@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34622.214
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WCPShared", "WCP\WCPShared.csproj", "{1830F7E7-409A-4F31-BDCC-FCEE4C17124A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WCPAuthAPI", "WCPAuthAPI\WCPAuthAPI.csproj", "{A4B737C4-66B6-4E22-A8AB-A3CE54CC12DD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WCPFileAPI", "WCPFileAPI\WCPFileAPI.csproj", "{F83B4C50-4DDE-4011-8D34-EC948961F312}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1830F7E7-409A-4F31-BDCC-FCEE4C17124A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1830F7E7-409A-4F31-BDCC-FCEE4C17124A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1830F7E7-409A-4F31-BDCC-FCEE4C17124A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1830F7E7-409A-4F31-BDCC-FCEE4C17124A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A4B737C4-66B6-4E22-A8AB-A3CE54CC12DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A4B737C4-66B6-4E22-A8AB-A3CE54CC12DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A4B737C4-66B6-4E22-A8AB-A3CE54CC12DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A4B737C4-66B6-4E22-A8AB-A3CE54CC12DD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F83B4C50-4DDE-4011-8D34-EC948961F312}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F83B4C50-4DDE-4011-8D34-EC948961F312}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F83B4C50-4DDE-4011-8D34-EC948961F312}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F83B4C50-4DDE-4011-8D34-EC948961F312}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0CB0AC21-DD05-4CD8-8605-0BF4975AD434}
+	EndGlobalSection
+EndGlobal
