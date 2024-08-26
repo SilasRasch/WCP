@@ -16,13 +16,13 @@ namespace WCPDataAPI.Controllers
     [ApiController]
     public class CreatorsController : ControllerBase
     {
-        private readonly IMongoCollection<Order> _orders;
         private readonly UserContextService _userContextService;
         private readonly ICreatorService _creatorService;
+        private readonly IOrderService _orderService;
 
-        public CreatorsController(MongoDbContext mongoDbService, UserContextService userContextService, ICreatorService creatorService)
+        public CreatorsController(UserContextService userContextService, ICreatorService creatorService, IOrderService orderService)
         {
-            _orders = mongoDbService.Database?.GetCollection<Order>(Secrets.MongoCollectionName)!;
+            _orderService = orderService;
             _userContextService = userContextService;
             _creatorService = creatorService;
         }
@@ -38,7 +38,7 @@ namespace WCPDataAPI.Controllers
             }
             else
             {
-                Order? order = await _orders.FindAsync(x => x.Id == orderId.Value).Result.FirstOrDefaultAsync();
+                Order? order = await _orderService.GetObject(orderId.Value);
 
                 if (order is not null && order.Creators is not null)
                 {
