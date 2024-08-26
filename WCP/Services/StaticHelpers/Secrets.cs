@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WCPShared.Services
+namespace WCPShared.Services.StaticHelpers
 {
     public static class Secrets
     {

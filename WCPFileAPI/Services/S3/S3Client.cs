@@ -40,10 +40,10 @@ namespace WCPFileAPI.Services.S3
 
     public class S3Settings
     {
-        public string AccessKey { get; set; }
-        public string SecretKey { get; set; }
-        public string ServiceUrl { get; set; }
-        public string Bucket { get; set; }
-        public string Root { get; set; }
+        public string AccessKey { get; set; } = string.Empty;
+        public string SecretKey { get; set; } = string.Empty;
+        public string ServiceUrl { get; set; } = string.Empty;
+        public string Bucket { get; set; } = string.Empty;
+        public string Root { get; set; } = string.Empty;
     }
 }

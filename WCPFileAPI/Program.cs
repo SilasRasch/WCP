@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 using WCPFileAPI.Services.S3;
 using WCPShared.Services;
+using WCPShared.Services.StaticHelpers;
 
 var builder = WebApplication.CreateBuilder(args);
 

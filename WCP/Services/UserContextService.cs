@@ -27,7 +27,7 @@ namespace WCPShared.Services
             return GetClaimValue(ClaimTypes.Name);
         }
 
-        public int GetMyId()
+        public int GetId()
         {
             return Convert.ToInt16(GetClaimValue(ClaimTypes.UserData));
         }

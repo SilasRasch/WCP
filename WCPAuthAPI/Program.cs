@@ -1,3 +1,15 @@
+using Microsoft.OpenApi.Models;
+using System.Text;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.EntityFrameworkCore;
+using WCPAuthAPI.Services.JWTs;
+using WCPShared.Interfaces;
+using WCPShared.Models;
+using WCPShared.Services.Databases;
+using WCPShared.Services;
+using WCPShared.Services.StaticHelpers;
+using Swashbuckle.AspNetCore.Filters;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -5,7 +17,54 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+
+// Auth API services
+builder.Services.AddHttpContextAccessor(); // To get user in service-file instead of the controller (SOC)!
+builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IOrganizationService, OrganizationService>();
+builder.Services.AddScoped<IEmailService, SendGridEmailService>();
+builder.Services.AddDbContext<AuthDbContext>(
+    options => options.UseSqlServer(Secrets.GetConnectionString(builder.Configuration)));
+
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme  // Makes it possible to authorize in Swagger using JWT-tokens -> not necessary for normal use (for development only)
+    {
+        In = ParameterLocation.Header,
+        Name = "Authorization",
+        Type = SecuritySchemeType.ApiKey
+    });
+
+    options.OperationFilter<SecurityRequirementsOperationFilter>();
+});
+
+// Authentication services
+builder.Services.AddAuthentication().AddJwtBearer(options =>
+{
+    options.SaveToken = true;
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        ValidateAudience = true,
+        ValidateIssuer = true,
+        ValidIssuer = Secrets.Issuer,
+        ValidAudiences = Secrets.GetAudiences(),
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(Secrets.GetJwtKey(builder.Configuration)))
+    };
+});
+
+// CORS
+
+var allowAll = "dev";
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: allowAll, policy =>
+    {
+        policy.WithOrigins(Secrets.Origins).AllowAnyHeader().AllowAnyMethod().AllowCredentials().SetPreflightMaxAge(TimeSpan.FromSeconds(3600));
+    });
+});
 
 var app = builder.Build();
 
@@ -18,8 +77,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseCors(allowAll);
+
 app.UseAuthorization();
 
 app.MapControllers();
 
-app.Run();
+await app.RunAsync();

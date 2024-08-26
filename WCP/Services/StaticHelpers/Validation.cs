@@ -5,7 +5,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace WCPShared.Services
+namespace WCPShared.Services.StaticHelpers
 {
     public static class Validation
     {
@@ -18,7 +18,7 @@ namespace WCPShared.Services
 
         public static bool ValidatePhone(string phoneNo)
         {
-            if (String.IsNullOrEmpty(phoneNo) || !Regex.IsMatch(phoneNo, @"^\d{8,11}$"))
+            if (string.IsNullOrEmpty(phoneNo) || !Regex.IsMatch(phoneNo, @"^\d{8,11}$"))
                 return false;
             return true;
         }
