@@ -5,7 +5,7 @@ using WCPShared.Models;
 using WCPShared.Models.UserModels.CreatorModels;
 using WCPShared.Services.StaticHelpers;
 
-namespace WCPShared.Services.Databases
+namespace WCPShared.Services.Databases.Mongo
 {
     public class CreatorService : ICreatorService
     {

@@ -5,7 +5,7 @@ using WCPShared.Models;
 using WCPShared.Models.BrandModels;
 using WCPShared.Services.StaticHelpers;
 
-namespace WCPShared.Services.Databases
+namespace WCPShared.Services.Databases.Mongo
 {
     public class BrandService : IBrandService
     {
@@ -22,7 +22,7 @@ namespace WCPShared.Services.Databases
         {
             if (!obj.Validate())
                 return;
-            
+
             Brand lastBrand = null!;
             if (await _brands.CountDocumentsAsync(FilterDefinition<Brand>.Empty) > 0)
                 lastBrand = await _brands.Find(FilterDefinition<Brand>.Empty).SortByDescending(o => o.Id).FirstAsync();
@@ -37,7 +37,7 @@ namespace WCPShared.Services.Databases
         {
             Brand? brand = await GetObject(id);
 
-            if (brand is null) 
+            if (brand is null)
                 return null;
 
             DeleteResult result = await _brands.DeleteOneAsync(x => x.Id == id);
@@ -52,7 +52,7 @@ namespace WCPShared.Services.Databases
         {
             return await _brands.FindAsync(FilterDefinition<Brand>.Empty).Result.ToListAsync();
         }
-        
+
         public async Task<IEnumerable<Brand>> GetAllObjects(Expression<Func<Brand, bool>>? filter = null)
         {
             return await _brands.FindAsync(filter).Result.ToListAsync();
@@ -66,7 +66,7 @@ namespace WCPShared.Services.Databases
         public async Task<Brand?> UpdateObject(int id, Brand obj)
         {
             Brand? oldBrand = await GetObject(id);
-            if (oldBrand is null) 
+            if (oldBrand is null)
                 return null;
 
             if (!obj.Validate())

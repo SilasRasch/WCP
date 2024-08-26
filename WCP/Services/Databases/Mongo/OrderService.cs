@@ -7,7 +7,7 @@ using WCPShared.Models.OrderModels;
 using WCPShared.Models.UserModels.CreatorModels;
 using WCPShared.Services.StaticHelpers;
 
-namespace WCPShared.Services.Databases
+namespace WCPShared.Services.Databases.Mongo
 {
     internal class OrderService : IOrderService
     {
