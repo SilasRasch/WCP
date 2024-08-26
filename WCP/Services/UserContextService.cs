@@ -19,69 +19,34 @@ namespace WCPShared.Services
 
         public string GetEmail()
         {
-            var result = string.Empty;
-
-            if (_contextAccessor.HttpContext is not null)
-            {
-                result = _contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Email)!.Value;
-            }
-
-            return result!;
+            return GetClaimValue(ClaimTypes.Email);
         }
 
         public string GetName()
         {
-            var result = string.Empty;
-
-            if (_contextAccessor.HttpContext is not null)
-            {
-                result = _contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Name)!.Value;
-            }
-
-            return result!;
+            return GetClaimValue(ClaimTypes.Name);
         }
 
         public int GetMyId()
         {
-            var result = string.Empty;
-
-            if (_contextAccessor.HttpContext is not null)
-            {
-                result = _contextAccessor.HttpContext.User.FindFirst(ClaimTypes.UserData)!.Value;
-            }
-
-            return Convert.ToInt16(result!);
+            return Convert.ToInt16(GetClaimValue(ClaimTypes.UserData));
         }
 
         public int GetOrganizationId()
         {
-            var result = string.Empty;
-
-            if (_contextAccessor.HttpContext is not null)
-            {
-                result = _contextAccessor.HttpContext.User.FindFirst("OrganizationId")!.Value;
-            }
-
-            return Convert.ToInt16(result!);
+            return Convert.ToInt16(GetClaimValue("OrganizationId"));
         }
 
         public string? GetPhone()
         {
-            var result = string.Empty;
-
-            if (_contextAccessor.HttpContext is not null)
-            {
-                result = _contextAccessor.HttpContext.User.FindFirst(ClaimTypes.MobilePhone)!.Value;
-            }
-
-            return result!;
+            return GetClaimValue(ClaimTypes.MobilePhone);
         }
 
         public IEnumerable<string> GetRoles()
         {
             var result = new List<string>();
 
-            if (_contextAccessor.HttpContext is not null)
+            if (_contextAccessor.HttpContext.User.Claims.Any())
             {
                 result = _contextAccessor.HttpContext.User.Claims
                     .Where(c => c.Type == ClaimTypes.Role)
@@ -90,6 +55,16 @@ namespace WCPShared.Services
             }
 
             return result;
+        }
+
+        private string GetClaimValue(string claimType)
+        {
+            string result = null!;
+
+            if (_contextAccessor.HttpContext.User.Claims.Any())
+                result = _contextAccessor.HttpContext.User.FindFirst(claimType)!.Value;
+
+            return result!;
         }
     }
 }

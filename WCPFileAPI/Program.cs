@@ -11,7 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-string devPolicy = "dev";
+string allowAll = "dev";
 
 builder.Services.AddSwaggerGen(options =>
 {
@@ -39,14 +39,13 @@ builder.Services.AddAuthentication().AddJwtBearer(options =>
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(devPolicy, policy =>
+    options.AddPolicy(allowAll, policy =>
     {
         policy.WithOrigins(Secrets.Origins).AllowAnyMethod().AllowAnyHeader().AllowCredentials().SetPreflightMaxAge(TimeSpan.FromSeconds(3600));
     });
 });
 
 builder.Services.AddControllers();
-
 builder.Services.AddControllers().AddJsonOptions(x => x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
 builder.Services.AddHttpContextAccessor();
@@ -73,15 +72,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles(new StaticFileOptions
-{
-    OnPrepareResponse = ctx =>
-    {
-        ctx.Context.Response.Headers.Append("Cache-Control", $"public, max-age{60 * 60 * 24 * 7}"); // Local cache for one week
-    }
-});
 
-app.UseCors(devPolicy);
+app.UseCors(allowAll);
 
 app.UseAuthorization();
 
