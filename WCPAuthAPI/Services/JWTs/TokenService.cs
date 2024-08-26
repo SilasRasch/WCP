@@ -129,7 +129,7 @@ namespace WCPAuthAPI.Services.JWTs
                 signingCredentials: credentials,
                 issuer: Secrets.Issuer,
                 audience: Secrets.Audience
-                );
+            );
 
             var jwt = new JwtSecurityTokenHandler().WriteToken(token);
 

@@ -9,8 +9,8 @@ namespace WCPShared.Services.StaticHelpers
 {
     public static class Secrets
     {
-        public const string Issuer = "https://auth.webcontent.dk";
-        public const string Audience = "https://app.webcontent.dk";
+        public const string Issuer = "https://webcontent.dk";
+        public const string Audience = "https://wcp.dk";
         public const string RefreshTokenCookieName = "_WCRefreshToken";
 
         public const string MongoCollectionName = "orders";
