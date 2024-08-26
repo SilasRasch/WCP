@@ -22,8 +22,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddHttpContextAccessor(); // To get user in service-file instead of the controller (SOC)!
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IOrganizationService, OrganizationService>();
 builder.Services.AddScoped<IEmailService, SendGridEmailService>();
+builder.Services.AddScoped<UserContextService>();
 builder.Services.AddDbContext<AuthDbContext>(
     options => options.UseSqlServer(Secrets.GetConnectionString(builder.Configuration)));
 

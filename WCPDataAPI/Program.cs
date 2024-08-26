@@ -7,12 +7,21 @@ using WCPShared.Interfaces;
 using WCPShared.Services.Databases;
 using WCPShared.Services;
 using WCPShared.Services.StaticHelpers;
+using Microsoft.EntityFrameworkCore;
+using WCPShared.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<MongoDbService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IOrganizationService, OrganizationService>();
+builder.Services.AddScoped<IEmailService, SendGridEmailService>();
+builder.Services.AddDbContext<AuthDbContext>(
+    options => options.UseSqlServer(Secrets.GetConnectionString(builder.Configuration)));
 
-string devPolicy = "dev";
+string allowAll = "dev";
 
 builder.Services.AddSwaggerGen(options =>
 {
@@ -40,7 +49,7 @@ builder.Services.AddAuthentication().AddJwtBearer(options =>
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(devPolicy, policy =>
+    options.AddPolicy(allowAll, policy =>
     {
         policy.WithOrigins(Secrets.Origins).AllowAnyMethod().AllowAnyHeader().AllowCredentials().SetPreflightMaxAge(TimeSpan.FromSeconds(3600));
     });
@@ -49,11 +58,6 @@ builder.Services.AddCors(options =>
 builder.Services.AddControllers();
 
 builder.Services.AddControllers().AddJsonOptions(x => x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
-
-builder.Services.AddHttpContextAccessor();
-builder.Services.AddSingleton<MongoDbService>();
-builder.Services.AddScoped<IEmailService, SendGridEmailService>();
-builder.Services.AddSingleton<UserContextService>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -70,7 +74,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseCors(devPolicy);
+app.UseCors(allowAll);
 
 app.UseAuthorization();
 
