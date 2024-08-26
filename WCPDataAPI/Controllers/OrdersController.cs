@@ -3,9 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 using WCPShared.Interfaces;
 using WCPShared.Models.OrderModels;
-using WCPShared.Services.Databases;
 using WCPShared.Services;
 using WCPShared.Services.StaticHelpers;
+using WCPShared.Models;
 
 namespace WCPDataAPI.Controllers
 {
@@ -17,7 +17,7 @@ namespace WCPDataAPI.Controllers
         private readonly IEmailService _emailService;
         private readonly UserContextService _userContextService;
 
-        public OrdersController(MongoDbService mongoDbService, IEmailService emailService, UserContextService userContextService)
+        public OrdersController(MongoDbContext mongoDbService, IEmailService emailService, UserContextService userContextService)
         {
             _orders = mongoDbService.Database?.GetCollection<Order>(Secrets.MongoCollectionName)!;
             _emailService = emailService;

@@ -4,9 +4,11 @@ using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 using WCPShared.Models.OrderModels;
 using WCPShared.Models.UserModels.CreatorModels;
-using WCPShared.Services.Databases;
 using WCPShared.Services;
 using WCPShared.Services.StaticHelpers;
+using WCPShared.Models;
+using Microsoft.EntityFrameworkCore.Metadata;
+using WCPShared.Interfaces;
 
 namespace WCPDataAPI.Controllers
 {
@@ -14,36 +16,36 @@ namespace WCPDataAPI.Controllers
     [ApiController]
     public class CreatorsController : ControllerBase
     {
-        private readonly IMongoCollection<Creator> _creators;
         private readonly IMongoCollection<Order> _orders;
         private readonly UserContextService _userContextService;
+        private readonly ICreatorService _creatorService;
 
-        public CreatorsController(MongoDbService mongoDbService, UserContextService userContextService)
+        public CreatorsController(MongoDbContext mongoDbService, UserContextService userContextService, ICreatorService creatorService)
         {
-            _creators = mongoDbService.Database?.GetCollection<Creator>(Secrets.MongoCreatorCollectionName)!;
             _orders = mongoDbService.Database?.GetCollection<Order>(Secrets.MongoCollectionName)!;
             _userContextService = userContextService;
+            _creatorService = creatorService;
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Creator>>> Get([FromQuery] int? orderId = null, [FromQuery] string? searchTerm = null)
         {
-            List<Creator> creators = null!;
+            IEnumerable<Creator> creators = null!;
 
             if (orderId is null)
             {
-                creators = await _creators.Find(FilterDefinition<Creator>.Empty).ToListAsync();
+                creators = await _creatorService.GetAllObjects();
             }
             else
             {
-                Order? order = await _orders.Find(x => x.Id == orderId.Value).FirstOrDefaultAsync();
+                Order? order = await _orders.FindAsync(x => x.Id == orderId.Value).Result.FirstOrDefaultAsync();
 
                 if (order is not null && order.Creators is not null)
                 {
-                    var creatorList = _creators.Find(x => order.Creators!.Contains(x.Id));
+                    var creatorList = await _creatorService.GetAllObjects(x => order.Creators.Contains(x.Id));
 
                     if (creatorList is not null)
-                        creators = await creatorList.ToListAsync();
+                        creators = creatorList;
                 }
             }
 
@@ -56,13 +58,13 @@ namespace WCPDataAPI.Controllers
                     ).ToList();
             }
 
-            return creators is not null ? Ok(creators) : NotFound("");
+            return creators is not null ? Ok(creators) : NotFound("No creators found");
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Creator>> Get(int id)
         {
-            Creator? creator = await _creators.Find(x => x.Id == id).FirstOrDefaultAsync();
+            Creator? creator = await _creatorService.GetObject(id);
             return creator is not null ? Ok(creator) : NotFound();
         }
 
@@ -72,48 +74,36 @@ namespace WCPDataAPI.Controllers
             if (!creator.Validate())
                 return BadRequest("Valideringsfejl, tjek venligst felterne igen...");
 
-            await _creators.InsertOneAsync(creator);
+            await _creatorService.AddObject(creator);
             return CreatedAtAction("Post", new { id = creator.Id }, creator);
         }
 
         [HttpPut("{id}")]
         public async Task<ActionResult<Creator>> Put(Creator creator, int id)
         {
-            if (creator.Id != _userContextService.GetId() && !_userContextService.GetRoles().Contains("Admin"))
-                return BadRequest("Du har ikke tilladelse til at ændre denne creator");
-
             if (!creator.Validate())
                 return BadRequest("Valideringsfejl, tjek venligst felterne igen...");
 
-            if (id != creator.Id)
-                return BadRequest("Ids must match in URI and body");
+            if (creator.Id != _userContextService.GetId() && !_userContextService.GetRoles().Contains("Admin"))
+                return BadRequest("You are not the owner of this brand");
 
-            ReplaceOneResult result = await _creators.ReplaceOneAsync(x => x.Id == creator.Id, creator);
-
-            if (result.IsAcknowledged)
-                return result.ModifiedCount == 1 ? Ok(result) : NotFound();
-
-            return NotFound();
+            Creator? modifiedCreator = await _creatorService.UpdateObject(id, creator);
+            return modifiedCreator is not null ? NoContent() : NotFound("Brand not found");
         }
 
         [HttpDelete("{id}"), Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
-            Creator? creator = await _creators.Find(x => x.Id == id).FirstOrDefaultAsync();
+            Creator? creator = await _creatorService.GetObject(id);
 
-            if (creator is not null)
-            {
-                if (creator.Id != _userContextService.GetId() && !_userContextService.GetRoles().Contains("Admin"))
-                    return BadRequest("Du har ikke tilladelse til at ændre denne creator");
-            }
-            else return NotFound();
+            if (creator is null)
+                return NotFound("Creator not found");
 
-            DeleteResult result = await _creators.DeleteOneAsync(x => x.Id == id);
+            if (creator.Id != _userContextService.GetId() && !_userContextService.GetRoles().Contains("Admin"))
+                return BadRequest("Du har ikke tilladelse til at ændre denne creator");
 
-            if (result.IsAcknowledged)
-                return result.DeletedCount == 1 ? Ok(result) : NotFound();
-
-            return NotFound();
+            Creator? deleted = await _creatorService.DeleteObject(id);
+            return deleted is not null ? NoContent() : NotFound("Brand not found");
         }
     }
 }

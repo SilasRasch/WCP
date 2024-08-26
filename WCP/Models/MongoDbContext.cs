@@ -1,19 +1,14 @@
 ﻿using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using WCPShared.Services.StaticHelpers;
 
-namespace WCPShared.Services.Databases
+namespace WCPShared.Models
 {
-    public class MongoDbService
+    public class MongoDbContext
     {
         private readonly IMongoDatabase _database;
 
-        public MongoDbService(IConfiguration configuration)
+        public MongoDbContext(IConfiguration configuration)
         {
             string connectionString = Secrets.GetMongoConnectionString(configuration);
             var mongoUrl = MongoUrl.Create(connectionString);

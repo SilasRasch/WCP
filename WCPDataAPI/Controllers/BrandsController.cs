@@ -4,9 +4,10 @@ using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 using WCPShared.Interfaces;
 using WCPShared.Models.BrandModels;
-using WCPShared.Services.Databases;
 using WCPShared.Services;
 using WCPShared.Services.StaticHelpers;
+using WCPShared.Models;
+using Azure.Core;
 
 namespace WCPDataAPI.Controllers
 {
@@ -15,15 +16,13 @@ namespace WCPDataAPI.Controllers
     [ApiController]
     public class BrandsController : ControllerBase
     {
-        private readonly IEmailService _emailService;
+        private readonly IBrandService _brandService;
         private readonly UserContextService _userContextService;
-        private readonly IMongoCollection<Brand> _brands;
 
-        public BrandsController(MongoDbService mongoDbService, IEmailService emailService, UserContextService userContextService)
+        public BrandsController(IBrandService brandService, UserContextService userContextService)
         {
-            _brands = mongoDbService.Database?.GetCollection<Brand>(Secrets.MongoBrandCollectionName)!;
-            _emailService = emailService;
             _userContextService = userContextService;
+            _brandService = brandService;
         }
 
         // GET: api/<BrandsController>
@@ -33,11 +32,11 @@ namespace WCPDataAPI.Controllers
             IEnumerable<Brand> brands;
 
             if (orgId is not null)
-                brands = await _brands.FindAsync(x => x.OrganizationId == orgId).Result.ToListAsync();
+                brands = await _brandService.GetAllObjects(x => x.OrganizationId == orgId);
             else if (_userContextService.GetRoles().Contains("Bruger")) // Catch (get by JWT role)
-                brands = await _brands.FindAsync(x => x.OrganizationId == _userContextService.GetOrganizationId()).Result.ToListAsync();
+                brands = await _brandService.GetAllObjects(x => x.OrganizationId == _userContextService.GetOrganizationId());
             else if (_userContextService.GetRoles().Contains("Admin"))
-                brands = await _brands.Find(FilterDefinition<Brand>.Empty).ToListAsync();
+                brands = await _brandService.GetAllObjects();
             else
                 brands = new List<Brand>();
 
@@ -48,8 +47,7 @@ namespace WCPDataAPI.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Brand>> Get(int id)
         {
-            Brand? brand = await _brands.FindAsync(x => x.Id == id).Result.FirstOrDefaultAsync();
-
+            Brand? brand = await _brandService.GetObject(id);
             return brand is not null ? Ok(brand) : NotFound("Der blev ikke fundet nogen brand med det id...");
         }
 
@@ -60,63 +58,44 @@ namespace WCPDataAPI.Controllers
             if (!request.Validate())
                 return BadRequest("Valideringsfejl, tjek venligst felterne igen...");
 
-            Brand lastBrand;
-
-            if (await _brands.CountDocumentsAsync(FilterDefinition<Brand>.Empty) > 0)
-                lastBrand = await _brands.Find(FilterDefinition<Brand>.Empty).SortByDescending(o => o.Id).Limit(1).FirstAsync();
-            else lastBrand = null!;
-
-            Brand brand = new Brand
+            await _brandService.AddObject(new Brand
             {
-                Id = lastBrand != null ? lastBrand.Id + 1 : 1000,
-                OrganizationId = request.OrganizationId,
                 Name = request.Name,
-                URL = request.URL
-            };
+                OrganizationId = request.OrganizationId,
+                URL = request.URL,
+            });
 
-            await _brands.InsertOneAsync(brand);
-            await _emailService.SendBrandCreationEmail(brand, _userContextService.GetEmail());
-
-            return CreatedAtAction("Post", new { id = brand.Id }, brand);
+            return Created();
         }
 
         // PUT api/<BrandsController>/5
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(int id, [FromBody] Brand brand)
         {
-            Brand? oldBrand = await _brands.Find(x => x.Id == id).FirstOrDefaultAsync();
-            if (oldBrand is null) return NotFound();
-
-            if (id != brand.Id || (brand.OrganizationId != _userContextService.GetOrganizationId() && !_userContextService.GetRoles().Contains("Admin")))
-                return BadRequest("You are not the owner of this brand");
-
             if (!brand.Validate())
                 return BadRequest("Valideringsfejl, tjek venligst felterne igen...");
 
-            ReplaceOneResult result = await _brands.ReplaceOneAsync(x => x.Id == brand.Id, brand);
+            if (id != brand.Id || (brand.OrganizationId != _userContextService.GetOrganizationId() && !_userContextService.GetRoles().Contains("Admin")))
+                throw new Exception("You are not the owner of this brand");
 
-            if (result.IsAcknowledged)
-                return result.ModifiedCount == 1 ? Ok(result) : NotFound();
-
-            return NotFound();
+            Brand? modifiedBrand = await _brandService.UpdateObject(id, brand);
+            return modifiedBrand is not null ? NoContent() : NotFound("Brand not found");
         }
 
         // DELETE api/<BrandsController>/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            Brand? brand = await _brands.Find(x => x.Id == id).FirstOrDefaultAsync();
+            Brand? brand = await _brandService.GetObject(id);
 
-            if (brand is null) return NotFound();
+            if (brand is null)
+                return BadRequest("Brand not found");
+
             if (brand.OrganizationId != _userContextService.GetOrganizationId() && !_userContextService.GetRoles().Contains("Admin"))
                 return BadRequest("You are not the owner of this brand");
 
-            DeleteResult result = await _brands.DeleteOneAsync(x => x.Id == id);
-
-            if (result.IsAcknowledged)
-                return result.DeletedCount == 1 ? NoContent() : NotFound();
-
-            return NotFound();
+            Brand? deleted = await _brandService.DeleteObject(id);
+            return deleted is not null ? NoContent() : NotFound("Brand not found");
         }
     }
 }
