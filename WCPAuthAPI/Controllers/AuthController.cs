@@ -8,6 +8,7 @@ using WCPShared.Interfaces;
 using WCPShared.Models.UserModels;
 using WCPShared.Services.StaticHelpers;
 using WCPShared.Services;
+using System.Net;
 
 namespace WCPAuthAPI.Controllers
 {
@@ -17,6 +18,7 @@ namespace WCPAuthAPI.Controllers
     {
         private readonly ITokenService _tokenService;
         private readonly IUserService _userService;
+        private readonly IEmailService _emailService;
         private readonly UserContextService _userContextService;
         private readonly CookieOptions cookieOptions = new CookieOptions
         {
@@ -27,15 +29,16 @@ namespace WCPAuthAPI.Controllers
             SameSite = Secrets.IsProd ? SameSiteMode.Strict : SameSiteMode.None,
         };
 
-        public AuthController(ITokenService tokenService, IUserService userService, UserContextService userContextService)
+        public AuthController(ITokenService tokenService, IUserService userService, IEmailService emailService, UserContextService userContextService)
         {
             _tokenService = tokenService;
             _userService = userService;
+            _emailService = emailService;
             _userContextService = userContextService;
         }
 
         [HttpPost("Register"), Authorize(Roles = "Admin")]
-        public async Task<ActionResult<int>> Register(RegisterDTO request)
+        public async Task<ActionResult<int>> Register(RegisterDto request)
         {
             if (!request.Validate())
                 return BadRequest("Valideringsfejl, tjek venligst felterne igen...");
@@ -138,6 +141,57 @@ namespace WCPAuthAPI.Controllers
             user.PasswordHash = passwordHash;
             user.IsActive = true;
 
+            await _userService.UpdateObject(user.Id, user);
+
+            return Ok();
+        }
+
+        [HttpPut("Reset-password"), AllowAnonymous]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto request)
+        {
+            User? user = await _userService.GetUserByVerificationToken(request.Token);
+
+            if (user == null) return BadRequest();
+            if (user.PasswordResetToken != request.Token || user.ResetTokenExpiry < DateTime.Now) return BadRequest();
+
+            string passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
+            user.PasswordHash = passwordHash;
+            user.ResetTokenExpiry = null;
+            user.PasswordResetToken = null;
+            await _userService.UpdateObject(user.Id, user);
+
+            return Ok();
+        }
+
+        [HttpPost("Forgot-password"), AllowAnonymous]
+        public async Task<IActionResult> ForgotPassword(EmailOnly email)
+        {
+            var user = await _userService.GetUserByEmail(email.Email);
+
+            if (user is null) return BadRequest();
+
+            var token = _tokenService.GenerateRandomString(64);
+            user.PasswordResetToken = token;
+            user.ResetTokenExpiry = DateTime.Now.AddMinutes(30);
+            await _userService.UpdateObject(user.Id, user);
+
+            var status = await _emailService.SendForgotPasswordEmail(user, token);
+
+            return status == HttpStatusCode.Accepted ? Ok() : BadRequest();
+        }
+
+        // PUT api/<UsersController>/5 - Used when changing password while already authenticated
+        [HttpPost("Change-password/{id}")]
+        public async Task<IActionResult> ChangePassword(int id, [FromBody] PasswordOnly request)
+        {
+            User? user = await _userService.GetObject(id);
+
+            if (user == null) return BadRequest();
+            if (_userContextService.GetId() != id && !_userContextService.GetRoles().Contains("Admin"))
+                return Unauthorized();
+
+            string passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
+            user.PasswordHash = passwordHash;
             await _userService.UpdateObject(user.Id, user);
 
             return Ok();

@@ -7,7 +7,7 @@ namespace WCPAuthAPI.Services.JWTs
     public interface ITokenService
     {
         Task<AuthResponse?> Login(UserDTO request);
-        Task<User> Register(RegisterDTO request);
+        Task<User> Register(RegisterDto request);
         Task<bool> AddAdmin(int id);
         string CreateToken(User user);
         Task<string?> RefreshToken(int userId, string refreshToken);

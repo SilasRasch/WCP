@@ -1,0 +1,6 @@
+@WCPDataAPI_HostAddress = http://localhost:5238
+
+GET {{WCPDataAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

@@ -1,16 +1,19 @@
 ﻿using Microsoft.IdentityModel.Tokens;
-using WCPShared.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using WCPShared.Services.StaticHelpers;
 
-namespace WCPAuthAPI.Models.DTOs
+namespace WCPShared.Models.UserModels
 {
-    public class RegisterDTO
+    public class RegisterDto
     {
         public string Email { get; set; } = string.Empty;
         public string DisplayName { get; set; } = string.Empty;
         public string? Phone { get; set; }
         public string? CVR { get; set; } = string.Empty;
-        public string? Password { get; set; }
         public string Role { get; set; } = string.Empty;
         public Organization? Organization { get; set; } = null!;
 

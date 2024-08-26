@@ -24,7 +24,7 @@ namespace WCPAuthAPI.Services.JWTs
             _emailService = emailService;
         }
 
-        public async Task<User> Register(RegisterDTO request)
+        public async Task<User> Register(RegisterDto request)
         {
             if (await _userService.GetUserByEmail(request.Email) is not null)
                 return null!;
