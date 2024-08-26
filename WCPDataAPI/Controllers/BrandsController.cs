@@ -1,13 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using MongoDB.Driver;
-using WCPShared.Interfaces;
 using WCPShared.Models.BrandModels;
 using WCPShared.Services;
-using WCPShared.Services.StaticHelpers;
-using WCPShared.Models;
-using Azure.Core;
+using WCPShared.Interfaces.Mongo;
 
 namespace WCPDataAPI.Controllers
 {

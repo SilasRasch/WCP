@@ -1,14 +1,12 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using MongoDB.Driver;
-using WCPShared.Interfaces;
+﻿using Microsoft.AspNetCore.Mvc;
 using WCPShared.Models.OrderModels;
 using WCPShared.Services;
-using WCPShared.Services.StaticHelpers;
-using WCPShared.Models;
+using WCPShared.Interfaces.Mongo;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WCPDataAPI.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class OrdersController : ControllerBase
@@ -84,7 +82,7 @@ namespace WCPDataAPI.Controllers
         }
 
         // DELETE api/<OrdersController>/5
-        [HttpDelete("{id}")]
+        [HttpDelete("{id}"), Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
             Order? order = await _orderService.GetObject(id);

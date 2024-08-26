@@ -1,17 +1,14 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 using WCPShared.Models.OrderModels;
 using WCPShared.Models.UserModels.CreatorModels;
 using WCPShared.Services;
-using WCPShared.Services.StaticHelpers;
-using WCPShared.Models;
-using Microsoft.EntityFrameworkCore.Metadata;
-using WCPShared.Interfaces;
+using WCPShared.Interfaces.Mongo;
 
 namespace WCPDataAPI.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class CreatorsController : ControllerBase

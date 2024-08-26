@@ -1,6 +1,6 @@
 ﻿using MongoDB.Driver;
 using System.Linq.Expressions;
-using WCPShared.Interfaces;
+using WCPShared.Interfaces.Mongo;
 using WCPShared.Models;
 using WCPShared.Models.UserModels.CreatorModels;
 using WCPShared.Services.StaticHelpers;
