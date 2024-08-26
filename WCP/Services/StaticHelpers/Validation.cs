@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Amazon.Runtime.Internal.Endpoints.StandardLibrary;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -33,6 +34,13 @@ namespace WCPShared.Services.StaticHelpers
         public static bool ValidateDisplayName(string name)
         {
             if (name.Length < 2)
+                return false;
+            return true;
+        }
+
+        public static bool ValidateBrandURL(string url)
+        {
+            if (!Regex.IsMatch(url, @"^\S+\.\S{1,24}$"))
                 return false;
             return true;
         }

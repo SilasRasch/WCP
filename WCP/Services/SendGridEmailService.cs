@@ -11,11 +11,14 @@ using WCPShared.Models.UserModels;
 using WCPShared.Services.StaticHelpers;
 using SendGrid.Helpers.Mail;
 using SendGrid;
+using WCPShared.Models.BrandModels;
+using Azure;
 
 namespace WCPShared.Services
 {
     public class SendGridEmailService : IEmailService
     {
+        private readonly string _wcEmail = Secrets.IsProd ? "info@webcontent.dk" : "udvikling@webcontent.dk";
         private readonly IConfiguration _configuration;
 
         public SendGridEmailService(IConfiguration configuration)
@@ -61,6 +64,67 @@ namespace WCPShared.Services
                 link = Secrets.IsProd ? $"https://wcp.dk/reset-kodeord?token={token}" : $"https://test.wcp.dk/reset-kodeord?token={token}",
             };
             msg.SetTemplateData(dynamicTemplateDate);
+
+            var response = await client.SendEmailAsync(msg);
+
+            if (response.StatusCode != HttpStatusCode.OK && response.StatusCode != HttpStatusCode.Created && response.StatusCode != HttpStatusCode.Accepted)
+                throw new ArgumentException($"Send Grid mail was not sent... {response.StatusCode} : {await response.Body.ReadAsStringAsync()}");
+
+            return response.StatusCode;
+        }
+
+        public async Task<HttpStatusCode> SendNotificationEmail(string name, string email, string projectName, string projectCategory)
+        {
+            var apiKey = Secrets.GetSendGridAPI(_configuration);
+            var client = new SendGridClient(apiKey);
+            var msg = new SendGridMessage();
+            msg.SetFrom(new EmailAddress("info@webcontent.dk", "WebContent Platform"));
+            msg.AddTo(new EmailAddress(email, name));
+            msg.SetTemplateId("d-2cc539eb5bc54175b5ce09c826548760");
+
+            msg.SetTemplateData(new { projectName, projectCategory, name });
+
+            var response = await client.SendEmailAsync(msg);
+            
+            if (response.StatusCode != HttpStatusCode.OK && response.StatusCode != HttpStatusCode.Created && response.StatusCode != HttpStatusCode.Accepted)
+                throw new ArgumentException($"Send Grid mail was not sent... {response.StatusCode} : {await response.Body.ReadAsStringAsync()}");
+
+            return response.StatusCode;
+        }
+
+        public async Task<HttpStatusCode> SendReportEmail(string email, string message)
+        {
+            var apiKey = Secrets.GetSendGridAPI(_configuration);
+            var client = new SendGridClient(apiKey);
+            var msg = new SendGridMessage();
+            msg.SetFrom(new EmailAddress("info@webcontent.dk", "WebContent Platform"));
+            msg.AddTo(new EmailAddress("udvikling@webcontent.dk", "WebContent Info"));
+            msg.SetTemplateId("d-390b09db349740fabff193b9a3064f23");
+
+            msg.SetTemplateData(new { email, message });
+
+            var response = await client.SendEmailAsync(msg);
+
+            if (response.StatusCode != HttpStatusCode.OK && response.StatusCode != HttpStatusCode.Created && response.StatusCode != HttpStatusCode.Accepted)
+                throw new ArgumentException($"Send Grid mail was not sent... {response.StatusCode} : {await response.Body.ReadAsStringAsync()}");
+            return response.StatusCode;
+        }
+
+        public async Task<HttpStatusCode> SendBrandCreationEmail(Brand brand, string email)
+        {
+            var apiKey = Secrets.GetSendGridAPI(_configuration);
+            var client = new SendGridClient(apiKey);
+            var msg = new SendGridMessage();
+            msg.SetFrom(new EmailAddress("info@webcontent.dk", "WebContent Platform"));
+            msg.AddTo(new EmailAddress(_wcEmail, "WebContent Info"));
+            msg.SetTemplateId("d-a775face789d4c8388c5c6e5c81582bb");
+
+            msg.SetTemplateData(new
+            {
+                userEmail = email,
+                brandName = brand.Name,
+                brandURL = brand.URL,
+            });
 
             var response = await client.SendEmailAsync(msg);
 

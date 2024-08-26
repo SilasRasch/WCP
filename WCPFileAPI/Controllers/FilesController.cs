@@ -35,7 +35,7 @@ namespace WCPFileAPI.Controllers
             await file.CopyToAsync(memoryStream);
 
             var fileExtension = Path.GetExtension(file.FileName);
-            var userId = _userContextService.GetMyId();
+            var userId = _userContextService.GetId();
             var fileName = $"profile-pics/{userId}-{Guid.NewGuid()}{fileExtension.ToLower()}";
 
             // Set correct mime-type for jpegs

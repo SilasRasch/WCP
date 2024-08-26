@@ -15,13 +15,11 @@ namespace WCPDataAPI.Controllers
     {
         private readonly IUserService _userService;
         private readonly UserContextService _userContextService;
-        private readonly IEmailService _emailService;
 
-        public UsersController(IUserService userService, IEmailService emailService, UserContextService userContextService)
+        public UsersController(IUserService userService, UserContextService userContextService)
         {
             _userService = userService;
             _userContextService = userContextService;
-            _emailService = emailService;
         }
 
         // GET: api/<UsersController>
