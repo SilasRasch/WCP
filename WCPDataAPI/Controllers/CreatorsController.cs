@@ -85,10 +85,10 @@ namespace WCPDataAPI.Controllers
                 return BadRequest("Valideringsfejl, tjek venligst felterne igen...");
 
             if (creator.Id != _userContextService.GetId() && !_userContextService.GetRoles().Contains("Admin"))
-                return BadRequest("You are not the owner of this brand");
+                return BadRequest("You are not the owner of this creator");
 
             Creator? modifiedCreator = await _creatorService.UpdateObject(id, creator);
-            return modifiedCreator is not null ? NoContent() : NotFound("Brand not found");
+            return modifiedCreator is not null ? NoContent() : NotFound("Creator not found");
         }
 
         [HttpDelete("{id}"), Authorize(Roles = "Admin")]
@@ -103,7 +103,7 @@ namespace WCPDataAPI.Controllers
                 return BadRequest("Du har ikke tilladelse til at ændre denne creator");
 
             Creator? deleted = await _creatorService.DeleteObject(id);
-            return deleted is not null ? NoContent() : NotFound("Brand not found");
+            return deleted is not null ? NoContent() : NotFound("Creator not found");
         }
     }
 }

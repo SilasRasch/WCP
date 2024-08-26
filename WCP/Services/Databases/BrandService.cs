@@ -25,10 +25,9 @@ namespace WCPShared.Services.Databases
             
             Brand lastBrand = null!;
             if (await _brands.CountDocumentsAsync(FilterDefinition<Brand>.Empty) > 0)
-                lastBrand = await _brands.Find(FilterDefinition<Brand>.Empty).SortByDescending(o => o.Id).Limit(1).FirstAsync();
+                lastBrand = await _brands.Find(FilterDefinition<Brand>.Empty).SortByDescending(o => o.Id).FirstAsync();
 
-
-            obj.Id = lastBrand != null ? lastBrand.Id + 1 : 1000;
+            obj.Id = lastBrand != null ? ++lastBrand.Id : 1000;
 
             await _brands.InsertOneAsync(obj);
             await _emailService.SendBrandCreationEmail(obj);
@@ -36,7 +35,7 @@ namespace WCPShared.Services.Databases
 
         public async Task<Brand?> DeleteObject(int id)
         {
-            Brand? brand = await _brands.Find(x => x.Id == id).FirstOrDefaultAsync();
+            Brand? brand = await GetObject(id);
 
             if (brand is null) 
                 return null;
@@ -66,7 +65,7 @@ namespace WCPShared.Services.Databases
 
         public async Task<Brand?> UpdateObject(int id, Brand obj)
         {
-            Brand? oldBrand = await _brands.Find(x => x.Id == id).FirstOrDefaultAsync();
+            Brand? oldBrand = await GetObject(id);
             if (oldBrand is null) 
                 return null;
 

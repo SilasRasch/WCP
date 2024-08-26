@@ -26,7 +26,7 @@ namespace WCPShared.Services.Databases
 
         public async Task<Creator?> DeleteObject(int id)
         {
-            Creator? creator = await _creators.FindAsync(x => x.Id == id).Result.FirstOrDefaultAsync();
+            Creator? creator = await GetObject(id);
 
             if (creator is null)
                 return null;
@@ -56,7 +56,7 @@ namespace WCPShared.Services.Databases
 
         public async Task<Creator?> UpdateObject(int id, Creator obj)
         {
-            Creator? oldCreator = await _creators.Find(x => x.Id == id).FirstOrDefaultAsync();
+            Creator? oldCreator = await GetObject(id);
             if (oldCreator is null)
                 return null;
 
