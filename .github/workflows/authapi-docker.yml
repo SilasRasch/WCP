@@ -1,4 +1,4 @@
-name: Docker Image CI
+name: Auth API Docker Image CI
 
 on:
   push:
