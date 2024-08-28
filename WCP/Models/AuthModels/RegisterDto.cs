@@ -1,20 +1,20 @@
 ﻿using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
 using WCPShared.Services.StaticHelpers;
 
-namespace WCPShared.Models.UserModels
+namespace WCPShared.Models.AuthModels
 {
     public class RegisterDto
     {
+        [Required, DataType(DataType.EmailAddress)]
         public string Email { get; set; } = string.Empty;
+        [Required]
         public string DisplayName { get; set; } = string.Empty;
+        [Required]
+        public string Role { get; set; } = string.Empty;
         public string? Phone { get; set; }
         public string? CVR { get; set; } = string.Empty;
-        public string Role { get; set; } = string.Empty;
+        
         public Organization? Organization { get; set; } = null!;
 
         public bool Validate()

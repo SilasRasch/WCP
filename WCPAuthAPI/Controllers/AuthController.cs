@@ -1,14 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using WCPAuthAPI.Models.DTOs;
-using WCPAuthAPI.Models;
-using WCPAuthAPI.Services.JWTs;
 using WCPShared.Interfaces;
 using WCPShared.Models.UserModels;
 using WCPShared.Services.StaticHelpers;
 using WCPShared.Services;
 using System.Net;
+using WCPShared.Models.AuthModels;
 
 namespace WCPAuthAPI.Controllers
 {
@@ -51,7 +49,7 @@ namespace WCPAuthAPI.Controllers
         }
 
         [HttpPost("Login")]
-        public async Task<ActionResult<string?>> Login(UserDTO request)
+        public async Task<ActionResult<string?>> Login(UserDto request)
         {
             AuthResponse? auth = await _tokenService.Login(request);
             if (auth == null) return BadRequest("Forkert brugernavn eller kodeord");

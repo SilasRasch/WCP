@@ -1,12 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace WCPAuthAPI.Models.DTOs
+namespace WCPShared.Models.AuthModels
 {
-    public class UserDTO
+    public class LoginDto
     {
-        [Required]
+        [Required, DataType(DataType.EmailAddress), EmailAddress]
         public string Email { get; set; } = string.Empty;
-        [Required]
+        [Required, DataType(DataType.Password)]
         public string Password { get; set; } = string.Empty;
     }
 }

@@ -2,7 +2,6 @@ using Microsoft.OpenApi.Models;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;
-using WCPAuthAPI.Services.JWTs;
 using WCPShared.Interfaces;
 using WCPShared.Models;
 using WCPShared.Services;
