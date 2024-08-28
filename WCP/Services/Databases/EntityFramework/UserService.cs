@@ -3,7 +3,7 @@ using WCPShared.Models.UserModels;
 using WCPShared.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace WCPShared.Services.Databases.MSSQL
+namespace WCPShared.Services.Databases.EntityFramework
 {
     public class UserService : IUserService
     {

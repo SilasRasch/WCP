@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using WCPShared.Interfaces.Auth;
 using WCPShared.Interfaces;
 using WCPShared.Services;
-using WCPShared.Services.Databases.MSSQL;
+using WCPShared.Services.Databases.EntityFramework;
 using WCPShared.Models;
 using Microsoft.EntityFrameworkCore;
 using WCPShared.Services.StaticHelpers;
