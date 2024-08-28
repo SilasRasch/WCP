@@ -7,6 +7,7 @@ using WCPShared.Services;
 using WCPShared.Interfaces.Mongo;
 using WCPShared.Models.UserModels;
 using WCPShared.Interfaces;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace WCPDataAPI.Controllers
 {
@@ -63,19 +64,19 @@ namespace WCPDataAPI.Controllers
         }
 
         [HttpGet("/api/creators-with-user")]
-        public async Task<ActionResult<Dictionary<User, Creator>>> GetCreatorUsers()
+        public async Task<ActionResult<IEnumerable<dynamic>>> GetCreatorUsers()
         {
             IEnumerable<Creator> creators = await _creatorService.GetAllObjects();
-            Dictionary<User, Creator> keyValuePairs = new Dictionary<User, Creator>();
+            List<dynamic> combined = new List<dynamic>();
 
             foreach (Creator creator in creators) 
             {
                 User? user = await _userService.GetObject(creator.Id);
                 if (user is not null)
-                    keyValuePairs.Add(user, creator);
+                    combined.Add(new { user, creator });
             }
 
-            return keyValuePairs;
+            return combined;
         }
 
         [HttpGet("{id}")]
