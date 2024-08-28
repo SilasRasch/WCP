@@ -9,13 +9,14 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using WCPShared.Interfaces;
+using WCPShared.Interfaces.Auth;
 using WCPShared.Models.AuthModels;
 using WCPShared.Models.UserModels;
 using WCPShared.Services.StaticHelpers;
 
 namespace WCPShared.Services
 {
-    public class JwtService : IJwtService
+    public class JwtService : IJwtService, IAuthService
     {
         private readonly IConfiguration _configuration;
         private readonly IUserService _userService;
@@ -182,7 +183,7 @@ namespace WCPShared.Services
             return Convert.ToHexString(RandomNumberGenerator.GetBytes(byteCount));
         }
 
-        private async Task LoginAttempt(bool success, User user)
+        public async Task LoginAttempt(bool success, User user)
         {
             if (success)
                 user.LoginTries = 0;

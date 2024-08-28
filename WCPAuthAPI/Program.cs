@@ -8,6 +8,7 @@ using WCPShared.Services;
 using WCPShared.Services.StaticHelpers;
 using Swashbuckle.AspNetCore.Filters;
 using WCPShared.Services.Databases.MSSQL;
+using WCPShared.Interfaces.Auth;
 
 var builder = WebApplication.CreateBuilder(args);
 
