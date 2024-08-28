@@ -14,7 +14,7 @@ namespace WCPAuthAPI.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly ITokenService _tokenService;
+        private readonly IJwtService _tokenService;
         private readonly IUserService _userService;
         private readonly IEmailService _emailService;
         private readonly UserContextService _userContextService;
@@ -27,7 +27,7 @@ namespace WCPAuthAPI.Controllers
             SameSite = Secrets.IsProd ? SameSiteMode.Strict : SameSiteMode.None,
         };
 
-        public AuthController(ITokenService tokenService, IUserService userService, IEmailService emailService, UserContextService userContextService)
+        public AuthController(IJwtService tokenService, IUserService userService, IEmailService emailService, UserContextService userContextService)
         {
             _tokenService = tokenService;
             _userService = userService;

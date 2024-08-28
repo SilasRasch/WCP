@@ -11,7 +11,7 @@ namespace WCPFrontEnd.Models
         private readonly ILocalStorageService _localStorage;
         //private readonly ITokenService _tokenService;
 
-        public JwtAuthStateProvider(ILocalStorageService localStorage, ITokenService tokenService)
+        public JwtAuthStateProvider(ILocalStorageService localStorage, IJwtService tokenService)
         {
             _localStorage = localStorage;
             //_tokenService = tokenService;

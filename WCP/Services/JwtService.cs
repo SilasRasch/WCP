@@ -15,13 +15,13 @@ using WCPShared.Services.StaticHelpers;
 
 namespace WCPShared.Services
 {
-    public class TokenService : ITokenService
+    public class JwtService : IJwtService
     {
         private readonly IConfiguration _configuration;
         private readonly IUserService _userService;
         private readonly IEmailService _emailService;
 
-        public TokenService(IConfiguration configuration, IUserService userService, IEmailService emailService)
+        public JwtService(IConfiguration configuration, IUserService userService, IEmailService emailService)
         {
             _configuration = configuration;
             _userService = userService;

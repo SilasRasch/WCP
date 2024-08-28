@@ -8,7 +8,7 @@ using WCPShared.Models.UserModels;
 
 namespace WCPShared.Interfaces
 {
-    public interface ITokenService
+    public interface IJwtService
     {
         Task<AuthResponse?> Login(UserDto request);
         Task<User> Register(RegisterDto request);
