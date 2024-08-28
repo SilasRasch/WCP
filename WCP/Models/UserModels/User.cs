@@ -43,5 +43,20 @@ namespace WCPShared.Models.UserModels
 
             return true;
         }
+
+        public UserNC ToUserNC()
+        {
+            return new UserNC
+            {
+                CVR = CVR,
+                DisplayName = DisplayName,
+                Email = Email,
+                Id = Id,
+                IsActive = IsActive,
+                Organization = Organization,
+                Phone = Phone,
+                Role = Role
+            };
+        }
     }
 }

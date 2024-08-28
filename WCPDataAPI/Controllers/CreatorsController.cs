@@ -73,7 +73,11 @@ namespace WCPDataAPI.Controllers
             {
                 User? user = await _userService.GetObject(creator.Id);
                 if (user is not null)
-                    combined.Add(new { user, creator });
+                {
+                    UserNC userNC = user.ToUserNC();
+                    combined.Add(new { userNC, creator });
+                }
+                    
             }
 
             return combined;
