@@ -5,6 +5,9 @@ using WCPShared.Models.OrderModels;
 using WCPShared.Models.UserModels.CreatorModels;
 using WCPShared.Services;
 using WCPShared.Interfaces.Mongo;
+using WCPShared.Models.UserModels;
+using WCPShared.Interfaces;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace WCPDataAPI.Controllers
 {
@@ -16,12 +19,14 @@ namespace WCPDataAPI.Controllers
         private readonly UserContextService _userContextService;
         private readonly ICreatorService _creatorService;
         private readonly IOrderService _orderService;
+        private readonly IUserService _userService;
 
-        public CreatorsController(UserContextService userContextService, ICreatorService creatorService, IOrderService orderService)
+        public CreatorsController(UserContextService userContextService, ICreatorService creatorService, IOrderService orderService, IUserService userService)
         {
             _orderService = orderService;
             _userContextService = userContextService;
             _creatorService = creatorService;
+            _userService = userService;
         }
 
         [HttpGet]
@@ -56,6 +61,26 @@ namespace WCPDataAPI.Controllers
             }
 
             return creators is not null ? Ok(creators) : NotFound("No creators found");
+        }
+
+        [HttpGet("/api/creators-with-user")]
+        public async Task<ActionResult<IEnumerable<dynamic>>> GetCreatorUsers()
+        {
+            IEnumerable<Creator> creators = await _creatorService.GetAllObjects();
+            List<dynamic> combined = new List<dynamic>();
+
+            foreach (Creator creator in creators) 
+            {
+                User? user = await _userService.GetObject(creator.Id);
+                if (user is not null)
+                {
+                    UserNC userNC = user.ToUserNC();
+                    combined.Add(new { userNC, creator });
+                }
+                    
+            }
+
+            return combined;
         }
 
         [HttpGet("{id}")]

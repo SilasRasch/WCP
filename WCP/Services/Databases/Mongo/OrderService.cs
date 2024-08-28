@@ -10,7 +10,7 @@ using WCPShared.Services.StaticHelpers;
 
 namespace WCPShared.Services.Databases.Mongo
 {
-    internal class OrderService : IOrderService
+    public class OrderService : IOrderService
     {
         private readonly IMongoCollection<Order> _orders;
         private readonly IEmailService _emailService;
