@@ -9,6 +9,8 @@ using WCPShared.Services.StaticHelpers;
 using Microsoft.EntityFrameworkCore;
 using WCPShared.Models;
 using WCPShared.Services.Databases.MSSQL;
+using WCPShared.Interfaces.Mongo;
+using WCPShared.Services.Databases.Mongo;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,7 +18,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<MongoDbContext>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IOrganizationService, OrganizationService>();
+builder.Services.AddScoped<ICreatorService, CreatorService>();
+builder.Services.AddScoped<IBrandService, BrandService>();
 builder.Services.AddScoped<IEmailService, SendGridEmailService>();
 builder.Services.AddScoped<UserContextService>();
 builder.Services.AddDbContext<AuthDbContext>(
