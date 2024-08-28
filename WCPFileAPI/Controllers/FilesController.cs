@@ -21,7 +21,7 @@ namespace WCPFileAPI.Controllers
             _userContextService = userContextService;
         }
 
-        [HttpPost]
+        [HttpPost("profile-pic")]
         public async Task<ActionResult<string>> UploadProfilePicture(IFormFile file)
         {
             string regexFileExtension = @"(png|jpe?g)";
