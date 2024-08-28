@@ -4,60 +4,53 @@
 
 
 <div class="flex flex-col gap-4 justify-center items-center my-32">
-    <AuthorizeView>
-        <NotAuthorized>
-            @if (!ShowLogin)
-            {
-                <h1 class="font-bold text-red-500 text-3xl md:text-5xl text-center w-[65vw]">Velkommen til WebContents bestillingsplatform</h1>
-                <h3 class="fw-bold text-center text-xl md:text-3xl">Lad os komme i gang!</h3>
+@if (!ShowLogin)
+{
+    <h1 class="font-bold text-red-500 text-3xl md:text-5xl text-center w-[65vw]">Velkommen til WebContents bestillingsplatform</h1>
+    <h3 class="fw-bold text-center text-xl md:text-3xl">Lad os komme i gang!</h3>
 
-                <div class="flex items-center gap-2">
-                    <button @onclick="ToggleLogin" class="p-2 bg-red-500 rounded-full text-white font-semibold min-w-28 hover:bg-red-600 duration-200">
-                        Log ind
-                    </button>
-                    <a href="https://meetings-eu1.hubspot.com/hoerberg?uuid=5622acbf-eafb-4f75-9e9c-a8d489f5db1c" target="_blank"
-                       class="p-2 bg-red-300 rounded-full text-center text-white font-semibold min-w-28 hover:bg-red-400 duration-200">
-                        Få adgang
-                    </a>
+    <div class="flex items-center gap-2">
+        <button @onclick="ToggleLogin" class="p-2 bg-red-500 rounded-full text-white font-semibold min-w-28 hover:bg-red-600 duration-200">
+            Log ind
+        </button>
+        <a href="https://meetings-eu1.hubspot.com/hoerberg?uuid=5622acbf-eafb-4f75-9e9c-a8d489f5db1c" target="_blank"
+            class="p-2 bg-red-300 rounded-full text-center text-white font-semibold min-w-28 hover:bg-red-400 duration-200">
+            Få adgang
+        </a>
+    </div>
+}
+else
+{
+    <div class="flex items-center gap-4">
+        <div class="text-left">
+            <h1 class="text-red-500 text-2xl font-semibold">WebContent</h1>
+            <p class="text-lg font-semibold p-0 m-0 py-2">Alt-i-en platform til content!</p>
+        </div>
+
+        <div class="pb-2 px-4 rounded-lg text-white bg-gray-900 min-w-[300px] max-w-lg shadow-black shadow-lg">
+            <div class="grid w-full">
+                <div class="grid pt-2 w-full">
+                    <p class="text-left p-0 py-1">E-mail </p>
+                    <InputText @bind-Value="User.Email" type="email" class="rounded-lg bg-slate-600 p-1 text-lg font-normal" />
                 </div>
-            }
-            else
-            {
-                <div class="flex items-center gap-4">
-                    <div class="text-left">
-                        <h1 class="text-red-500 text-2xl font-semibold">WebContent</h1>
-                        <p class="text-lg font-semibold p-0 m-0 py-2">Alt-i-en platform til content!</p>
-                    </div>
-
-                    <div class="pb-2 px-4 rounded-lg text-white bg-gray-900 min-w-[300px] max-w-lg shadow-black shadow-lg">
-                        <div class="grid w-full">
-                            <div class="grid pt-2 w-full">
-                                <p class="text-left p-0 py-1">E-mail </p>
-                                <InputText @bind-Value="User.Email" type="email" class="rounded-lg bg-slate-600 p-1 text-lg font-normal" />
-                            </div>
-                            <div class="grid w-full">
-                                <p class="text-left p-0 py-1">Kodeord</p>
-                                <InputText @bind-Value="User.Password" type="password" class="rounded-lg bg-slate-600 p-1 text-lg font-normal" />
-                            </div>
-                            <div class="flex justify-between py-2 text-base w-full">
-                                <button @onclick="Login" class="bg-green-500 p-2 rounded-lg w-1/2 mr-1 hover:bg-green-600 duration-200">Log ind</button>
-                                <a href="https://meetings-eu1.hubspot.com/hoerberg?uuid=5622acbf-eafb-4f75-9e9c-a8d489f5db1c" target="_blank" class="bg-red-500 p-2 rounded-lg w-1/2 ml-1 hover:bg-red-600 duration-200 text-center">Få adgang</a>
-                            </div>
-                            <NavLink href="/glemt-kodeord" class="text-base cursor-pointer hover:text-blue-500 duration-300 text-center">Glemt kodeord?</NavLink>
-                        </div>
-                        @if (!String.IsNullOrEmpty(Error))
-                        {
-                            <div class="text-red-600 text-base text-center">Error</div>
-                        }
-                    </div>
+                <div class="grid w-full">
+                    <p class="text-left p-0 py-1">Kodeord</p>
+                    <InputText @bind-Value="User.Password" type="password" class="rounded-lg bg-slate-600 p-1 text-lg font-normal" />
                 </div>
-
+                <div class="flex justify-between py-2 text-base w-full">
+                    <button @onclick="Login" class="bg-green-500 p-2 rounded-lg w-1/2 mr-1 hover:bg-green-600 duration-200">Log ind</button>
+                    <a href="https://meetings-eu1.hubspot.com/hoerberg?uuid=5622acbf-eafb-4f75-9e9c-a8d489f5db1c" target="_blank" class="bg-red-500 p-2 rounded-lg w-1/2 ml-1 hover:bg-red-600 duration-200 text-center">Få adgang</a>
+                </div>
+                <NavLink href="/glemt-kodeord" class="text-base cursor-pointer hover:text-blue-500 duration-300 text-center">Glemt kodeord?</NavLink>
+            </div>
+            @if (!String.IsNullOrEmpty(Error))
+            {
+                <div class="text-red-600 text-base text-center">Error</div>
             }
-        </NotAuthorized>
-        <Authorized>
-            <span>Wow! Du er logget ind :D</span>
-        </Authorized>
-    </AuthorizeView>
+        </div>
+    </div>
+
+}
 </div>
 
 @code {

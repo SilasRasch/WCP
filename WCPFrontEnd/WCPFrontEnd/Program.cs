@@ -23,8 +23,6 @@ builder.Services.AddScoped<UserContextService>();
 builder.Services.AddDbContext<AuthDbContext>(
     options => options.UseSqlServer(Secrets.GetConnectionString(builder.Configuration)));
 
-builder.Services.AddAuthorizationCore();
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
