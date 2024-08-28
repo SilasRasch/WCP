@@ -62,7 +62,7 @@ namespace WCPDataAPI.Controllers
             return creators is not null ? Ok(creators) : NotFound("No creators found");
         }
 
-        [HttpGet("with-user")]
+        [HttpGet("/api/creators-with-user")]
         public async Task<ActionResult<Dictionary<User, Creator>>> GetCreatorUsers()
         {
             IEnumerable<Creator> creators = await _creatorService.GetAllObjects();
