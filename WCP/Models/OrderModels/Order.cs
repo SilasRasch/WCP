@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using WCPShared.Models.BrandModels;
+using WCPShared.Models.UserModels;
 using WCPShared.Models.UserModels.CreatorModels;
 using WCPShared.Services.StaticHelpers;
 
@@ -15,108 +16,72 @@ namespace WCPShared.Models.OrderModels
     {
         #region Base
 
-        [BsonId]
         public int Id { get; set; }
-
-        [BsonElement("price")]
         public double Price { get; set; }
-
-        [BsonElement("deliveryTimeFrom")]
         public int DeliveryTimeFrom { get; set; }
-
-        [BsonElement("deliveryTimeTo")]
         public int DeliveryTimeTo { get; set; }
+        public int State { get; set; }
+        public int Category { get; set; }
+        //public int OrganizationId { get; set; }
+        //public Organization Organization { get; set; } = new Organization();
+        public List<Creator> Creators { get; set; } = new List<Creator>();
 
-        [BsonElement("userId")]
-        public int UserId { get; set; }
-
-        [BsonElement("organizationId")]
-        public int OrganizationId { get; set; }
-
-        [BsonElement("status")]
-        public Status Status { get; set; } = new Status();
-
-        [BsonElement("links")]
-        [BsonIgnoreIfNull]
-        public Links? Links { get; set; }
-
-        [BsonElement("creators")]
-        [BsonIgnoreIfNull]
-        public List<int>? Creators { get; set; }
+        // Drive-links
+        public string Scripts { get; set; } = string.Empty;
+        public string Content { get; set; } = string.Empty; // Dump for creator
+        public string Delivery { get; set; } = string.Empty; // Finished product
+        public string Other { get; set; } = string.Empty;
 
         #endregion
 
         #region Page one
 
-        [BsonElement("brand")]
+        public int BrandId { get; set; }
         public Brand Brand { get; set; } = new Brand();
-        [BsonElement("contact")]
-        public Contact Contact { get; set; } = new Contact();
+        public string Name { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string Phone { get; set; } = string.Empty;
 
         #endregion
 
         #region Page two
 
-        [BsonElement("projectName")]
         public string ProjectName { get; set; } = string.Empty;
-        [BsonElement("projectType")]
         public string ProjectType { get; set; } = string.Empty;
-        [BsonElement("contentCount")]
         public int ContentCount { get; set; }
-        [BsonElement("contentLength")]
-        [BsonIgnoreIfNull]
-        public int ContentLength { get; set; }
-        [BsonElement("platforms")]
+        public int? ContentLength { get; set; }
         public string Platforms { get; set; } = string.Empty;
-        [BsonElement("format")]
         public string Format { get; set; } = string.Empty;
 
         #endregion
 
         #region Page three
 
-        [BsonElement("extraCreator")]
-        [BsonIgnoreIfNull]
-        public bool ExtraCreator { get; set; }
-        [BsonElement("extraHook")]
-        [BsonIgnoreIfDefault]
-        public int ExtraHook { get; set; }
-        [BsonElement("extraNotes")]
-        [BsonIgnoreIfNull]
+        public bool? ExtraCreator { get; set; }
+        public int? ExtraHook { get; set; }
         public string? ExtraNotes { get; set; }
-        [BsonElement("creatorDescription")]
-        [BsonIgnoreIfNull]
-        public string? CreatorDescription { get; set; }
-        [BsonElement("focusPoints")]
-        [BsonIgnoreIfNull]
         public string? FocusPoints { get; set; }
-        [BsonElement("ideas")]
-        [BsonIgnoreIfNull]
-        public List<string>? Ideas { get; set; }
-        [BsonElement("relevantFiles")]
-        [BsonIgnoreIfNull]
         public string? RelevantFiles { get; set; }
-        [BsonElement("products")]
-        [BsonIgnoreIfNull]
-        public List<string>? Products { get; set; }
+        public List<string> Ideas { get; set; } = new List<string>();
+        public List<string> Products { get; set; } = new List<string>();
 
         #endregion
 
         public bool Validate()
         {
-            if (Validation.ValidateEmail(Contact.Email))
+            if (Validation.ValidateEmail(Email))
                 return false;
 
-            if (Validation.ValidatePhone(Contact.Phone))
+            if (Validation.ValidatePhone(Phone))
                 return false;
 
-            if (Validation.ValidateDisplayName(Contact.Name))
+            if (Validation.ValidateDisplayName(Name))
                 return false;
 
             if (!Brand.Validate())
                 return false;
 
-            if (String.IsNullOrWhiteSpace(ProjectName) || UserId == default || OrganizationId == default || String.IsNullOrWhiteSpace(ProjectType) || String.IsNullOrWhiteSpace(Platforms) || String.IsNullOrWhiteSpace(Format))
+            if (String.IsNullOrWhiteSpace(ProjectName) || BrandId == 0 || String.IsNullOrWhiteSpace(ProjectType) || String.IsNullOrWhiteSpace(Platforms) || String.IsNullOrWhiteSpace(Format))
                 return false;
 
             return true;

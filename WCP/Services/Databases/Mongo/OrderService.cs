@@ -12,32 +12,32 @@ namespace WCPShared.Services.Databases.Mongo
 {
     public class OrderService : IOrderService
     {
-        private readonly IMongoCollection<Order> _orders;
+        private readonly IMongoCollection<OrderMongo> _orders;
         private readonly IEmailService _emailService;
 
         public OrderService(MongoDbContext mongoDbService, IEmailService emailService)
         {
-            _orders = mongoDbService.Database?.GetCollection<Order>(Secrets.MongoCollectionName)!;
+            _orders = mongoDbService.Database?.GetCollection<OrderMongo>(Secrets.MongoCollectionName)!;
             _emailService = emailService;
         }
 
-        public async Task AddObject(Order obj)
+        public async Task AddObject(OrderMongo obj)
         {
             if (!obj.Validate())
                 return;
 
-            Order? lastOrder = null;
-            if (await _orders.CountDocumentsAsync(FilterDefinition<Order>.Empty) > 0)
-                lastOrder = await _orders.Find(FilterDefinition<Order>.Empty).SortByDescending(o => o.Id).FirstAsync();
+            OrderMongo? lastOrder = null;
+            if (await _orders.CountDocumentsAsync(FilterDefinition<OrderMongo>.Empty) > 0)
+                lastOrder = await _orders.Find(FilterDefinition<OrderMongo>.Empty).SortByDescending(o => o.Id).FirstAsync();
 
             obj.Id = lastOrder != null ? ++lastOrder.Id : 1000;
 
             await _orders.InsertOneAsync(obj);
         }
 
-        public async Task<Order?> DeleteObject(int id)
+        public async Task<OrderMongo?> DeleteObject(int id)
         {
-            Order? order = await GetObject(id);
+            OrderMongo? order = await GetObject(id);
 
             if (order is null)
                 return null;
@@ -50,24 +50,24 @@ namespace WCPShared.Services.Databases.Mongo
             return result.DeletedCount == 1 ? order : null;
         }
 
-        public async Task<IEnumerable<Order>> GetAllObjects()
+        public async Task<IEnumerable<OrderMongo>> GetAllObjects()
         {
-            return await _orders.FindAsync(FilterDefinition<Order>.Empty).Result.ToListAsync();
+            return await _orders.FindAsync(FilterDefinition<OrderMongo>.Empty).Result.ToListAsync();
         }
 
-        public async Task<IEnumerable<Order>> GetAllObjects(Expression<Func<Order, bool>>? filter = null)
+        public async Task<IEnumerable<OrderMongo>> GetAllObjects(Expression<Func<OrderMongo, bool>>? filter = null)
         {
             return await _orders.FindAsync(filter).Result.ToListAsync();
         }
 
-        public async Task<Order?> GetObject(int id)
+        public async Task<OrderMongo?> GetObject(int id)
         {
             return await _orders.FindAsync(x => x.Id == id).Result.FirstOrDefaultAsync();
         }
 
-        public async Task<Order?> UpdateObject(int id, Order obj)
+        public async Task<OrderMongo?> UpdateObject(int id, OrderMongo obj)
         {
-            Order? oldOrder = await GetObject(id);
+            OrderMongo? oldOrder = await GetObject(id);
             if (oldOrder is null)
                 return null;
 

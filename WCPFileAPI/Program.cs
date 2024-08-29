@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
@@ -5,12 +6,16 @@ using System.Runtime;
 using System.Text;
 using System.Text.Json.Serialization;
 using WCPFileAPI.Services.S3;
+using WCPShared.Models;
 using WCPShared.Services;
 using WCPShared.Services.StaticHelpers;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+
+builder.Services.AddDbContext<WcpDbContext>(options => 
+    options.UseSqlServer(Secrets.GetConnectionString(builder.Configuration)));
 
 string allowAll = "dev";
 

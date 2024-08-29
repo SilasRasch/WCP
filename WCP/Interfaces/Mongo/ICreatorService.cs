@@ -2,7 +2,7 @@
 
 namespace WCPShared.Interfaces.Mongo
 {
-    public interface ICreatorService : IDatabaseService<Creator>, IMongoDbServiceExtension<Creator>
+    public interface ICreatorService : IDatabaseService<CreatorMongo>, IMongoDbServiceExtension<CreatorMongo>
     {
     }
 }

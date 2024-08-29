@@ -110,7 +110,7 @@ namespace WCPShared.Services
             return response.StatusCode;
         }
 
-        public async Task<HttpStatusCode> SendBrandCreationEmail(Brand brand)
+        public async Task<HttpStatusCode> SendBrandCreationEmail(BrandMongo brand)
         {
             var apiKey = Secrets.GetSendGridAPI(_configuration);
             var client = new SendGridClient(apiKey);

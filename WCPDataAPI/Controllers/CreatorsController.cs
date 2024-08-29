@@ -30,9 +30,9 @@ namespace WCPDataAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Creator>>> Get([FromQuery] int? orderId = null, [FromQuery] string? searchTerm = null)
+        public async Task<ActionResult<IEnumerable<CreatorMongo>>> Get([FromQuery] int? orderId = null, [FromQuery] string? searchTerm = null)
         {
-            IEnumerable<Creator> creators = null!;
+            IEnumerable<CreatorMongo> creators = null!;
 
             if (orderId is null)
             {
@@ -40,7 +40,7 @@ namespace WCPDataAPI.Controllers
             }
             else
             {
-                Order? order = await _orderService.GetObject(orderId.Value);
+                OrderMongo? order = await _orderService.GetObject(orderId.Value);
 
                 if (order is not null && order.Creators is not null)
                 {
@@ -66,10 +66,10 @@ namespace WCPDataAPI.Controllers
         [HttpGet("/api/creators-with-user")]
         public async Task<ActionResult<IEnumerable<dynamic>>> GetCreatorUsers()
         {
-            IEnumerable<Creator> creators = await _creatorService.GetAllObjects();
+            IEnumerable<CreatorMongo> creators = await _creatorService.GetAllObjects();
             List<dynamic> combined = new List<dynamic>();
 
-            foreach (Creator creator in creators) 
+            foreach (CreatorMongo creator in creators) 
             {
                 User? user = await _userService.GetObject(creator.Id);
                 if (user is not null)
@@ -84,14 +84,14 @@ namespace WCPDataAPI.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Creator>> Get(int id)
+        public async Task<ActionResult<CreatorMongo>> Get(int id)
         {
-            Creator? creator = await _creatorService.GetObject(id);
+            CreatorMongo? creator = await _creatorService.GetObject(id);
             return creator is not null ? Ok(creator) : NotFound();
         }
 
         [HttpPost, Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Post(Creator creator)
+        public async Task<IActionResult> Post(CreatorMongo creator)
         {
             if (!creator.Validate())
                 return BadRequest("Valideringsfejl, tjek venligst felterne igen...");
@@ -101,7 +101,7 @@ namespace WCPDataAPI.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<Creator>> Put(Creator creator, int id)
+        public async Task<ActionResult<CreatorMongo>> Put(CreatorMongo creator, int id)
         {
             if (!creator.Validate())
                 return BadRequest("Valideringsfejl, tjek venligst felterne igen...");
@@ -109,14 +109,14 @@ namespace WCPDataAPI.Controllers
             if (creator.Id != _userContextService.GetId() && !_userContextService.GetRoles().Contains("Admin"))
                 return BadRequest("You are not the owner of this creator");
 
-            Creator? modifiedCreator = await _creatorService.UpdateObject(id, creator);
+            CreatorMongo? modifiedCreator = await _creatorService.UpdateObject(id, creator);
             return modifiedCreator is not null ? NoContent() : NotFound("Creator not found");
         }
 
         [HttpDelete("{id}"), Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
-            Creator? creator = await _creatorService.GetObject(id);
+            CreatorMongo? creator = await _creatorService.GetObject(id);
 
             if (creator is null)
                 return NotFound("Creator not found");
@@ -124,7 +124,7 @@ namespace WCPDataAPI.Controllers
             if (creator.Id != _userContextService.GetId() && !_userContextService.GetRoles().Contains("Admin"))
                 return BadRequest("Du har ikke tilladelse til at ændre denne creator");
 
-            Creator? deleted = await _creatorService.DeleteObject(id);
+            CreatorMongo? deleted = await _creatorService.DeleteObject(id);
             return deleted is not null ? NoContent() : NotFound("Creator not found");
         }
     }

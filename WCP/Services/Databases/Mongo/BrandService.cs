@@ -11,22 +11,22 @@ namespace WCPShared.Services.Databases.Mongo
     public class BrandService : IBrandService
     {
         private readonly IEmailService _emailService;
-        private readonly IMongoCollection<Brand> _brands;
+        private readonly IMongoCollection<BrandMongo> _brands;
 
         public BrandService(MongoDbContext mongoDbService, IEmailService emailService)
         {
-            _brands = mongoDbService.Database?.GetCollection<Brand>(Secrets.MongoBrandCollectionName)!;
+            _brands = mongoDbService.Database?.GetCollection<BrandMongo>(Secrets.MongoBrandCollectionName)!;
             _emailService = emailService;
         }
 
-        public async Task AddObject(Brand obj)
+        public async Task AddObject(BrandMongo obj)
         {
             if (!obj.Validate())
                 return;
 
-            Brand lastBrand = null!;
-            if (await _brands.CountDocumentsAsync(FilterDefinition<Brand>.Empty) > 0)
-                lastBrand = await _brands.Find(FilterDefinition<Brand>.Empty).SortByDescending(o => o.Id).FirstAsync();
+            BrandMongo lastBrand = null!;
+            if (await _brands.CountDocumentsAsync(FilterDefinition<BrandMongo>.Empty) > 0)
+                lastBrand = await _brands.Find(FilterDefinition<BrandMongo>.Empty).SortByDescending(o => o.Id).FirstAsync();
 
             obj.Id = lastBrand != null ? ++lastBrand.Id : 1000;
 
@@ -34,9 +34,9 @@ namespace WCPShared.Services.Databases.Mongo
             await _emailService.SendBrandCreationEmail(obj);
         }
 
-        public async Task<Brand?> DeleteObject(int id)
+        public async Task<BrandMongo?> DeleteObject(int id)
         {
-            Brand? brand = await GetObject(id);
+            BrandMongo? brand = await GetObject(id);
 
             if (brand is null)
                 return null;
@@ -49,24 +49,24 @@ namespace WCPShared.Services.Databases.Mongo
             return result.DeletedCount == 1 ? brand : null;
         }
 
-        public async Task<IEnumerable<Brand>> GetAllObjects()
+        public async Task<IEnumerable<BrandMongo>> GetAllObjects()
         {
-            return await _brands.FindAsync(FilterDefinition<Brand>.Empty).Result.ToListAsync();
+            return await _brands.FindAsync(FilterDefinition<BrandMongo>.Empty).Result.ToListAsync();
         }
 
-        public async Task<IEnumerable<Brand>> GetAllObjects(Expression<Func<Brand, bool>>? filter = null)
+        public async Task<IEnumerable<BrandMongo>> GetAllObjects(Expression<Func<BrandMongo, bool>>? filter = null)
         {
             return await _brands.FindAsync(filter).Result.ToListAsync();
         }
 
-        public async Task<Brand?> GetObject(int id)
+        public async Task<BrandMongo?> GetObject(int id)
         {
             return await _brands.FindAsync(x => x.Id == id).Result.FirstOrDefaultAsync();
         }
 
-        public async Task<Brand?> UpdateObject(int id, Brand obj)
+        public async Task<BrandMongo?> UpdateObject(int id, BrandMongo obj)
         {
-            Brand? oldBrand = await GetObject(id);
+            BrandMongo? oldBrand = await GetObject(id);
             if (oldBrand is null)
                 return null;
 

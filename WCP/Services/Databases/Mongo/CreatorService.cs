@@ -9,14 +9,14 @@ namespace WCPShared.Services.Databases.Mongo
 {
     public class CreatorService : ICreatorService
     {
-        private readonly IMongoCollection<Creator> _creators;
+        private readonly IMongoCollection<CreatorMongo> _creators;
 
         public CreatorService(MongoDbContext mongoDbService)
         {
-            _creators = mongoDbService.Database?.GetCollection<Creator>(Secrets.MongoCreatorCollectionName)!;
+            _creators = mongoDbService.Database?.GetCollection<CreatorMongo>(Secrets.MongoCreatorCollectionName)!;
         }
 
-        public async Task AddObject(Creator obj)
+        public async Task AddObject(CreatorMongo obj)
         {
             if (!obj.Validate())
                 return;
@@ -24,9 +24,9 @@ namespace WCPShared.Services.Databases.Mongo
             await _creators.InsertOneAsync(obj);
         }
 
-        public async Task<Creator?> DeleteObject(int id)
+        public async Task<CreatorMongo?> DeleteObject(int id)
         {
-            Creator? creator = await GetObject(id);
+            CreatorMongo? creator = await GetObject(id);
 
             if (creator is null)
                 return null;
@@ -39,24 +39,24 @@ namespace WCPShared.Services.Databases.Mongo
             return result.DeletedCount == 1 ? creator : null;
         }
 
-        public async Task<IEnumerable<Creator>> GetAllObjects()
+        public async Task<IEnumerable<CreatorMongo>> GetAllObjects()
         {
-            return await _creators.FindAsync(FilterDefinition<Creator>.Empty).Result.ToListAsync();
+            return await _creators.FindAsync(FilterDefinition<CreatorMongo>.Empty).Result.ToListAsync();
         }
 
-        public async Task<IEnumerable<Creator>> GetAllObjects(Expression<Func<Creator, bool>>? filter = null)
+        public async Task<IEnumerable<CreatorMongo>> GetAllObjects(Expression<Func<CreatorMongo, bool>>? filter = null)
         {
             return await _creators.FindAsync(filter).Result.ToListAsync();
         }
 
-        public async Task<Creator?> GetObject(int id)
+        public async Task<CreatorMongo?> GetObject(int id)
         {
             return await _creators.FindAsync(x => x.Id == id).Result.FirstOrDefaultAsync();
         }
 
-        public async Task<Creator?> UpdateObject(int id, Creator obj)
+        public async Task<CreatorMongo?> UpdateObject(int id, CreatorMongo obj)
         {
-            Creator? oldCreator = await GetObject(id);
+            CreatorMongo? oldCreator = await GetObject(id);
             if (oldCreator is null)
                 return null;
 

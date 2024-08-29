@@ -2,7 +2,7 @@
 
 namespace WCPShared.Interfaces.Mongo
 {
-    public interface IOrderService : IDatabaseService<Order>, IMongoDbServiceExtension<Order>
+    public interface IOrderService : IDatabaseService<OrderMongo>, IMongoDbServiceExtension<OrderMongo>
     {
     }
 }

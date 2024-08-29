@@ -23,7 +23,7 @@ namespace WCPDataAPI.Controllers
 
         // GET: api/<OrdersController>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Order>>> Get([FromQuery] int? userId = null, [FromQuery] int? creatorId = null, [FromQuery] int? orgId = null)
+        public async Task<ActionResult<IEnumerable<OrderMongo>>> Get([FromQuery] int? userId = null, [FromQuery] int? creatorId = null, [FromQuery] int? orgId = null)
         {
             if (orgId is not null) // && creatorId is null && userId is null)
                 return Ok(await _orderService.GetAllObjects(x => x.OrganizationId == (int)orgId));
@@ -41,20 +41,20 @@ namespace WCPDataAPI.Controllers
             if (userId is not null) // && creatorId is null)
                 return Ok(await _orderService.GetAllObjects(x => x.UserId == userId));
 
-            return Ok(new List<Order>());
+            return Ok(new List<OrderMongo>());
         }
 
         // GET api/<OrdersController>/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Order>> Get(int id)
+        public async Task<ActionResult<OrderMongo>> Get(int id)
         {
-            Order? order = await _orderService.GetObject(id);
+            OrderMongo? order = await _orderService.GetObject(id);
             return order is not null ? Ok(order) : NotFound();
         }
 
         // POST api/<OrdersController>
         [HttpPost]
-        public async Task<ActionResult<Order>> Post(Order order)
+        public async Task<ActionResult<OrderMongo>> Post(OrderMongo order)
         {
             if (!order.Validate())
                 return BadRequest("Valideringsfejl, tjek venligst felterne igen...");
@@ -66,7 +66,7 @@ namespace WCPDataAPI.Controllers
 
         // PUT api/<OrdersController>/5
         [HttpPut("{id}")]
-        public async Task<ActionResult<Order>> Put(Order order, int id)
+        public async Task<ActionResult<OrderMongo>> Put(OrderMongo order, int id)
         {
             if (!order.Validate())
                 return BadRequest("Valideringsfejl, tjek venligst felterne igen...");
@@ -77,7 +77,7 @@ namespace WCPDataAPI.Controllers
             if (id != order.Id)
                 return BadRequest("Ids must match in URI and body");
 
-            Order? modifiedOrder = await _orderService.UpdateObject(id, order);
+            OrderMongo? modifiedOrder = await _orderService.UpdateObject(id, order);
             return modifiedOrder is not null ? NoContent() : NotFound("Order not found");
         }
 
@@ -85,7 +85,7 @@ namespace WCPDataAPI.Controllers
         [HttpDelete("{id}"), Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
-            Order? order = await _orderService.GetObject(id);
+            OrderMongo? order = await _orderService.GetObject(id);
 
             if (order is not null)
                 return NotFound();
@@ -93,7 +93,7 @@ namespace WCPDataAPI.Controllers
             if (!_userContextService.GetRoles().Contains("Admin")) // Users cannot delete orders
                 return Unauthorized("Du har ikke tilladelse til at ændre denne ordre");
 
-            Order? deleted = await _orderService.DeleteObject(id);
+            OrderMongo? deleted = await _orderService.DeleteObject(id);
             return deleted is not null ? NoContent() : NotFound("Order not found");
         }
     }

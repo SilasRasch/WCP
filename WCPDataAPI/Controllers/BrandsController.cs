@@ -22,9 +22,9 @@ namespace WCPDataAPI.Controllers
 
         // GET: api/<BrandsController>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Brand>>> Get([FromQuery] int? orgId = null)
+        public async Task<ActionResult<IEnumerable<BrandMongo>>> Get([FromQuery] int? orgId = null)
         {
-            IEnumerable<Brand> brands;
+            IEnumerable<BrandMongo> brands;
 
             if (orgId is not null)
                 brands = await _brandService.GetAllObjects(x => x.OrganizationId == orgId);
@@ -33,16 +33,16 @@ namespace WCPDataAPI.Controllers
             else if (_userContextService.GetRoles().Contains("Admin"))
                 brands = await _brandService.GetAllObjects();
             else
-                brands = new List<Brand>();
+                brands = new List<BrandMongo>();
 
             return brands is not null ? Ok(brands) : NotFound("Ingen brands at finde...");
         }
 
         // GET api/<BrandsController>/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Brand>> Get(int id)
+        public async Task<ActionResult<BrandMongo>> Get(int id)
         {
-            Brand? brand = await _brandService.GetObject(id);
+            BrandMongo? brand = await _brandService.GetObject(id);
             return brand is not null ? Ok(brand) : NotFound("Der blev ikke fundet nogen brand med det id...");
         }
 
@@ -53,7 +53,7 @@ namespace WCPDataAPI.Controllers
             if (!request.Validate())
                 return BadRequest("Valideringsfejl, tjek venligst felterne igen...");
 
-            await _brandService.AddObject(new Brand
+            await _brandService.AddObject(new BrandMongo
             {
                 Name = request.Name,
                 OrganizationId = request.OrganizationId,
@@ -65,7 +65,7 @@ namespace WCPDataAPI.Controllers
 
         // PUT api/<BrandsController>/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, [FromBody] Brand brand)
+        public async Task<IActionResult> Put(int id, [FromBody] BrandMongo brand)
         {
             if (!brand.Validate())
                 return BadRequest("Valideringsfejl, tjek venligst felterne igen...");
@@ -73,7 +73,7 @@ namespace WCPDataAPI.Controllers
             if (id != brand.Id || (brand.OrganizationId != _userContextService.GetOrganizationId() && !_userContextService.GetRoles().Contains("Admin")))
                 throw new Exception("You are not the owner of this brand");
 
-            Brand? modifiedBrand = await _brandService.UpdateObject(id, brand);
+            BrandMongo? modifiedBrand = await _brandService.UpdateObject(id, brand);
             return modifiedBrand is not null ? NoContent() : NotFound("Brand not found");
         }
 
@@ -81,7 +81,7 @@ namespace WCPDataAPI.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            Brand? brand = await _brandService.GetObject(id);
+            BrandMongo? brand = await _brandService.GetObject(id);
 
             if (brand is null)
                 return BadRequest("Brand not found");
@@ -89,7 +89,7 @@ namespace WCPDataAPI.Controllers
             if (brand.OrganizationId != _userContextService.GetOrganizationId() && !_userContextService.GetRoles().Contains("Admin"))
                 return BadRequest("You are not the owner of this brand");
 
-            Brand? deleted = await _brandService.DeleteObject(id);
+            BrandMongo? deleted = await _brandService.DeleteObject(id);
             return deleted is not null ? NoContent() : NotFound("Brand not found");
         }
     }

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using WCPShared.Models.BrandModels;
 using WCPShared.Services.StaticHelpers;
 
 namespace WCPShared.Models
@@ -12,6 +8,7 @@ namespace WCPShared.Models
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
         public string CVR { get; set; } = string.Empty;
+        public List<Brand> Brands { get; set; } = new List<Brand>();
 
         public bool Validate()
         {
