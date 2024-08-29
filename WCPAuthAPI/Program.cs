@@ -2,13 +2,13 @@ using Microsoft.OpenApi.Models;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;
-using WCPAuthAPI.Services.JWTs;
 using WCPShared.Interfaces;
 using WCPShared.Models;
 using WCPShared.Services;
 using WCPShared.Services.StaticHelpers;
 using Swashbuckle.AspNetCore.Filters;
-using WCPShared.Services.Databases.MSSQL;
+using WCPShared.Services.Databases.EntityFramework;
+using WCPShared.Interfaces.Auth;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,7 +20,7 @@ builder.Services.AddEndpointsApiExplorer();
 
 // Auth API services
 builder.Services.AddHttpContextAccessor(); // To get user in service-file instead of the controller (SOC)!
-builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IEmailService, SendGridEmailService>();
 builder.Services.AddScoped<UserContextService>();

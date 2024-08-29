@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WCPShared.Interfaces;
+using WCPShared.Models.AuthModels;
 using WCPShared.Models.UserModels;
 using WCPShared.Services;
 

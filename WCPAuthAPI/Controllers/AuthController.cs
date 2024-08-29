@@ -1,14 +1,13 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using WCPAuthAPI.Models.DTOs;
-using WCPAuthAPI.Models;
-using WCPAuthAPI.Services.JWTs;
 using WCPShared.Interfaces;
 using WCPShared.Models.UserModels;
 using WCPShared.Services.StaticHelpers;
 using WCPShared.Services;
 using System.Net;
+using WCPShared.Models.AuthModels;
+using WCPShared.Interfaces.Auth;
 
 namespace WCPAuthAPI.Controllers
 {
@@ -16,7 +15,8 @@ namespace WCPAuthAPI.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly ITokenService _tokenService;
+        private readonly IJwtService _tokenService;
+        private readonly IAuthService _authService;
         private readonly IUserService _userService;
         private readonly IEmailService _emailService;
         private readonly UserContextService _userContextService;
@@ -29,12 +29,13 @@ namespace WCPAuthAPI.Controllers
             SameSite = Secrets.IsProd ? SameSiteMode.Strict : SameSiteMode.None,
         };
 
-        public AuthController(ITokenService tokenService, IUserService userService, IEmailService emailService, UserContextService userContextService)
+        public AuthController(IJwtService tokenService, IAuthService authService, IUserService userService, IEmailService emailService, UserContextService userContextService)
         {
             _tokenService = tokenService;
             _userService = userService;
             _emailService = emailService;
             _userContextService = userContextService;
+            _authService = authService;
         }
 
         [HttpPost("Register"), Authorize(Roles = "Admin")]
@@ -43,7 +44,7 @@ namespace WCPAuthAPI.Controllers
             if (!request.Validate())
                 return BadRequest("Valideringsfejl, tjek venligst felterne igen...");
 
-            User user = await _tokenService.Register(request);
+            User user = await _authService.Register(request);
 
             if (user is null) return BadRequest("Der eksisterer allerede en bruger med denne email...");
 
@@ -51,12 +52,12 @@ namespace WCPAuthAPI.Controllers
         }
 
         [HttpPost("Login")]
-        public async Task<ActionResult<string?>> Login(UserDTO request)
+        public async Task<ActionResult<string?>> Login(UserDto request)
         {
-            AuthResponse? auth = await _tokenService.Login(request);
+            AuthResponse? auth = await _authService.Login(request);
             if (auth == null) return BadRequest("Forkert brugernavn eller kodeord");
 
-            if (!await _tokenService.CheckLoginAttempts(request))
+            if (!await _authService.CheckLoginAttempts(request))
                 return BadRequest("Du er blevet midlertidigt udelukket grundet for mange mislykkede loginforsøg");
 
             Response.Cookies.Append(Secrets.RefreshTokenCookieName, auth.RefreshToken, cookieOptions);

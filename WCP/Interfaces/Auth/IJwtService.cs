@@ -1,19 +1,21 @@
-﻿using WCPAuthAPI.Models;
-using WCPAuthAPI.Models.DTOs;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using WCPShared.Models.AuthModels;
 using WCPShared.Models.UserModels;
 
-namespace WCPAuthAPI.Services.JWTs
+namespace WCPShared.Interfaces.Auth
 {
-    public interface ITokenService
+    public interface IJwtService
     {
-        Task<AuthResponse?> Login(UserDTO request);
-        Task<User> Register(RegisterDto request);
         Task<bool> AddAdmin(int id);
         string CreateToken(User user);
         Task<string?> RefreshToken(int userId, string refreshToken);
         Task<string?> RefreshToken(string email, string refreshToken);
         Task RevokeSession(int userId);
         string GenerateRandomString(int byteCount);
-        Task<bool> CheckLoginAttempts(UserDTO request);
+        Task<bool> ValidateToken(string token);
     }
 }

@@ -1,23 +1,28 @@
-﻿using Microsoft.IdentityModel.Tokens;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using System;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using WCPAuthAPI.Models.DTOs;
-using WCPAuthAPI.Models;
+using System.Threading.Tasks;
 using WCPShared.Interfaces;
+using WCPShared.Interfaces.Auth;
+using WCPShared.Models.AuthModels;
 using WCPShared.Models.UserModels;
 using WCPShared.Services.StaticHelpers;
 
-namespace WCPAuthAPI.Services.JWTs
+namespace WCPShared.Services
 {
-    public class TokenService : ITokenService
+    public class JwtService : IJwtService, IAuthService
     {
         private readonly IConfiguration _configuration;
         private readonly IUserService _userService;
         private readonly IEmailService _emailService;
 
-        public TokenService(IConfiguration configuration, IUserService userService, IEmailService emailService)
+        public JwtService(IConfiguration configuration, IUserService userService, IEmailService emailService)
         {
             _configuration = configuration;
             _userService = userService;
@@ -54,7 +59,7 @@ namespace WCPAuthAPI.Services.JWTs
             return user;
         }
 
-        public async Task<AuthResponse?> Login(UserDTO request)
+        public async Task<AuthResponse?> Login(UserDto request)
         {
             User? user = await _userService.GetUserByEmail(request.Email);
 
@@ -177,7 +182,7 @@ namespace WCPAuthAPI.Services.JWTs
             return Convert.ToHexString(RandomNumberGenerator.GetBytes(byteCount));
         }
 
-        private async Task LoginAttempt(bool success, User user)
+        public async Task LoginAttempt(bool success, User user)
         {
             if (success)
                 user.LoginTries = 0;
@@ -188,7 +193,7 @@ namespace WCPAuthAPI.Services.JWTs
             await _userService.UpdateObject(user.Id, user);
         }
 
-        public async Task<bool> CheckLoginAttempts(UserDTO request)
+        public async Task<bool> CheckLoginAttempts(UserDto request)
         {
             User? user = await _userService.GetUserByEmail(request.Email);
 
@@ -202,6 +207,24 @@ namespace WCPAuthAPI.Services.JWTs
                     await LoginAttempt(true, user); // Reset login tries after the 15 minutes
 
             return true;
+        }
+
+        public async Task<bool> ValidateToken(string token)
+        {
+            if (String.IsNullOrEmpty(token))
+                return false;
+            
+            var jwt = await new JwtSecurityTokenHandler().ValidateTokenAsync(token, new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                ValidateAudience = true,
+                ValidateIssuer = true,
+                ValidIssuer = Secrets.Issuer,
+                ValidAudiences = Secrets.GetAudiences(),
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(Secrets.GetJwtKey(_configuration)))
+            });
+
+            return jwt.IsValid;
         }
     }
 }

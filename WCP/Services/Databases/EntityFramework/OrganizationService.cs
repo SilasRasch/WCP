@@ -2,7 +2,7 @@
 using WCPShared.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace WCPShared.Services.Databases.MSSQL
+namespace WCPShared.Services.Databases.EntityFramework
 {
     public class OrganizationService : IOrganizationService
     {
