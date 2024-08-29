@@ -36,11 +36,10 @@ namespace WCPAuthAPI.Services.JWTs
             User user = new User()
             {
                 Email = request.Email,
-                DisplayName = request.DisplayName,
+                Name = request.Name,
                 PasswordHash = passwordHash,
                 Phone = request.Phone,
                 Role = request.Role,
-                CVR = request.CVR,
                 IsActive = false,
                 VerificationToken = verificationToken,
                 OrganizationId = null!
@@ -106,7 +105,7 @@ namespace WCPAuthAPI.Services.JWTs
             {
                 new Claim(ClaimTypes.Email, user.Email),
                 new Claim(ClaimTypes.UserData, $"{user.Id}"),
-                new Claim(ClaimTypes.Name, user.DisplayName),
+                new Claim(ClaimTypes.Name, user.Name),
                 new Claim(ClaimTypes.Role, user.Role)
             };
 

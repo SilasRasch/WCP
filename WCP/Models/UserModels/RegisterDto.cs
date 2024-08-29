@@ -1,9 +1,4 @@
 ﻿using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using WCPShared.Services.StaticHelpers;
 
 namespace WCPShared.Models.UserModels
@@ -11,9 +6,8 @@ namespace WCPShared.Models.UserModels
     public class RegisterDto
     {
         public string Email { get; set; } = string.Empty;
-        public string DisplayName { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
         public string? Phone { get; set; }
-        public string? CVR { get; set; } = string.Empty;
         public string Role { get; set; } = string.Empty;
         public Organization? Organization { get; set; } = null!;
 
@@ -28,7 +22,7 @@ namespace WCPShared.Models.UserModels
             if (!Phone.IsNullOrEmpty() && !Validation.ValidatePhone(Phone!))
                 return false;
 
-            if (!Validation.ValidateDisplayName(DisplayName))
+            if (!Validation.ValidateDisplayName(Name))
                 return false;
 
             return true;

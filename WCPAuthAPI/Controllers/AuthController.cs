@@ -94,7 +94,7 @@ namespace WCPAuthAPI.Controllers
 
             var id = user.Id;
             var roles = _userContextService.GetRoles();
-            var displayName = user.DisplayName;
+            var displayName = user.Name;
             var phone = user.Phone;
             var orgId = 0;
 

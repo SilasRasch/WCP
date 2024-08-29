@@ -32,12 +32,12 @@ namespace WCPShared.Services
             var client = new SendGridClient(apiKey);
             var msg = new SendGridMessage();
             msg.SetFrom(new EmailAddress("info@webcontent.dk", "WebContent Platform"));
-            msg.AddTo(new EmailAddress(user.Email, user.DisplayName));
+            msg.AddTo(new EmailAddress(user.Email, user.Name));
             msg.SetTemplateId("d-09b4d4101889434eb93492fd812ddaf4");
 
             var dynamicTemplateDate = new
             {
-                name = user.DisplayName,
+                name = user.Name,
                 link = Secrets.IsProd ? $"https://wcp.dk/verify?token={token}" : $"https://test.wcp.dk/verify?token={token}",
             };
             msg.SetTemplateData(dynamicTemplateDate);
@@ -56,7 +56,7 @@ namespace WCPShared.Services
             var client = new SendGridClient(apiKey);
             var msg = new SendGridMessage();
             msg.SetFrom(new EmailAddress("info@webcontent.dk", "WebContent Platform"));
-            msg.AddTo(new EmailAddress(user.Email, user.DisplayName));
+            msg.AddTo(new EmailAddress(user.Email, user.Name));
             msg.SetTemplateId("d-604ac0bfd5024dd1b7ee756414bc7847");
 
             var dynamicTemplateDate = new

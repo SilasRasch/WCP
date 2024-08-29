@@ -74,7 +74,7 @@ namespace WCPDataAPI.Controllers
                 User? user = await _userService.GetObject(creator.Id);
                 if (user is not null)
                 {
-                    UserNC userNC = user.ToUserNC();
+                    UserNC userNC = user.ConvertToNCUser();
                     combined.Add(new { userNC, creator });
                 }
                     

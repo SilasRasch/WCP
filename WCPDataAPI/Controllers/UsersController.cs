@@ -27,14 +27,13 @@ namespace WCPDataAPI.Controllers
             IEnumerable<User> users = await _userService.GetAllObjects();
             if (role is not null) users = users.Where(x => x.Role.ToLower() == role.ToLower());
 
-            IEnumerable<UserNC> ncUsers = users.Select((user) => new UserNC()
+            IEnumerable<User> ncUsers = users.Select((user) => new User()
             {
                 Id = user.Id,
                 Email = user.Email,
-                DisplayName = user.DisplayName,
+                Name = user.Name,
                 IsActive = user.IsActive,
                 Phone = user.Phone,
-                CVR = user.CVR,
                 Role = user.Role,
                 Organization = user.Organization,
             });
@@ -62,7 +61,7 @@ namespace WCPDataAPI.Controllers
             if (user is null) return BadRequest();
 
             user.Email = request.Email;
-            user.DisplayName = request.DisplayName;
+            user.Name = request.Name;
             user.Phone = request.Phone;
 
             await _userService.UpdateObject(user.Id, user);
