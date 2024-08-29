@@ -28,6 +28,10 @@ namespace WCPShared.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Creator>()
+                .HasMany(x => x.Languages)
+                .WithMany(x => x.Speakers);
+            
             modelBuilder.Entity<Order>()
                 .Property(x => x.Ideas)
                 .HasConversion(new ValueConverter<List<string>, string>(
