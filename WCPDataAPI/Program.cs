@@ -9,14 +9,12 @@ using WCPShared.Services.StaticHelpers;
 using Microsoft.EntityFrameworkCore;
 using WCPShared.Models;
 using WCPShared.Services.Databases.EntityFramework;
-using WCPShared.Interfaces.Mongo;
-using WCPShared.Services.Databases.Mongo;
+using WCPShared.Interfaces.DataServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<MongoDbContext>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IOrganizationService, OrganizationService>();

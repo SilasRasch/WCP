@@ -1,16 +1,7 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using WCPShared.Models.BrandModels;
-using WCPShared.Models.UserModels;
-using WCPShared.Models.UserModels.CreatorModels;
+﻿using WCPShared.Models.UserModels;
 using WCPShared.Services.StaticHelpers;
 
-namespace WCPShared.Models.OrderModels
+namespace WCPShared.Models
 {
     public class Order
     {
@@ -81,7 +72,7 @@ namespace WCPShared.Models.OrderModels
             if (!Brand.Validate())
                 return false;
 
-            if (String.IsNullOrWhiteSpace(ProjectName) || BrandId == 0 || String.IsNullOrWhiteSpace(ProjectType) || String.IsNullOrWhiteSpace(Platforms) || String.IsNullOrWhiteSpace(Format))
+            if (string.IsNullOrWhiteSpace(ProjectName) || BrandId == 0 || string.IsNullOrWhiteSpace(ProjectType) || string.IsNullOrWhiteSpace(Platforms) || string.IsNullOrWhiteSpace(Format))
                 return false;
 
             return true;

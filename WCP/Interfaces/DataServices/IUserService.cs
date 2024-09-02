@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using WCPShared.Models.UserModels;
 
-namespace WCPShared.Interfaces
+namespace WCPShared.Interfaces.DataServices
 {
     public interface IUserService : IDatabaseService<User>
     {

@@ -1,5 +1,4 @@
-﻿using WCPShared.Models.BrandModels;
-using WCPShared.Services.StaticHelpers;
+﻿using WCPShared.Services.StaticHelpers;
 
 namespace WCPShared.Models
 {

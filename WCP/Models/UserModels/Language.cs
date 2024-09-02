@@ -1,6 +1,4 @@
-﻿using WCPShared.Models.UserModels.CreatorModels;
-
-namespace WCPShared.Models.UserModels
+﻿namespace WCPShared.Models.UserModels
 {
     public class Language
     {

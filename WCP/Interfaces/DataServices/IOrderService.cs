@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using WCPShared.Models;
 
-namespace WCPShared.Interfaces
+namespace WCPShared.Interfaces.DataServices
 {
-    public interface IOrganizationService : IDatabaseService<Organization>
+    public interface IOrderService : IDatabaseService<Order>
     {
     }
 }

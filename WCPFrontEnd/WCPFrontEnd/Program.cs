@@ -7,6 +7,7 @@ using WCPShared.Services.Databases.EntityFramework;
 using WCPShared.Models;
 using Microsoft.EntityFrameworkCore;
 using WCPShared.Services.StaticHelpers;
+using WCPShared.Interfaces.DataServices;
 
 var builder = WebApplication.CreateBuilder(args);
 

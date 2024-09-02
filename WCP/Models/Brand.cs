@@ -1,7 +1,6 @@
-﻿using WCPShared.Models.OrderModels;
-using WCPShared.Services.StaticHelpers;
+﻿using WCPShared.Services.StaticHelpers;
 
-namespace WCPShared.Models.BrandModels
+namespace WCPShared.Models
 {
     public class Brand
     {

@@ -1,18 +1,11 @@
 ﻿using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Mail;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 using WCPShared.Interfaces;
 using WCPShared.Models.UserModels;
 using WCPShared.Services.StaticHelpers;
 using SendGrid.Helpers.Mail;
 using SendGrid;
-using WCPShared.Models.BrandModels;
-using Azure;
+using WCPShared.Models;
 
 namespace WCPShared.Services
 {
@@ -110,7 +103,7 @@ namespace WCPShared.Services
             return response.StatusCode;
         }
 
-        public async Task<HttpStatusCode> SendBrandCreationEmail(BrandMongo brand)
+        public async Task<HttpStatusCode> SendBrandCreationEmail(Brand brand)
         {
             var apiKey = Secrets.GetSendGridAPI(_configuration);
             var client = new SendGridClient(apiKey);

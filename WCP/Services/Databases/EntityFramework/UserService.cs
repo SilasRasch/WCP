@@ -1,7 +1,7 @@
-﻿using WCPShared.Interfaces;
-using WCPShared.Models.UserModels;
+﻿using WCPShared.Models.UserModels;
 using WCPShared.Models;
 using Microsoft.EntityFrameworkCore;
+using WCPShared.Interfaces.DataServices;
 
 namespace WCPShared.Services.Databases.EntityFramework
 {
@@ -52,7 +52,7 @@ namespace WCPShared.Services.Databases.EntityFramework
             return await _context.Users.Include(x => x.Organization).FirstOrDefaultAsync(x => x.VerificationToken == token);
         }
 
-        public async Task<IEnumerable<User>> GetAllObjects()
+        public async Task<List<User>> GetAllObjects()
         {
             return await _context.Users.Include(x => x.Organization).ToListAsync();
         }

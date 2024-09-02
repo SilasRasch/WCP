@@ -8,6 +8,7 @@ using WCPShared.Services;
 using System.Net;
 using WCPShared.Models.AuthModels;
 using WCPShared.Interfaces.Auth;
+using WCPShared.Interfaces.DataServices;
 
 namespace WCPAuthAPI.Controllers
 {

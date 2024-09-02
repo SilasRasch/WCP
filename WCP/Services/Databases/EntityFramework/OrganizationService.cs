@@ -1,6 +1,6 @@
-﻿using WCPShared.Interfaces;
-using WCPShared.Models;
+﻿using WCPShared.Models;
 using Microsoft.EntityFrameworkCore;
+using WCPShared.Interfaces.DataServices;
 
 namespace WCPShared.Services.Databases.EntityFramework
 {
@@ -33,12 +33,12 @@ namespace WCPShared.Services.Databases.EntityFramework
 
         public async Task<Organization?> GetObject(int id)
         {
-            return await _context.Organizations.FirstOrDefaultAsync(x => x.Id == id);
+            return await _context.Organizations.Include(x => x.Brands).FirstOrDefaultAsync(x => x.Id == id);
         }
 
-        public async Task<IEnumerable<Organization>> GetAllObjects()
+        public async Task<List<Organization>> GetAllObjects()
         {
-            return await _context.Organizations.ToListAsync();
+            return await _context.Organizations.Include(x => x.Brands).ToListAsync();
         }
 
         public async Task<Organization?> UpdateObject(int id, Organization organization)

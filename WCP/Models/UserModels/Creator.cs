@@ -1,6 +1,4 @@
-﻿using WCPShared.Models.OrderModels;
-
-namespace WCPShared.Models.UserModels.CreatorModels
+﻿namespace WCPShared.Models.UserModels
 {
     public class Creator
     {
@@ -17,7 +15,7 @@ namespace WCPShared.Models.UserModels.CreatorModels
 
         public bool Validate()
         {
-            if (!IsEditor && (String.IsNullOrWhiteSpace(Address) || String.IsNullOrWhiteSpace(Speciality)))
+            if (!IsEditor && (string.IsNullOrWhiteSpace(Address) || string.IsNullOrWhiteSpace(Speciality)))
                 return false;
 
             return true;

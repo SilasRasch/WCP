@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using WCPShared.Interfaces;
 using WCPShared.Interfaces.Auth;
+using WCPShared.Interfaces.DataServices;
 using WCPShared.Models.AuthModels;
 using WCPShared.Models.UserModels;
 using WCPShared.Services.StaticHelpers;

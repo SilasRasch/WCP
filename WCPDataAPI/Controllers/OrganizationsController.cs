@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using WCPShared.Interfaces;
+using WCPShared.Interfaces.DataServices;
 using WCPShared.Models;
 
 namespace WCPDataAPI.Controllers
