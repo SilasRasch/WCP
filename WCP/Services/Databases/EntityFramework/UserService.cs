@@ -7,9 +7,9 @@ namespace WCPShared.Services.Databases.EntityFramework
 {
     public class UserService : IUserService
     {
-        private readonly AuthDbContext _context;
+        private readonly WcpDbContext _context;
 
-        public UserService(AuthDbContext context)
+        public UserService(WcpDbContext context)
         {
             _context = context;
         }

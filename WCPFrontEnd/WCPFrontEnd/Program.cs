@@ -21,7 +21,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IEmailService, SendGridEmailService>();
 builder.Services.AddScoped<UserContextService>();
 
-builder.Services.AddDbContext<AuthDbContext>(
+builder.Services.AddDbContext<WcpDbContext>(
     options => options.UseSqlServer(Secrets.GetConnectionString(builder.Configuration)));
 
 var app = builder.Build();

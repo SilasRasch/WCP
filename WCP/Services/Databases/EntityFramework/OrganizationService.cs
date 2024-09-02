@@ -6,9 +6,9 @@ namespace WCPShared.Services.Databases.EntityFramework
 {
     public class OrganizationService : IOrganizationService
     {
-        private readonly AuthDbContext _context;
+        private readonly WcpDbContext _context;
 
-        public OrganizationService(AuthDbContext context)
+        public OrganizationService(WcpDbContext context)
         {
             _context = context;
         }
