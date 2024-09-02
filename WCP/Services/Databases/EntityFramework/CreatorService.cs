@@ -34,12 +34,12 @@ namespace WCPShared.Services.Databases.EntityFramework
 
         public async Task<Creator?> GetObject(int id)
         {
-            return await _context.Creators.Include(x => x.User).Include(x => x.Languages).FirstOrDefaultAsync(x => x.Id == id);
+            return await _context.Creators.Include(x => x.User).Include(x => x.Languages).AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
         }
 
         public async Task<List<Creator>> GetAllObjects()
         {
-            return await _context.Creators.Include(x => x.User).Include(x => x.Languages).ToListAsync();
+            return await _context.Creators.Include(x => x.User).Include(x => x.Languages).AsNoTracking().ToListAsync();
         }
 
         public async Task<Creator?> UpdateObject(int id, Creator obj)

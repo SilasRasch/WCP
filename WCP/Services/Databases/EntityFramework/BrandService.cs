@@ -33,12 +33,12 @@ namespace WCPShared.Services.Databases.EntityFramework
 
         public async Task<Brand?> GetObject(int id)
         {
-            return await _context.Brands.Include(x => x.Organization).FirstOrDefaultAsync(x => x.Id == id);
+            return await _context.Brands.Include(x => x.Organization).AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
         }
 
         public async Task<List<Brand>> GetAllObjects()
         {
-            return await _context.Brands.Include(x => x.Organization).ToListAsync();
+            return await _context.Brands.Include(x => x.Organization).AsNoTracking().ToListAsync();
         }
 
         public async Task<Brand?> UpdateObject(int id, Brand brand)
