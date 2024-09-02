@@ -22,7 +22,7 @@ builder.Services.AddScoped<ICreatorService, CreatorService>();
 builder.Services.AddScoped<IBrandService, BrandService>();
 builder.Services.AddScoped<IEmailService, SendGridEmailService>();
 builder.Services.AddScoped<UserContextService>();
-builder.Services.AddDbContext<AuthDbContext>(
+builder.Services.AddDbContext<WcpDbContext>(
     options => options.UseSqlServer(Secrets.GetConnectionString(builder.Configuration)));
 
 string allowAll = "dev";
