@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using WCPShared.Interfaces;
 using WCPShared.Interfaces.Auth;
 using WCPShared.Interfaces.DataServices;
+using WCPShared.Models;
 using WCPShared.Models.AuthModels;
 using WCPShared.Models.UserModels;
 using WCPShared.Services.StaticHelpers;
@@ -21,19 +22,25 @@ namespace WCPShared.Services
     {
         private readonly IConfiguration _configuration;
         private readonly IUserService _userService;
+        private readonly IOrganizationService _organizationService;
         private readonly IEmailService _emailService;
 
-        public JwtService(IConfiguration configuration, IUserService userService, IEmailService emailService)
+        public JwtService(IConfiguration configuration, IUserService userService, IEmailService emailService, IOrganizationService organizationService)
         {
             _configuration = configuration;
             _userService = userService;
             _emailService = emailService;
+            _organizationService = organizationService;
         }
 
         public async Task<User> Register(RegisterDto request)
         {
             if (await _userService.GetUserByEmail(request.Email) is not null)
                 return null!;
+
+            Organization? org = null;
+            if (request.OrganizationId != 0 && request.OrganizationId is not null)
+                org = await _organizationService.GetObject(request.OrganizationId!.Value);
 
             string generatedPassword = GenerateRandomString(32);
             string passwordHash = BCrypt.Net.BCrypt.HashPassword(generatedPassword);
@@ -48,11 +55,9 @@ namespace WCPShared.Services
                 Role = request.Role,
                 IsActive = false,
                 VerificationToken = verificationToken,
-                OrganizationId = null!
-            };
-
-            if (request.Organization is not null)
-                user.OrganizationId = request.Organization.Id;
+                OrganizationId = request.OrganizationId,
+                Organization = org
+            };                
 
             await _userService.AddObject(user);
             await _emailService.SendRegistrationEmail(user, verificationToken);

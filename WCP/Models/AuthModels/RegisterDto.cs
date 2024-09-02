@@ -9,7 +9,7 @@ namespace WCPShared.Models.UserModels
         public string Name { get; set; } = string.Empty;
         public string? Phone { get; set; }
         public string Role { get; set; } = string.Empty;
-        public Organization? Organization { get; set; } = null!;
+        public int? OrganizationId { get; set; } = null!;
 
         public bool Validate()
         {

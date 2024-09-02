@@ -1,9 +1,12 @@
-﻿using WCPShared.Services.StaticHelpers;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
+using WCPShared.Services.StaticHelpers;
 
 namespace WCPShared.Models
 {
     public class Brand
     {
+        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
         public string URL { get; set; } = string.Empty;

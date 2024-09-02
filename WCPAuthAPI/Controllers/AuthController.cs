@@ -151,7 +151,7 @@ namespace WCPAuthAPI.Controllers
         [HttpPut("Reset-password"), AllowAnonymous]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto request)
         {
-            User? user = await _userService.GetUserByVerificationToken(request.Token);
+            User? user = await _userService.GetUserByResetToken(request.Token);
 
             if (user == null) return BadRequest();
             if (user.PasswordResetToken != request.Token || user.ResetTokenExpiry < DateTime.Now) return BadRequest();

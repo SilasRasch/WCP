@@ -1,6 +1,7 @@
 ﻿using WCPShared.Models;
 using Microsoft.EntityFrameworkCore;
 using WCPShared.Interfaces.DataServices;
+using WCPShared.Models.DTOs;
 
 namespace WCPShared.Services.Databases.EntityFramework
 {
@@ -33,12 +34,12 @@ namespace WCPShared.Services.Databases.EntityFramework
 
         public async Task<Organization?> GetObject(int id)
         {
-            return await _context.Organizations.Include(x => x.Brands).AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+            return await _context.Organizations.Include(x => x.Brands).FirstOrDefaultAsync(x => x.Id == id);
         }
 
         public async Task<List<Organization>> GetAllObjects()
         {
-            return await _context.Organizations.Include(x => x.Brands).AsNoTracking().ToListAsync();
+            return await _context.Organizations.Include(x => x.Brands).ToListAsync();
         }
 
         public async Task<Organization?> GetObject(int id, bool includeBrands = false)
@@ -65,6 +66,21 @@ namespace WCPShared.Services.Databases.EntityFramework
             _context.Update(organization);
             await _context.SaveChangesAsync();
             return organization;
+        }
+
+        public async Task<Organization?> UpdateObject(int id, OrganizationDto organization)
+        {
+            Organization? oldOrg = await GetObject(id);
+
+            if (oldOrg is null)
+                return null!;
+
+            oldOrg.Name = organization.Name;
+            oldOrg.CVR = organization.CVR;
+
+            _context.Update(oldOrg);
+            await _context.SaveChangesAsync();
+            return oldOrg;
         }
     }
 }

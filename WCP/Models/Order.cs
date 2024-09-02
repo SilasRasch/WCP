@@ -1,4 +1,6 @@
-﻿using WCPShared.Models.UserModels;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
+using WCPShared.Models.UserModels;
 using WCPShared.Services.StaticHelpers;
 
 namespace WCPShared.Models
@@ -7,6 +9,7 @@ namespace WCPShared.Models
     {
         #region Base
 
+        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         public double Price { get; set; }
         public int DeliveryTimeFrom { get; set; }

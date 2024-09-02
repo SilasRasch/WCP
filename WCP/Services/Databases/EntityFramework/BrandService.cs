@@ -7,14 +7,17 @@ namespace WCPShared.Services.Databases.EntityFramework
     public class BrandService : IBrandService
     {
         private readonly WcpDbContext _context;
+        private readonly IOrganizationService _organizationService;
 
-        public BrandService(WcpDbContext context)
+        public BrandService(WcpDbContext context, IOrganizationService organizationService)
         {
             _context = context;
+            _organizationService = organizationService;
         }
 
         public async Task AddObject(Brand brand)
         {
+            _context.Organizations.Attach(brand.Organization);
             await _context.Brands.AddAsync(brand);
             await _context.SaveChangesAsync();
         }
@@ -43,14 +46,41 @@ namespace WCPShared.Services.Databases.EntityFramework
 
         public async Task<Brand?> UpdateObject(int id, Brand brand)
         {
-            Brand? oldOrg = await GetObject(id);
+            Brand? oldBrand = await GetObject(id);
 
-            if (oldOrg is null || id != brand.Id)
+            if (oldBrand is null || id != brand.Id)
                 return null!;
 
+            //_context.ChangeTracker.Clear();
             _context.Update(brand);
             await _context.SaveChangesAsync();
             return brand;
+        }
+
+        public async Task<Brand?> UpdateObject(int id, BrandDto brand)
+        {
+            Brand? oldBrand = await GetObject(id);
+            
+            if (oldBrand is null)
+                return null!;
+
+            oldBrand.Name = brand.Name;
+            oldBrand.URL = brand.URL;
+
+            if (oldBrand.OrganizationId != brand.OrganizationId)
+            {
+                var org = await _organizationService.GetObject(brand.OrganizationId);
+
+                if (org is not null)
+                {
+                    oldBrand.OrganizationId = brand.OrganizationId;
+                    oldBrand.Organization = org;
+                }
+            }
+
+            _context.Update(oldBrand);
+            await _context.SaveChangesAsync();
+            return oldBrand;
         }
     }
 }

@@ -14,8 +14,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-//builder.Services.AddDbContext<WcpDbContext>(options => 
-//    options.UseSqlServer(Secrets.GetConnectionString(builder.Configuration)));
+builder.Services.AddDbContext<WcpDbContext>(options =>
+    options.UseSqlServer(Secrets.GetConnectionString(builder.Configuration)));
 
 string allowAll = "dev";
 

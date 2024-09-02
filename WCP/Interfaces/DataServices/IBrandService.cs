@@ -9,5 +9,6 @@ namespace WCPShared.Interfaces.DataServices
 {
     public interface IBrandService : IDatabaseService<Brand>
     {
+        Task<Brand?> UpdateObject(int id, BrandDto brand);
     }
 }

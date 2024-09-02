@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using WCPShared.Models;
 using WCPShared.Services.Databases.EntityFramework;
 using WCPShared.Interfaces.DataServices;
+using WCPShared.Models.UserModels;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +22,7 @@ builder.Services.AddScoped<IOrganizationService, OrganizationService>();
 builder.Services.AddScoped<ICreatorService, CreatorService>();
 builder.Services.AddScoped<IBrandService, BrandService>();
 builder.Services.AddScoped<IEmailService, SendGridEmailService>();
+builder.Services.AddScoped<ILanguageService, LanguageService>();
 builder.Services.AddScoped<UserContextService>();
 builder.Services.AddDbContext<WcpDbContext>(
     options => options.UseSqlServer(Secrets.GetConnectionString(builder.Configuration)));

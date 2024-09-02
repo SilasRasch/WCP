@@ -4,6 +4,8 @@ using WCPShared.Services;
 using WCPShared.Models.UserModels;
 using WCPShared.Interfaces.DataServices;
 using WCPShared.Models;
+using WCPShared.Models.DTOs;
+using System.Linq;
 
 namespace WCPDataAPI.Controllers
 {
@@ -16,13 +18,15 @@ namespace WCPDataAPI.Controllers
         private readonly ICreatorService _creatorService;
         private readonly IOrderService _orderService;
         private readonly IUserService _userService;
+        private readonly ILanguageService _languageService;
 
-        public CreatorsController(UserContextService userContextService, ICreatorService creatorService, IOrderService orderService, IUserService userService)
+        public CreatorsController(UserContextService userContextService, ICreatorService creatorService, IOrderService orderService, IUserService userService, ILanguageService languageService)
         {
             _orderService = orderService;
             _userContextService = userContextService;
             _creatorService = creatorService;
             _userService = userService;
+            _languageService = languageService;
         }
 
         [HttpGet]
@@ -68,13 +72,12 @@ namespace WCPDataAPI.Controllers
 
             foreach (Creator creator in creators) 
             {
-                User? user = await _userService.GetObject(creator.Id);
+                User? user = await _userService.GetObject(creator.UserId);
                 if (user is not null)
                 {
                     UserNC userNC = user.ConvertToNCUser();
                     combined.Add(new { userNC, creator });
                 }
-                    
             }
 
             return combined;
@@ -88,24 +91,49 @@ namespace WCPDataAPI.Controllers
         }
 
         [HttpPost, Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Post(Creator creator)
+        public async Task<IActionResult> Post(CreatorDto creator)
         {
-            if (!creator.Validate())
+            var user = await _userService.GetObject(creator.UserId);
+
+            if (!creator.Validate() || user is null)
                 return BadRequest("Valideringsfejl, tjek venligst felterne igen...");
 
-            await _creatorService.AddObject(creator);
-            return CreatedAtAction("Post", new { id = creator.Id }, creator);
+            var creatorToAdd = new Creator { 
+                Address = creator.Address, 
+                DateOfBirth = creator.DateOfBirth, 
+                ImgURL = creator.ImgURL, 
+                IsEditor = creator.IsEditor, 
+                Languages = new List<Language>(),
+                Speciality = creator.Speciality, 
+                UserId = creator.UserId,
+                User = user
+            };
+
+            if (creator.Languages is not null)
+            {
+                creatorToAdd.Languages = await _languageService.GetAllObjects();
+                creatorToAdd.Languages = creatorToAdd.Languages.Where(x => creator.Languages.Contains(x.Name)).ToList();
+            }
+
+            await _creatorService.AddObject(creatorToAdd);
+
+            return CreatedAtAction("Post", new { id = creator.UserId }, creator);
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<Creator>> Put(Creator creator, int id)
+        public async Task<ActionResult<Creator>> Put(CreatorDto creator, int id)
         {
+            Creator? oldCreator = await _creatorService.GetObject(id);
+
+            if (oldCreator is null)
+                return NotFound("Creator not found");
+
             if (!creator.Validate())
                 return BadRequest("Valideringsfejl, tjek venligst felterne igen...");
 
-            if (creator.Id != _userContextService.GetId() && !_userContextService.GetRoles().Contains("Admin"))
+            if (id != _userContextService.GetId() && !_userContextService.GetRoles().Contains("Admin"))
                 return BadRequest("You are not the owner of this creator");
-
+                
             Creator? modifiedCreator = await _creatorService.UpdateObject(id, creator);
             return modifiedCreator is not null ? NoContent() : NotFound("Creator not found");
         }

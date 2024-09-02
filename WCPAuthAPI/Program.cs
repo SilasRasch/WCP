@@ -22,7 +22,9 @@ builder.Services.AddEndpointsApiExplorer();
 // Auth API services
 builder.Services.AddHttpContextAccessor(); // To get user in service-file instead of the controller (SOC)!
 builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddScoped<IAuthService, JwtService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IOrganizationService, OrganizationService>();
 builder.Services.AddScoped<IEmailService, SendGridEmailService>();
 builder.Services.AddScoped<UserContextService>();
 builder.Services.AddDbContext<WcpDbContext>(

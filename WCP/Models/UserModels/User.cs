@@ -1,10 +1,13 @@
-﻿using WCPShared.Interfaces;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
+using WCPShared.Interfaces;
 using WCPShared.Services.StaticHelpers;
 
 namespace WCPShared.Models.UserModels
 {
     public class User : UserAuth, IUser
     {
+        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         public string Email { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;

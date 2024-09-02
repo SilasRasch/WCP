@@ -2,10 +2,11 @@
 using Microsoft.AspNetCore.Mvc;
 using WCPShared.Interfaces.DataServices;
 using WCPShared.Models;
+using WCPShared.Models.DTOs;
 
 namespace WCPDataAPI.Controllers
 {
-    [Authorize]
+    //[Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class OrganizationsController : ControllerBase
@@ -20,7 +21,7 @@ namespace WCPDataAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Organization>>> Get()
         {
-            return Ok(await _organizationService.GetAllObjects());
+            return Ok(await _organizationService.GetAllObjects(true));
         }
 
         [HttpGet("{id}")]
@@ -30,8 +31,8 @@ namespace WCPDataAPI.Controllers
             return organization is null ? NotFound() : Ok(organization);
         }
 
-        [HttpPost, Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Post(int id, [FromBody] Organization organization)
+        [HttpPost]//, Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Post([FromBody] OrganizationDto organization)
         {
             if (!organization.Validate()) return BadRequest("Valideringsfejl");
 
@@ -39,23 +40,23 @@ namespace WCPDataAPI.Controllers
             if (_organizationService.GetAllObjects().Result.Any(x => x.CVR == organization.CVR))
                 return BadRequest("Der eksisterer allerede en organisation med det CVR");
 
-            await _organizationService.AddObject(organization);
+            await _organizationService.AddObject(new Organization { CVR = organization.CVR, Name = organization.Name });
             return Created();
         }
 
-        [HttpPut("{id}"), Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Put(int id, [FromBody] Organization organization)
+        [HttpPut("{id}")]//, Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Put(int id, [FromBody] OrganizationDto organization)
         {
             Organization? oldOrg = await _organizationService.GetObject(id);
 
             if (oldOrg is null) return NotFound();
-            if (!organization.Validate() || id != organization.Id) return BadRequest("Valideringsfejl");
+            if (!organization.Validate()) return BadRequest("Valideringsfejl");
 
             await _organizationService.UpdateObject(id, organization);
             return Ok();
         }
 
-        [HttpDelete("{id}"), Authorize(Roles = "Admin")]
+        [HttpDelete("{id}")]//, Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
             Organization? organization = await _organizationService.GetObject(id);

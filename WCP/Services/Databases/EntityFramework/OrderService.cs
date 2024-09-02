@@ -20,6 +20,11 @@ namespace WCPShared.Services.Databases.EntityFramework
 
         public async Task AddObject(Order obj)
         {
+            if (obj.Brand is not null)
+                _context.Brands.Attach(obj.Brand);
+            if (obj.Creators is not null)
+                _context.Creators.AttachRange(obj.Creators);
+
             await _context.Orders.AddAsync(obj);
             await _context.SaveChangesAsync();
         }
@@ -53,6 +58,7 @@ namespace WCPShared.Services.Databases.EntityFramework
             if (oldOrg is null || id != obj.Id) 
                 return null!;
 
+            _context.ChangeTracker.Clear();
             _context.Update(obj);
             await _context.SaveChangesAsync();
             return obj;

@@ -12,12 +12,14 @@ namespace WCPDataAPI.Controllers
     public class BrandsController : ControllerBase
     {
         private readonly IBrandService _brandService;
+        private readonly IOrganizationService _organizationService;
         private readonly UserContextService _userContextService;
 
-        public BrandsController(IBrandService brandService, UserContextService userContextService)
+        public BrandsController(IBrandService brandService, UserContextService userContextService, IOrganizationService organizationService)
         {
             _userContextService = userContextService;
             _brandService = brandService;
+            _organizationService = organizationService;
         }
 
         // GET: api/<BrandsController>
@@ -31,8 +33,8 @@ namespace WCPDataAPI.Controllers
             else if (_userContextService.GetRoles().Contains("Bruger")) // Catch (get by JWT role)
                 brands = brands.Where(x => x.OrganizationId == _userContextService.GetOrganizationId());
             else if (_userContextService.GetRoles().Contains("Admin")) { /* Do nothing */ }
-            else
-                brands = new List<Brand>();
+            //else
+            //    brands = new List<Brand>();
 
             return brands is not null ? Ok(brands) : NotFound("Ingen brands at finde...");
         }
@@ -49,6 +51,11 @@ namespace WCPDataAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] BrandDto request)
         {
+            var org = await _organizationService.GetObject(request.OrganizationId);
+            
+            if (org is null)
+                return BadRequest("Organization doesn't exist");
+            
             if (!request.Validate())
                 return BadRequest("Valideringsfejl, tjek venligst felterne igen...");
 
@@ -56,6 +63,7 @@ namespace WCPDataAPI.Controllers
             {
                 Name = request.Name,
                 OrganizationId = request.OrganizationId,
+                Organization = org,
                 URL = request.URL,
             });
 
@@ -64,13 +72,13 @@ namespace WCPDataAPI.Controllers
 
         // PUT api/<BrandsController>/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, [FromBody] Brand brand)
+        public async Task<IActionResult> Put(int id, [FromBody] BrandDto brand)
         {
             if (!brand.Validate())
                 return BadRequest("Valideringsfejl, tjek venligst felterne igen...");
 
-            if (id != brand.Id || (brand.OrganizationId != _userContextService.GetOrganizationId() && !_userContextService.GetRoles().Contains("Admin")))
-                throw new Exception("You are not the owner of this brand");
+            if (!_userContextService.GetRoles().Contains("Admin") && brand.OrganizationId != _userContextService.GetOrganizationId())
+                return Unauthorized("You are not the owner of this brand");
 
             Brand? modifiedBrand = await _brandService.UpdateObject(id, brand);
             return modifiedBrand is not null ? NoContent() : NotFound("Brand not found");
@@ -85,7 +93,7 @@ namespace WCPDataAPI.Controllers
             if (brand is null)
                 return BadRequest("Brand not found");
 
-            if (brand.OrganizationId != _userContextService.GetOrganizationId() && !_userContextService.GetRoles().Contains("Admin"))
+            if (!_userContextService.GetRoles().Contains("Admin") && brand.OrganizationId != _userContextService.GetOrganizationId())
                 return BadRequest("You are not the owner of this brand");
 
             Brand? deleted = await _brandService.DeleteObject(id);

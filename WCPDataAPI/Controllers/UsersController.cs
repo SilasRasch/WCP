@@ -23,12 +23,12 @@ namespace WCPDataAPI.Controllers
 
         // GET: api/<UsersController>
         [HttpGet, Authorize(Roles = "Admin")]
-        public async Task<ActionResult<IEnumerable<User>>> Get([FromQuery] string? role)
+        public async Task<ActionResult<IEnumerable<UserNC>>> Get([FromQuery] string? role)
         {
             IEnumerable<User> users = await _userService.GetAllObjects();
             if (role is not null) users = users.Where(x => x.Role.ToLower() == role.ToLower());
 
-            IEnumerable<User> ncUsers = users.Select((user) => new User()
+            IEnumerable<UserNC> ncUsers = users.Select((user) => new UserNC()
             {
                 Id = user.Id,
                 Email = user.Email,
@@ -44,10 +44,10 @@ namespace WCPDataAPI.Controllers
 
         // GET api/<UsersController>/5
         [HttpGet("{id}"), Authorize(Roles = "Admin")]
-        public async Task<ActionResult<User>> Get(int id)
+        public async Task<ActionResult<UserNC>> Get(int id)
         {
             User? user = await _userService.GetObject(id);
-            return user is not null ? Ok(user) : NotFound("Der blev ikke fundet en bruger med det id...");
+            return user is not null ? Ok(user.ConvertToNCUser()) : NotFound("Der blev ikke fundet en bruger med det id...");
         }
 
         // PUT api/<UsersController>/5
@@ -58,14 +58,9 @@ namespace WCPDataAPI.Controllers
                 return Unauthorized();
 
             User? user = await _userService.GetObject(id);
-
             if (user is null) return BadRequest();
 
-            user.Email = request.Email;
-            user.Name = request.Name;
-            user.Phone = request.Phone;
-
-            await _userService.UpdateObject(user.Id, user);
+            await _userService.UpdateObject(user.Id, request);
             return Ok();
         }
 
