@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using WCPShared.Models;
+﻿using WCPShared.Models;
 
 namespace WCPShared.Interfaces.DataServices
 {
     public interface IOrganizationService : IDatabaseService<Organization>
     {
+        Task<Organization?> GetObject(int id, bool includeBrands = false);
+        Task<IEnumerable<Organization>> GetAllObjects(bool includeBrands = false);
     }
 }
