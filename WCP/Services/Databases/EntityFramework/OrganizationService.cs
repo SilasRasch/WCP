@@ -34,7 +34,7 @@ namespace WCPShared.Services.Databases.EntityFramework
 
         public async Task<Organization?> GetObject(int id)
         {
-            return await _context.Organizations.Include(x => x.Brands).FirstOrDefaultAsync(x => x.Id == id);
+            return await _context.Organizations.Include(x => x.Brands).SingleOrDefaultAsync(x => x.Id == id);
         }
 
         public async Task<List<Organization>> GetAllObjects()
@@ -45,11 +45,11 @@ namespace WCPShared.Services.Databases.EntityFramework
         public async Task<Organization?> GetObject(int id, bool includeBrands = false)
         {
             if (includeBrands)
-                return await _context.Organizations.Include(x => x.Brands).FirstOrDefaultAsync(x => x.Id == id);
-            return await _context.Organizations.FirstOrDefaultAsync(x => x.Id == id);   
+                return await _context.Organizations.Include(x => x.Brands).SingleOrDefaultAsync(x => x.Id == id);
+            return await _context.Organizations.SingleOrDefaultAsync(x => x.Id == id);   
         }
 
-        public async Task<IEnumerable<Organization>> GetAllObjects(bool includeBrands = false)
+        public async Task<List<Organization>> GetAllObjects(bool includeBrands = false)
         {
             if (includeBrands)
                 return await _context.Organizations.Include(x => x.Brands).ToListAsync();

@@ -111,8 +111,8 @@ namespace WCPDataAPI.Controllers
 
             if (creator.Languages is not null)
             {
-                creatorToAdd.Languages = await _languageService.GetAllObjects();
-                creatorToAdd.Languages = creatorToAdd.Languages.Where(x => creator.Languages.Contains(x.Name)).ToList();
+                var languages = await _languageService.GetAllObjects();
+                creatorToAdd.Languages = languages.Where(x => creator.Languages.Contains(x.Name)).ToList();
             }
 
             await _creatorService.AddObject(creatorToAdd);

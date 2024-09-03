@@ -1,21 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using WCPShared.Interfaces.DataServices;
+﻿using WCPShared.Interfaces.DataServices;
 using WCPShared.Models;
 using Microsoft.EntityFrameworkCore;
+using WCPShared.Models.DTOs;
+using Microsoft.SqlServer.Server;
+using SendGrid.Helpers.Mail;
+using System.Diagnostics;
+using System.Numerics;
+using System;
+using WCPShared.Models.UserModels;
 
 namespace WCPShared.Services.Databases.EntityFramework
 {
     public class OrderService : IOrderService
     {
         private readonly WcpDbContext _context;
+        private readonly IBrandService _brandService;
+        private readonly ICreatorService _creatorService;
 
-        public OrderService(WcpDbContext context)
+        public OrderService(WcpDbContext context, IBrandService brandService, ICreatorService creatorService)
         {
             _context = context;
+            _brandService = brandService;
+            _creatorService = creatorService;
         }
 
         public async Task AddObject(Order obj)
@@ -43,12 +49,12 @@ namespace WCPShared.Services.Databases.EntityFramework
 
         public async Task<Order?> GetObject(int id)
         {
-            return await _context.Orders.Include(x => x.Brand).ThenInclude(b => b.Organization).AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+            return await _context.Orders.Include(x => x.Brand).ThenInclude(b => b.Organization).SingleOrDefaultAsync(x => x.Id == id);
         }
 
         public async Task<List<Order>> GetAllObjects()
         {
-            return await _context.Orders.Include(x => x.Brand).ThenInclude(b => b.Organization).AsNoTracking().ToListAsync();
+            return await _context.Orders.Include(x => x.Brand).ThenInclude(b => b.Organization).ToListAsync();
         }
 
         public async Task<Order?> UpdateObject(int id, Order obj)
@@ -62,6 +68,67 @@ namespace WCPShared.Services.Databases.EntityFramework
             _context.Update(obj);
             await _context.SaveChangesAsync();
             return obj;
+        }
+
+        public async Task<Order> UpdateObject(int id, OrderDto order)
+        {
+            Order? existingOrder = await GetObject(id);
+
+            if (existingOrder is null)
+                return null!;
+
+            existingOrder.BrandId = order.BrandId;
+            existingOrder.Price = order.Price;
+            existingOrder.Category = 0;
+            existingOrder.State = 0;
+            existingOrder.Content = order.Content;
+            existingOrder.ContentCount = order.ContentCount;
+            existingOrder.ContentLength = order.ContentLength;
+            existingOrder.Delivery = order.Delivery;
+            existingOrder.DeliveryTimeFrom = order.DeliveryTimeFrom;
+            existingOrder.DeliveryTimeTo = order.DeliveryTimeTo;
+            existingOrder.Email = order.Email;
+            existingOrder.Name = order.Name;
+            existingOrder.Phone = order.Phone;
+            existingOrder.ExtraCreator = order.ExtraCreator;
+            existingOrder.ExtraHook = order.ExtraHook;
+            existingOrder.ExtraNotes = order.ExtraNotes;
+            existingOrder.FocusPoints = order.FocusPoints;
+            existingOrder.Format = order.Format;
+            existingOrder.Ideas = order.Ideas;
+            existingOrder.Platforms = order.Platforms;
+            existingOrder.Products = order.Products;
+            existingOrder.ProjectName = order.ProjectName;
+            existingOrder.ProjectType = order.ProjectType;
+            existingOrder.RelevantFiles = order.RelevantFiles;
+            existingOrder.Scripts = order.Scripts;
+            existingOrder.Other = order.Other;
+
+            if (order.BrandId != existingOrder.BrandId)
+            {
+                Brand? brand = await _brandService.GetObject(order.BrandId);
+                if (brand is not null)
+                    existingOrder.Brand = brand;
+            }
+
+            if (order.Creators is not null)
+            {
+                var newCreators = _creatorService.GetAllObjects().Result.Where(x => order.Creators.Contains(x.Id)).ToList();
+
+                if (existingOrder.Creators is not null)
+                {
+                    existingOrder.Creators.Clear();
+                    existingOrder.Creators = newCreators;
+                }
+                else
+                {
+                    existingOrder.Creators = newCreators;
+                }
+            }
+
+            _context.Update(existingOrder);
+            await _context.SaveChangesAsync();
+            return existingOrder;
         }
     }
 }

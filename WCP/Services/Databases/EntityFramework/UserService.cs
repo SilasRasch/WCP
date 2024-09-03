@@ -39,22 +39,22 @@ namespace WCPShared.Services.Databases.EntityFramework
 
         public async Task<User?> GetObject(int id)
         {
-            return await _context.Users.Include(x => x.Organization).FirstOrDefaultAsync(x => x.Id == id);
+            return await _context.Users.Include(x => x.Organization).SingleOrDefaultAsync(x => x.Id == id);
         }
 
         public async Task<User?> GetUserByResetToken(string resetToken)
         {
-            return await _context.Users.Include(x => x.Organization).FirstOrDefaultAsync(x => x.PasswordResetToken == resetToken);
+            return await _context.Users.Include(x => x.Organization).SingleOrDefaultAsync(x => x.PasswordResetToken == resetToken);
         }
 
         public async Task<User?> GetUserByEmail(string email)
         {
-            return await _context.Users.Include(x => x.Organization).FirstOrDefaultAsync(x => x.Email.ToLower() == email.ToLower());
+            return await _context.Users.Include(x => x.Organization).SingleOrDefaultAsync(x => x.Email.ToLower() == email.ToLower());
         }
 
         public async Task<User?> GetUserByVerificationToken(string token)
         {
-            return await _context.Users.Include(x => x.Organization).FirstOrDefaultAsync(x => x.VerificationToken == token);
+            return await _context.Users.Include(x => x.Organization).SingleOrDefaultAsync(x => x.VerificationToken == token);
         }
 
         public async Task<List<User>> GetAllObjects()

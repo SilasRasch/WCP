@@ -46,13 +46,13 @@ namespace WCPShared.Services.Databases.EntityFramework
 
         public async Task<Creator?> GetObject(int id)
         {
-            return await _context.Creators.Include(x => x.User).Include(x => x.Languages).AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+            return await _context.Creators.Include(x => x.User).Include(x => x.Languages).AsNoTracking().SingleOrDefaultAsync(x => x.Id == id);
         }
 
         public async Task<Creator?> GetObject(int id, bool includeUser = false)
         {
             if (includeUser)
-                return await _context.Creators.Include(x => x.User).Include(x => x.Languages).AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+                return await _context.Creators.Include(x => x.User).Include(x => x.Languages).AsNoTracking().SingleOrDefaultAsync(x => x.Id == id);
             return await GetObject(id);
         }
 

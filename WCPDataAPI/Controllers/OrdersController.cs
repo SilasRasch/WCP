@@ -3,6 +3,8 @@ using WCPShared.Services;
 using Microsoft.AspNetCore.Authorization;
 using WCPShared.Interfaces.DataServices;
 using WCPShared.Models;
+using WCPShared.Models.DTOs;
+using WCPShared.Models.UserModels;
 
 namespace WCPDataAPI.Controllers
 {
@@ -13,21 +15,25 @@ namespace WCPDataAPI.Controllers
     {
         private readonly UserContextService _userContextService;
         private readonly IOrderService _orderService;
+        private readonly IBrandService _brandService;
+        private readonly ICreatorService _creatorService;
 
-        public OrdersController(UserContextService userContextService, IOrderService orderService)
+        public OrdersController(UserContextService userContextService, IOrderService orderService, IBrandService brandService, ICreatorService creatorService)
         {
             _userContextService = userContextService;
             _orderService = orderService;
+            _brandService = brandService;
+            _creatorService = creatorService;
         }
 
 
         // GET: api/<OrdersController>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Order>>> Get([FromQuery] int? userId = null, [FromQuery] int? creatorId = null, [FromQuery] int? orgId = null)
+        public async Task<ActionResult<IEnumerable<Order>>> Get([FromQuery] int? creatorId = null, [FromQuery] int? orgId = null)
         {
             var orders = await _orderService.GetAllObjects();
 
-            if (orgId is not null) // && creatorId is null && userId is null)
+            if (orgId is not null) // && creatorId is null)
                 return Ok(orders.Where(x => x.Brand.OrganizationId == orgId.Value));
                 
             else if (_userContextService.GetRoles().Contains("Bruger")) // Catch (get by JWT role)
@@ -38,7 +44,7 @@ namespace WCPDataAPI.Controllers
             else if (_userContextService.GetRoles().Contains("Creator") || _userContextService.GetRoles().Contains("Editor")) // Catch (get by JWT role)
                 return Ok(orders.Where(x => x.Creators!.Any(x => x.Id == _userContextService.GetId())));
 
-            if (_userContextService.GetRoles().Contains("Admin") && userId is null && creatorId is null && orgId is null)
+            if (_userContextService.GetRoles().Contains("Admin") && creatorId is null && orgId is null)
                 return Ok(orders);
 
             return Ok(new List<Order>());
@@ -54,28 +60,67 @@ namespace WCPDataAPI.Controllers
 
         // POST api/<OrdersController>
         [HttpPost]
-        public async Task<ActionResult<Order>> Post(Order order)
+        public async Task<ActionResult<Order>> Post(OrderDto order)
         {
             if (!order.Validate())
                 return BadRequest("Valideringsfejl, tjek venligst felterne igen...");
 
-            await _orderService.AddObject(order);
+            Brand? brand = await _brandService.GetObject(order.BrandId);
+            if (brand is null)
+                return BadRequest("Brand not found");
+
+            List<Creator> creators = await _creatorService.GetAllObjects();
+            creators = creators.Where(x => order.Creators.Contains(x.Id)).ToList();
+
+            await _orderService.AddObject(new Order
+            {
+                Brand = brand,
+                Creators = creators,
+                BrandId = order.BrandId,
+                Price = order.Price,
+                Category = 0,
+                State = 0,
+                Content = order.Content,
+                ContentCount = order.ContentCount,
+                ContentLength = order.ContentLength,
+                Delivery = order.Delivery,
+                DeliveryTimeFrom = order.DeliveryTimeFrom,
+                DeliveryTimeTo = order.DeliveryTimeTo,
+                Email = order.Email,
+                Name = order.Name,
+                Phone = order.Phone,
+                ExtraCreator = order.ExtraCreator,
+                ExtraHook = order.ExtraHook,
+                ExtraNotes = order.ExtraNotes,
+                FocusPoints = order.FocusPoints,
+                Format = order.Format,
+                Ideas = order.Ideas,
+                Platforms = order.Platforms,
+                Products = order.Products,
+                ProjectName = order.ProjectName,
+                ProjectType = order.ProjectType,
+                RelevantFiles = order.RelevantFiles,
+                Scripts = order.Scripts,
+                Other = order.Other
+            });
 
             return Created();
         }
 
         // PUT api/<OrdersController>/5
         [HttpPut("{id}")]
-        public async Task<ActionResult<Order>> Put(Order order, int id)
+        public async Task<ActionResult<Order>> Put(OrderDto order, int id)
         {
+            Order? existingOrder = await _orderService.GetObject(id);
+
+            if (existingOrder is null)
+                return NotFound("Order not found");
+
             if (!order.Validate())
                 return BadRequest("Valideringsfejl, tjek venligst felterne igen...");
 
-            if (order.Brand.OrganizationId != _userContextService.GetOrganizationId() && !_userContextService.GetRoles().Contains("Admin"))
+            if (existingOrder.Brand.OrganizationId != _userContextService.GetOrganizationId() && !_userContextService.GetRoles().Contains("Admin"))
                 return Unauthorized("Du har ikke tilladelse til at ændre denne ordre");
-
-            if (id != order.Id)
-                return BadRequest("Ids must match in URI and body");
 
             Order? modifiedOrder = await _orderService.UpdateObject(id, order);
             return modifiedOrder is not null ? NoContent() : NotFound("Order not found");

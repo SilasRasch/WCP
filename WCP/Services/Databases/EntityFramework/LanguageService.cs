@@ -34,7 +34,7 @@ namespace WCPShared.Services.Databases.EntityFramework
 
         public async Task<Language?> GetObject(int id)
         {
-            return await _context.Languages.FirstOrDefaultAsync(x => x.Id == id);
+            return await _context.Languages.SingleOrDefaultAsync(x => x.Id == id);
         }
 
         public async Task<List<Language>> GetAllObjects()
