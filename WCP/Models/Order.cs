@@ -63,13 +63,13 @@ namespace WCPShared.Models
 
         public bool Validate()
         {
-            if (Validation.ValidateEmail(Email))
+            if (!Validation.ValidateEmail(Email))
                 return false;
 
-            if (Validation.ValidatePhone(Phone))
+            if (!Validation.ValidatePhone(Phone))
                 return false;
 
-            if (Validation.ValidateDisplayName(Name))
+            if (!Validation.ValidateDisplayName(Name))
                 return false;
 
             if (!Brand.Validate())

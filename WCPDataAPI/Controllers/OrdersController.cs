@@ -85,7 +85,7 @@ namespace WCPDataAPI.Controllers
             if (!order.Validate())
                 return BadRequest("Valideringsfejl, tjek venligst felterne igen...");
 
-            if (existingOrder.Brand.OrganizationId != _userContextService.GetOrganizationId() && !_userContextService.GetRoles().Contains("Admin"))
+            if (!_userContextService.GetRoles().Contains("Admin") && existingOrder.Brand.OrganizationId != _userContextService.GetOrganizationId())
                 return Unauthorized("Du har ikke tilladelse til at ændre denne ordre");
 
             Order? modifiedOrder = await _orderService.UpdateObject(id, order);

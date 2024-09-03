@@ -52,7 +52,7 @@ namespace WCPAuthAPI.Controllers
             return user.Role != "Bruger" ? Created($"auth/{user.Id}", user.Id) : Created($"auth/{user.Id}", new { id = user.Id, orgId = user.OrganizationId });
         }
 
-        [HttpPost("Login")]
+        [HttpPost("Login"), AllowAnonymous]
         public async Task<ActionResult<string?>> Login(UserDto request)
         {
             AuthResponse? auth = await _authService.Login(request);
@@ -66,7 +66,7 @@ namespace WCPAuthAPI.Controllers
             return Ok(auth.Token);
         }
 
-        [HttpPost("Refresh")]
+        [HttpPost("Refresh"), AllowAnonymous]
         public async Task<ActionResult<string?>> RefreshToken([FromQuery] int? id = null, [FromQuery] string? email = null)
         {
             var refreshToken = Request.Cookies[Secrets.RefreshTokenCookieName];
@@ -132,7 +132,7 @@ namespace WCPAuthAPI.Controllers
         }
 
         // POST /auth/verify
-        [HttpPost("Verify")]
+        [HttpPost("Verify"), AllowAnonymous]
         public async Task<IActionResult> Verify(VerifyUserDTO request)
         {
             var user = await _userService.GetUserByVerificationToken(request.VerificationToken);
@@ -183,12 +183,13 @@ namespace WCPAuthAPI.Controllers
         }
 
         // PUT api/<UsersController>/5 - Used when changing password while already authenticated
-        [HttpPost("Change-password/{id}")]
+        [HttpPost("Change-password/{id}"), Authorize]
         public async Task<IActionResult> ChangePassword(int id, [FromBody] PasswordOnly request)
         {
             User? user = await _userService.GetObject(id);
 
             if (user == null) return BadRequest();
+            var myid = _userContextService.GetId();
             if (_userContextService.GetId() != id && !_userContextService.GetRoles().Contains("Admin"))
                 return Unauthorized();
 
