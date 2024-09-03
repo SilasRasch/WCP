@@ -37,7 +37,7 @@ namespace WCPDataAPI.Controllers
             if (!organization.Validate()) return BadRequest("Valideringsfejl");
 
             // Check if element already exists
-            if (_organizationService.GetAllObjects().Result.Any(x => x.CVR == organization.CVR))
+            if ((await _organizationService.GetAllObjects()).Any(x => x.CVR == organization.CVR))
                 return BadRequest("Der eksisterer allerede en organisation med det CVR");
 
             await _organizationService.AddObject(organization);

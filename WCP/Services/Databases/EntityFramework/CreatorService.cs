@@ -85,7 +85,7 @@ namespace WCPShared.Services.Databases.EntityFramework
 
             if (obj.Languages is not null)
             {
-                var newLanguages = _languageService.GetAllObjects().Result.Where(x => obj.Languages.Contains(x.Name)).ToList();
+                var newLanguages = (await _languageService.GetAllObjects()).Where(x => obj.Languages.Contains(x.Name)).ToList();
 
                 if (oldCreator.Languages is not null)
                 {

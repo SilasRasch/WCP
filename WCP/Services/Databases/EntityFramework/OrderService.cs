@@ -109,7 +109,7 @@ namespace WCPShared.Services.Databases.EntityFramework
 
             if (order.Creators is not null)
             {
-                var newCreators = _creatorService.GetAllObjects().Result.Where(x => order.Creators.Contains(x.Id)).ToList();
+                var newCreators = (await _creatorService.GetAllObjects()).Where(x => order.Creators.Contains(x.Id)).ToList();
 
                 if (existingOrder.Creators is not null)
                 {
