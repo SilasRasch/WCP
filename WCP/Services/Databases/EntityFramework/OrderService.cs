@@ -2,7 +2,6 @@
 using WCPShared.Models;
 using Microsoft.EntityFrameworkCore;
 using WCPShared.Models.DTOs;
-using EllipticCurve.Utils;
 using WCPShared.Models.UserModels;
 
 namespace WCPShared.Services.Databases.EntityFramework

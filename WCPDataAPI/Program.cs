@@ -10,7 +10,6 @@ using Microsoft.EntityFrameworkCore;
 using WCPShared.Models;
 using WCPShared.Services.Databases.EntityFramework;
 using WCPShared.Interfaces.DataServices;
-using WCPShared.Models.UserModels;
 
 var builder = WebApplication.CreateBuilder(args);
 

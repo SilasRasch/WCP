@@ -5,7 +5,6 @@ using WCPShared.Models.UserModels;
 using WCPShared.Interfaces.DataServices;
 using WCPShared.Models;
 using WCPShared.Models.DTOs;
-using System.Linq;
 
 namespace WCPDataAPI.Controllers
 {

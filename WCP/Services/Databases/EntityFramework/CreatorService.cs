@@ -2,10 +2,7 @@
 using WCPShared.Models;
 using Microsoft.EntityFrameworkCore;
 using WCPShared.Models.UserModels;
-using Microsoft.EntityFrameworkCore.Query;
-using Microsoft.EntityFrameworkCore.Metadata;
 using WCPShared.Models.DTOs;
-using WCPShared.Interfaces;
 
 namespace WCPShared.Services.Databases.EntityFramework
 {
