@@ -5,6 +5,7 @@ using WCPShared.Models.UserModels;
 using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.EntityFrameworkCore.Metadata;
 using WCPShared.Models.DTOs;
+using WCPShared.Interfaces;
 
 namespace WCPShared.Services.Databases.EntityFramework
 {
@@ -46,25 +47,25 @@ namespace WCPShared.Services.Databases.EntityFramework
 
         public async Task<Creator?> GetObject(int id)
         {
-            return await _context.Creators.Include(x => x.User).Include(x => x.Languages).AsNoTracking().SingleOrDefaultAsync(x => x.Id == id);
+            return await _context.Creators.Include(x => x.User).Include(x => x.Languages).SingleOrDefaultAsync(x => x.Id == id);
         }
 
         public async Task<Creator?> GetObject(int id, bool includeUser = false)
         {
             if (includeUser)
-                return await _context.Creators.Include(x => x.User).Include(x => x.Languages).AsNoTracking().SingleOrDefaultAsync(x => x.Id == id);
+                return await _context.Creators.Include(x => x.User).Include(x => x.Languages).SingleOrDefaultAsync(x => x.Id == id);
             return await GetObject(id);
         }
 
         public async Task<List<Creator>> GetAllObjects()
         {
-            return await _context.Creators.Include(x => x.Languages).AsNoTracking().ToListAsync();
+            return await _context.Creators.Include(x => x.Languages).ToListAsync();
         }
 
         public async Task<List<Creator>> GetAllObjects(bool includeUser = false)
         {
             if (includeUser)
-                return await _context.Creators.Include(x => x.User).Include(x => x.Languages).AsNoTracking().ToListAsync();
+                return await _context.Creators.Include(x => x.User).Include(x => x.Languages).ToListAsync();
             else return await GetAllObjects();
         }
 
@@ -75,7 +76,7 @@ namespace WCPShared.Services.Databases.EntityFramework
             if (oldCreator is null)
                 return null!;
 
-            _context.Creators.Attach(oldCreator);
+            //_context.Creators.Attach(oldCreator); // Not needed? Already tracked frem GET
 
             oldCreator.DateOfBirth = obj.DateOfBirth;
             oldCreator.Address = obj.Address;
@@ -120,9 +121,33 @@ namespace WCPShared.Services.Databases.EntityFramework
             return oldCreator;
         }
 
-        public void Attach(Creator creator)
+        public async Task<Creator?> AddObject(CreatorDto obj)
         {
-            _context.Creators.Attach(creator);
+            var user = await _userService.GetObject(obj.UserId);
+            if (user is null)
+                return null;
+            
+            var creatorToAdd = new Creator
+            {
+                Address = obj.Address,
+                DateOfBirth = obj.DateOfBirth,
+                ImgURL = obj.ImgURL,
+                IsEditor = obj.IsEditor,
+                Languages = new List<Language>(),
+                Speciality = obj.Speciality,
+                UserId = obj.UserId,
+                User = user
+            };
+
+            if (obj.Languages is not null)
+            {
+                var languages = await _languageService.GetAllObjects();
+                creatorToAdd.Languages = languages.Where(x => obj.Languages.Contains(x.Name)).ToList();
+            }
+
+            await _context.AddAsync(creatorToAdd);
+            await _context.SaveChangesAsync();
+            return creatorToAdd;
         }
     }
 }

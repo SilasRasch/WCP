@@ -7,8 +7,7 @@ using WCPShared.Models;
 
 namespace WCPShared.Interfaces.DataServices
 {
-    public interface IBrandService : IDatabaseService<Brand>
+    public interface IBrandService : IDatabaseService<Brand>, IDtoExtensions<BrandDto, Brand>
     {
-        Task<Brand?> UpdateObject(int id, BrandDto brand);
     }
 }

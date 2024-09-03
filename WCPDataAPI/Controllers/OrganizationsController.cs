@@ -6,7 +6,7 @@ using WCPShared.Models.DTOs;
 
 namespace WCPDataAPI.Controllers
 {
-    //[Authorize]
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class OrganizationsController : ControllerBase
@@ -31,7 +31,7 @@ namespace WCPDataAPI.Controllers
             return organization is null ? NotFound() : Ok(organization);
         }
 
-        [HttpPost]//, Authorize(Roles = "Admin")]
+        [HttpPost, Authorize(Roles = "Admin")]
         public async Task<IActionResult> Post([FromBody] OrganizationDto organization)
         {
             if (!organization.Validate()) return BadRequest("Valideringsfejl");
@@ -40,11 +40,11 @@ namespace WCPDataAPI.Controllers
             if (_organizationService.GetAllObjects().Result.Any(x => x.CVR == organization.CVR))
                 return BadRequest("Der eksisterer allerede en organisation med det CVR");
 
-            await _organizationService.AddObject(new Organization { CVR = organization.CVR, Name = organization.Name });
+            await _organizationService.AddObject(organization);
             return Created();
         }
 
-        [HttpPut("{id}")]//, Authorize(Roles = "Admin")]
+        [HttpPut("{id}"), Authorize(Roles = "Admin")]
         public async Task<IActionResult> Put(int id, [FromBody] OrganizationDto organization)
         {
             Organization? oldOrg = await _organizationService.GetObject(id);
@@ -56,7 +56,7 @@ namespace WCPDataAPI.Controllers
             return Ok();
         }
 
-        [HttpDelete("{id}")]//, Authorize(Roles = "Admin")]
+        [HttpDelete("{id}"), Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
             Organization? organization = await _organizationService.GetObject(id);

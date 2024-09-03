@@ -69,41 +69,7 @@ namespace WCPDataAPI.Controllers
             if (brand is null)
                 return BadRequest("Brand not found");
 
-            List<Creator> creators = await _creatorService.GetAllObjects();
-            creators = creators.Where(x => order.Creators.Contains(x.Id)).ToList();
-
-            await _orderService.AddObject(new Order
-            {
-                Brand = brand,
-                Creators = creators,
-                BrandId = order.BrandId,
-                Price = order.Price,
-                Category = 0,
-                State = 0,
-                Content = order.Content,
-                ContentCount = order.ContentCount,
-                ContentLength = order.ContentLength,
-                Delivery = order.Delivery,
-                DeliveryTimeFrom = order.DeliveryTimeFrom,
-                DeliveryTimeTo = order.DeliveryTimeTo,
-                Email = order.Email,
-                Name = order.Name,
-                Phone = order.Phone,
-                ExtraCreator = order.ExtraCreator,
-                ExtraHook = order.ExtraHook,
-                ExtraNotes = order.ExtraNotes,
-                FocusPoints = order.FocusPoints,
-                Format = order.Format,
-                Ideas = order.Ideas,
-                Platforms = order.Platforms,
-                Products = order.Products,
-                ProjectName = order.ProjectName,
-                ProjectType = order.ProjectType,
-                RelevantFiles = order.RelevantFiles,
-                Scripts = order.Scripts,
-                Other = order.Other
-            });
-
+            await _orderService.AddObject(order);
             return Created();
         }
 

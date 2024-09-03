@@ -82,5 +82,18 @@ namespace WCPShared.Services.Databases.EntityFramework
             await _context.SaveChangesAsync();
             return oldOrg;
         }
+
+        public async Task<Organization?> AddObject(OrganizationDto obj)
+        {
+            Organization organization = new Organization
+            {
+                CVR = obj.CVR,
+                Name = obj.Name
+            };
+
+            await _context.AddAsync(organization);
+            await _context.SaveChangesAsync();
+            return organization;
+        }
     }
 }

@@ -98,24 +98,7 @@ namespace WCPDataAPI.Controllers
             if (!creator.Validate() || user is null)
                 return BadRequest("Valideringsfejl, tjek venligst felterne igen...");
 
-            var creatorToAdd = new Creator { 
-                Address = creator.Address, 
-                DateOfBirth = creator.DateOfBirth, 
-                ImgURL = creator.ImgURL, 
-                IsEditor = creator.IsEditor, 
-                Languages = new List<Language>(),
-                Speciality = creator.Speciality, 
-                UserId = creator.UserId,
-                User = user
-            };
-
-            if (creator.Languages is not null)
-            {
-                var languages = await _languageService.GetAllObjects();
-                creatorToAdd.Languages = languages.Where(x => creator.Languages.Contains(x.Name)).ToList();
-            }
-
-            await _creatorService.AddObject(creatorToAdd);
+            await _creatorService.AddObject(creator);
 
             return CreatedAtAction("Post", new { id = creator.UserId }, creator);
         }

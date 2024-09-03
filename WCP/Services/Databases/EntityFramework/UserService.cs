@@ -4,16 +4,19 @@ using Microsoft.EntityFrameworkCore;
 using WCPShared.Interfaces.DataServices;
 using WCPShared.Models.AuthModels;
 using Azure.Core;
+using WCPShared.Interfaces;
 
 namespace WCPShared.Services.Databases.EntityFramework
 {
     public class UserService : IUserService
     {
         private readonly WcpDbContext _context;
+        private readonly IOrganizationService _organizationService;
 
-        public UserService(WcpDbContext context)
+        public UserService(WcpDbContext context, IOrganizationService organizationService)
         {
             _context = context;
+            _organizationService = organizationService;
         }
 
         public async Task AddObject(User user)
@@ -88,6 +91,29 @@ namespace WCPShared.Services.Databases.EntityFramework
             _context.Update(oldUser);
             await _context.SaveChangesAsync();
             return oldUser;
+        }
+
+        public async Task<User?> AddObject(RegisterDto obj)
+        {
+            Organization? organization = null;
+            if (obj.OrganizationId is not null)
+            {
+                organization = await _organizationService.GetObject(obj.OrganizationId.Value);
+            }
+
+            if (organization is not null)
+                _context.Organizations.Attach(organization);
+
+            var user = new User
+            {
+                Email = obj.Email,
+                Name = obj.Name,
+                Phone = obj.Phone,
+            };
+
+            await _context.Users.AddAsync(user);
+            await _context.SaveChangesAsync();
+            return user;
         }
     }
 }

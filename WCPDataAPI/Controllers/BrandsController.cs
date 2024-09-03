@@ -59,14 +59,7 @@ namespace WCPDataAPI.Controllers
             if (!request.Validate())
                 return BadRequest("Valideringsfejl, tjek venligst felterne igen...");
 
-            await _brandService.AddObject(new Brand
-            {
-                Name = request.Name,
-                OrganizationId = request.OrganizationId,
-                Organization = org,
-                URL = request.URL,
-            });
-
+            await _brandService.AddObject(request);
             return Created();
         }
 

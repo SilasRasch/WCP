@@ -3,10 +3,9 @@ using WCPShared.Models.DTOs;
 
 namespace WCPShared.Interfaces.DataServices
 {
-    public interface IOrganizationService : IDatabaseService<Organization>
+    public interface IOrganizationService : IDatabaseService<Organization>, IDtoExtensions<OrganizationDto, Organization>
     {
         Task<Organization?> GetObject(int id, bool includeBrands = false);
         Task<List<Organization>> GetAllObjects(bool includeBrands = false);
-        Task<Organization?> UpdateObject(int id, OrganizationDto organization);
     }
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Azure.Core;
+using Microsoft.EntityFrameworkCore;
 using WCPShared.Interfaces.DataServices;
 using WCPShared.Models;
 
@@ -81,6 +82,26 @@ namespace WCPShared.Services.Databases.EntityFramework
             _context.Update(oldBrand);
             await _context.SaveChangesAsync();
             return oldBrand;
+        }
+
+        public async Task<Brand?> AddObject(BrandDto obj)
+        {
+            Organization? organization = await _organizationService.GetObject(obj.OrganizationId);
+            if (organization is null)
+                return null;
+
+            _context.Organizations.Attach(organization);
+            Brand brand = new Brand
+            {
+                Name = obj.Name,
+                OrganizationId = obj.OrganizationId,
+                Organization = organization,
+                URL = obj.URL,
+            };
+
+            await _context.Brands.AddAsync(brand);
+            await _context.SaveChangesAsync();
+            return brand;
         }
     }
 }

@@ -2,11 +2,7 @@
 using WCPShared.Models;
 using Microsoft.EntityFrameworkCore;
 using WCPShared.Models.DTOs;
-using Microsoft.SqlServer.Server;
-using SendGrid.Helpers.Mail;
-using System.Diagnostics;
-using System.Numerics;
-using System;
+using EllipticCurve.Utils;
 using WCPShared.Models.UserModels;
 
 namespace WCPShared.Services.Databases.EntityFramework
@@ -70,12 +66,12 @@ namespace WCPShared.Services.Databases.EntityFramework
             return obj;
         }
 
-        public async Task<Order> UpdateObject(int id, OrderDto order)
+        public async Task<Order?> UpdateObject(int id, OrderDto order)
         {
             Order? existingOrder = await GetObject(id);
 
             if (existingOrder is null)
-                return null!;
+                return null;
 
             existingOrder.BrandId = order.BrandId;
             existingOrder.Price = order.Price;
@@ -129,6 +125,52 @@ namespace WCPShared.Services.Databases.EntityFramework
             _context.Update(existingOrder);
             await _context.SaveChangesAsync();
             return existingOrder;
+        }
+
+        public async Task<Order?> AddObject(OrderDto obj)
+        {
+            Brand? brand = await _brandService.GetObject(obj.BrandId);
+            if (brand is null)
+                return null;
+
+            List<Creator> creators = await _creatorService.GetAllObjects();
+            creators = creators.Where(x => obj.Creators.Contains(x.Id)).ToList();
+
+            var order = new Order
+            {
+                Brand = brand,
+                Creators = creators,
+                BrandId = obj.BrandId,
+                Price = obj.Price,
+                Category = 0,
+                State = 0,
+                Content = obj.Content,
+                ContentCount = obj.ContentCount,
+                ContentLength = obj.ContentLength,
+                Delivery = obj.Delivery,
+                DeliveryTimeFrom = obj.DeliveryTimeFrom,
+                DeliveryTimeTo = obj.DeliveryTimeTo,
+                Email = obj.Email,
+                Name = obj.Name,
+                Phone = obj.Phone,
+                ExtraCreator = obj.ExtraCreator,
+                ExtraHook = obj.ExtraHook,
+                ExtraNotes = obj.ExtraNotes,
+                FocusPoints = obj.FocusPoints,
+                Format = obj.Format,
+                Ideas = obj.Ideas,
+                Platforms = obj.Platforms,
+                Products = obj.Products,
+                ProjectName = obj.ProjectName,
+                ProjectType = obj.ProjectType,
+                RelevantFiles = obj.RelevantFiles,
+                Scripts = obj.Scripts,
+                Other = obj.Other
+            };
+
+            await _context.AddAsync(order);
+            await _context.SaveChangesAsync();
+            return order;
         }
     }
 }

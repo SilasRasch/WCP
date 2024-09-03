@@ -8,8 +8,7 @@ using WCPShared.Models.DTOs;
 
 namespace WCPShared.Interfaces.DataServices
 {
-    public interface IOrderService : IDatabaseService<Order>
+    public interface IOrderService : IDatabaseService<Order>, IDtoExtensions<OrderDto, Order>
     {
-        Task<Order> UpdateObject(int id, OrderDto order);
     }
 }

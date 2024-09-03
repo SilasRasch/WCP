@@ -8,9 +8,7 @@ using WCPShared.Models.UserModels;
 
 namespace WCPShared.Interfaces.DataServices
 {
-    public interface ICreatorService : IDatabaseService<Creator>
+    public interface ICreatorService : IDatabaseService<Creator>, IDtoExtensions<CreatorDto, Creator>
     {
-        void Attach(Creator creator);
-        Task<Creator?> UpdateObject(int id, CreatorDto creator);
     }
 }
