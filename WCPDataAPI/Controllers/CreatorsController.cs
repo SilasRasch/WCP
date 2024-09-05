@@ -29,7 +29,7 @@ namespace WCPDataAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Creator>>> Get([FromQuery] int? orderId = null, [FromQuery] string? searchTerm = null)
+        public async Task<ActionResult<IEnumerable<dynamic>>> Get([FromQuery] int? orderId = null, [FromQuery] string? searchTerm = null)
         {
             IEnumerable<Creator> creators = null!;
 
@@ -60,7 +60,19 @@ namespace WCPDataAPI.Controllers
                     ).ToList();
             }
 
-            return creators is not null ? Ok(creators) : NotFound("No creators found");
+            List<dynamic> combined = new List<dynamic>();
+
+            foreach (Creator creator in creators)
+            {
+                User? user = await _userService.GetObject(creator.UserId);
+                if (user is not null)
+                {
+                    UserNC userNC = user.ConvertToNCUser();
+                    combined.Add(new { user = userNC, creator });
+                }
+            }
+
+            return combined is not null ? Ok(combined) : NotFound("No creators found");
         }
 
         [HttpGet("/api/creators-with-user")]
@@ -75,7 +87,7 @@ namespace WCPDataAPI.Controllers
                 if (user is not null)
                 {
                     UserNC userNC = user.ConvertToNCUser();
-                    combined.Add(new { userNC, creator });
+                    combined.Add(new { user = userNC, creator });
                 }
             }
 

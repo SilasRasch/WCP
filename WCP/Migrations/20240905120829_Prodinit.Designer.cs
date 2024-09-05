@@ -12,8 +12,8 @@ using WCPShared.Models;
 namespace WCPShared.Migrations
 {
     [DbContext(typeof(WcpDbContext))]
-    [Migration("20240829210436_Init")]
-    partial class Init
+    [Migration("20240905120829_Prodinit")]
+    partial class Prodinit
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -55,7 +55,7 @@ namespace WCPShared.Migrations
                     b.ToTable("CreatorOrder");
                 });
 
-            modelBuilder.Entity("WCPShared.Models.BrandModels.Brand", b =>
+            modelBuilder.Entity("WCPShared.Models.Brand", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -81,7 +81,7 @@ namespace WCPShared.Migrations
                     b.ToTable("Brands");
                 });
 
-            modelBuilder.Entity("WCPShared.Models.OrderModels.Order", b =>
+            modelBuilder.Entity("WCPShared.Models.Order", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -208,7 +208,7 @@ namespace WCPShared.Migrations
                     b.ToTable("Organizations");
                 });
 
-            modelBuilder.Entity("WCPShared.Models.UserModels.CreatorModels.Creator", b =>
+            modelBuilder.Entity("WCPShared.Models.UserModels.Creator", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -327,7 +327,7 @@ namespace WCPShared.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("WCPShared.Models.UserModels.CreatorModels.Creator", null)
+                    b.HasOne("WCPShared.Models.UserModels.Creator", null)
                         .WithMany()
                         .HasForeignKey("SpeakersId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -336,20 +336,20 @@ namespace WCPShared.Migrations
 
             modelBuilder.Entity("CreatorOrder", b =>
                 {
-                    b.HasOne("WCPShared.Models.UserModels.CreatorModels.Creator", null)
+                    b.HasOne("WCPShared.Models.UserModels.Creator", null)
                         .WithMany()
                         .HasForeignKey("CreatorsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("WCPShared.Models.OrderModels.Order", null)
+                    b.HasOne("WCPShared.Models.Order", null)
                         .WithMany()
                         .HasForeignKey("OrdersId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("WCPShared.Models.BrandModels.Brand", b =>
+            modelBuilder.Entity("WCPShared.Models.Brand", b =>
                 {
                     b.HasOne("WCPShared.Models.Organization", "Organization")
                         .WithMany("Brands")
@@ -360,9 +360,9 @@ namespace WCPShared.Migrations
                     b.Navigation("Organization");
                 });
 
-            modelBuilder.Entity("WCPShared.Models.OrderModels.Order", b =>
+            modelBuilder.Entity("WCPShared.Models.Order", b =>
                 {
-                    b.HasOne("WCPShared.Models.BrandModels.Brand", "Brand")
+                    b.HasOne("WCPShared.Models.Brand", "Brand")
                         .WithMany("Orders")
                         .HasForeignKey("BrandId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -371,7 +371,7 @@ namespace WCPShared.Migrations
                     b.Navigation("Brand");
                 });
 
-            modelBuilder.Entity("WCPShared.Models.UserModels.CreatorModels.Creator", b =>
+            modelBuilder.Entity("WCPShared.Models.UserModels.Creator", b =>
                 {
                     b.HasOne("WCPShared.Models.UserModels.User", "User")
                         .WithMany()
@@ -391,7 +391,7 @@ namespace WCPShared.Migrations
                     b.Navigation("Organization");
                 });
 
-            modelBuilder.Entity("WCPShared.Models.BrandModels.Brand", b =>
+            modelBuilder.Entity("WCPShared.Models.Brand", b =>
                 {
                     b.Navigation("Orders");
                 });
