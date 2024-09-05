@@ -29,7 +29,7 @@ namespace WCPDataAPI.Controllers
 
         // GET: api/<OrdersController>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Order>>> Get([FromQuery] int? creatorId = null, [FromQuery] int? orgId = null)
+        public async Task<ActionResult<IEnumerable<Order>>> Get([FromQuery] int? userId = null, [FromQuery] int? orgId = null)
         {
             var orders = await _orderService.GetAllObjects();
 
@@ -39,12 +39,12 @@ namespace WCPDataAPI.Controllers
             else if (_userContextService.GetRoles().Contains("Bruger")) // Catch (get by JWT role)
                 return Ok(orders.Where(x => x.Brand.OrganizationId == _userContextService.GetOrganizationId()));
 
-            if (creatorId is not null)
-                return Ok(orders.Where(x => x.Creators.Any(x => x.Id == creatorId.Value)));
+            if (userId is not null)
+                return Ok(orders.Where(x => x.Creators.Any(x => x.UserId == userId.Value)));
             else if (_userContextService.GetRoles().Contains("Creator") || _userContextService.GetRoles().Contains("Editor")) // Catch (get by JWT role)
-                return Ok(orders.Where(x => x.Creators!.Any(x => x.Id == _userContextService.GetId())));
+                return Ok(orders.Where(x => x.Creators!.Any(x => x.UserId == _userContextService.GetId())));
 
-            if (_userContextService.GetRoles().Contains("Admin") && creatorId is null && orgId is null)
+            if (_userContextService.GetRoles().Contains("Admin") && userId is null && orgId is null)
                 return Ok(orders);
 
             return Ok(new List<Order>());
