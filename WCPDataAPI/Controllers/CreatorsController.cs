@@ -147,7 +147,7 @@ namespace WCPDataAPI.Controllers
             if (!creator.Validate())
                 return BadRequest("Valideringsfejl, tjek venligst felterne igen...");
 
-            Creator? modifiedCreator = await _creatorService.UpdateObject(id, creator);
+            Creator? modifiedCreator = await _creatorService.UpdateObject(creator.Id, creator);
             return modifiedCreator is not null ? NoContent() : NotFound("Creator not found");
         }
     }
