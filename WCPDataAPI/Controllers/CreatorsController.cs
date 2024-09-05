@@ -134,7 +134,7 @@ namespace WCPDataAPI.Controllers
         [HttpPut("UpdateProfilePicture/{id}")]
         public async Task<IActionResult> UpdateProfilePicture(int id, [FromBody] string imgURL)
         {
-            Creator? creator = (await _creatorService.GetAllObjects()).Where(x => x.Id == id).SingleOrDefault();
+            Creator? creator = (await _creatorService.GetAllObjects()).Where(x => x.UserId == id).SingleOrDefault();
 
             if (creator is null)
                 return NotFound("Creator not found");
