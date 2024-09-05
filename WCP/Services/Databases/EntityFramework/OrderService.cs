@@ -69,11 +69,35 @@ namespace WCPShared.Services.Databases.EntityFramework
         public async Task<Order?> UpdateObject(int id, OrderDto order)
         {
             Order? existingOrder = await GetObject(id);
-
             if (existingOrder is null)
                 return null;
-
-            existingOrder = DtoConverter.OrderDtoToOrder(order);
+            
+            existingOrder.BrandId = order.BrandId;
+            existingOrder.Price = order.Price;
+            existingOrder.Category = 0;
+            existingOrder.State = 0;
+            existingOrder.Content = order.Content;
+            existingOrder.ContentCount = order.ContentCount;
+            existingOrder.ContentLength = order.ContentLength;
+            existingOrder.Delivery = order.Delivery;
+            existingOrder.DeliveryTimeFrom = order.DeliveryTimeFrom;
+            existingOrder.DeliveryTimeTo = order.DeliveryTimeTo;
+            existingOrder.Email = order.Email;
+            existingOrder.Name = order.Name;
+            existingOrder.Phone = order.Phone;
+            existingOrder.ExtraCreator = order.ExtraCreator;
+            existingOrder.ExtraHook = order.ExtraHook;
+            existingOrder.ExtraNotes = order.ExtraNotes;
+            existingOrder.FocusPoints = order.FocusPoints;
+            existingOrder.Format = order.Format;
+            existingOrder.Ideas = order.Ideas;
+            existingOrder.Platforms = order.Platforms;
+            existingOrder.Products = order.Products;
+            existingOrder.ProjectName = order.ProjectName;
+            existingOrder.ProjectType = order.ProjectType;
+            existingOrder.RelevantFiles = order.RelevantFiles;
+            existingOrder.Scripts = order.Scripts;
+            existingOrder.Other = order.Other;
 
             if (order.BrandId != existingOrder.BrandId)
             {

@@ -98,7 +98,7 @@ namespace WCPDataAPI.Controllers
         {
             Order? order = await _orderService.GetObject(id);
 
-            if (order is not null)
+            if (order is null)
                 return NotFound();
 
             if (!_userContextService.GetRoles().Contains("Admin")) // Users cannot delete orders

@@ -120,7 +120,7 @@ namespace WCPShared.Services.StaticHelpers
                 RelevantFiles = obj.RelevantFiles,
                 Scripts = obj.Scripts,
                 Other = obj.Other
-        };
+            };
 
             return order;
         }
