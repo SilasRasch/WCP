@@ -109,7 +109,7 @@ namespace WCPDataAPI.Controllers
             if (!creator.Validate())
                 return BadRequest("Valideringsfejl, tjek venligst felterne igen...");
 
-            if (id != _userContextService.GetId() && !_userContextService.GetRoles().Contains("Admin"))
+            if (oldCreator.UserId != _userContextService.GetId() && !_userContextService.GetRoles().Contains("Admin"))
                 return BadRequest("You are not the owner of this creator");
                 
             Creator? modifiedCreator = await _creatorService.UpdateObject(id, creator);
@@ -124,7 +124,7 @@ namespace WCPDataAPI.Controllers
             if (creator is null)
                 return NotFound("Creator not found");
 
-            if (creator.Id != _userContextService.GetId() && !_userContextService.GetRoles().Contains("Admin"))
+            if (creator.UserId != _userContextService.GetId() && !_userContextService.GetRoles().Contains("Admin"))
                 return BadRequest("Du har ikke tilladelse til at ændre denne creator");
 
             Creator? deleted = await _creatorService.DeleteObject(id);
@@ -139,7 +139,7 @@ namespace WCPDataAPI.Controllers
             if (creator is null)
                 return NotFound("Creator not found");
 
-            if (creator.Id != _userContextService.GetId() && !_userContextService.GetRoles().Contains("Admin"))
+            if (creator.UserId != _userContextService.GetId() && !_userContextService.GetRoles().Contains("Admin"))
                 return BadRequest("Du har ikke tilladelse til at ændre denne creator");
 
             creator.ImgURL = imgURL;
