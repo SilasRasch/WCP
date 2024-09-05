@@ -12,8 +12,8 @@ using WCPShared.Models;
 namespace WCPShared.Migrations
 {
     [DbContext(typeof(WcpDbContext))]
-    [Migration("20240905120829_Prodinit")]
-    partial class Prodinit
+    [Migration("20240905160419_creator-gender")]
+    partial class creatorgender
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -221,6 +221,10 @@ namespace WCPShared.Migrations
 
                     b.Property<DateTime?>("DateOfBirth")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("Gender")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ImgURL")
                         .HasColumnType("nvarchar(max)");

@@ -74,8 +74,8 @@ namespace WCPShared.Services.Databases.EntityFramework
             
             existingOrder.BrandId = order.BrandId;
             existingOrder.Price = order.Price;
-            existingOrder.Category = 0;
-            existingOrder.State = 0;
+            existingOrder.Category = order.Category;
+            existingOrder.State = order.State;
             existingOrder.Content = order.Content;
             existingOrder.ContentCount = order.ContentCount;
             existingOrder.ContentLength = order.ContentLength;
