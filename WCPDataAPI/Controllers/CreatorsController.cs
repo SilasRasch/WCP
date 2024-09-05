@@ -95,10 +95,20 @@ namespace WCPDataAPI.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Creator>> Get(int id)
+        public async Task<ActionResult<dynamic>> Get(int id)
         {
             Creator? creator = await _creatorService.GetObject(id);
-            return creator is not null ? Ok(creator) : NotFound();
+
+            if (creator is null)
+                return NotFound();
+
+            User? user = await _userService.GetObject(creator.UserId);
+            if (user is not null)
+            {
+                return Ok(new { user = user.ConvertToNCUser(), creator });
+            }
+
+            return NotFound();
         }
 
         [HttpPost, Authorize(Roles = "Admin")]
