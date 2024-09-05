@@ -22,7 +22,8 @@ namespace WCPShared.Services.StaticHelpers
                 ImgURL = creator.ImgURL,
                 IsEditor = creator.IsEditor,
                 Speciality = creator.Speciality,
-                UserId = creator.UserId
+                UserId = creator.UserId,
+                Gender = creator.Gender               
             };
 
             if (creator.Languages is not null)
