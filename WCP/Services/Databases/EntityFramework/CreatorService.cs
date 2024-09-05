@@ -65,6 +65,7 @@ namespace WCPShared.Services.Databases.EntityFramework
             oldCreator.Address = obj.Address;
             oldCreator.Speciality = obj.Speciality;
             oldCreator.ImgURL = obj.ImgURL;
+            oldCreator.Gender = obj.Gender;
 
             if (obj.Languages is not null)
             {
@@ -113,6 +114,7 @@ namespace WCPShared.Services.Databases.EntityFramework
             var creatorToAdd = new Creator
             {
                 Address = obj.Address,
+                Gender = obj.Gender,
                 DateOfBirth = obj.DateOfBirth,
                 ImgURL = obj.ImgURL,
                 IsEditor = obj.IsEditor,
