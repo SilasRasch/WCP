@@ -6,6 +6,7 @@ using WCPShared.Interfaces.DataServices;
 using WCPShared.Models;
 using WCPShared.Models.DTOs;
 using WCPShared.Services.StaticHelpers;
+using MongoDB.Driver;
 
 namespace WCPDataAPI.Controllers
 {
@@ -128,6 +129,26 @@ namespace WCPDataAPI.Controllers
 
             Creator? deleted = await _creatorService.DeleteObject(id);
             return deleted is not null ? NoContent() : NotFound("Creator not found");
+        }
+
+        [HttpPut("UpdateProfilePicture/{id}")]
+        public async Task<IActionResult> UpdateProfilePicture(int id, [FromBody] string imgURL)
+        {
+            Creator? creator = (await _creatorService.GetAllObjects()).Where(x => x.Id == id).SingleOrDefault();
+
+            if (creator is null)
+                return NotFound("Creator not found");
+
+            if (creator.Id != _userContextService.GetId() && !_userContextService.GetRoles().Contains("Admin"))
+                return BadRequest("Du har ikke tilladelse til at ændre denne creator");
+
+            creator.ImgURL = imgURL;
+
+            if (!creator.Validate())
+                return BadRequest("Valideringsfejl, tjek venligst felterne igen...");
+
+            Creator? modifiedCreator = await _creatorService.UpdateObject(id, creator);
+            return modifiedCreator is not null ? NoContent() : NotFound("Creator not found");
         }
     }
 }
