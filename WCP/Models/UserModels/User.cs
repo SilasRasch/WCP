@@ -33,19 +33,5 @@ namespace WCPShared.Models.UserModels
 
             return true;
         }
-
-        public UserNC ConvertToNCUser()
-        {
-            return new UserNC
-            {
-                Name = Name,
-                Email = Email,
-                Id = Id,
-                IsActive = IsActive,
-                Organization = Organization,
-                Phone = Phone,
-                Role = Role
-            };
-        }
     }
 }

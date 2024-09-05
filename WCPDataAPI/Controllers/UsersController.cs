@@ -4,6 +4,7 @@ using WCPShared.Interfaces.DataServices;
 using WCPShared.Models.AuthModels;
 using WCPShared.Models.UserModels;
 using WCPShared.Services;
+using WCPShared.Services.StaticHelpers;
 
 namespace WCPDataAPI.Controllers
 {
@@ -28,16 +29,7 @@ namespace WCPDataAPI.Controllers
             IEnumerable<User> users = await _userService.GetAllObjects();
             if (role is not null) users = users.Where(x => x.Role.ToLower() == role.ToLower());
 
-            IEnumerable<UserNC> ncUsers = users.Select((user) => new UserNC()
-            {
-                Id = user.Id,
-                Email = user.Email,
-                Name = user.Name,
-                IsActive = user.IsActive,
-                Phone = user.Phone,
-                Role = user.Role,
-                Organization = user.Organization,
-            });
+            IEnumerable<UserNC> ncUsers = users.Select((user) => DtoConverter.UserToNCUser(user));
 
             return Ok(ncUsers);
         }
@@ -47,7 +39,7 @@ namespace WCPDataAPI.Controllers
         public async Task<ActionResult<UserNC>> Get(int id)
         {
             User? user = await _userService.GetObject(id);
-            return user is not null ? Ok(user.ConvertToNCUser()) : NotFound("Der blev ikke fundet en bruger med det id...");
+            return user is not null ? Ok(DtoConverter.UserToNCUser(user)) : NotFound("Der blev ikke fundet en bruger med det id...");
         }
 
         // PUT api/<UsersController>/5

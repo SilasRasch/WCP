@@ -3,6 +3,7 @@ using WCPShared.Models;
 using Microsoft.EntityFrameworkCore;
 using WCPShared.Models.DTOs;
 using WCPShared.Models.UserModels;
+using WCPShared.Services.StaticHelpers;
 
 namespace WCPShared.Services.Databases.EntityFramework
 {
@@ -72,32 +73,7 @@ namespace WCPShared.Services.Databases.EntityFramework
             if (existingOrder is null)
                 return null;
 
-            existingOrder.BrandId = order.BrandId;
-            existingOrder.Price = order.Price;
-            existingOrder.Category = 0;
-            existingOrder.State = 0;
-            existingOrder.Content = order.Content;
-            existingOrder.ContentCount = order.ContentCount;
-            existingOrder.ContentLength = order.ContentLength;
-            existingOrder.Delivery = order.Delivery;
-            existingOrder.DeliveryTimeFrom = order.DeliveryTimeFrom;
-            existingOrder.DeliveryTimeTo = order.DeliveryTimeTo;
-            existingOrder.Email = order.Email;
-            existingOrder.Name = order.Name;
-            existingOrder.Phone = order.Phone;
-            existingOrder.ExtraCreator = order.ExtraCreator;
-            existingOrder.ExtraHook = order.ExtraHook;
-            existingOrder.ExtraNotes = order.ExtraNotes;
-            existingOrder.FocusPoints = order.FocusPoints;
-            existingOrder.Format = order.Format;
-            existingOrder.Ideas = order.Ideas;
-            existingOrder.Platforms = order.Platforms;
-            existingOrder.Products = order.Products;
-            existingOrder.ProjectName = order.ProjectName;
-            existingOrder.ProjectType = order.ProjectType;
-            existingOrder.RelevantFiles = order.RelevantFiles;
-            existingOrder.Scripts = order.Scripts;
-            existingOrder.Other = order.Other;
+            existingOrder = DtoConverter.OrderDtoToOrder(order);
 
             if (order.BrandId != existingOrder.BrandId)
             {
@@ -135,37 +111,9 @@ namespace WCPShared.Services.Databases.EntityFramework
             List<Creator> creators = await _creatorService.GetAllObjects();
             creators = creators.Where(x => obj.Creators.Contains(x.Id)).ToList();
 
-            var order = new Order
-            {
-                Brand = brand,
-                Creators = creators,
-                BrandId = obj.BrandId,
-                Price = obj.Price,
-                Category = 0,
-                State = 0,
-                Content = obj.Content,
-                ContentCount = obj.ContentCount,
-                ContentLength = obj.ContentLength,
-                Delivery = obj.Delivery,
-                DeliveryTimeFrom = obj.DeliveryTimeFrom,
-                DeliveryTimeTo = obj.DeliveryTimeTo,
-                Email = obj.Email,
-                Name = obj.Name,
-                Phone = obj.Phone,
-                ExtraCreator = obj.ExtraCreator,
-                ExtraHook = obj.ExtraHook,
-                ExtraNotes = obj.ExtraNotes,
-                FocusPoints = obj.FocusPoints,
-                Format = obj.Format,
-                Ideas = obj.Ideas,
-                Platforms = obj.Platforms,
-                Products = obj.Products,
-                ProjectName = obj.ProjectName,
-                ProjectType = obj.ProjectType,
-                RelevantFiles = obj.RelevantFiles,
-                Scripts = obj.Scripts,
-                Other = obj.Other
-            };
+            var order = DtoConverter.OrderDtoToOrder(obj);
+            order.Brand = brand;
+            order.Creators = creators;
 
             await _context.AddAsync(order);
             await _context.SaveChangesAsync();

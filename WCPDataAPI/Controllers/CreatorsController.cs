@@ -5,6 +5,7 @@ using WCPShared.Models.UserModels;
 using WCPShared.Interfaces.DataServices;
 using WCPShared.Models;
 using WCPShared.Models.DTOs;
+using WCPShared.Services.StaticHelpers;
 
 namespace WCPDataAPI.Controllers
 {
@@ -29,25 +30,17 @@ namespace WCPDataAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<dynamic>>> Get([FromQuery] int? orderId = null, [FromQuery] string? searchTerm = null)
+        public async Task<ActionResult<IEnumerable<CreatorUser>>> Get([FromQuery] int? orderId = null, [FromQuery] string? searchTerm = null)
         {
-            IEnumerable<Creator> creators = null!;
+            List<Creator> creators = await _creatorService.GetAllObjects();
 
-            if (orderId is null)
-            {
-                creators = await _creatorService.GetAllObjects();
-            }
-            else
+            if (orderId is not null)
             {
                 Order? order = await _orderService.GetObject(orderId.Value);
 
                 if (order is not null && order.Creators is not null)
                 {
-                    var creatorList = await _creatorService.GetAllObjects();
-                    creatorList = creatorList.Where(order.Creators.Contains).ToList();
-
-                    if (creatorList is not null)
-                        creators = creatorList;
+                    creators = creators.Where(order.Creators.Contains).ToList();
                 }
             }
 
@@ -60,42 +53,22 @@ namespace WCPDataAPI.Controllers
                     ).ToList();
             }
 
-            List<dynamic> combined = new List<dynamic>();
+            List<CreatorUser> combined = new List<CreatorUser>();
 
             foreach (Creator creator in creators)
             {
                 User? user = await _userService.GetObject(creator.UserId);
                 if (user is not null)
                 {
-                    UserNC userNC = user.ConvertToNCUser();
-                    combined.Add(new { user = userNC, creator });
+                    combined.Add(DtoConverter.UserCreatorToCreatorUser(user, creator));
                 }
             }
 
             return combined is not null ? Ok(combined) : NotFound("No creators found");
         }
 
-        [HttpGet("/api/creators-with-user")]
-        public async Task<ActionResult<IEnumerable<dynamic>>> GetCreatorUsers()
-        {
-            IEnumerable<Creator> creators = await _creatorService.GetAllObjects();
-            List<dynamic> combined = new List<dynamic>();
-
-            foreach (Creator creator in creators) 
-            {
-                User? user = await _userService.GetObject(creator.UserId);
-                if (user is not null)
-                {
-                    UserNC userNC = user.ConvertToNCUser();
-                    combined.Add(new { user = userNC, creator });
-                }
-            }
-
-            return combined;
-        }
-
         [HttpGet("{id}")]
-        public async Task<ActionResult<dynamic>> Get(int id)
+        public async Task<ActionResult<CreatorUser>> Get(int id)
         {
             Creator? creator = await _creatorService.GetObject(id);
 
@@ -105,7 +78,7 @@ namespace WCPDataAPI.Controllers
             User? user = await _userService.GetObject(creator.UserId);
             if (user is not null)
             {
-                return Ok(new { user = user.ConvertToNCUser(), creator });
+                return Ok(DtoConverter.UserCreatorToCreatorUser(user, creator));
             }
 
             return NotFound();

@@ -44,26 +44,12 @@ namespace WCPShared.Services.Databases.EntityFramework
 
         public async Task<Creator?> GetObject(int id)
         {
-            return await _context.Creators.Include(x => x.User).Include(x => x.Languages).SingleOrDefaultAsync(x => x.Id == id);
-        }
-
-        public async Task<Creator?> GetObject(int id, bool includeUser = false)
-        {
-            if (includeUser)
-                return await _context.Creators.Include(x => x.User).Include(x => x.Languages).SingleOrDefaultAsync(x => x.Id == id);
-            return await GetObject(id);
+            return await _context.Creators.Include(x => x.Languages).SingleOrDefaultAsync(x => x.Id == id);
         }
 
         public async Task<List<Creator>> GetAllObjects()
         {
             return await _context.Creators.Include(x => x.Languages).ToListAsync();
-        }
-
-        public async Task<List<Creator>> GetAllObjects(bool includeUser = false)
-        {
-            if (includeUser)
-                return await _context.Creators.Include(x => x.User).Include(x => x.Languages).ToListAsync();
-            else return await GetAllObjects();
         }
 
         public async Task<Creator?> UpdateObject(int id, CreatorDto obj)
