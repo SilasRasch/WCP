@@ -14,10 +14,7 @@ namespace WCPShared.Models
         public double Price { get; set; }
         public int DeliveryTimeFrom { get; set; }
         public int DeliveryTimeTo { get; set; }
-        public int State { get; set; }
-        public int Category { get; set; }
-        //public int OrganizationId { get; set; }
-        //public Organization Organization { get; set; } = new Organization();
+        public int Status { get; set; }
         public List<Creator> Creators { get; set; } = new List<Creator>();
 
         // Drive-links

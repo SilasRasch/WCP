@@ -74,8 +74,7 @@ namespace WCPShared.Services.Databases.EntityFramework
             
             existingOrder.BrandId = order.BrandId;
             existingOrder.Price = order.Price;
-            existingOrder.Category = order.Category;
-            existingOrder.State = order.State;
+            existingOrder.Status = order.Status;
             existingOrder.Content = order.Content;
             existingOrder.ContentCount = order.ContentCount;
             existingOrder.ContentLength = order.ContentLength;
@@ -138,6 +137,7 @@ namespace WCPShared.Services.Databases.EntityFramework
             var order = DtoConverter.OrderDtoToOrder(obj);
             order.Brand = brand;
             order.Creators = creators;
+            order.Status = 0;
 
             await _context.AddAsync(order);
             await _context.SaveChangesAsync();

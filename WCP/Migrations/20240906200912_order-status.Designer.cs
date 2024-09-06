@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WCPShared.Models;
 
@@ -11,9 +12,11 @@ using WCPShared.Models;
 namespace WCPShared.Migrations
 {
     [DbContext(typeof(WcpDbContext))]
-    partial class WcpDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240906200912_order-status")]
+    partial class orderstatus
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

@@ -20,7 +20,7 @@ namespace WCPShared.Models.UserModels
 
         public bool Validate()
         {
-            if (!IsEditor && (string.IsNullOrWhiteSpace(Address) || string.IsNullOrWhiteSpace(Speciality)))
+            if (!IsEditor && string.IsNullOrWhiteSpace(Address))
                 return false;
 
             return true;

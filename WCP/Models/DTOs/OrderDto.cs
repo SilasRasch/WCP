@@ -12,8 +12,7 @@ namespace WCPShared.Models.DTOs
         public double Price { get; set; }
         public int DeliveryTimeFrom { get; set; }
         public int DeliveryTimeTo { get; set; }
-        public int State { get; set; }
-        public int Category { get; set; }
+        public int Status { get; set; }
         public List<int> Creators { get; set; } = new List<int>();
 
         // Drive-links

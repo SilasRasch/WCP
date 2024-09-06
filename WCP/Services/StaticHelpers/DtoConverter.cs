@@ -23,7 +23,7 @@ namespace WCPShared.Services.StaticHelpers
                 IsEditor = creator.IsEditor,
                 Speciality = creator.Speciality,
                 UserId = creator.UserId,
-                Gender = creator.Gender               
+                Gender = creator.Gender!               
             };
 
             if (creator.Languages is not null)
@@ -62,8 +62,7 @@ namespace WCPShared.Services.StaticHelpers
             {
                 BrandId = obj.BrandId,
                 Price = obj.Price,
-                Category = 0,
-                State = 0,
+                Status = obj.Status,
                 Content = obj.Content,
                 ContentCount = obj.ContentCount,
                 ContentLength = obj.ContentLength,
@@ -97,8 +96,7 @@ namespace WCPShared.Services.StaticHelpers
             {
                 BrandId = obj.BrandId,
                 Price = obj.Price,
-                Category = 0,
-                State = 0,
+                Status = obj.Status,
                 Content = obj.Content,
                 ContentCount = obj.ContentCount,
                 ContentLength = obj.ContentLength,
