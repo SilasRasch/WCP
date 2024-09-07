@@ -91,6 +91,17 @@ namespace WCPShared.Services.StaticHelpers
             return audiences;
         }
 
+        public static string GetSlackKey(IConfiguration config)
+        {
+            var env = Environment.GetEnvironmentVariable("SLACK_KEY")!;
+            var appsetting = config.GetSection("SlackKey").Value!;
+
+            if (env != null)
+                return env;
+
+            return appsetting;
+        }
+
         public static readonly string[] Origins = [
             "http://localhost",
             "http://localhost:5173",

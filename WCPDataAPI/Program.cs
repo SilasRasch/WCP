@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using WCPShared.Models;
 using WCPShared.Services.Databases.EntityFramework;
 using WCPShared.Interfaces.DataServices;
+using SlackNet.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +26,12 @@ builder.Services.AddScoped<ILanguageService, LanguageService>();
 builder.Services.AddScoped<UserContextService>();
 builder.Services.AddDbContext<WcpDbContext>(
     options => options.UseSqlServer(Secrets.GetConnectionString(builder.Configuration)));
+
+builder.Services.AddSingleton<SlackNotificationService>();
+builder.Services.AddSlackNet(options =>
+{
+    options.UseApiToken(Secrets.GetSlackKey(builder.Configuration));
+});
 
 string allowAll = "dev";
 

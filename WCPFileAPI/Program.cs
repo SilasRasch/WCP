@@ -2,7 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
-using System.Runtime;
 using System.Text;
 using System.Text.Json.Serialization;
 using WCPFileAPI.Services.S3;

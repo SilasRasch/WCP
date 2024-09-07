@@ -15,10 +15,13 @@ namespace WCPFileAPI.Controllers
         private readonly IS3Client _client;
         private readonly UserContextService _userContextService;
 
-        public FilesController(IS3Client client, UserContextService userContextService)
+        private readonly SlackNotificationService _slackNetService;
+
+        public FilesController(IS3Client client, UserContextService userContextService, SlackNotificationService slackNetService)
         {
             _client = client;
             _userContextService = userContextService;
+            _slackNetService = slackNetService;
         }
 
         [HttpPost("profile-pic")]
