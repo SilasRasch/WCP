@@ -10,5 +10,6 @@ namespace WCPShared.Interfaces.DataServices
 {
     public interface ICreatorService : IDatabaseService<Creator>, IDtoExtensions<CreatorDto, Creator>
     {
+        Task<List<Creator>> GetAllCreatorsWithUser();
     }
 }

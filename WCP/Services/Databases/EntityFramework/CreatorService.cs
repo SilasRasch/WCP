@@ -134,5 +134,14 @@ namespace WCPShared.Services.Databases.EntityFramework
             await _context.SaveChangesAsync();
             return creatorToAdd;
         }
+
+        /// <summary>
+        /// Only for internal use!
+        /// </summary>
+        /// <returns></returns>
+        public async Task<List<Creator>> GetAllCreatorsWithUser()
+        {
+            return await _context.Creators.Include(x => x.User).AsNoTracking().ToListAsync();
+        }
     }
 }

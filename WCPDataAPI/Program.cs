@@ -27,7 +27,7 @@ builder.Services.AddScoped<UserContextService>();
 builder.Services.AddDbContext<WcpDbContext>(
     options => options.UseSqlServer(Secrets.GetConnectionString(builder.Configuration)));
 
-builder.Services.AddSingleton<SlackNotificationService>();
+builder.Services.AddScoped<SlackNotificationService>();
 builder.Services.AddSlackNet(options =>
 {
     options.UseApiToken(Secrets.GetSlackKey(builder.Configuration));

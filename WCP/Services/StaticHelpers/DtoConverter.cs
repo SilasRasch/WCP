@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Data;
 using WCPShared.Models;
 using WCPShared.Models.DTOs;
 using WCPShared.Models.UserModels;
@@ -43,7 +37,7 @@ namespace WCPShared.Services.StaticHelpers
                 Scripts = obj.Scripts,
                 Other = obj.Other,
                 Brand = obj.Brand,
-                Creators = obj.Creators,
+                Creators = new List<Creator>(obj.Creators),
                 Id = obj.Id
             };
         }

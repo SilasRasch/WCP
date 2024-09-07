@@ -5,7 +5,7 @@ using WCPShared.Services.StaticHelpers;
 
 namespace WCPShared.Models
 {
-    public class Order
+    public class Order : IEquatable<Order?>
     {
         #region Base
 
@@ -76,6 +76,17 @@ namespace WCPShared.Models
                 return false;
 
             return true;
+        }
+
+        public override bool Equals(object? obj)
+        {
+            return Equals(obj as Order);
+        }
+
+        public bool Equals(Order? other)
+        {
+            return other is not null &&
+                   Id == other.Id;
         }
     }
 }

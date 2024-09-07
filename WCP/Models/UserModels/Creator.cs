@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace WCPShared.Models.UserModels
 {
-    public class Creator
+    public class Creator : IEquatable<Creator?>
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
@@ -24,6 +24,17 @@ namespace WCPShared.Models.UserModels
                 return false;
 
             return true;
+        }
+
+        public override bool Equals(object? obj)
+        {
+            return Equals(obj as Creator);
+        }
+
+        public bool Equals(Creator? other)
+        {
+            return other is not null &&
+                   Id == other.Id;
         }
     }
 }
