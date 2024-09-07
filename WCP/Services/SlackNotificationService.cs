@@ -55,42 +55,55 @@ namespace WCPShared.Services
         {
             // Organizational notifications
 
+            // Notify organization when the order is accepted
             if (newOrder.Status == 1 && oldOrder.Status == 0)
                 await SendMessageToChannel(
                     newOrder.Brand.Organization.Name,
                     $"[{newOrder.ProjectName}] Tak for din bestilling - den er nu bekræftet!");
 
+            // Notify the organization when the scripts and creators have been choosen
             if (newOrder.Status == 2 && oldOrder.Status == 1)
                 await SendMessageToChannel(
                     newOrder.Brand.Organization.Name,
                     $"[{newOrder.ProjectName}] Scripts og creators er nu klar - hop ind og accepter!");
 
+            // Notify the organization when the project has wrapped up production
             if (newOrder.Status == 4 && oldOrder.Status == 5)
                 await SendMessageToChannel(
                     newOrder.Brand.Organization.Name,
-                    $"[{newOrder.ProjectName}] Scripts og creators er nu klar - hop ind og accepter!");
+                    $"[{newOrder.ProjectName}] Dit projekt er nu færdigt - hop ind og giv feedback!");
 
+            // Notify the organization when the project has been cancelled
             if (newOrder.Status == -1 && oldOrder.Status != -1)
                 await SendMessageToChannel(
                     newOrder.Brand.Organization.Name,
-                    $"[{newOrder.ProjectName}] Scripts og creators er nu klar - hop ind og accepter!");
+                    $"[{newOrder.ProjectName}] Dit projekt er blevet annulleret");
 
             // Creator notifications
 
+            // Notify creators when the project is moved from planned to production
             if (newOrder.Status == 3 && oldOrder.Status == 2)
                 foreach (WCPShared.Models.UserModels.Creator creator in newOrder.Creators)
                     await SendMessageToUser(
                         creator.User.Name,
                         $"[{newOrder.ProjectName}] Projektet er nu godkendt og produkterne er på vej til dig!");
 
-            var newCreators = newOrder.Creators.Except(oldOrder.Creators);
-
-            if (newCreators.Any() && newOrder.Status == 2 && oldOrder.Status == 1)
-            {
-                foreach (WCPShared.Models.UserModels.Creator creator in newCreators)
+            // Notify creators when the project is moved from queued to planned
+            if (newOrder.Status == 2 && oldOrder.Status == 1)
+                foreach (WCPShared.Models.UserModels.Creator creator in newOrder.Creators)
                     await SendMessageToUser(
                         creator.User.Name,
                         "Du er blevet inviteret til et projekt!");
+
+            // Notify newly invited creators (only in planned ???)
+            if (newOrder.Status == 2)
+            {
+                var newCreators = newOrder.Creators.Except(oldOrder.Creators);
+                if (newCreators.Any())
+                    foreach (WCPShared.Models.UserModels.Creator creator in newOrder.Creators)
+                        await SendMessageToUser(
+                            creator.User.Name,
+                            "Du er blevet inviteret til et projekt!");
             }
         }
     }
