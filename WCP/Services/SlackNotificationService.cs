@@ -85,7 +85,7 @@ namespace WCPShared.Services
 
             var newCreators = newOrder.Creators.Except(oldOrder.Creators);
 
-            if (newCreators.Any())
+            if (newCreators.Any() && newOrder.Status == 2 && oldOrder.Status == 1)
             {
                 foreach (WCPShared.Models.UserModels.Creator creator in newCreators)
                     await SendMessageToUser(
