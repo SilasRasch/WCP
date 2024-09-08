@@ -75,50 +75,6 @@ namespace WCPShared.Services.StaticHelpers
             };
         }
 
-        public static CreatorUser UserCreatorToCreatorUser(User user, Creator creator)
-        {
-            return new CreatorUser
-            {
-                Id = creator.Id,
-                Creator = CreatorToDto(creator),
-                User = UserToNCUser(user),
-            };
-        }
-
-        public static OrderDto OrderToDto(Order obj)
-        {
-            var dto = new OrderDto
-            {
-                BrandId = obj.BrandId,
-                Price = obj.Price,
-                Status = obj.Status,
-                Content = obj.Content,
-                ContentCount = obj.ContentCount,
-                ContentLength = obj.ContentLength,
-                Delivery = obj.Delivery,
-                DeliveryTimeFrom = obj.DeliveryTimeFrom,
-                DeliveryTimeTo = obj.DeliveryTimeTo,
-                Email = obj.Email,
-                Name = obj.Name,
-                Phone = obj.Phone,
-                ExtraCreator = obj.ExtraCreator,
-                ExtraHook = obj.ExtraHook,
-                ExtraNotes = obj.ExtraNotes,
-                FocusPoints = obj.FocusPoints,
-                Format = obj.Format,
-                Ideas = obj.Ideas,
-                Platforms = obj.Platforms,
-                Products = obj.Products,
-                ProjectName = obj.ProjectName,
-                ProjectType = obj.ProjectType,
-                RelevantFiles = obj.RelevantFiles,
-                Scripts = obj.Scripts,
-                Other = obj.Other
-            };
-
-            return dto;
-        }
-
         public static Order OrderDtoToOrder(OrderDto obj)
         {
             var order = new Order
