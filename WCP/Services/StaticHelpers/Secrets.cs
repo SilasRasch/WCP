@@ -106,6 +106,7 @@ namespace WCPShared.Services.StaticHelpers
             "http://localhost",
             "http://localhost:5173",
             "https://wcp.dk",
+            "https://www.wcp.dk",
             "https://test.wcp.dk",
             "http://172.232.142.14:8181",
             "http://172.232.142.14"
