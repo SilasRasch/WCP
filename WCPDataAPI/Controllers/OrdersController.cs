@@ -31,24 +31,38 @@ namespace WCPDataAPI.Controllers
         // TODO: Refactor Get endpoint to use claims/roles instead of query parameters... (for security)
 
         // GET: api/<OrdersController>
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<OrderView>>> Get([FromQuery] int status, [FromQuery] int? userId = null, [FromQuery] int? orgId = null)
+        [HttpGet, AllowAnonymous]
+        public async Task<ActionResult<IEnumerable<OrderView>>> Get([FromQuery] int status, [FromQuery] int? statusTo = null, [FromQuery] int? userId = null, [FromQuery] int? orgId = null)
         {   
-            if (orgId is not null) // && creatorId is null)
-                return Ok(await _orderService.GetObjectsViewBy(x => x.Brand.OrganizationId == orgId.Value && x.Status == status));
-                
-            else if (_userContextService.GetRoles().Contains("Bruger")) // Catch (get by JWT role)
-                return Ok(await _orderService.GetObjectsViewBy(x => x.Brand.OrganizationId == _userContextService.GetOrganizationId() && x.Status == status));
+            IEnumerable<OrderView> orders = new List<OrderView>();
+
+            // Get user's projects
+            if (_userContextService.GetRoles().Contains("Bruger"))
+                orders = await _orderService.GetObjectsViewBy(x => x.Brand.OrganizationId == _userContextService.GetOrganizationId());
+
+            // Get creator's projects
+            else if (_userContextService.GetRoles().Contains("Creator") || _userContextService.GetRoles().Contains("Editor"))
+                orders = await _orderService.GetObjectsViewBy(x => x.Creators!.Any(x => x.UserId == _userContextService.GetId()));
+
+            if (_userContextService.GetRoles().Contains("Admin"))
+                orders = await _orderService.GetAllObjectsView();
+
+            // Filter by status
+            if (statusTo is not null)
+                orders = orders.Where(x => x.Status >= status && x.Status <= statusTo);
+            else orders = orders.Where(x => x.Status == status);
+
+            // Exit if not admin
+            if (!_userContextService.GetRoles().Contains("Admin"))
+                return orders.ToList();
+
+            if (orgId is not null)
+                orders = orders.Where(x => x.Brand.OrganizationId == orgId.Value);
 
             if (userId is not null)
-                return Ok(await _orderService.GetObjectsViewBy(x => x.Creators.Any(x => x.UserId == userId.Value) && x.Status == status));
-            else if (_userContextService.GetRoles().Contains("Creator") || _userContextService.GetRoles().Contains("Editor")) // Catch (get by JWT role)
-                return Ok(await _orderService.GetObjectsViewBy(x => x.Creators!.Any(x => x.UserId == _userContextService.GetId()) && x.Status == status));
+                orders = orders.Where(x => x.Creators.Any(x => x.User.Id == userId.Value));
 
-            if (_userContextService.GetRoles().Contains("Admin") && userId is null && orgId is null)
-                return Ok(await _orderService.GetObjectsViewBy(x => x.Status == status));
-
-            return Ok(new List<OrderView>());
+            return Ok(orders);
         }
 
         // GET api/<OrdersController>/5
