@@ -16,7 +16,7 @@ namespace WCPShared.Models.Views
 
         public CreatorView(Creator obj)
         {
-            obj.Id = Id;
+            Id = obj.Id;
             Creator.Address = obj.Address;
             Creator.Gender = obj.Gender;
             Creator.UserId = obj.UserId;
