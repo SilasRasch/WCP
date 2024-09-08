@@ -10,6 +10,7 @@ using Swashbuckle.AspNetCore.Filters;
 using WCPShared.Services.Databases.EntityFramework;
 using WCPShared.Interfaces.Auth;
 using WCPShared.Interfaces.DataServices;
+using WCPShared.Services.Converters;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,6 +28,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IOrganizationService, OrganizationService>();
 builder.Services.AddScoped<IEmailService, SendGridEmailService>();
 builder.Services.AddScoped<UserContextService>();
+builder.Services.AddScoped<ViewConverter>();
 builder.Services.AddDbContext<WcpDbContext>(
     options => options.UseSqlServer(Secrets.GetConnectionString(builder.Configuration)));
 
