@@ -46,7 +46,7 @@ namespace WCPDataAPI.Controllers
                 return Ok(orders.Where(x => x.Creators!.Any(x => x.UserId == _userContextService.GetId())));
 
             if (_userContextService.GetRoles().Contains("Admin") && userId is null && orgId is null)
-                return Ok(orders);
+                return Ok(orders.TakeLast(30));
 
             return Ok(new List<Order>());
         }
