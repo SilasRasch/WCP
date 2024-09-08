@@ -30,8 +30,8 @@ namespace WCPDataAPI.Controllers
 
         // GET: api/<OrdersController>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Order>>> Get([FromQuery] int? userId = null, [FromQuery] int? orgId = null)
-        {
+        public async Task<ActionResult<IEnumerable<Order>>> Get([FromQuery] int? userId = null, [FromQuery] int? orgId = null, [FromQuery] int? status = null)
+        {   
             var orders = await _orderService.GetAllObjects();
 
             if (orgId is not null) // && creatorId is null)

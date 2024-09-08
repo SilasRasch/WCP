@@ -11,6 +11,7 @@ using WCPShared.Models;
 using WCPShared.Services.Databases.EntityFramework;
 using WCPShared.Interfaces.DataServices;
 using SlackNet.AspNetCore;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,6 +32,18 @@ builder.Services.AddScoped<SlackNotificationService>();
 builder.Services.AddSlackNet(options =>
 {
     options.UseApiToken(Secrets.GetSlackKey(builder.Configuration));
+});
+
+builder.Services.Configure<IISServerOptions>(options =>
+{
+    options.MaxRequestBodySize = int.MaxValue;
+});
+
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Limits.MaxResponseBufferSize = 64 * 1024 * 1024; // 64 MB buffer (or adjust as needed)
+    options.Limits.KeepAliveTimeout = TimeSpan.FromMinutes(2); // Timeout for keeping the connection open
+    options.Limits.MinResponseDataRate = null; // Disable the minimum data rate
 });
 
 string allowAll = "dev";
