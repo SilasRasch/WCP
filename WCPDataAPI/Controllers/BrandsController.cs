@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using WCPShared.Services;
 using WCPShared.Models;
 using WCPShared.Interfaces.DataServices;
+using WCPShared.Models.DTOs.RangeDTOs;
 
 namespace WCPDataAPI.Controllers
 {
@@ -60,6 +61,25 @@ namespace WCPDataAPI.Controllers
                 return BadRequest("Valideringsfejl, tjek venligst felterne igen...");
 
             await _brandService.AddObject(request);
+            return Created();
+        }
+
+        [HttpPost("AddRange"), Authorize(Roles = "Admin")]
+        public async Task<IActionResult> PostRange([FromBody] BrandDtoList request)
+        {
+            foreach (var brand in request.Brands)
+            {
+                var org = await _organizationService.GetObject(brand.OrganizationId);
+
+                if (org is null)
+                    return BadRequest("Organization doesn't exist");
+
+                if (!brand.Validate())
+                    return BadRequest("Valideringsfejl, tjek venligst felterne igen...");
+
+                await _brandService.AddObject(brand);
+            }
+
             return Created();
         }
 

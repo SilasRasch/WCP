@@ -7,6 +7,8 @@ using WCPShared.Models;
 using WCPShared.Models.DTOs;
 using WCPShared.Services.StaticHelpers;
 using MongoDB.Driver;
+using EllipticCurve.Utils;
+using WCPShared.Models.DTOs.RangeDTOs;
 
 namespace WCPDataAPI.Controllers
 {
@@ -85,6 +87,23 @@ namespace WCPDataAPI.Controllers
             return NotFound();
         }
 
+        [HttpGet("GetByEmail/{email}")]
+        public async Task<ActionResult<CreatorUser>> GetByEmail(string email)
+        {
+            Creator? creator = (await _creatorService.GetAllCreatorsWithUser()).SingleOrDefault(x => x.User.Email == email);
+
+            if (creator is null)
+                return NotFound();
+
+            User? user = await _userService.GetObject(creator.UserId);
+            if (user is not null)
+            {
+                return Ok(DtoConverter.UserCreatorToCreatorUser(user, creator));
+            }
+
+            return NotFound();
+        }
+
         [HttpPost, Authorize(Roles = "Admin")]
         public async Task<IActionResult> Post(CreatorDto creator)
         {
@@ -96,6 +115,22 @@ namespace WCPDataAPI.Controllers
             await _creatorService.AddObject(creator);
 
             return CreatedAtAction("Post", new { id = creator.UserId }, creator);
+        }
+
+        [HttpPost("AddRange"), Authorize(Roles = "Admin")]
+        public async Task<IActionResult> PostRange([FromBody] CreatorDtoList request)
+        {
+            foreach (var creator in request.Creators)
+            {
+                var user = await _userService.GetObject(creator.UserId);
+
+                if (!creator.Validate() || user is null)
+                    return BadRequest("Valideringsfejl, tjek venligst felterne igen...");
+
+                await _creatorService.AddObject(creator);
+            }
+
+            return Ok();
         }
 
         [HttpPut("{id}")]

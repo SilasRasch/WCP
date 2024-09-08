@@ -5,6 +5,7 @@ using WCPShared.Interfaces.DataServices;
 using WCPShared.Models;
 using WCPShared.Models.DTOs;
 using WCPShared.Models.UserModels;
+using WCPShared.Models.DTOs.RangeDTOs;
 
 namespace WCPDataAPI.Controllers
 {
@@ -59,7 +60,7 @@ namespace WCPDataAPI.Controllers
         }
 
         // POST api/<OrdersController>
-        [HttpPost]
+        [HttpPost()]
         public async Task<ActionResult<Order>> Post(OrderDto order)
         {
             if (!order.Validate())
@@ -70,6 +71,25 @@ namespace WCPDataAPI.Controllers
                 return BadRequest("Brand not found");
 
             await _orderService.AddObject(order);
+            return Created();
+        }
+
+        [HttpPost("AddRange"), Authorize(Roles = "Admin")]
+        public async Task<ActionResult<Order>> Post(OrderDtoList request)
+        {
+            foreach (OrderDto order in request.Orders)
+            {
+                if (!order.Validate())
+                    return BadRequest("Valideringsfejl, tjek venligst felterne igen...");
+
+                Brand? brand = await _brandService.GetObject(order.BrandId);
+                if (brand is null)
+                    return BadRequest("Brand not found");
+
+                await _orderService.AddObject(order);
+            }
+            
+            
             return Created();
         }
 

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace WCPShared.Migrations
 {
     /// <inheritdoc />
-    public partial class Init : Migration
+    public partial class init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -99,8 +99,7 @@ namespace WCPShared.Migrations
                     Price = table.Column<double>(type: "float", nullable: false),
                     DeliveryTimeFrom = table.Column<int>(type: "int", nullable: false),
                     DeliveryTimeTo = table.Column<int>(type: "int", nullable: false),
-                    State = table.Column<int>(type: "int", nullable: false),
-                    Category = table.Column<int>(type: "int", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
                     Scripts = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Content = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Delivery = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -145,7 +144,8 @@ namespace WCPShared.Migrations
                     Speciality = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ImgURL = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     IsEditor = table.Column<bool>(type: "bit", nullable: false),
-                    UserId = table.Column<int>(type: "int", nullable: false)
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    Gender = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {

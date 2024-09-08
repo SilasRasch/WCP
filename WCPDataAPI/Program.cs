@@ -25,7 +25,7 @@ builder.Services.AddScoped<IEmailService, SendGridEmailService>();
 builder.Services.AddScoped<ILanguageService, LanguageService>();
 builder.Services.AddScoped<UserContextService>();
 builder.Services.AddDbContext<WcpDbContext>(
-    options => options.UseSqlServer(Secrets.GetConnectionString(builder.Configuration)));
+    options => options.UseSqlServer("Data Source=172.232.142.14;Initial Catalog=WCP;User ID=sa;Password=Microsoftlmao!;Connect Timeout=30;Encrypt=True;Trust Server Certificate=True;Application Intent=ReadWrite;Multi Subnet Failover=False"));
 
 builder.Services.AddScoped<SlackNotificationService>();
 builder.Services.AddSlackNet(options =>

@@ -13,10 +13,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-//builder.Services.AddDbContext<WcpDbContext>(options =>
-//    options.UseSqlServer("Data Source=172.232.142.14;Initial Catalog=WCP;User ID=sa;Password=Microsoftlmao!;Connect Timeout=30;Encrypt=True;Trust Server Certificate=True;Application Intent=ReadWrite;Multi Subnet Failover=False"));
 builder.Services.AddDbContext<WcpDbContext>(options =>
-    options.UseSqlServer(Secrets.GetConnectionString(builder.Configuration)));
+    options.UseSqlServer("Data Source=172.232.142.14;Initial Catalog=WCP;User ID=sa;Password=Microsoftlmao!;Connect Timeout=30;Encrypt=True;Trust Server Certificate=True;Application Intent=ReadWrite;Multi Subnet Failover=False"));
+//builder.Services.AddDbContext<WcpDbContext>(options =>
+//    options.UseSqlServer(Secrets.GetConnectionString(builder.Configuration)));
 
 string allowAll = "dev";
 

@@ -12,8 +12,8 @@ using WCPShared.Models;
 namespace WCPShared.Migrations
 {
     [DbContext(typeof(WcpDbContext))]
-    [Migration("20240905160419_creator-gender")]
-    partial class creatorgender
+    [Migration("20240908125304_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -90,9 +90,6 @@ namespace WCPShared.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("BrandId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Category")
                         .HasColumnType("int");
 
                     b.Property<string>("Content")
@@ -177,7 +174,7 @@ namespace WCPShared.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("State")
+                    b.Property<int>("Status")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -223,7 +220,6 @@ namespace WCPShared.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Gender")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ImgURL")
