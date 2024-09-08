@@ -4,6 +4,9 @@ using Microsoft.EntityFrameworkCore;
 using WCPShared.Models.DTOs;
 using WCPShared.Models.UserModels;
 using WCPShared.Services.StaticHelpers;
+using System.Linq.Expressions;
+using WCPShared.Models.Views;
+using WCPShared.Services.Converters;
 
 namespace WCPShared.Services.Databases.EntityFramework
 {
@@ -12,13 +15,15 @@ namespace WCPShared.Services.Databases.EntityFramework
         private readonly WcpDbContext _context;
         private readonly IBrandService _brandService;
         private readonly ICreatorService _creatorService;
+        private readonly ViewConverter _viewConverter;
         private readonly SlackNotificationService _slackNetService;
 
-        public OrderService(WcpDbContext context, IBrandService brandService, ICreatorService creatorService, SlackNotificationService slackNetService)
+        public OrderService(WcpDbContext context, IBrandService brandService, ICreatorService creatorService, ViewConverter viewConverter, SlackNotificationService slackNetService)
         {
             _context = context;
             _brandService = brandService;
             _creatorService = creatorService;
+            _viewConverter = viewConverter;
             _slackNetService = slackNetService;
         }
 
@@ -47,12 +52,71 @@ namespace WCPShared.Services.Databases.EntityFramework
 
         public async Task<Order?> GetObject(int id)
         {
-            return await _context.Orders.Include(x => x.Brand).ThenInclude(b => b.Organization).Include(x => x.Creators).SingleOrDefaultAsync(x => x.Id == id);
+            return await _context.Orders
+                .Include(x => x.Brand)
+                .ThenInclude(b => b.Organization)
+                .Include(x => x.Creators)
+                .SingleOrDefaultAsync(x => x.Id == id);
+        }
+
+        public async Task<Order?> GetObjectBy(Expression<Func<Order, bool>> predicate)
+        {
+            return await _context.Orders
+                .Include(x => x.Brand)
+                .ThenInclude(b => b.Organization)
+                .Include(x => x.Creators)
+                .SingleOrDefaultAsync(predicate);
+        }
+
+        public async Task<OrderView?> GetObjectViewBy(Expression<Func<Order, bool>> predicate)
+        {
+            var order = await _context.Orders
+                .Include(x => x.Brand)
+                .ThenInclude(b => b.Organization)
+                .Include(x => x.Creators)
+                .SingleOrDefaultAsync(predicate);
+
+            if (order is not null)
+                return _viewConverter.Convert(order);
+            return null;
         }
 
         public async Task<List<Order>> GetAllObjects()
         {
-            return await _context.Orders.Include(x => x.Brand).ThenInclude(b => b.Organization).Include(x => x.Creators).ToListAsync();
+            return await _context.Orders.ToListAsync();
+        }
+
+        public async Task<List<OrderView>> GetAllObjectsView()
+        {
+            return await _context.Orders
+                .Include(x => x.Brand)
+                .ThenInclude(b => b.Organization)
+                .Include(x => x.Creators)
+                .ThenInclude(x => x.User)
+                .Select(x => _viewConverter.Convert(x))
+                .ToListAsync();
+        }
+
+        public async Task<List<Order>> GetObjectsBy(Expression<Func<Order, bool>> predicate)
+        {
+            return await _context.Orders
+                .Where(predicate)
+                .Include(x => x.Brand)
+                .ThenInclude(b => b.Organization)
+                .Include(x => x.Creators)
+                .ToListAsync();
+        }
+
+        public async Task<List<OrderView>> GetObjectsViewBy(Expression<Func<Order, bool>> predicate)
+        {
+            return await _context.Orders
+                .Where(predicate)
+                .Include(x => x.Brand)
+                .ThenInclude(b => b.Organization)
+                .Include(x => x.Creators)
+                .ThenInclude(x => x.User)
+                .Select(x => _viewConverter.Convert(x))
+                .ToListAsync();
         }
 
         public async Task<Order?> UpdateObject(int id, Order obj)

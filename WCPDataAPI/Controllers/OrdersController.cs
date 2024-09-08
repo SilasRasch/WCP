@@ -6,6 +6,7 @@ using WCPShared.Models;
 using WCPShared.Models.DTOs;
 using WCPShared.Models.UserModels;
 using WCPShared.Models.DTOs.RangeDTOs;
+using WCPShared.Models.Views;
 
 namespace WCPDataAPI.Controllers
 {
@@ -30,38 +31,36 @@ namespace WCPDataAPI.Controllers
 
         // GET: api/<OrdersController>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Order>>> Get([FromQuery] int? userId = null, [FromQuery] int? orgId = null, [FromQuery] int? status = null)
+        public async Task<ActionResult<IEnumerable<OrderView>>> Get([FromQuery] int? userId = null, [FromQuery] int? orgId = null, [FromQuery] int? status = null)
         {   
-            var orders = await _orderService.GetAllObjects();
-
             if (orgId is not null) // && creatorId is null)
-                return Ok(orders.Where(x => x.Brand.OrganizationId == orgId.Value));
+                return Ok(await _orderService.GetObjectsViewBy(x => x.Brand.OrganizationId == orgId.Value));
                 
             else if (_userContextService.GetRoles().Contains("Bruger")) // Catch (get by JWT role)
-                return Ok(orders.Where(x => x.Brand.OrganizationId == _userContextService.GetOrganizationId()));
+                return Ok(await _orderService.GetObjectsViewBy(x => x.Brand.OrganizationId == _userContextService.GetOrganizationId()));
 
             if (userId is not null)
-                return Ok(orders.Where(x => x.Creators.Any(x => x.UserId == userId.Value)));
+                return Ok(await _orderService.GetObjectsViewBy(x => x.Creators.Any(x => x.UserId == userId.Value)));
             else if (_userContextService.GetRoles().Contains("Creator") || _userContextService.GetRoles().Contains("Editor")) // Catch (get by JWT role)
-                return Ok(orders.Where(x => x.Creators!.Any(x => x.UserId == _userContextService.GetId())));
+                return Ok(await _orderService.GetObjectsViewBy(x => x.Creators!.Any(x => x.UserId == _userContextService.GetId())));
 
             if (_userContextService.GetRoles().Contains("Admin") && userId is null && orgId is null)
-                return Ok(orders.TakeLast(30));
+                return Ok(await _orderService.GetAllObjectsView());
 
-            return Ok(new List<Order>());
+            return Ok(new List<OrderView>());
         }
 
         // GET api/<OrdersController>/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Order>> Get(int id)
+        public async Task<ActionResult<OrderView>> Get(int id)
         {
-            Order? order = await _orderService.GetObject(id);
+            OrderView? order = await _orderService.GetObjectViewBy(x => x.Id == id);
             return order is not null ? Ok(order) : NotFound();
         }
 
         // POST api/<OrdersController>
         [HttpPost()]
-        public async Task<ActionResult<Order>> Post(OrderDto order)
+        public async Task<IActionResult> Post(OrderDto order)
         {
             if (!order.Validate())
                 return BadRequest("Valideringsfejl, tjek venligst felterne igen...");
@@ -75,7 +74,7 @@ namespace WCPDataAPI.Controllers
         }
 
         [HttpPost("AddRange"), Authorize(Roles = "Admin")]
-        public async Task<ActionResult<Order>> Post(OrderDtoList request)
+        public async Task<IActionResult> Post(OrderDtoList request)
         {
             foreach (OrderDto order in request.Orders)
             {
@@ -88,14 +87,12 @@ namespace WCPDataAPI.Controllers
 
                 await _orderService.AddObject(order);
             }
-            
-            
             return Created();
         }
 
         // PUT api/<OrdersController>/5
         [HttpPut("{id}")]
-        public async Task<ActionResult<Order>> Put(OrderDto order, int id)
+        public async Task<IActionResult> Put(OrderDto order, int id)
         {
             Order? existingOrder = await _orderService.GetObject(id);
 
