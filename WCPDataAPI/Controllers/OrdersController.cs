@@ -28,24 +28,25 @@ namespace WCPDataAPI.Controllers
             _creatorService = creatorService;
         }
 
+        // TODO: Refactor Get endpoint to use claims/roles instead of query parameters... (for security)
 
         // GET: api/<OrdersController>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<OrderView>>> Get([FromQuery] int? userId = null, [FromQuery] int? orgId = null, [FromQuery] int? status = null)
+        public async Task<ActionResult<IEnumerable<OrderView>>> Get([FromQuery] int status, [FromQuery] int? userId = null, [FromQuery] int? orgId = null)
         {   
             if (orgId is not null) // && creatorId is null)
-                return Ok(await _orderService.GetObjectsViewBy(x => x.Brand.OrganizationId == orgId.Value));
+                return Ok(await _orderService.GetObjectsViewBy(x => x.Brand.OrganizationId == orgId.Value && x.Status == status));
                 
             else if (_userContextService.GetRoles().Contains("Bruger")) // Catch (get by JWT role)
-                return Ok(await _orderService.GetObjectsViewBy(x => x.Brand.OrganizationId == _userContextService.GetOrganizationId()));
+                return Ok(await _orderService.GetObjectsViewBy(x => x.Brand.OrganizationId == _userContextService.GetOrganizationId() && x.Status == status));
 
             if (userId is not null)
-                return Ok(await _orderService.GetObjectsViewBy(x => x.Creators.Any(x => x.UserId == userId.Value)));
+                return Ok(await _orderService.GetObjectsViewBy(x => x.Creators.Any(x => x.UserId == userId.Value) && x.Status == status));
             else if (_userContextService.GetRoles().Contains("Creator") || _userContextService.GetRoles().Contains("Editor")) // Catch (get by JWT role)
-                return Ok(await _orderService.GetObjectsViewBy(x => x.Creators!.Any(x => x.UserId == _userContextService.GetId())));
+                return Ok(await _orderService.GetObjectsViewBy(x => x.Creators!.Any(x => x.UserId == _userContextService.GetId()) && x.Status == status));
 
             if (_userContextService.GetRoles().Contains("Admin") && userId is null && orgId is null)
-                return Ok(await _orderService.GetAllObjectsView());
+                return Ok(await _orderService.GetObjectsViewBy(x => x.Status == status));
 
             return Ok(new List<OrderView>());
         }
