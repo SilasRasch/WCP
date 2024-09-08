@@ -192,7 +192,7 @@ namespace WCPShared.Services.Databases.EntityFramework
 
             _context.Update(existingOrder);
             await _context.SaveChangesAsync();
-            await _slackNetService.SendStatusNotifications(existingOrder, copyOfExistingOrder);
+            //await _slackNetService.SendStatusNotifications(existingOrder, copyOfExistingOrder);
 
             return existingOrder;
         }
