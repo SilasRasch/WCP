@@ -9,6 +9,7 @@ using WCPShared.Services.StaticHelpers;
 using MongoDB.Driver;
 using EllipticCurve.Utils;
 using WCPShared.Models.DTOs.RangeDTOs;
+using WCPShared.Models.Views;
 
 namespace WCPDataAPI.Controllers
 {
@@ -33,9 +34,9 @@ namespace WCPDataAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<CreatorUser>>> Get([FromQuery] int? orderId = null, [FromQuery] string? searchTerm = null)
+        public async Task<ActionResult<IEnumerable<CreatorView>>> Get([FromQuery] int? orderId = null, [FromQuery] string? searchTerm = null)
         {
-            List<Creator> creators = await _creatorService.GetAllObjects();
+            List<CreatorView> creators = await _creatorService.GetAllObjectsView();
 
             if (orderId is not null)
             {
@@ -43,7 +44,7 @@ namespace WCPDataAPI.Controllers
 
                 if (order is not null && order.Creators is not null)
                 {
-                    creators = creators.Where(order.Creators.Contains).ToList();
+                    creators = creators.Where(x => order.Creators.Any(c => c.Id == x.Id)).ToList();
                 }
             }
 
@@ -56,52 +57,29 @@ namespace WCPDataAPI.Controllers
                     ).ToList();
             }
 
-            List<CreatorUser> combined = new List<CreatorUser>();
-
-            foreach (Creator creator in creators)
-            {
-                User? user = await _userService.GetObject(creator.UserId);
-                if (user is not null)
-                {
-                    combined.Add(DtoConverter.UserCreatorToCreatorUser(user, creator));
-                }
-            }
-
-            return combined is not null ? Ok(combined) : NotFound("No creators found");
+            return creators is not null ? Ok(creators) : NotFound("No creators found");
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<CreatorUser>> Get(int id)
+        public async Task<ActionResult<CreatorView>> Get(int id)
         {
-            Creator? creator = await _creatorService.GetObject(id);
+            CreatorView? creator = await _creatorService.GetObjectViewBy(x => x.Id == id);
 
             if (creator is null)
                 return NotFound();
 
-            User? user = await _userService.GetObject(creator.UserId);
-            if (user is not null)
-            {
-                return Ok(DtoConverter.UserCreatorToCreatorUser(user, creator));
-            }
-
-            return NotFound();
+            return Ok(creator);
         }
 
         [HttpGet("GetByEmail/{email}")]
-        public async Task<ActionResult<CreatorUser>> GetByEmail(string email)
+        public async Task<ActionResult<CreatorView>> GetByEmail(string email)
         {
-            Creator? creator = (await _creatorService.GetAllCreatorsWithUser()).SingleOrDefault(x => x.User.Email == email);
+            CreatorView? creator = await _creatorService.GetObjectViewBy(x => x.User.Email == email);
 
             if (creator is null)
                 return NotFound();
 
-            User? user = await _userService.GetObject(creator.UserId);
-            if (user is not null)
-            {
-                return Ok(DtoConverter.UserCreatorToCreatorUser(user, creator));
-            }
-
-            return NotFound();
+            return Ok(creator);
         }
 
         [HttpPost, Authorize(Roles = "Admin")]

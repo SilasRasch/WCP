@@ -3,6 +3,10 @@ using WCPShared.Models;
 using Microsoft.EntityFrameworkCore;
 using WCPShared.Models.UserModels;
 using WCPShared.Models.DTOs;
+using WCPShared.Models.Views;
+using System.Linq.Expressions;
+using WCPShared.Services.Converters;
+using System;
 
 namespace WCPShared.Services.Databases.EntityFramework
 {
@@ -11,12 +15,14 @@ namespace WCPShared.Services.Databases.EntityFramework
         private readonly WcpDbContext _context;
         private readonly IUserService _userService;
         private readonly ILanguageService _languageService;
+        private readonly ViewConverter _viewConverter;
 
-        public CreatorService(WcpDbContext context, ILanguageService languageService, IUserService userService)
+        public CreatorService(WcpDbContext context, ILanguageService languageService, IUserService userService, ViewConverter viewConverter)
         {
             _context = context;
             _languageService = languageService;
             _userService = userService;
+            _viewConverter = viewConverter;
         }
 
         public async Task AddObject(Creator obj)
@@ -135,13 +141,35 @@ namespace WCPShared.Services.Databases.EntityFramework
             return creatorToAdd;
         }
 
-        /// <summary>
-        /// Only for internal use!
-        /// </summary>
-        /// <returns></returns>
-        public async Task<List<Creator>> GetAllCreatorsWithUser()
+        public async Task<List<CreatorView>> GetObjectsViewBy(Expression<Func<Creator, bool>> predicate)
         {
-            return await _context.Creators.Include(x => x.User).AsNoTracking().ToListAsync();
+            return await _context.Creators
+                .Where(predicate)
+                .Include(x => x.Languages)
+                .Include(x => x.User)
+                .Select(x => _viewConverter.Convert(x))
+                .ToListAsync();
+        }
+
+        public async Task<CreatorView?> GetObjectViewBy(Expression<Func<Creator, bool>> predicate)
+        {
+            var creator = await _context.Creators
+                .Include(x => x.Languages)
+                .Include(x => x.User)
+                .SingleOrDefaultAsync(predicate);
+
+            if (creator is not null)
+                _viewConverter.Convert(creator);
+            return null;
+        }
+
+        public async Task<List<CreatorView>> GetAllObjectsView()
+        {
+            return await _context.Creators
+                .Include(x => x.Languages)
+                .Include(x => x.User)
+                .Select(x => _viewConverter.Convert(x))
+                .ToListAsync();
         }
     }
 }

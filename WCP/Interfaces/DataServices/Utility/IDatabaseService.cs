@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WCPShared.Interfaces.DataServices
+namespace WCPShared.Interfaces.DataServices.Utility
 {
     public interface IDatabaseService<T> where T : class
     {

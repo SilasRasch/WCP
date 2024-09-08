@@ -4,6 +4,7 @@ using WCPShared.Services;
 using WCPShared.Models;
 using WCPShared.Interfaces.DataServices;
 using WCPShared.Models.DTOs.RangeDTOs;
+using WCPShared.Models.Views;
 
 namespace WCPDataAPI.Controllers
 {
@@ -25,26 +26,25 @@ namespace WCPDataAPI.Controllers
 
         // GET: api/<BrandsController>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Brand>>> Get([FromQuery] int? orgId = null)
+        public async Task<ActionResult<IEnumerable<BrandView>>> Get([FromQuery] int? orgId = null)
         {
-            IEnumerable<Brand> brands = await _brandService.GetAllObjects();
-
+            if (_userContextService.GetRoles().Contains("Bruger"))
+                return await _brandService.GetObjectsViewBy(x => x.OrganizationId == _userContextService.GetOrganizationId());
+            
             if (orgId is not null)
-                brands = brands.Where(x => x.OrganizationId == orgId);
-            else if (_userContextService.GetRoles().Contains("Bruger")) // Catch (get by JWT role)
-                brands = brands.Where(x => x.OrganizationId == _userContextService.GetOrganizationId());
-            else if (_userContextService.GetRoles().Contains("Admin")) { /* Do nothing */ }
-            //else
-            //    brands = new List<Brand>();
+                return await _brandService.GetObjectsViewBy(x => x.OrganizationId == orgId);
 
-            return brands is not null ? Ok(brands) : NotFound("Ingen brands at finde...");
+            if (_userContextService.GetRoles().Contains("Bruger"))
+                return await _brandService.GetAllObjectsView();
+            
+            return NotFound("Ingen brands at finde...");
         }
 
         // GET api/<BrandsController>/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Brand>> Get(int id)
+        public async Task<ActionResult<BrandView>> Get(int id)
         {
-            Brand? brand = await _brandService.GetObject(id);
+            BrandView? brand = await _brandService.GetObjectViewBy(x => x.Id == id);
             return brand is not null ? Ok(brand) : NotFound("Der blev ikke fundet nogen brand med det id...");
         }
 

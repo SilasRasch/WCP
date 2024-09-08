@@ -3,6 +3,7 @@ using SlackNet.WebApi;
 using System.Linq;
 using WCPShared.Interfaces.DataServices;
 using WCPShared.Models;
+using WCPShared.Models.Views;
 
 namespace WCPShared.Services
 {
@@ -85,20 +86,18 @@ namespace WCPShared.Services
 
             // Creator notifications
 
-            List<WCPShared.Models.UserModels.Creator> creatorsWithUsers = (await _creatorService.GetAllCreatorsWithUser())
-                .Where(x => newOrder.Creators.Exists(c => x.Id == c.Id))
-                .ToList();
+            List<CreatorView> creatorsWithUsers = await _creatorService.GetObjectsViewBy(x => newOrder.Creators.Exists(c => x.Id == c.Id));
 
             // Notify creators when the project is moved from planned to production
             if (newOrder.Status == 3 && oldOrder.Status == 2)
-                foreach (WCPShared.Models.UserModels.Creator creator in creatorsWithUsers)
+                foreach (CreatorView creator in creatorsWithUsers)
                     await SendMessageToUser(
                         creator.User.Name,
                         $"[{newOrder.ProjectName}] Projektet er nu godkendt og produkterne er på vej til dig!");
 
             // Notify creators when the project is moved from queued to planned
             if (newOrder.Status == 2 && oldOrder.Status == 1)
-                foreach (WCPShared.Models.UserModels.Creator creator in creatorsWithUsers)
+                foreach (CreatorView creator in creatorsWithUsers)
                     await SendMessageToUser(
                         creator.User.Name,
                         "Du er blevet inviteret til et projekt!");
@@ -108,7 +107,7 @@ namespace WCPShared.Services
             {
                 var newCreators = creatorsWithUsers.ExceptBy(oldOrder.Creators.Select(x => x.Id), x => x.Id);
                 if (newCreators.Any())
-                    foreach (WCPShared.Models.UserModels.Creator creator in newCreators)
+                    foreach (CreatorView creator in newCreators)
                         await SendMessageToUser(
                             creator.User.Name,
                             "Du er blevet inviteret til et projekt!");

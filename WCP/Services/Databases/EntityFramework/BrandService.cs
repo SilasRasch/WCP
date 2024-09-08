@@ -1,6 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System;
+using System.Linq.Expressions;
 using WCPShared.Interfaces.DataServices;
 using WCPShared.Models;
+using WCPShared.Models.Views;
+using WCPShared.Services.Converters;
 
 namespace WCPShared.Services.Databases.EntityFramework
 {
@@ -8,11 +12,13 @@ namespace WCPShared.Services.Databases.EntityFramework
     {
         private readonly WcpDbContext _context;
         private readonly IOrganizationService _organizationService;
+        private readonly ViewConverter _viewConverter;
 
-        public BrandService(WcpDbContext context, IOrganizationService organizationService)
+        public BrandService(WcpDbContext context, IOrganizationService organizationService, ViewConverter viewConverter)
         {
             _context = context;
             _organizationService = organizationService;
+            _viewConverter = viewConverter;
         }
 
         public async Task AddObject(Brand brand)
@@ -101,6 +107,34 @@ namespace WCPShared.Services.Databases.EntityFramework
             await _context.Brands.AddAsync(brand);
             await _context.SaveChangesAsync();
             return brand;
+        }
+
+        public async Task<List<BrandView>> GetObjectsViewBy(Expression<Func<Brand, bool>> predicate)
+        {
+            return await _context.Brands
+                .Where(predicate)
+                .Include(x => x.Organization)
+                .Select(x => _viewConverter.Convert(x))
+                .ToListAsync();
+        }
+
+        public async Task<BrandView?> GetObjectViewBy(Expression<Func<Brand, bool>> predicate)
+        {
+            var brand = await _context.Brands
+                .Include(x => x.Organization)
+                .SingleOrDefaultAsync(predicate);
+
+            if (brand is not null)
+                _viewConverter.Convert(brand);
+            return null;
+        }
+
+        public async Task<List<BrandView>> GetAllObjectsView()
+        {
+            return await _context.Brands
+                .Include(x => x.Organization)
+                .Select(x => _viewConverter.Convert(x))
+                .ToListAsync();
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using WCPShared.Models;
+﻿using WCPShared.Interfaces.DataServices.Utility;
+using WCPShared.Models;
 using WCPShared.Models.DTOs;
 
 namespace WCPShared.Interfaces.DataServices

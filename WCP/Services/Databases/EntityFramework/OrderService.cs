@@ -68,33 +68,9 @@ namespace WCPShared.Services.Databases.EntityFramework
                 .SingleOrDefaultAsync(predicate);
         }
 
-        public async Task<OrderView?> GetObjectViewBy(Expression<Func<Order, bool>> predicate)
-        {
-            var order = await _context.Orders
-                .Include(x => x.Brand)
-                .ThenInclude(b => b.Organization)
-                .Include(x => x.Creators)
-                .SingleOrDefaultAsync(predicate);
-
-            if (order is not null)
-                return _viewConverter.Convert(order);
-            return null;
-        }
-
         public async Task<List<Order>> GetAllObjects()
         {
             return await _context.Orders.ToListAsync();
-        }
-
-        public async Task<List<OrderView>> GetAllObjectsView()
-        {
-            return await _context.Orders
-                .Include(x => x.Brand)
-                .ThenInclude(b => b.Organization)
-                .Include(x => x.Creators)
-                .ThenInclude(x => x.User)
-                .Select(x => _viewConverter.Convert(x))
-                .ToListAsync();
         }
 
         public async Task<List<Order>> GetObjectsBy(Expression<Func<Order, bool>> predicate)
@@ -104,18 +80,6 @@ namespace WCPShared.Services.Databases.EntityFramework
                 .Include(x => x.Brand)
                 .ThenInclude(b => b.Organization)
                 .Include(x => x.Creators)
-                .ToListAsync();
-        }
-
-        public async Task<List<OrderView>> GetObjectsViewBy(Expression<Func<Order, bool>> predicate)
-        {
-            return await _context.Orders
-                .Where(predicate)
-                .Include(x => x.Brand)
-                .ThenInclude(b => b.Organization)
-                .Include(x => x.Creators)
-                .ThenInclude(x => x.User)
-                .Select(x => _viewConverter.Convert(x))
                 .ToListAsync();
         }
 
@@ -214,6 +178,42 @@ namespace WCPShared.Services.Databases.EntityFramework
             await _context.AddAsync(order);
             await _context.SaveChangesAsync();
             return order;
+        }
+
+        public async Task<List<OrderView>> GetAllObjectsView()
+        {
+            return await _context.Orders
+                .Include(x => x.Brand)
+                .ThenInclude(b => b.Organization)
+                .Include(x => x.Creators)
+                .ThenInclude(x => x.User)
+                .Select(x => _viewConverter.Convert(x))
+                .ToListAsync();
+        }
+
+        public async Task<List<OrderView>> GetObjectsViewBy(Expression<Func<Order, bool>> predicate)
+        {
+            return await _context.Orders
+                .Where(predicate)
+                .Include(x => x.Brand)
+                .ThenInclude(b => b.Organization)
+                .Include(x => x.Creators)
+                .ThenInclude(x => x.User)
+                .Select(x => _viewConverter.Convert(x))
+                .ToListAsync();
+        }
+
+        public async Task<OrderView?> GetObjectViewBy(Expression<Func<Order, bool>> predicate)
+        {
+            var order = await _context.Orders
+                .Include(x => x.Brand)
+                .ThenInclude(b => b.Organization)
+                .Include(x => x.Creators)
+                .SingleOrDefaultAsync(predicate);
+
+            if (order is not null)
+                return _viewConverter.Convert(order);
+            return null;
         }
     }
 }

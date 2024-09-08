@@ -5,6 +5,9 @@ using WCPShared.Interfaces.DataServices;
 using WCPShared.Models.AuthModels;
 using Azure.Core;
 using WCPShared.Interfaces;
+using System.Linq.Expressions;
+using WCPShared.Services.Converters;
+using System;
 
 namespace WCPShared.Services.Databases.EntityFramework
 {
@@ -12,11 +15,13 @@ namespace WCPShared.Services.Databases.EntityFramework
     {
         private readonly WcpDbContext _context;
         private readonly IOrganizationService _organizationService;
+        private readonly ViewConverter _viewConverter;
 
-        public UserService(WcpDbContext context, IOrganizationService organizationService)
+        public UserService(WcpDbContext context, IOrganizationService organizationService, ViewConverter viewConverter)
         {
             _context = context;
             _organizationService = organizationService;
+            _viewConverter = viewConverter;
         }
 
         public async Task AddObject(User user)
@@ -114,6 +119,34 @@ namespace WCPShared.Services.Databases.EntityFramework
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
             return user;
+        }
+
+        public async Task<List<UserNC>> GetObjectsViewBy(Expression<Func<User, bool>> predicate)
+        {
+            return await _context.Users
+                .Where(predicate)
+                .Include(x => x.Organization)
+                .Select(x => _viewConverter.Convert(x))
+                .ToListAsync();
+        }
+
+        public async Task<UserNC?> GetObjectViewBy(Expression<Func<User, bool>> predicate)
+        {
+            var user = await _context.Users
+                .Include(x => x.Organization)
+                .SingleOrDefaultAsync(predicate);
+
+            if (user is not null)
+                return _viewConverter.Convert(user);
+            return null;
+        }
+
+        public async Task<List<UserNC>> GetAllObjectsView()
+        {
+            return await _context.Users
+                .Include(x => x.Organization)
+                .Select(x => _viewConverter.Convert(x))
+                .ToListAsync();
         }
     }
 }

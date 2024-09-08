@@ -26,20 +26,16 @@ namespace WCPDataAPI.Controllers
         [HttpGet, Authorize(Roles = "Admin")]
         public async Task<ActionResult<IEnumerable<UserNC>>> Get([FromQuery] string? role)
         {
-            IEnumerable<User> users = await _userService.GetAllObjects();
-            if (role is not null) users = users.Where(x => x.Role.ToLower() == role.ToLower());
-
-            IEnumerable<UserNC> ncUsers = users.Select((user) => DtoConverter.UserToNCUser(user));
-
-            return Ok(ncUsers);
+            if (role is not null) return Ok(await _userService.GetObjectsViewBy(x => x.Role.ToLower() == role.ToLower()));
+            return Ok(_userService.GetAllObjectsView());
         }
 
         // GET api/<UsersController>/5
         [HttpGet("{id}"), Authorize(Roles = "Admin")]
         public async Task<ActionResult<UserNC>> Get(int id)
         {
-            User? user = await _userService.GetObject(id);
-            return user is not null ? Ok(DtoConverter.UserToNCUser(user)) : NotFound("Der blev ikke fundet en bruger med det id...");
+            UserNC? user = await _userService.GetObjectViewBy(x => x.Id == id);
+            return user is not null ? Ok(user) : NotFound("Der blev ikke fundet en bruger med det id...");
         }
 
         // PUT api/<UsersController>/5
