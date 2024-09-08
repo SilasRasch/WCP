@@ -86,7 +86,11 @@ namespace WCPShared.Services
 
             // Creator notifications
 
-            List<CreatorView> creatorsWithUsers = await _creatorService.GetObjectsViewBy(x => newOrder.Creators.Exists(c => x.Id == c.Id));
+            var allCreators = await _creatorService.GetAllObjectsView();
+            IEnumerable<CreatorView> creatorsWithUsers = from Creator in newOrder.Creators
+                                                  join CreatorView in allCreators
+                                                  on Creator.Id equals CreatorView.Id
+                                                  select CreatorView;
 
             // Notify creators when the project is moved from planned to production
             if (newOrder.Status == 3 && oldOrder.Status == 2)
