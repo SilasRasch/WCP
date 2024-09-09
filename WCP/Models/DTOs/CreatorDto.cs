@@ -20,7 +20,7 @@ namespace WCPShared.Models.DTOs
 
         public bool Validate()
         {
-            if (!IsEditor && (string.IsNullOrWhiteSpace(Address) || string.IsNullOrWhiteSpace(Speciality)))
+            if (!IsEditor && (string.IsNullOrWhiteSpace(Address) || string.IsNullOrWhiteSpace(Gender) || string.IsNullOrWhiteSpace(Address)))
                 return false;
 
             return true;
