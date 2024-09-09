@@ -125,7 +125,7 @@ namespace WCPShared.Services.Databases.EntityFramework
                 .SingleOrDefaultAsync(predicate);
 
             if (brand is not null)
-                _viewConverter.Convert(brand);
+                return _viewConverter.Convert(brand);
             return null;
         }
 

@@ -20,6 +20,7 @@ namespace WCPShared.Models.Views
         public int DeliveryTimeTo { get; set; }
         public int Status { get; set; }
         public List<CreatorView> Creators { get; set; } = new List<CreatorView>();
+        public List<StaticTemplateView> StaticTemplates { get; set; } = new List<StaticTemplateView>();
 
         // Drive-links
         public string Scripts { get; set; } = string.Empty;

@@ -15,6 +15,7 @@ namespace WCPShared.Models
         public DbSet<Creator> Creators { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<Language> Languages { get; set; }
+        public DbSet<StaticTemplate> StaticTemplates { get; set; }
 
         private readonly IConfiguration _configuration;
 
@@ -28,6 +29,10 @@ namespace WCPShared.Models
             modelBuilder.Entity<Creator>()
                 .HasMany(x => x.Languages)
                 .WithMany(x => x.Speakers);
+
+            modelBuilder.Entity<Order>()
+                .HasMany(x => x.StaticTemplates)
+                .WithMany(x => x.Orders);
             
             modelBuilder.Entity<Order>()
                 .Property(x => x.Ideas)

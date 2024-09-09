@@ -12,6 +12,7 @@ namespace WCPShared.Services.Converters
             OrderView view = new OrderView(obj);
             view.Brand = Convert(obj.Brand);
             view.Creators = obj.Creators.Select(x => Convert(x)).ToList();
+            view.StaticTemplates = obj.StaticTemplates.Select(x => Convert(x)).ToList();
             return view;
         }
 
@@ -46,6 +47,11 @@ namespace WCPShared.Services.Converters
                 Phone = obj.Phone,
                 Role = obj.Role
             };
+        }
+
+        public StaticTemplateView Convert(StaticTemplate obj)
+        {
+            return new StaticTemplateView(obj);
         }
     }
 }
