@@ -23,6 +23,7 @@ builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IOrganizationService, OrganizationService>();
 builder.Services.AddScoped<ICreatorService, CreatorService>();
 builder.Services.AddScoped<IBrandService, BrandService>();
+builder.Services.AddScoped<IStaticTemplateService, StaticTemplateService>();
 builder.Services.AddScoped<IEmailService, SendGridEmailService>();
 builder.Services.AddScoped<ILanguageService, LanguageService>();
 builder.Services.AddScoped<UserContextService>();
