@@ -13,11 +13,11 @@ namespace WCPShared.Services.Databases.EntityFramework
 {
     public class UserService : IUserService
     {
-        private readonly WcpDbContext _context;
+        private readonly IWcpDbContext _context;
         private readonly IOrganizationService _organizationService;
         private readonly ViewConverter _viewConverter;
 
-        public UserService(WcpDbContext context, IOrganizationService organizationService, ViewConverter viewConverter)
+        public UserService(IWcpDbContext context, IOrganizationService organizationService, ViewConverter viewConverter)
         {
             _context = context;
             _organizationService = organizationService;

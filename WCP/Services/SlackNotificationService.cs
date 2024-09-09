@@ -4,6 +4,7 @@ using System.Linq;
 using WCPShared.Interfaces.DataServices;
 using WCPShared.Models;
 using WCPShared.Models.Views;
+using WCPShared.Services.StaticHelpers;
 
 namespace WCPShared.Services
 {
@@ -20,6 +21,8 @@ namespace WCPShared.Services
 
         public async Task SendMessageToUser(string username, string message)
         {
+            if (!Secrets.IsProd) return;
+            
             User? user = await FetchUser(username);
 
             if (user is not null)
@@ -28,6 +31,8 @@ namespace WCPShared.Services
 
         public async Task SendMessageToChannel(string channel, string message)
         {
+            if (!Secrets.IsProd) return;
+
             Conversation? conversation = await FetchConversation(channel);
             
             if (conversation is not null)
@@ -58,6 +63,8 @@ namespace WCPShared.Services
 
         public async Task SendStatusNotifications(Order newOrder, Order oldOrder)
         {
+            if (!Secrets.IsProd) return;
+
             // Organizational notifications
 
             // Notify organization when the order is accepted

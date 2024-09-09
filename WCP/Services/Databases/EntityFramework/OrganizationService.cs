@@ -2,14 +2,15 @@
 using Microsoft.EntityFrameworkCore;
 using WCPShared.Interfaces.DataServices;
 using WCPShared.Models.DTOs;
+using WCPShared.Interfaces;
 
 namespace WCPShared.Services.Databases.EntityFramework
 {
     public class OrganizationService : IOrganizationService
     {
-        private readonly WcpDbContext _context;
+        private readonly IWcpDbContext _context;
 
-        public OrganizationService(WcpDbContext context)
+        public OrganizationService(IWcpDbContext context)
         {
             _context = context;
         }

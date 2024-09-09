@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq.Expressions;
+using WCPShared.Interfaces;
 using WCPShared.Interfaces.DataServices;
 using WCPShared.Models;
 using WCPShared.Models.Views;
@@ -10,11 +11,11 @@ namespace WCPShared.Services.Databases.EntityFramework
 {
     public class BrandService : IBrandService
     {
-        private readonly WcpDbContext _context;
+        private readonly IWcpDbContext _context;
         private readonly IOrganizationService _organizationService;
         private readonly ViewConverter _viewConverter;
 
-        public BrandService(WcpDbContext context, IOrganizationService organizationService, ViewConverter viewConverter)
+        public BrandService(IWcpDbContext context, IOrganizationService organizationService, ViewConverter viewConverter)
         {
             _context = context;
             _organizationService = organizationService;

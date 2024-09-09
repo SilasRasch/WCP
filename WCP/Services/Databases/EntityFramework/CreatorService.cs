@@ -7,17 +7,18 @@ using WCPShared.Models.Views;
 using System.Linq.Expressions;
 using WCPShared.Services.Converters;
 using System;
+using WCPShared.Interfaces;
 
 namespace WCPShared.Services.Databases.EntityFramework
 {
     public class CreatorService : ICreatorService
     {
-        private readonly WcpDbContext _context;
+        private readonly IWcpDbContext _context;
         private readonly IUserService _userService;
         private readonly ILanguageService _languageService;
         private readonly ViewConverter _viewConverter;
 
-        public CreatorService(WcpDbContext context, ILanguageService languageService, IUserService userService, ViewConverter viewConverter)
+        public CreatorService(IWcpDbContext context, ILanguageService languageService, IUserService userService, ViewConverter viewConverter)
         {
             _context = context;
             _languageService = languageService;
@@ -64,8 +65,6 @@ namespace WCPShared.Services.Databases.EntityFramework
 
             if (oldCreator is null)
                 return null!;
-
-            //_context.Creators.Attach(oldCreator); // Not needed? Already tracked frem GET
 
             oldCreator.DateOfBirth = obj.DateOfBirth;
             oldCreator.Address = obj.Address;
@@ -136,7 +135,7 @@ namespace WCPShared.Services.Databases.EntityFramework
                 creatorToAdd.Languages = languages.Where(x => obj.Languages.Contains(x.Name)).ToList();
             }
 
-            await _context.AddAsync(creatorToAdd);
+            await _context.Creators.AddAsync(creatorToAdd);
             await _context.SaveChangesAsync();
             return creatorToAdd;
         }

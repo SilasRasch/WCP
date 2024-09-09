@@ -7,18 +7,19 @@ using WCPShared.Services.StaticHelpers;
 using System.Linq.Expressions;
 using WCPShared.Models.Views;
 using WCPShared.Services.Converters;
+using WCPShared.Interfaces;
 
 namespace WCPShared.Services.Databases.EntityFramework
 {
     public class OrderService : IOrderService
     {
-        private readonly WcpDbContext _context;
+        private readonly IWcpDbContext _context;
         private readonly IBrandService _brandService;
         private readonly ICreatorService _creatorService;
         private readonly ViewConverter _viewConverter;
         private readonly SlackNotificationService _slackNetService;
 
-        public OrderService(WcpDbContext context, IBrandService brandService, ICreatorService creatorService, ViewConverter viewConverter, SlackNotificationService slackNetService)
+        public OrderService(IWcpDbContext context, IBrandService brandService, ICreatorService creatorService, ViewConverter viewConverter, SlackNotificationService slackNetService)
         {
             _context = context;
             _brandService = brandService;

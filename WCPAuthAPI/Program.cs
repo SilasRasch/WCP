@@ -29,8 +29,16 @@ builder.Services.AddScoped<IOrganizationService, OrganizationService>();
 builder.Services.AddScoped<IEmailService, SendGridEmailService>();
 builder.Services.AddScoped<UserContextService>();
 builder.Services.AddScoped<ViewConverter>();
-builder.Services.AddDbContext<WcpDbContext>(
-    options => options.UseSqlServer(Secrets.GetConnectionString(builder.Configuration)));
+if (Secrets.IsProd)
+{
+    builder.Services.AddDbContext<IWcpDbContext, WcpDbContext>(
+        options => options.UseSqlServer(Secrets.GetConnectionString(builder.Configuration)));
+}
+else
+{
+    builder.Services.AddDbContext<IWcpDbContext, TestDbContext>(
+        options => options.UseSqlServer(Secrets.GetConnectionString(builder.Configuration)));
+}
 
 builder.Services.AddSwaggerGen(options =>
 {

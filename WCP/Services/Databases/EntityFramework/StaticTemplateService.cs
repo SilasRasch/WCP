@@ -1,6 +1,7 @@
 ﻿
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
+using WCPShared.Interfaces;
 using WCPShared.Interfaces.DataServices;
 using WCPShared.Models;
 using WCPShared.Models.DTOs;
@@ -11,10 +12,10 @@ namespace WCPShared.Services.Databases.EntityFramework
 {
     public class StaticTemplateService : IStaticTemplateService
     {
-        private readonly WcpDbContext _context;
+        private readonly IWcpDbContext _context;
         private readonly ViewConverter _viewConverter;
 
-        public StaticTemplateService(WcpDbContext context, ViewConverter viewConverter)
+        public StaticTemplateService(IWcpDbContext context, ViewConverter viewConverter)
         {
             _context = context;
             _viewConverter = viewConverter;
