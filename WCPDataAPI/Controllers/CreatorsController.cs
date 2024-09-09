@@ -33,7 +33,7 @@ namespace WCPDataAPI.Controllers
             _languageService = languageService;
         }
 
-        [HttpGet]
+        [HttpGet, AllowAnonymous]
         public async Task<ActionResult<IEnumerable<CreatorView>>> Get([FromQuery] int? orderId = null, [FromQuery] string? searchTerm = null)
         {
             List<CreatorView> creators = await _creatorService.GetAllObjectsView();
