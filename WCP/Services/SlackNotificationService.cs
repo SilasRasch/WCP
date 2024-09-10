@@ -12,7 +12,7 @@ namespace WCPShared.Services
     {
         private readonly ISlackApiClient _slackApiClient;
         private readonly ICreatorService _creatorService;
-        private bool EnableNotifications = true; // return to env later // Secrets.IsProd;
+        private bool EnableNotifications = Secrets.IsProd;
 
         public SlackNotificationService(ISlackApiClient slackApiClient, ICreatorService creatorService)
         {
@@ -54,12 +54,12 @@ namespace WCPShared.Services
             ConversationListResponse conversations = await _slackApiClient.Conversations.List(
                 types: [ConversationType.PublicChannel, ConversationType.PrivateChannel]);
 
-            return conversations.Channels.SingleOrDefault(x => x.Name == conversation);
+            return conversations.Channels.SingleOrDefault(x => x.Name == conversation.Replace(' ', '-').ToLower());
         }
 
         private async Task<User?> FetchUser(string userName)
         {
-            return (await _slackApiClient.Users.List()).Members.SingleOrDefault(x => x.RealName == userName);
+            return (await _slackApiClient.Users.List()).Members.SingleOrDefault(x => x.RealName.ToLower() == userName.ToLower());
         }
 
         public async Task SendStatusNotifications(Order newOrder, Order oldOrder)
