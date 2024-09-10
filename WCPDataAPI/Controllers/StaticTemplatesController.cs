@@ -8,7 +8,7 @@ using WCPShared.Models.Views;
 namespace WCPDataAPI.Controllers
 {
     [Authorize]
-    [Route("api/[controller]")]
+    [Route("api/Templates")]
     [ApiController]
     public class StaticTemplatesController : ControllerBase
     {

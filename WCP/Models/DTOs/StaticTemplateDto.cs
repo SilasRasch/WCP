@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using WCPShared.Services.StaticHelpers;
+﻿using WCPShared.Services.StaticHelpers;
 
 namespace WCPShared.Models.DTOs
 {
