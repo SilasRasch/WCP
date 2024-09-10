@@ -12,6 +12,7 @@ namespace WCPShared.Services
     {
         private readonly ISlackApiClient _slackApiClient;
         private readonly ICreatorService _creatorService;
+        private bool EnableNotifications = true; // return to env later // Secrets.IsProd;
 
         public SlackNotificationService(ISlackApiClient slackApiClient, ICreatorService creatorService)
         {
@@ -21,7 +22,7 @@ namespace WCPShared.Services
 
         public async Task SendMessageToUser(string username, string message)
         {
-            if (!Secrets.IsProd) return;
+            if (!EnableNotifications) return;
             
             User? user = await FetchUser(username);
 
@@ -31,7 +32,7 @@ namespace WCPShared.Services
 
         public async Task SendMessageToChannel(string channel, string message)
         {
-            if (!Secrets.IsProd) return;
+            if (!EnableNotifications) return;
 
             Conversation? conversation = await FetchConversation(channel);
             
@@ -63,7 +64,7 @@ namespace WCPShared.Services
 
         public async Task SendStatusNotifications(Order newOrder, Order oldOrder)
         {
-            if (!Secrets.IsProd) return;
+            if (!EnableNotifications) return;
 
             // Organizational notifications
 

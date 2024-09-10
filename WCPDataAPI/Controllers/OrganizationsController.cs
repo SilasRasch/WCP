@@ -40,8 +40,8 @@ namespace WCPDataAPI.Controllers
             if ((await _organizationService.GetAllObjects()).Any(x => x.CVR == organization.CVR))
                 return BadRequest("Der eksisterer allerede en organisation med det CVR");
 
-            await _organizationService.AddObject(organization);
-            return Created();
+            var result = await _organizationService.AddObject(organization);
+            return result is not null ? Ok(result.Id) : BadRequest();
         }
 
         [HttpPut("{id}"), Authorize(Roles = "Admin")]
