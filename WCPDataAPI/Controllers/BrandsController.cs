@@ -34,7 +34,7 @@ namespace WCPDataAPI.Controllers
             if (orgId is not null)
                 return await _brandService.GetObjectsViewBy(x => x.OrganizationId == orgId);
 
-            if (_userContextService.GetRoles().Contains("Bruger"))
+            if (_userContextService.GetRoles().Contains("Admin"))
                 return await _brandService.GetAllObjectsView();
             
             return NotFound("Ingen brands at finde...");
