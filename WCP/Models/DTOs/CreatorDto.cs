@@ -16,7 +16,7 @@ namespace WCPShared.Models.DTOs
         public bool IsEditor { get; set; }
         public int? UserId { get; set; }
         public List<string>? Languages { get; set; } = new List<string>();
-        public string Gender { get; set; } = string.Empty;
+        public string? Gender { get; set; } = string.Empty;
 
         public bool Validate()
         {
