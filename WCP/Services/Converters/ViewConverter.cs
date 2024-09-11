@@ -18,6 +18,7 @@ namespace WCPShared.Services.Converters
 
         public OrganizationView Convert(Organization obj)
         {
+            if (obj is null) return null;
             return new OrganizationView(obj);
         }
 
@@ -35,15 +36,15 @@ namespace WCPShared.Services.Converters
             return view;
         }
 
-        public UserNC Convert(User obj)
+        public UserView Convert(User obj)
         {
-            return new UserNC
+            return new UserView
             {
                 Name = obj.Name,
                 Email = obj.Email,
                 Id = obj.Id,
                 IsActive = obj.IsActive,
-                Organization = obj.Organization,
+                Organization = Convert(obj.Organization!),
                 Phone = obj.Phone,
                 Role = obj.Role
             };

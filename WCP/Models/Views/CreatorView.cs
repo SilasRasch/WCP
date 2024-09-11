@@ -11,20 +11,27 @@ namespace WCPShared.Models.Views
     public class CreatorView
     {
         public int Id { get; set; }
-        public UserNC User { get; set; } = new UserNC();
-        public CreatorDto Creator { get; set; } = new CreatorDto();
+        public UserView User { get; set; } = new();
+        public DateTime? DateOfBirth { get; set; }
+        public string? Address { get; set; } = string.Empty;
+        public string? Speciality { get; set; } = string.Empty;
+        public string? ImgURL { get; set; }
+        public bool IsEditor { get; set; }
+        public int? UserId { get; set; }
+        public List<string>? Languages { get; set; } = new List<string>();
+        public string Gender { get; set; } = string.Empty;
 
         public CreatorView(Creator obj)
         {
             Id = obj.Id;
-            Creator.Address = obj.Address;
-            Creator.Gender = obj.Gender;
-            Creator.UserId = obj.UserId;
-            Creator.IsEditor = obj.IsEditor;
-            Creator.Languages = obj.Languages.Select(x => x.Name).ToList();
-            Creator.DateOfBirth = obj.DateOfBirth;
-            Creator.Speciality = obj.Speciality;
-            Creator.ImgURL = obj.ImgURL;
+            Address = obj.Address;
+            Gender = obj.Gender;
+            UserId = obj.UserId;
+            IsEditor = obj.IsEditor;
+            Languages = obj.Languages.Select(x => x.Name).ToList();
+            DateOfBirth = obj.DateOfBirth;
+            Speciality = obj.Speciality;
+            ImgURL = obj.ImgURL;
         }
     }
 }
