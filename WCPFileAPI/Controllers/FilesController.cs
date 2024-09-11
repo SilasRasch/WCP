@@ -45,5 +45,50 @@ namespace WCPFileAPI.Controllers
 
             return Ok(await _client.UploadImage(fileName, memoryStream, $"image/{fileExtension.Substring(1)}"));
         }
+
+        [HttpPost("template-img")]
+        public async Task<ActionResult<Dictionary<string,string>>> UploadTemplateImages(List<IFormFile> files)
+        {
+            Dictionary<string, string> urls = new Dictionary<string, string>();
+            foreach (var element in files.Select((File, Index) => (File, Index)))
+            {
+                string regexFileExtension = @"(png|jpe?g)";
+                if (!Regex.IsMatch(Path.GetExtension(element.File.FileName).ToLower(), regexFileExtension) || !element.File.ContentType.ToLower().Contains("image"))
+                    return BadRequest("File-type not accepted");
+
+                if (element.File.Length > 1024 * 1024 * 10) // 10 Mb
+                    return BadRequest("File size above limit");
+
+                await using var memoryStream = new MemoryStream();
+                await element.File.CopyToAsync(memoryStream);
+
+                var fileExtension = Path.GetExtension(element.File.FileName);
+                var userId = _userContextService.GetId();
+                var fileName = $"statics/{userId}-{Guid.NewGuid()}{fileExtension.ToLower()}";
+
+                // Set correct mime-type for jpegs
+                if (fileExtension.ToLower() == ".jpg")
+                    fileExtension = ".jpeg";
+    
+                string url = await _client.UploadImage(fileName, memoryStream, $"image/{fileExtension.Substring(1)}");
+
+                switch (element.Index)
+                {
+                    case 0:
+                        urls.Add("templateImgOne", url);
+                        break;
+                    case 1:
+                        urls.Add("templateImgTwo", url);
+                        break;
+                    case 2:
+                        urls.Add("exampleImg", url);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            return Ok(urls);
+        }
     }
 }
