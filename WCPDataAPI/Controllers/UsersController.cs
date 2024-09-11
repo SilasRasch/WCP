@@ -1,10 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WCPShared.Interfaces.DataServices;
-using WCPShared.Models.AuthModels;
 using WCPShared.Models.UserModels;
 using WCPShared.Services;
-using WCPShared.Services.StaticHelpers;
 
 namespace WCPDataAPI.Controllers
 {
@@ -27,7 +25,7 @@ namespace WCPDataAPI.Controllers
         public async Task<ActionResult<IEnumerable<UserNC>>> Get([FromQuery] string? role)
         {
             if (role is not null) return Ok(await _userService.GetObjectsViewBy(x => x.Role.ToLower() == role.ToLower()));
-            return Ok(_userService.GetAllObjectsView());
+            return Ok(await _userService.GetAllObjectsView());
         }
 
         // GET api/<UsersController>/5
