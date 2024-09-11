@@ -10,7 +10,7 @@ using WCPShared.Services.Converters;
 using System;
 using WCPShared.Models.Views;
 
-namespace WCPShared.Services.Databases.EntityFramework
+namespace WCPShared.Services.EntityFramework
 {
     public class UserService : IUserService
     {

@@ -9,7 +9,7 @@ using WCPShared.Services.Converters;
 using System;
 using WCPShared.Interfaces;
 
-namespace WCPShared.Services.Databases.EntityFramework
+namespace WCPShared.Services.EntityFramework
 {
     public class CreatorService : ICreatorService
     {
@@ -114,11 +114,11 @@ namespace WCPShared.Services.Databases.EntityFramework
         public async Task<Creator?> AddObject(CreatorDto obj)
         {
             if (obj.UserId is null) return null!;
-            
+
             var user = await _userService.GetObject(obj.UserId.Value);
             if (user is null)
                 return null;
-            
+
             var creatorToAdd = new Creator
             {
                 Address = obj.Address,

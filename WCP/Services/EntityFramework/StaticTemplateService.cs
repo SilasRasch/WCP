@@ -8,7 +8,7 @@ using WCPShared.Models.DTOs;
 using WCPShared.Models.Views;
 using WCPShared.Services.Converters;
 
-namespace WCPShared.Services.Databases.EntityFramework
+namespace WCPShared.Services.EntityFramework
 {
     public class StaticTemplateService : IStaticTemplateService
     {

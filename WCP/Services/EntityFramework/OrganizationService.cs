@@ -8,7 +8,7 @@ using System.Linq.Expressions;
 using WCPShared.Services.Converters;
 using System;
 
-namespace WCPShared.Services.Databases.EntityFramework
+namespace WCPShared.Services.EntityFramework
 {
     public class OrganizationService : IOrganizationService
     {
@@ -54,7 +54,7 @@ namespace WCPShared.Services.Databases.EntityFramework
         {
             if (includeBrands)
                 return await _context.Organizations.Include(x => x.Brands).SingleOrDefaultAsync(x => x.Id == id);
-            return await _context.Organizations.SingleOrDefaultAsync(x => x.Id == id);   
+            return await _context.Organizations.SingleOrDefaultAsync(x => x.Id == id);
         }
 
         public async Task<List<Organization>> GetAllObjects(bool includeBrands = false)

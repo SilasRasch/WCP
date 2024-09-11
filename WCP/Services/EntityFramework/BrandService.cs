@@ -8,7 +8,7 @@ using WCPShared.Models.DTOs;
 using WCPShared.Models.Views;
 using WCPShared.Services.Converters;
 
-namespace WCPShared.Services.Databases.EntityFramework
+namespace WCPShared.Services.EntityFramework
 {
     public class BrandService : IBrandService
     {
@@ -69,7 +69,7 @@ namespace WCPShared.Services.Databases.EntityFramework
         public async Task<Brand?> UpdateObject(int id, BrandDto brand)
         {
             Brand? oldBrand = await GetObject(id);
-            
+
             if (oldBrand is null)
                 return null!;
 

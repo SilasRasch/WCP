@@ -58,9 +58,14 @@ namespace WCPDataAPI.Controllers
             if (_userContextService.GetId() != id && !_userContextService.GetRoles().Contains("Admin"))
                 return Unauthorized();
 
-            User? user = await _userService.DeleteObject(id);
+            User? user = await _userService.GetObject(id);
 
-            return user is null ? NotFound() : NoContent();
+            if (user is null)
+                return NotFound();
+
+            user.IsActive = false;
+            user = await _userService.UpdateObject(id, user);
+            return user is not null && !user.IsActive ? NoContent() : NotFound();
         }
     }
 }

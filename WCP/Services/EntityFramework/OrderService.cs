@@ -9,7 +9,7 @@ using WCPShared.Models.Views;
 using WCPShared.Services.Converters;
 using WCPShared.Interfaces;
 
-namespace WCPShared.Services.Databases.EntityFramework
+namespace WCPShared.Services.EntityFramework
 {
     public class OrderService : IOrderService
     {
@@ -89,7 +89,7 @@ namespace WCPShared.Services.Databases.EntityFramework
         {
             Order? existingOrder = await GetObject(id);
 
-            if (existingOrder is null) 
+            if (existingOrder is null)
                 return null!;
 
             _context.ChangeTracker.Clear();
@@ -107,7 +107,7 @@ namespace WCPShared.Services.Databases.EntityFramework
                 return null;
 
             Order copyOfExistingOrder = DtoConverter.CloneOrder(existingOrder);
-            
+
             existingOrder.BrandId = order.BrandId;
             existingOrder.Price = order.Price;
             existingOrder.Status = order.Status;

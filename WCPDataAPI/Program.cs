@@ -8,11 +8,11 @@ using WCPShared.Services;
 using WCPShared.Services.StaticHelpers;
 using Microsoft.EntityFrameworkCore;
 using WCPShared.Models;
-using WCPShared.Services.Databases.EntityFramework;
 using WCPShared.Interfaces.DataServices;
 using SlackNet.AspNetCore;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using WCPShared.Services.Converters;
+using WCPShared.Services.EntityFramework;
 
 var builder = WebApplication.CreateBuilder(args);
 

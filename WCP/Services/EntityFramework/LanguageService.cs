@@ -4,7 +4,7 @@ using WCPShared.Interfaces.DataServices;
 using WCPShared.Models;
 using WCPShared.Models.UserModels;
 
-namespace WCPShared.Services.Databases.EntityFramework
+namespace WCPShared.Services.EntityFramework
 {
     public class LanguageService : ILanguageService
     {
@@ -16,7 +16,7 @@ namespace WCPShared.Services.Databases.EntityFramework
         }
 
         public async Task<Language> AddObject(Language language)
-        {            
+        {
             await _context.Languages.AddAsync(language);
             await _context.SaveChangesAsync();
             return language;

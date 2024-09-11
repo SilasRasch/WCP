@@ -112,9 +112,9 @@ namespace WCPDataAPI.Controllers
             if (creator.UserId != _userContextService.GetId() && !_userContextService.GetRoles().Contains("Admin"))
                 return BadRequest("Du har ikke tilladelse til at ændre denne creator");
 
-            // User delete will cause a cascade deletion of the creator object
-            User? deletedUser = await _userService.DeleteObject(creator.UserId);
-            return deletedUser is not null ? NoContent() : NotFound("Creator not found");
+            user.IsActive = false;
+            user = await _userService.UpdateObject(user.Id, user);
+            return user is not null && !user.IsActive ? NoContent() : NotFound("Creator not found");
         }
 
         [HttpPut("UpdateProfilePicture/{id}")]
