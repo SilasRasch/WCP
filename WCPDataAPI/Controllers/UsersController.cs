@@ -65,7 +65,7 @@ namespace WCPDataAPI.Controllers
 
             user.IsActive = !user.IsActive;
             user = await _userService.UpdateObject(id, user);
-            return user is not null && !user.IsActive ? NoContent() : NotFound();
+            return user is not null ? NoContent() : NotFound();
         }
     }
 }
