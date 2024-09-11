@@ -63,7 +63,7 @@ namespace WCPAuthAPI.Controllers
             if (!request.User.Validate())
                 return BadRequest("Valideringsfejl på bruger, tjek venligst felterne igen...");
 
-            if (request.Creator is not null && !request.Creator.Validate() && (request.User.Role == "Creator" || request.User.Role == "Editor"))
+            if (request.Creator is not null && (request.User.Role == "Creator" || request.User.Role == "Editor") && !request.Creator.Validate())
                 return BadRequest("Valideringsfejl på creator, tjek venligst felterne igen...");
 
             try
