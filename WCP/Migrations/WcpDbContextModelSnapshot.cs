@@ -52,6 +52,21 @@ namespace WCPShared.Migrations
                     b.ToTable("CreatorOrder");
                 });
 
+            modelBuilder.Entity("OrderStaticTemplate", b =>
+                {
+                    b.Property<int>("OrdersId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StaticTemplatesId")
+                        .HasColumnType("int");
+
+                    b.HasKey("OrdersId", "StaticTemplatesId");
+
+                    b.HasIndex("StaticTemplatesId");
+
+                    b.ToTable("OrderStaticTemplate");
+                });
+
             modelBuilder.Entity("WCPShared.Models.Brand", b =>
                 {
                     b.Property<int>("Id")
@@ -202,6 +217,35 @@ namespace WCPShared.Migrations
                     b.ToTable("Organizations");
                 });
 
+            modelBuilder.Entity("WCPShared.Models.StaticTemplate", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ExampleImg")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TemplateImgOne")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TemplateImgTwo")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("StaticTemplates");
+                });
+
             modelBuilder.Entity("WCPShared.Models.UserModels.Creator", b =>
                 {
                     b.Property<int>("Id")
@@ -342,6 +386,21 @@ namespace WCPShared.Migrations
                     b.HasOne("WCPShared.Models.Order", null)
                         .WithMany()
                         .HasForeignKey("OrdersId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("OrderStaticTemplate", b =>
+                {
+                    b.HasOne("WCPShared.Models.Order", null)
+                        .WithMany()
+                        .HasForeignKey("OrdersId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("WCPShared.Models.StaticTemplate", null)
+                        .WithMany()
+                        .HasForeignKey("StaticTemplatesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
