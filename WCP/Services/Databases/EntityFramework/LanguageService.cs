@@ -15,10 +15,11 @@ namespace WCPShared.Services.Databases.EntityFramework
             _context = context;
         }
 
-        public async Task AddObject(Language language)
+        public async Task<Language> AddObject(Language language)
         {            
             await _context.Languages.AddAsync(language);
             await _context.SaveChangesAsync();
+            return language;
         }
 
         public async Task<Language?> DeleteObject(int id)

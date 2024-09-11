@@ -9,6 +9,7 @@ using System.Net;
 using WCPShared.Models.AuthModels;
 using WCPShared.Interfaces.Auth;
 using WCPShared.Interfaces.DataServices;
+using WCPShared.Models.DTOs;
 
 namespace WCPAuthAPI.Controllers
 {
@@ -45,11 +46,42 @@ namespace WCPAuthAPI.Controllers
             if (!request.Validate())
                 return BadRequest("Valideringsfejl, tjek venligst felterne igen...");
 
-            User user = await _authService.Register(request);
+            try
+            {
+                User? user = await _authService.Register(request);
+                return user.Role != "Bruger" ? Created($"auth/{user.Id}", user.Id) : Created($"auth/{user.Id}", new { id = user.Id, orgId = user.OrganizationId });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
 
-            if (user is null) return BadRequest("Der eksisterer allerede en bruger med denne email...");
+            
+        }
 
-            return user.Role != "Bruger" ? Created($"auth/{user.Id}", user.Id) : Created($"auth/{user.Id}", new { id = user.Id, orgId = user.OrganizationId });
+        [HttpPost("RegisterCreator"), Authorize(Roles = "Admin")]
+        public async Task<ActionResult<int>> RegisterCreator(RegisterCreatorDto request)
+        {
+            if (!request.User.Validate() || (request.User.Role == "Creator" && request.Creator is not null && !request.Creator.Validate()))
+                return BadRequest("Valideringsfejl, tjek venligst felterne igen...");
+
+            try
+            {
+                if (request.Creator is not null)
+                {
+                    User? user = await _authService.Register(request.User, request.Creator);
+                    return user.Role != "Bruger" ? Created($"auth/{user.Id}", user.Id) : Created($"auth/{user.Id}", new { id = user.Id, orgId = user.OrganizationId });
+                }
+                else
+                {
+                    User? user = await _authService.Register(request.User);
+                    return user.Role != "Bruger" ? Created($"auth/{user.Id}", user.Id) : Created($"auth/{user.Id}", new { id = user.Id, orgId = user.OrganizationId });
+                }
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPost("Login"), AllowAnonymous]

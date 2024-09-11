@@ -15,10 +15,11 @@ namespace WCPShared.Services.Databases.EntityFramework
             _context = context;
         }
 
-        public async Task AddObject(Organization organization)
+        public async Task<Organization> AddObject(Organization organization)
         {
             await _context.Organizations.AddAsync(organization);
             await _context.SaveChangesAsync();
+            return organization;
         }
 
         public async Task<Organization?> DeleteObject(int id)

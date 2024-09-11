@@ -24,13 +24,14 @@ namespace WCPShared.Services.Databases.EntityFramework
             _viewConverter = viewConverter;
         }
 
-        public async Task AddObject(User user)
+        public async Task<User> AddObject(User user)
         {
             if (user.Organization is not null)
                 _context.Organizations.Attach(user.Organization);
 
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
+            return user;
         }
 
         public async Task<User?> DeleteObject(int id)

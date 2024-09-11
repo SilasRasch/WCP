@@ -26,7 +26,7 @@ namespace WCPShared.Services.Databases.EntityFramework
             _viewConverter = viewConverter;
         }
 
-        public async Task AddObject(Creator obj)
+        public async Task<Creator> AddObject(Creator obj)
         {
             if (obj.Languages is not null)
                 _context.Languages.AttachRange(obj.Languages);
@@ -35,6 +35,7 @@ namespace WCPShared.Services.Databases.EntityFramework
 
             await _context.Creators.AddAsync(obj);
             await _context.SaveChangesAsync();
+            return obj;
         }
 
         public async Task<Creator?> DeleteObject(int id)

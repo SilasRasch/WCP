@@ -27,7 +27,7 @@ namespace WCPDataAPI.Controllers
         public async Task<ActionResult<IEnumerable<UserNC>>> Get([FromQuery] string? role)
         {
             if (role is not null) return Ok(await _userService.GetObjectsViewBy(x => x.Role.ToLower() == role.ToLower()));
-            return Ok(_userService.GetAllObjectsView());
+            return Ok(await _userService.GetAllObjectsView());
         }
 
         // GET api/<UsersController>/5

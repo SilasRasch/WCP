@@ -28,7 +28,7 @@ namespace WCPShared.Services.Databases.EntityFramework
             _slackNetService = slackNetService;
         }
 
-        public async Task AddObject(Order obj)
+        public async Task<Order> AddObject(Order obj)
         {
             if (obj.Brand is not null)
                 _context.Brands.Attach(obj.Brand);
@@ -37,6 +37,7 @@ namespace WCPShared.Services.Databases.EntityFramework
 
             await _context.Orders.AddAsync(obj);
             await _context.SaveChangesAsync();
+            return obj;
         }
 
         public async Task<Order?> DeleteObject(int id)

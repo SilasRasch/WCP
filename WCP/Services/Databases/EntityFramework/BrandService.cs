@@ -22,11 +22,12 @@ namespace WCPShared.Services.Databases.EntityFramework
             _viewConverter = viewConverter;
         }
 
-        public async Task AddObject(Brand brand)
+        public async Task<Brand> AddObject(Brand brand)
         {
             _context.Organizations.Attach(brand.Organization);
             await _context.Brands.AddAsync(brand);
             await _context.SaveChangesAsync();
+            return brand;
         }
 
         public async Task<Brand?> DeleteObject(int id)
