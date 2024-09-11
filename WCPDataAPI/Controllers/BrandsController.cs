@@ -5,6 +5,7 @@ using WCPShared.Models;
 using WCPShared.Interfaces.DataServices;
 using WCPShared.Models.DTOs.RangeDTOs;
 using WCPShared.Models.Views;
+using WCPShared.Models.DTOs;
 
 namespace WCPDataAPI.Controllers
 {

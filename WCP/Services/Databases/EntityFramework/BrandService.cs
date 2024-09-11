@@ -4,6 +4,7 @@ using System.Linq.Expressions;
 using WCPShared.Interfaces;
 using WCPShared.Interfaces.DataServices;
 using WCPShared.Models;
+using WCPShared.Models.DTOs;
 using WCPShared.Models.Views;
 using WCPShared.Services.Converters;
 
@@ -22,12 +23,11 @@ namespace WCPShared.Services.Databases.EntityFramework
             _viewConverter = viewConverter;
         }
 
-        public async Task<Brand> AddObject(Brand brand)
+        public async Task AddObject(Brand brand)
         {
             _context.Organizations.Attach(brand.Organization);
             await _context.Brands.AddAsync(brand);
             await _context.SaveChangesAsync();
-            return brand;
         }
 
         public async Task<Brand?> DeleteObject(int id)
