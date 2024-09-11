@@ -15,7 +15,8 @@ namespace WCPShared.Models
         public int DeliveryTimeFrom { get; set; }
         public int DeliveryTimeTo { get; set; }
         public int Status { get; set; }
-        public List<Creator> Creators { get; set; } = new List<Creator>();
+        public List<Creator> Creators { get; set; } = [];
+        public List<StaticTemplate> StaticTemplates { get; set; } = [];
 
         // Drive-links
         public string Scripts { get; set; } = string.Empty;

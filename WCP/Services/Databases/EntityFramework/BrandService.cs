@@ -1,8 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq.Expressions;
+using WCPShared.Interfaces;
 using WCPShared.Interfaces.DataServices;
 using WCPShared.Models;
+using WCPShared.Models.DTOs;
 using WCPShared.Models.Views;
 using WCPShared.Services.Converters;
 
@@ -10,22 +12,23 @@ namespace WCPShared.Services.Databases.EntityFramework
 {
     public class BrandService : IBrandService
     {
-        private readonly WcpDbContext _context;
+        private readonly IWcpDbContext _context;
         private readonly IOrganizationService _organizationService;
         private readonly ViewConverter _viewConverter;
 
-        public BrandService(WcpDbContext context, IOrganizationService organizationService, ViewConverter viewConverter)
+        public BrandService(IWcpDbContext context, IOrganizationService organizationService, ViewConverter viewConverter)
         {
             _context = context;
             _organizationService = organizationService;
             _viewConverter = viewConverter;
         }
 
-        public async Task AddObject(Brand brand)
+        public async Task<Brand> AddObject(Brand brand)
         {
             _context.Organizations.Attach(brand.Organization);
             await _context.Brands.AddAsync(brand);
             await _context.SaveChangesAsync();
+            return brand;
         }
 
         public async Task<Brand?> DeleteObject(int id)
@@ -125,7 +128,7 @@ namespace WCPShared.Services.Databases.EntityFramework
                 .SingleOrDefaultAsync(predicate);
 
             if (brand is not null)
-                _viewConverter.Convert(brand);
+                return _viewConverter.Convert(brand);
             return null;
         }
 

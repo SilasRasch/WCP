@@ -14,13 +14,13 @@ namespace WCPShared.Models.DTOs
         public string? Speciality { get; set; } = string.Empty;
         public string? ImgURL { get; set; }
         public bool IsEditor { get; set; }
-        public int UserId { get; set; }
+        public int? UserId { get; set; }
         public List<string>? Languages { get; set; } = new List<string>();
-        public string Gender { get; set; } = string.Empty;
+        public string? Gender { get; set; } = string.Empty;
 
         public bool Validate()
         {
-            if (!IsEditor && (string.IsNullOrWhiteSpace(Address) || string.IsNullOrWhiteSpace(Speciality)))
+            if (!IsEditor && (string.IsNullOrWhiteSpace(Address) || string.IsNullOrWhiteSpace(Gender) || string.IsNullOrWhiteSpace(Address)))
                 return false;
 
             return true;

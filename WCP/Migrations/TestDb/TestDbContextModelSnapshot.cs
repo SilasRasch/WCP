@@ -8,10 +8,10 @@ using WCPShared.Models;
 
 #nullable disable
 
-namespace WCPShared.Migrations
+namespace WCPShared.Migrations.TestDb
 {
-    [DbContext(typeof(WcpDbContext))]
-    partial class WcpDbContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(TestDbContext))]
+    partial class TestDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {

@@ -1,14 +1,14 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
+﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using WCPShared.Models.UserModels;
 using Newtonsoft.Json;
 using WCPShared.Interfaces;
-using WCPShared.Models.UserModels;
 
 namespace WCPShared.Models
 {
-    public class WcpDbContext : DbContext, IWcpDbContext
+    public class TestDbContext : DbContext, IWcpDbContext
     {
         public DbSet<User> Users { get; set; }
         public DbSet<Organization> Organizations { get; set; }
@@ -20,7 +20,7 @@ namespace WCPShared.Models
 
         private readonly IConfiguration _configuration;
 
-        public WcpDbContext(DbContextOptions<WcpDbContext> options, IConfiguration config) : base(options)
+        public TestDbContext(DbContextOptions<TestDbContext> options, IConfiguration config) : base(options)
         {
             _configuration = config;
         }
@@ -34,11 +34,11 @@ namespace WCPShared.Models
             modelBuilder.Entity<Order>()
                 .HasMany(x => x.StaticTemplates)
                 .WithMany(x => x.Orders);
-            
+
             modelBuilder.Entity<Order>()
                 .Property(x => x.Ideas)
                 .HasConversion(new ValueConverter<List<string>, string>(
-                    v => JsonConvert.SerializeObject(v), 
+                    v => JsonConvert.SerializeObject(v),
                     v => JsonConvert.DeserializeObject<List<string>>(v)),
                     new ValueComparer<List<string>>(
                         (c1, c2) => c1.SequenceEqual(c2),

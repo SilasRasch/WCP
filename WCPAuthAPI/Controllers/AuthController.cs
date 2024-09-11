@@ -9,6 +9,7 @@ using System.Net;
 using WCPShared.Models.AuthModels;
 using WCPShared.Interfaces.Auth;
 using WCPShared.Interfaces.DataServices;
+using WCPShared.Models.DTOs;
 
 namespace WCPAuthAPI.Controllers
 {
@@ -39,17 +40,49 @@ namespace WCPAuthAPI.Controllers
             _authService = authService;
         }
 
+        //[HttpPost("Register"), Authorize(Roles = "Admin")]
+        //public async Task<ActionResult<int>> Register(RegisterDto request)
+        //{
+        //    if (!request.Validate())
+        //        return BadRequest("Valideringsfejl, tjek venligst felterne igen...");
+
+        //    try
+        //    {
+        //        User? user = await _authService.Register(request);
+        //        return user.Role != "Bruger" ? Created($"auth/{user.Id}", user.Id) : Created($"auth/{user.Id}", new { id = user.Id, orgId = user.OrganizationId });
+        //    }
+        //    catch (ArgumentException ex)
+        //    {
+        //        return BadRequest(ex.Message);
+        //    }
+        //}
+
         [HttpPost("Register"), Authorize(Roles = "Admin")]
-        public async Task<ActionResult<int>> Register(RegisterDto request)
+        public async Task<ActionResult<int>> Register(RegisterCreatorDto request)
         {
-            if (!request.Validate())
-                return BadRequest("Valideringsfejl, tjek venligst felterne igen...");
+            if (!request.User.Validate())
+                return BadRequest("Valideringsfejl på bruger, tjek venligst felterne igen...");
 
-            User user = await _authService.Register(request);
+            if (request.Creator is not null && (request.User.Role == "Creator" || request.User.Role == "Editor") && !request.Creator.Validate())
+                return BadRequest("Valideringsfejl på creator, tjek venligst felterne igen...");
 
-            if (user is null) return BadRequest("Der eksisterer allerede en bruger med denne email...");
-
-            return user.Role != "Bruger" ? Created($"auth/{user.Id}", user.Id) : Created($"auth/{user.Id}", new { id = user.Id, orgId = user.OrganizationId });
+            try
+            {
+                if (request.Creator is not null)
+                {
+                    User? user = await _authService.Register(request);
+                    return user.Role != "Bruger" ? Created($"auth/{user.Id}", user.Id) : Created($"auth/{user.Id}", new { id = user.Id, orgId = user.OrganizationId });
+                }
+                else
+                {
+                    User? user = await _authService.Register(request.User);
+                    return user.Role != "Bruger" ? Created($"auth/{user.Id}", user.Id) : Created($"auth/{user.Id}", new { id = user.Id, orgId = user.OrganizationId });
+                }
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPost("Login"), AllowAnonymous]

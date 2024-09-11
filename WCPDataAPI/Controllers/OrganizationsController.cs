@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using WCPShared.Interfaces.DataServices;
 using WCPShared.Models;
 using WCPShared.Models.DTOs;
+using WCPShared.Models.Views;
 
 namespace WCPDataAPI.Controllers
 {
@@ -19,15 +20,15 @@ namespace WCPDataAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Organization>>> Get()
+        public async Task<ActionResult<IEnumerable<OrganizationView>>> Get()
         {
-            return Ok(await _organizationService.GetAllObjects(true));
+            return Ok(await _organizationService.GetAllObjectsView());
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Organization>> Get(int id)
+        public async Task<ActionResult<OrganizationView>> Get(int id)
         {
-            Organization? organization = await _organizationService.GetObject(id);
+            OrganizationView? organization = await _organizationService.GetObjectViewBy(x => x.Id == id);
             return organization is null ? NotFound() : Ok(organization);
         }
 
@@ -40,8 +41,8 @@ namespace WCPDataAPI.Controllers
             if ((await _organizationService.GetAllObjects()).Any(x => x.CVR == organization.CVR))
                 return BadRequest("Der eksisterer allerede en organisation med det CVR");
 
-            await _organizationService.AddObject(organization);
-            return Created();
+            var result = await _organizationService.AddObject(organization);
+            return result is not null ? Ok(result.Id) : BadRequest();
         }
 
         [HttpPut("{id}"), Authorize(Roles = "Admin")]

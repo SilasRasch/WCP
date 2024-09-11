@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using WCPShared.Interfaces;
 using WCPShared.Interfaces.DataServices;
 using WCPShared.Models;
 using WCPShared.Models.UserModels;
@@ -7,17 +8,18 @@ namespace WCPShared.Services.Databases.EntityFramework
 {
     public class LanguageService : ILanguageService
     {
-        private readonly WcpDbContext _context;
+        private readonly IWcpDbContext _context;
 
-        public LanguageService(WcpDbContext context)
+        public LanguageService(IWcpDbContext context)
         {
             _context = context;
         }
 
-        public async Task AddObject(Language language)
+        public async Task<Language> AddObject(Language language)
         {            
             await _context.Languages.AddAsync(language);
             await _context.SaveChangesAsync();
+            return language;
         }
 
         public async Task<Language?> DeleteObject(int id)

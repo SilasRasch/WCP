@@ -8,29 +8,31 @@ using WCPShared.Interfaces;
 using System.Linq.Expressions;
 using WCPShared.Services.Converters;
 using System;
+using WCPShared.Models.Views;
 
 namespace WCPShared.Services.Databases.EntityFramework
 {
     public class UserService : IUserService
     {
-        private readonly WcpDbContext _context;
+        private readonly IWcpDbContext _context;
         private readonly IOrganizationService _organizationService;
         private readonly ViewConverter _viewConverter;
 
-        public UserService(WcpDbContext context, IOrganizationService organizationService, ViewConverter viewConverter)
+        public UserService(IWcpDbContext context, IOrganizationService organizationService, ViewConverter viewConverter)
         {
             _context = context;
             _organizationService = organizationService;
             _viewConverter = viewConverter;
         }
 
-        public async Task AddObject(User user)
+        public async Task<User> AddObject(User user)
         {
             if (user.Organization is not null)
                 _context.Organizations.Attach(user.Organization);
 
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
+            return user;
         }
 
         public async Task<User?> DeleteObject(int id)
@@ -121,7 +123,7 @@ namespace WCPShared.Services.Databases.EntityFramework
             return user;
         }
 
-        public async Task<List<UserNC>> GetObjectsViewBy(Expression<Func<User, bool>> predicate)
+        public async Task<List<UserView>> GetObjectsViewBy(Expression<Func<User, bool>> predicate)
         {
             return await _context.Users
                 .Where(predicate)
@@ -130,7 +132,7 @@ namespace WCPShared.Services.Databases.EntityFramework
                 .ToListAsync();
         }
 
-        public async Task<UserNC?> GetObjectViewBy(Expression<Func<User, bool>> predicate)
+        public async Task<UserView?> GetObjectViewBy(Expression<Func<User, bool>> predicate)
         {
             var user = await _context.Users
                 .Include(x => x.Organization)
@@ -141,7 +143,7 @@ namespace WCPShared.Services.Databases.EntityFramework
             return null;
         }
 
-        public async Task<List<UserNC>> GetAllObjectsView()
+        public async Task<List<UserView>> GetAllObjectsView()
         {
             return await _context.Users
                 .Include(x => x.Organization)

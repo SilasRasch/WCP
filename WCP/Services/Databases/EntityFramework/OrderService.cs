@@ -7,18 +7,19 @@ using WCPShared.Services.StaticHelpers;
 using System.Linq.Expressions;
 using WCPShared.Models.Views;
 using WCPShared.Services.Converters;
+using WCPShared.Interfaces;
 
 namespace WCPShared.Services.Databases.EntityFramework
 {
     public class OrderService : IOrderService
     {
-        private readonly WcpDbContext _context;
+        private readonly IWcpDbContext _context;
         private readonly IBrandService _brandService;
         private readonly ICreatorService _creatorService;
         private readonly ViewConverter _viewConverter;
         private readonly SlackNotificationService _slackNetService;
 
-        public OrderService(WcpDbContext context, IBrandService brandService, ICreatorService creatorService, ViewConverter viewConverter, SlackNotificationService slackNetService)
+        public OrderService(IWcpDbContext context, IBrandService brandService, ICreatorService creatorService, ViewConverter viewConverter, SlackNotificationService slackNetService)
         {
             _context = context;
             _brandService = brandService;
@@ -27,7 +28,7 @@ namespace WCPShared.Services.Databases.EntityFramework
             _slackNetService = slackNetService;
         }
 
-        public async Task AddObject(Order obj)
+        public async Task<Order> AddObject(Order obj)
         {
             if (obj.Brand is not null)
                 _context.Brands.Attach(obj.Brand);
@@ -36,6 +37,7 @@ namespace WCPShared.Services.Databases.EntityFramework
 
             await _context.Orders.AddAsync(obj);
             await _context.SaveChangesAsync();
+            return obj;
         }
 
         public async Task<Order?> DeleteObject(int id)

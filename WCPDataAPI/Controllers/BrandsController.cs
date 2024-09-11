@@ -5,6 +5,7 @@ using WCPShared.Models;
 using WCPShared.Interfaces.DataServices;
 using WCPShared.Models.DTOs.RangeDTOs;
 using WCPShared.Models.Views;
+using WCPShared.Models.DTOs;
 
 namespace WCPDataAPI.Controllers
 {
@@ -34,7 +35,7 @@ namespace WCPDataAPI.Controllers
             if (orgId is not null)
                 return await _brandService.GetObjectsViewBy(x => x.OrganizationId == orgId);
 
-            if (_userContextService.GetRoles().Contains("Bruger"))
+            if (_userContextService.GetRoles().Contains("Admin"))
                 return await _brandService.GetAllObjectsView();
             
             return NotFound("Ingen brands at finde...");

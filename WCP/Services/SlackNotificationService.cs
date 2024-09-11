@@ -4,6 +4,7 @@ using System.Linq;
 using WCPShared.Interfaces.DataServices;
 using WCPShared.Models;
 using WCPShared.Models.Views;
+using WCPShared.Services.StaticHelpers;
 
 namespace WCPShared.Services
 {
@@ -11,6 +12,7 @@ namespace WCPShared.Services
     {
         private readonly ISlackApiClient _slackApiClient;
         private readonly ICreatorService _creatorService;
+        private bool EnableNotifications = Secrets.IsProd;
 
         public SlackNotificationService(ISlackApiClient slackApiClient, ICreatorService creatorService)
         {
@@ -20,6 +22,8 @@ namespace WCPShared.Services
 
         public async Task SendMessageToUser(string username, string message)
         {
+            if (!EnableNotifications) return;
+            
             User? user = await FetchUser(username);
 
             if (user is not null)
@@ -28,6 +32,8 @@ namespace WCPShared.Services
 
         public async Task SendMessageToChannel(string channel, string message)
         {
+            if (!EnableNotifications) return;
+
             Conversation? conversation = await FetchConversation(channel);
             
             if (conversation is not null)
@@ -48,16 +54,18 @@ namespace WCPShared.Services
             ConversationListResponse conversations = await _slackApiClient.Conversations.List(
                 types: [ConversationType.PublicChannel, ConversationType.PrivateChannel]);
 
-            return conversations.Channels.SingleOrDefault(x => x.Name == conversation);
+            return conversations.Channels.SingleOrDefault(x => x.Name == conversation.Replace(' ', '-').ToLower());
         }
 
         private async Task<User?> FetchUser(string userName)
         {
-            return (await _slackApiClient.Users.List()).Members.SingleOrDefault(x => x.RealName == userName);
+            return (await _slackApiClient.Users.List()).Members.SingleOrDefault(x => x.RealName.ToLower() == userName.ToLower());
         }
 
         public async Task SendStatusNotifications(Order newOrder, Order oldOrder)
         {
+            if (!EnableNotifications) return;
+
             // Organizational notifications
 
             // Notify organization when the order is accepted

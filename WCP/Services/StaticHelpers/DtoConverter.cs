@@ -41,39 +41,6 @@ namespace WCPShared.Services.StaticHelpers
                 Id = obj.Id
             };
         }
-        
-        public static CreatorDto CreatorToDto(Creator creator)
-        {
-            var dto = new CreatorDto()
-            {
-                Address = creator.Address,
-                DateOfBirth = creator.DateOfBirth,
-                ImgURL = creator.ImgURL,
-                IsEditor = creator.IsEditor,
-                Speciality = creator.Speciality,
-                UserId = creator.UserId,
-                Gender = creator.Gender!               
-            };
-
-            if (creator.Languages is not null)
-                dto.Languages = creator.Languages.Select(x => x.Name).ToList();
-
-            return dto;
-        }
-
-        public static UserNC UserToNCUser(User user)
-        {
-            return new UserNC
-            {
-                Name = user.Name,
-                Email = user.Email,
-                Id = user.Id,
-                IsActive = user.IsActive,
-                Organization = user.Organization,
-                Phone = user.Phone,
-                Role = user.Role
-            };
-        }
 
         public static Order OrderDtoToOrder(OrderDto obj)
         {

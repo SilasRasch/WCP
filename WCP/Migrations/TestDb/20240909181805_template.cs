@@ -3,10 +3,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace WCPShared.Migrations
+namespace WCPShared.Migrations.TestDb
 {
     /// <inheritdoc />
-    public partial class init : Migration
+    public partial class template : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -36,6 +36,22 @@ namespace WCPShared.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Organizations", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "StaticTemplates",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    TemplateImgOne = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    TemplateImgTwo = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ExampleImg = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_StaticTemplates", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -159,6 +175,30 @@ namespace WCPShared.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "OrderStaticTemplate",
+                columns: table => new
+                {
+                    OrdersId = table.Column<int>(type: "int", nullable: false),
+                    StaticTemplatesId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_OrderStaticTemplate", x => new { x.OrdersId, x.StaticTemplatesId });
+                    table.ForeignKey(
+                        name: "FK_OrderStaticTemplate_Orders_OrdersId",
+                        column: x => x.OrdersId,
+                        principalTable: "Orders",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_OrderStaticTemplate_StaticTemplates_StaticTemplatesId",
+                        column: x => x.StaticTemplatesId,
+                        principalTable: "StaticTemplates",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "CreatorLanguage",
                 columns: table => new
                 {
@@ -232,6 +272,11 @@ namespace WCPShared.Migrations
                 column: "BrandId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_OrderStaticTemplate_StaticTemplatesId",
+                table: "OrderStaticTemplate",
+                column: "StaticTemplatesId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Users_OrganizationId",
                 table: "Users",
                 column: "OrganizationId");
@@ -247,6 +292,9 @@ namespace WCPShared.Migrations
                 name: "CreatorOrder");
 
             migrationBuilder.DropTable(
+                name: "OrderStaticTemplate");
+
+            migrationBuilder.DropTable(
                 name: "Languages");
 
             migrationBuilder.DropTable(
@@ -254,6 +302,9 @@ namespace WCPShared.Migrations
 
             migrationBuilder.DropTable(
                 name: "Orders");
+
+            migrationBuilder.DropTable(
+                name: "StaticTemplates");
 
             migrationBuilder.DropTable(
                 name: "Users");

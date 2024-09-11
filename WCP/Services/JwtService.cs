@@ -1,18 +1,15 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 using WCPShared.Interfaces;
 using WCPShared.Interfaces.Auth;
 using WCPShared.Interfaces.DataServices;
 using WCPShared.Models;
 using WCPShared.Models.AuthModels;
+using WCPShared.Models.DTOs;
 using WCPShared.Models.UserModels;
 using WCPShared.Services.StaticHelpers;
 
@@ -24,19 +21,21 @@ namespace WCPShared.Services
         private readonly IUserService _userService;
         private readonly IOrganizationService _organizationService;
         private readonly IEmailService _emailService;
+        private readonly ICreatorService _creatorService;
 
-        public JwtService(IConfiguration configuration, IUserService userService, IEmailService emailService, IOrganizationService organizationService)
+        public JwtService(IConfiguration configuration, IUserService userService, IEmailService emailService, IOrganizationService organizationService, ICreatorService creatorService)
         {
             _configuration = configuration;
             _userService = userService;
             _emailService = emailService;
             _organizationService = organizationService;
+            _creatorService = creatorService;
         }
 
         public async Task<User> Register(RegisterDto request)
         {
             if (await _userService.GetUserByEmail(request.Email) is not null)
-                return null!;
+                throw new ArgumentException("A user with that email already exists...");
 
             Organization? org = null;
             if (request.OrganizationId != 0 && request.OrganizationId is not null)
@@ -57,11 +56,55 @@ namespace WCPShared.Services
                 VerificationToken = verificationToken,
                 OrganizationId = request.OrganizationId,
                 Organization = org
-            };                
+            };
 
-            await _userService.AddObject(user);
+            user = await _userService.AddObject(user);
             await _emailService.SendRegistrationEmail(user, verificationToken);
 
+            return user;
+        }
+
+        public async Task<User> Register(RegisterCreatorDto request)
+        {
+            if (await _userService.GetUserByEmail(request.User.Email) is not null)
+                throw new ArgumentException("A user with that email already exists...");
+
+            Organization? org = null;
+            if (request.User.OrganizationId != 0 && request.User.OrganizationId is not null)
+                org = await _organizationService.GetObject(request.User.OrganizationId!.Value);
+
+            string generatedPassword = GenerateRandomString(32);
+            string passwordHash = BCrypt.Net.BCrypt.HashPassword(generatedPassword);
+            string verificationToken = GenerateRandomString(64);
+
+            User user = new User()
+            {
+                Email = request.User.Email,
+                Name = request.User.Name,
+                PasswordHash = passwordHash,
+                Phone = request.User.Phone,
+                Role = request.User.Role,
+                IsActive = false,
+                VerificationToken = verificationToken,
+                OrganizationId = request.User.OrganizationId,
+                Organization = org
+            };
+
+            user = await _userService.AddObject(user);
+
+            if (request.Creator is not null && user is not null && user.Id != 0 && (request.User.Role == "Creator" || request.User.Role == "Editor"))
+            {
+                await _emailService.SendRegistrationEmail(user, verificationToken);
+                request.Creator.UserId = user.Id;
+                Creator? creator = await _creatorService.AddObject(request.Creator);
+
+                if (creator is null || creator.Id is 0)
+                {
+                    await _userService.DeleteObject(user.Id);
+                    throw new ArgumentException("Adding creator failed...");
+                }
+            }
+                
             return user;
         }
 

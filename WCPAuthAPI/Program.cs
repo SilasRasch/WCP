@@ -25,12 +25,22 @@ builder.Services.AddHttpContextAccessor(); // To get user in service-file instea
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IAuthService, JwtService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<ICreatorService, CreatorService>();
+builder.Services.AddScoped<ILanguageService, LanguageService>();
 builder.Services.AddScoped<IOrganizationService, OrganizationService>();
 builder.Services.AddScoped<IEmailService, SendGridEmailService>();
 builder.Services.AddScoped<UserContextService>();
 builder.Services.AddScoped<ViewConverter>();
-builder.Services.AddDbContext<WcpDbContext>(
-    options => options.UseSqlServer(Secrets.GetConnectionString(builder.Configuration)));
+if (Secrets.IsProd)
+{
+    builder.Services.AddDbContext<IWcpDbContext, WcpDbContext>(
+        options => options.UseSqlServer(Secrets.GetConnectionString(builder.Configuration)));
+}
+else
+{
+    builder.Services.AddDbContext<IWcpDbContext, TestDbContext>(
+        options => options.UseSqlServer(Secrets.GetConnectionString(builder.Configuration)));
+}
 
 builder.Services.AddSwaggerGen(options =>
 {

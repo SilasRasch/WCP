@@ -7,17 +7,18 @@ using WCPShared.Models.Views;
 using System.Linq.Expressions;
 using WCPShared.Services.Converters;
 using System;
+using WCPShared.Interfaces;
 
 namespace WCPShared.Services.Databases.EntityFramework
 {
     public class CreatorService : ICreatorService
     {
-        private readonly WcpDbContext _context;
+        private readonly IWcpDbContext _context;
         private readonly IUserService _userService;
         private readonly ILanguageService _languageService;
         private readonly ViewConverter _viewConverter;
 
-        public CreatorService(WcpDbContext context, ILanguageService languageService, IUserService userService, ViewConverter viewConverter)
+        public CreatorService(IWcpDbContext context, ILanguageService languageService, IUserService userService, ViewConverter viewConverter)
         {
             _context = context;
             _languageService = languageService;
@@ -25,7 +26,7 @@ namespace WCPShared.Services.Databases.EntityFramework
             _viewConverter = viewConverter;
         }
 
-        public async Task AddObject(Creator obj)
+        public async Task<Creator> AddObject(Creator obj)
         {
             if (obj.Languages is not null)
                 _context.Languages.AttachRange(obj.Languages);
@@ -34,6 +35,7 @@ namespace WCPShared.Services.Databases.EntityFramework
 
             await _context.Creators.AddAsync(obj);
             await _context.SaveChangesAsync();
+            return obj;
         }
 
         public async Task<Creator?> DeleteObject(int id)
@@ -65,8 +67,6 @@ namespace WCPShared.Services.Databases.EntityFramework
             if (oldCreator is null)
                 return null!;
 
-            //_context.Creators.Attach(oldCreator); // Not needed? Already tracked frem GET
-
             oldCreator.DateOfBirth = obj.DateOfBirth;
             oldCreator.Address = obj.Address;
             oldCreator.Speciality = obj.Speciality;
@@ -84,9 +84,9 @@ namespace WCPShared.Services.Databases.EntityFramework
                 }
             }
 
-            if (obj.UserId != oldCreator.UserId)
+            if (obj.UserId is not null && obj.UserId != oldCreator.UserId)
             {
-                var user = await _userService.GetObject(obj.UserId);
+                var user = await _userService.GetObject(obj.UserId.Value);
                 if (user is not null)
                 {
                     oldCreator.UserId = user.Id;
@@ -113,7 +113,9 @@ namespace WCPShared.Services.Databases.EntityFramework
 
         public async Task<Creator?> AddObject(CreatorDto obj)
         {
-            var user = await _userService.GetObject(obj.UserId);
+            if (obj.UserId is null) return null!;
+            
+            var user = await _userService.GetObject(obj.UserId.Value);
             if (user is null)
                 return null;
             
@@ -126,7 +128,7 @@ namespace WCPShared.Services.Databases.EntityFramework
                 IsEditor = obj.IsEditor,
                 Languages = new List<Language>(),
                 Speciality = obj.Speciality,
-                UserId = obj.UserId,
+                UserId = obj.UserId.Value,
                 User = user
             };
 
@@ -136,7 +138,7 @@ namespace WCPShared.Services.Databases.EntityFramework
                 creatorToAdd.Languages = languages.Where(x => obj.Languages.Contains(x.Name)).ToList();
             }
 
-            await _context.AddAsync(creatorToAdd);
+            await _context.Creators.AddAsync(creatorToAdd);
             await _context.SaveChangesAsync();
             return creatorToAdd;
         }

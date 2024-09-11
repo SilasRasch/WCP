@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using WCPShared.Interfaces.DataServices.Utility;
 using WCPShared.Models;
+using WCPShared.Models.DTOs;
 using WCPShared.Models.Views;
 
 namespace WCPShared.Interfaces.DataServices

@@ -5,6 +5,7 @@ using Swashbuckle.AspNetCore.Filters;
 using System.Text;
 using System.Text.Json.Serialization;
 using WCPFileAPI.Services.S3;
+using WCPShared.Interfaces;
 using WCPShared.Models;
 using WCPShared.Services;
 using WCPShared.Services.StaticHelpers;
@@ -13,10 +14,18 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container
 
-builder.Services.AddDbContext<WcpDbContext>(options =>
+builder.Services.AddDbContext<IWcpDbContext, WcpDbContext>(options =>
     options.UseSqlServer("Data Source=172.232.142.14;Initial Catalog=WCP;User ID=sa;Password=Microsoftlmao!;Connect Timeout=30;Encrypt=True;Trust Server Certificate=True;Application Intent=ReadWrite;Multi Subnet Failover=False"));
-//builder.Services.AddDbContext<WcpDbContext>(options =>
-//    options.UseSqlServer(Secrets.GetConnectionString(builder.Configuration)));
+//if (Secrets.IsProd)
+//{
+//    builder.Services.AddDbContext<IWcpDbContext, WcpDbContext>(
+//        options => options.UseSqlServer(Secrets.GetConnectionString(builder.Configuration)));
+//}
+//else
+//{
+//    builder.Services.AddDbContext<IWcpDbContext, TestDbContext>(
+//        options => options.UseSqlServer(Secrets.GetConnectionString(builder.Configuration)));
+//}
 
 string allowAll = "dev";
 

@@ -1,12 +1,13 @@
-﻿using WCPShared.Interfaces;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using WCPShared.Interfaces;
 
-namespace WCPShared.Models.UserModels
+namespace WCPShared.Models.Views
 {
-    /// <summary>
-    /// Non-confidential user (no passwords, auth tokens, or information that cannot be shared with the public)
-    /// </summary>
-
-    public class UserNC : IUser
+    public class UserView
     {
         public int Id { get; set; }
         public string Email { get; set; } = string.Empty;
@@ -14,6 +15,6 @@ namespace WCPShared.Models.UserModels
         public string? Phone { get; set; } = string.Empty;
         public string Role { get; set; } = string.Empty;
         public bool IsActive { get; set; }
-        public Organization? Organization { get; set; }
+        public OrganizationView? Organization { get; set; }
     }
 }

@@ -33,7 +33,7 @@ namespace WCPDataAPI.Controllers
             _languageService = languageService;
         }
 
-        [HttpGet]
+        [HttpGet, AllowAnonymous]
         public async Task<ActionResult<IEnumerable<CreatorView>>> Get([FromQuery] int? orderId = null, [FromQuery] string? searchTerm = null)
         {
             List<CreatorView> creators = await _creatorService.GetAllObjectsView();
@@ -82,35 +82,6 @@ namespace WCPDataAPI.Controllers
             return Ok(creator);
         }
 
-        [HttpPost, Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Post(CreatorDto creator)
-        {
-            var user = await _userService.GetObject(creator.UserId);
-
-            if (!creator.Validate() || user is null)
-                return BadRequest("Valideringsfejl, tjek venligst felterne igen...");
-
-            await _creatorService.AddObject(creator);
-
-            return CreatedAtAction("Post", new { id = creator.UserId }, creator);
-        }
-
-        [HttpPost("AddRange"), Authorize(Roles = "Admin")]
-        public async Task<IActionResult> PostRange([FromBody] CreatorDtoList request)
-        {
-            foreach (var creator in request.Creators)
-            {
-                var user = await _userService.GetObject(creator.UserId);
-
-                if (!creator.Validate() || user is null)
-                    return BadRequest("Valideringsfejl, tjek venligst felterne igen...");
-
-                await _creatorService.AddObject(creator);
-            }
-
-            return Ok();
-        }
-
         [HttpPut("{id}")]
         public async Task<ActionResult<Creator>> Put(CreatorDto creator, int id)
         {
@@ -133,15 +104,17 @@ namespace WCPDataAPI.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             Creator? creator = await _creatorService.GetObject(id);
+            if (creator is null) return NotFound("Creator not found");
 
-            if (creator is null)
-                return NotFound("Creator not found");
+            User? user = await _userService.GetObject(creator.UserId);
+            if (user is null) return NotFound("User not found");
 
             if (creator.UserId != _userContextService.GetId() && !_userContextService.GetRoles().Contains("Admin"))
                 return BadRequest("Du har ikke tilladelse til at ændre denne creator");
 
-            Creator? deleted = await _creatorService.DeleteObject(id);
-            return deleted is not null ? NoContent() : NotFound("Creator not found");
+            // User delete will cause a cascade deletion of the creator object
+            User? deletedUser = await _userService.DeleteObject(creator.UserId);
+            return deletedUser is not null ? NoContent() : NotFound("Creator not found");
         }
 
         [HttpPut("UpdateProfilePicture/{id}")]

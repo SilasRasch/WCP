@@ -36,5 +36,20 @@ namespace WCPShared.Models.UserModels
             return other is not null &&
                    Id == other.Id;
         }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Id);
+        }
+
+        public static bool operator ==(Creator? left, Creator? right)
+        {
+            return EqualityComparer<Creator>.Default.Equals(left, right);
+        }
+
+        public static bool operator !=(Creator? left, Creator? right)
+        {
+            return !(left == right);
+        }
     }
 }

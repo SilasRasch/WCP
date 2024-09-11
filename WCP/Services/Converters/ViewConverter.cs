@@ -12,11 +12,13 @@ namespace WCPShared.Services.Converters
             OrderView view = new OrderView(obj);
             view.Brand = Convert(obj.Brand);
             view.Creators = obj.Creators.Select(x => Convert(x)).ToList();
+            view.StaticTemplates = obj.StaticTemplates.Select(x => Convert(x)).ToList();
             return view;
         }
 
         public OrganizationView Convert(Organization obj)
         {
+            if (obj is null) return null;
             return new OrganizationView(obj);
         }
 
@@ -34,18 +36,23 @@ namespace WCPShared.Services.Converters
             return view;
         }
 
-        public UserNC Convert(User obj)
+        public UserView Convert(User obj)
         {
-            return new UserNC
+            return new UserView
             {
                 Name = obj.Name,
                 Email = obj.Email,
                 Id = obj.Id,
                 IsActive = obj.IsActive,
-                Organization = obj.Organization,
+                Organization = Convert(obj.Organization!),
                 Phone = obj.Phone,
                 Role = obj.Role
             };
+        }
+
+        public StaticTemplateView Convert(StaticTemplate obj)
+        {
+            return new StaticTemplateView(obj);
         }
     }
 }

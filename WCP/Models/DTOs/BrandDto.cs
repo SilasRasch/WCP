@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using WCPShared.Services.StaticHelpers;
 
-namespace WCPShared.Models
+namespace WCPShared.Models.DTOs
 {
     public class BrandDto
     {

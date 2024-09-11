@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using WCPShared.Interfaces.DataServices;
 using WCPShared.Models.UserModels;
+using WCPShared.Models.Views;
 using WCPShared.Services;
 
 namespace WCPDataAPI.Controllers
@@ -22,7 +23,7 @@ namespace WCPDataAPI.Controllers
 
         // GET: api/<UsersController>
         [HttpGet, Authorize(Roles = "Admin")]
-        public async Task<ActionResult<IEnumerable<UserNC>>> Get([FromQuery] string? role)
+        public async Task<ActionResult<IEnumerable<UserView>>> Get([FromQuery] string? role)
         {
             if (role is not null) return Ok(await _userService.GetObjectsViewBy(x => x.Role.ToLower() == role.ToLower()));
             return Ok(await _userService.GetAllObjectsView());
@@ -30,9 +31,9 @@ namespace WCPDataAPI.Controllers
 
         // GET api/<UsersController>/5
         [HttpGet("{id}"), Authorize(Roles = "Admin")]
-        public async Task<ActionResult<UserNC>> Get(int id)
+        public async Task<ActionResult<UserView>> Get(int id)
         {
-            UserNC? user = await _userService.GetObjectViewBy(x => x.Id == id);
+            UserView? user = await _userService.GetObjectViewBy(x => x.Id == id);
             return user is not null ? Ok(user) : NotFound("Der blev ikke fundet en bruger med det id...");
         }
 
