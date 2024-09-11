@@ -112,9 +112,9 @@ namespace WCPDataAPI.Controllers
             if (creator.UserId != _userContextService.GetId() && !_userContextService.GetRoles().Contains("Admin"))
                 return BadRequest("Du har ikke tilladelse til at ændre denne creator");
 
-            user.IsActive = false;
+            user.IsActive = !user.IsActive;
             user = await _userService.UpdateObject(user.Id, user);
-            return user is not null && !user.IsActive ? NoContent() : NotFound("Creator not found");
+            return user is not null ? NoContent() : NotFound("Creator not found");
         }
 
         [HttpPut("UpdateProfilePicture/{id}")]
