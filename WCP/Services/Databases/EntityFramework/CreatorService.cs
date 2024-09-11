@@ -84,9 +84,9 @@ namespace WCPShared.Services.Databases.EntityFramework
                 }
             }
 
-            if (obj.UserId != oldCreator.UserId)
+            if (obj.UserId is not null && obj.UserId != oldCreator.UserId)
             {
-                var user = await _userService.GetObject(obj.UserId);
+                var user = await _userService.GetObject(obj.UserId.Value);
                 if (user is not null)
                 {
                     oldCreator.UserId = user.Id;
@@ -113,7 +113,9 @@ namespace WCPShared.Services.Databases.EntityFramework
 
         public async Task<Creator?> AddObject(CreatorDto obj)
         {
-            var user = await _userService.GetObject(obj.UserId);
+            if (obj.UserId is null) return null!;
+            
+            var user = await _userService.GetObject(obj.UserId.Value);
             if (user is null)
                 return null;
             
@@ -126,7 +128,7 @@ namespace WCPShared.Services.Databases.EntityFramework
                 IsEditor = obj.IsEditor,
                 Languages = new List<Language>(),
                 Speciality = obj.Speciality,
-                UserId = obj.UserId,
+                UserId = obj.UserId.Value,
                 User = user
             };
 

@@ -40,36 +40,34 @@ namespace WCPAuthAPI.Controllers
             _authService = authService;
         }
 
+        //[HttpPost("Register"), Authorize(Roles = "Admin")]
+        //public async Task<ActionResult<int>> Register(RegisterDto request)
+        //{
+        //    if (!request.Validate())
+        //        return BadRequest("Valideringsfejl, tjek venligst felterne igen...");
+
+        //    try
+        //    {
+        //        User? user = await _authService.Register(request);
+        //        return user.Role != "Bruger" ? Created($"auth/{user.Id}", user.Id) : Created($"auth/{user.Id}", new { id = user.Id, orgId = user.OrganizationId });
+        //    }
+        //    catch (ArgumentException ex)
+        //    {
+        //        return BadRequest(ex.Message);
+        //    }
+        //}
+
         [HttpPost("Register"), Authorize(Roles = "Admin")]
-        public async Task<ActionResult<int>> Register(RegisterDto request)
+        public async Task<ActionResult<int>> Register(RegisterCreatorDto request)
         {
-            if (!request.Validate())
-                return BadRequest("Valideringsfejl, tjek venligst felterne igen...");
-
-            try
-            {
-                User? user = await _authService.Register(request);
-                return user.Role != "Bruger" ? Created($"auth/{user.Id}", user.Id) : Created($"auth/{user.Id}", new { id = user.Id, orgId = user.OrganizationId });
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-
-            
-        }
-
-        [HttpPost("RegisterCreator"), Authorize(Roles = "Admin")]
-        public async Task<ActionResult<int>> RegisterCreator(RegisterCreatorDto request)
-        {
-            if (!request.User.Validate() || (request.User.Role == "Creator" && request.Creator is not null && !request.Creator.Validate()))
+            if (!request.User.Validate() || ((request.User.Role == "Creator" || request.User.Role == "Editor") && request.Creator is not null && !request.Creator.Validate()))
                 return BadRequest("Valideringsfejl, tjek venligst felterne igen...");
 
             try
             {
                 if (request.Creator is not null)
                 {
-                    User? user = await _authService.Register(request.User, request.Creator);
+                    User? user = await _authService.Register(request);
                     return user.Role != "Bruger" ? Created($"auth/{user.Id}", user.Id) : Created($"auth/{user.Id}", new { id = user.Id, orgId = user.OrganizationId });
                 }
                 else

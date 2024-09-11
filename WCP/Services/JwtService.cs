@@ -92,7 +92,7 @@ namespace WCPShared.Services
 
             user = await _userService.AddObject(user);
 
-            if (request.Creator is not null && user is not null && user.Id != 0)
+            if (request.Creator is not null && user is not null && user.Id != 0 && (request.User.Role == "Creator" || request.User.Role == "Editor"))
             {
                 await _emailService.SendRegistrationEmail(user, verificationToken);
                 request.Creator.UserId = user.Id;

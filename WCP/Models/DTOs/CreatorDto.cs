@@ -14,7 +14,7 @@ namespace WCPShared.Models.DTOs
         public string? Speciality { get; set; } = string.Empty;
         public string? ImgURL { get; set; }
         public bool IsEditor { get; set; }
-        public int UserId { get; set; }
+        public int? UserId { get; set; }
         public List<string>? Languages { get; set; } = new List<string>();
         public string Gender { get; set; } = string.Empty;
 
