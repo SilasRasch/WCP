@@ -129,7 +129,7 @@ namespace WCPAuthAPI.Controllers
 
             var id = user.Id;
             var roles = _userContextService.GetRoles();
-            var displayName = user.Name;
+            var name = user.Name;
             var phone = user.Phone;
             var orgId = 0;
 
@@ -137,9 +137,9 @@ namespace WCPAuthAPI.Controllers
                 orgId = user.Organization.Id;
 
             if (orgId == 0)
-                return Ok(new { id, email, roles, displayName, phone });
+                return Ok(new { id, email, roles, name, phone });
 
-            return Ok(new { id, orgId, email, roles, displayName, phone });
+            return Ok(new { id, orgId, email, roles, name, phone });
         }
 
         [HttpPost("AddAdmin"), Authorize(Roles = "Admin")]
