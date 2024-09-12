@@ -186,7 +186,7 @@ namespace WCPAuthAPI.Controllers
         {
             User? user = await _userService.GetUserByResetToken(request.Token);
 
-            if (user == null) return BadRequest();
+            if (user == null) return BadRequest("Forkert reset token, start venligst forfra");
             if (user.PasswordResetToken != request.Token) return BadRequest("Reset token mismatch...");
             if (user.ResetTokenExpiry < DateTime.Now) return BadRequest("Reset token forældet, start venligst forfra");
 
