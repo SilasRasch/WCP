@@ -187,7 +187,8 @@ namespace WCPAuthAPI.Controllers
             User? user = await _userService.GetUserByResetToken(request.Token);
 
             if (user == null) return BadRequest();
-            if (user.PasswordResetToken != request.Token || user.ResetTokenExpiry < DateTime.Now) return BadRequest();
+            if (user.PasswordResetToken != request.Token) return BadRequest("Reset token mismatch...");
+            if (user.ResetTokenExpiry < DateTime.Now) return BadRequest("Reset token forældet, start venligst forfra");
 
             string passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
             user.PasswordHash = passwordHash;
@@ -212,7 +213,7 @@ namespace WCPAuthAPI.Controllers
 
             var status = await _emailService.SendForgotPasswordEmail(user, token);
 
-            return status == HttpStatusCode.Accepted ? Ok() : BadRequest();
+            return status == HttpStatusCode.Accepted ? Ok() : BadRequest("Email could not be sent...");
         }
 
         // PUT api/<UsersController>/5 - Used when changing password while already authenticated
@@ -224,7 +225,7 @@ namespace WCPAuthAPI.Controllers
             if (user == null) return BadRequest();
             var myid = _userContextService.GetId();
             if (_userContextService.GetId() != id && !_userContextService.GetRoles().Contains("Admin"))
-                return Unauthorized();
+                return Unauthorized("Adgang nægtet...");
 
             string passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
             user.PasswordHash = passwordHash;
