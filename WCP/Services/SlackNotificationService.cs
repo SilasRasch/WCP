@@ -1,6 +1,5 @@
 ﻿using SlackNet;
 using SlackNet.WebApi;
-using System.Linq;
 using WCPShared.Interfaces.DataServices;
 using WCPShared.Models;
 using WCPShared.Models.Views;
@@ -47,6 +46,7 @@ namespace WCPShared.Services
                 Text = message,
                 Channel = conversationId
             });
+
         }
 
         private async Task<Conversation?> FetchConversation(string conversation)
@@ -72,25 +72,25 @@ namespace WCPShared.Services
             if (newOrder.Status == 1 && oldOrder.Status == 0)
                 await SendMessageToChannel(
                     newOrder.Brand.Organization.Name,
-                    $"[{newOrder.ProjectName}] Tak for din bestilling - den er nu bekræftet!");
+                    $"[{newOrder.ProjectName}] Tak for din bestilling - den er nu bekræftet! {InsertProjectLink(newOrder.Id)}");
 
             // Notify the organization when the scripts and creators have been choosen
             if (newOrder.Status == 2 && oldOrder.Status == 1)
                 await SendMessageToChannel(
                     newOrder.Brand.Organization.Name,
-                    $"[{newOrder.ProjectName}] Scripts og creators er nu klar - hop ind og accepter!");
+                    $"[{newOrder.ProjectName}] Scripts og creators er nu klar - hop ind og accepter! {InsertProjectLink(newOrder.Id)}");
 
             // Notify the organization when the project has wrapped up production
             if (newOrder.Status == 5 && oldOrder.Status == 4)
                 await SendMessageToChannel(
                     newOrder.Brand.Organization.Name,
-                    $"[{newOrder.ProjectName}] Dit projekt er nu færdigt - hop ind og giv feedback!");
+                    $"[{newOrder.ProjectName}] Dit projekt er nu færdigt - hop ind og giv feedback! {InsertProjectLink(newOrder.Id)}");
 
             // Notify the organization when the project has been cancelled
             if (newOrder.Status == -1 && oldOrder.Status != -1)
                 await SendMessageToChannel(
                     newOrder.Brand.Organization.Name,
-                    $"[{newOrder.ProjectName}] Dit projekt er blevet annulleret");
+                    $"[{newOrder.ProjectName}] Dit projekt er blevet annulleret {InsertProjectLink(newOrder.Id)}");
 
             // Creator notifications
 
@@ -105,14 +105,14 @@ namespace WCPShared.Services
                 foreach (CreatorView creator in creatorsWithUsers)
                     await SendMessageToUser(
                         creator.User.Name,
-                        $"[{newOrder.ProjectName}] Projektet er nu godkendt og produkterne er på vej til dig!");
+                        $"[{newOrder.ProjectName}] Projektet er nu godkendt og produkterne er på vej til dig! {InsertProjectLink(newOrder.Id)}");
 
             // Notify creators when the project is moved from queued to planned
             if (newOrder.Status == 2 && oldOrder.Status == 1)
                 foreach (CreatorView creator in creatorsWithUsers)
                     await SendMessageToUser(
                         creator.User.Name,
-                        "Du er blevet inviteret til et projekt!");
+                        $"[{newOrder.ProjectName}] Du er blevet inviteret til et projekt! {InsertProjectLink(newOrder.Id)}");
 
             // Notify newly invited creators (only in planned ???)
             if (newOrder.Status == 2)
@@ -122,8 +122,13 @@ namespace WCPShared.Services
                     foreach (CreatorView creator in newCreators)
                         await SendMessageToUser(
                             creator.User.Name,
-                            "Du er blevet inviteret til et projekt!");
+                            $"[{newOrder.ProjectName}] Du er blevet inviteret til et projekt! {InsertProjectLink(newOrder.Id)}");
             }
+        }
+
+        private string InsertProjectLink(int id)
+        {
+            return $"<https://wcp.dk/projekt/{id}|Gå til projekt>";
         }
     }
 }
