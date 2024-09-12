@@ -88,15 +88,22 @@ namespace WCPAuthAPI.Controllers
         [HttpPost("Login"), AllowAnonymous]
         public async Task<ActionResult<string?>> Login(UserDto request)
         {
-            AuthResponse? auth = await _authService.Login(request);
-            if (auth == null) return BadRequest("Forkert brugernavn eller kodeord");
+            try
+            {
+                AuthResponse? auth = await _authService.Login(request);
+                if (auth == null) return BadRequest("Forkert brugernavn eller kodeord");
 
-            if (!await _authService.CheckLoginAttempts(request))
-                return BadRequest("Du er blevet midlertidigt udelukket grundet for mange mislykkede loginforsøg");
+                if (!await _authService.CheckLoginAttempts(request))
+                    return BadRequest("Du er blevet midlertidigt udelukket grundet for mange mislykkede loginforsøg");
 
-            Response.Cookies.Append(Secrets.RefreshTokenCookieName, auth.RefreshToken, cookieOptions);
+                Response.Cookies.Append(Secrets.RefreshTokenCookieName, auth.RefreshToken, cookieOptions);
 
-            return Ok(auth.Token);
+                return Ok(auth.Token);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPost("Refresh"), AllowAnonymous]
