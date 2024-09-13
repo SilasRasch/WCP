@@ -34,7 +34,19 @@ namespace WCPShared.Models
             modelBuilder.Entity<Order>()
                 .HasMany(x => x.StaticTemplates)
                 .WithMany(x => x.Orders);
-            
+
+            //modelBuilder.Entity<Order>()
+            //    .OwnsMany(order => order.Products, ownedNavigationBuilder =>
+            //    {
+            //        ownedNavigationBuilder.ToJson();
+            //    });
+
+            //modelBuilder.Entity<Order>()
+            //    .OwnsMany(order => order.Ideas, ownedNavigationBuilder =>
+            //    {
+            //        ownedNavigationBuilder.ToJson();
+            //    });
+
             modelBuilder.Entity<Order>()
                 .Property(x => x.Ideas)
                 .HasConversion(new ValueConverter<List<string>, string>(
@@ -64,6 +76,12 @@ namespace WCPShared.Models
                         (c1, c2) => c1.SequenceEqual(c2),
                         c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
                         c => c.ToDictionary()));
+
+            //modelBuilder.Entity<Order>()
+            //    .OwnsOne(x => x.CreatorDeliveryStatus, ownedNavigationBuilder =>
+            //    {
+            //        ownedNavigationBuilder.ToJson();
+            //    });
         }
     }
 }
