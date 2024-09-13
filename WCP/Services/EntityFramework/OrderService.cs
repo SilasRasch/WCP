@@ -198,12 +198,25 @@ namespace WCPShared.Services.EntityFramework
             var order = DtoConverter.OrderDtoToOrder(obj);
             order.Brand = brand;
             order.Creators = creators;
+            order.CreatorDeliveryStatus = creators.ToDictionary(x => x.Id, x => false);
             order.Status = 0;
 
             if (obj.VideographerId is not null)
+            {
                 order.Videographer = await _creatorService.GetObject(obj.VideographerId.Value);
+
+                if (order.Videographer is not null)
+                    order.CreatorDeliveryStatus.Add(obj.VideographerId.Value, false);
+            }
+                
             if (obj.EditorId is not null)
+            {
                 order.Editor = await _creatorService.GetObject(obj.EditorId.Value);
+
+                if (order.Editor is not null)
+                    order.CreatorDeliveryStatus.Add(obj.EditorId.Value, false);
+            }
+                
 
             await _context.AddAsync(order);
             await _context.SaveChangesAsync();

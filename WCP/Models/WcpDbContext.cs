@@ -39,7 +39,7 @@ namespace WCPShared.Models
                 .Property(x => x.Ideas)
                 .HasConversion(new ValueConverter<List<string>, string>(
                     v => JsonConvert.SerializeObject(v), 
-                    v => JsonConvert.DeserializeObject<List<string>>(v)),
+                    v => JsonConvert.DeserializeObject<List<string>>(v)!),
                     new ValueComparer<List<string>>(
                         (c1, c2) => c1.SequenceEqual(c2),
                         c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
@@ -49,7 +49,7 @@ namespace WCPShared.Models
                 .Property(x => x.Products)
                 .HasConversion(new ValueConverter<List<string>, string>(
                     v => JsonConvert.SerializeObject(v),
-                    v => JsonConvert.DeserializeObject<List<string>>(v)),
+                    v => JsonConvert.DeserializeObject<List<string>>(v)!),
                     new ValueComparer<List<string>>(
                         (c1, c2) => c1.SequenceEqual(c2),
                         c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
@@ -59,7 +59,7 @@ namespace WCPShared.Models
                 .Property(x => x.CreatorDeliveryStatus)
                 .HasConversion(new ValueConverter<Dictionary<int, bool>, string>(
                     v => JsonConvert.SerializeObject(v),
-                    v => JsonConvert.DeserializeObject<Dictionary<int, bool>>(v)),
+                    v => JsonConvert.DeserializeObject<Dictionary<int, bool>>(v)!),
                     new ValueComparer<Dictionary<int, bool>>(
                         (c1, c2) => c1.SequenceEqual(c2),
                         c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
