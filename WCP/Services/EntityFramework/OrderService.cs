@@ -243,6 +243,7 @@ namespace WCPShared.Services.EntityFramework
                 .Include(x => x.Brand)
                 .ThenInclude(b => b.Organization)
                 .Include(x => x.Creators)
+                .ThenInclude(x => x.User)
                 .Include(x => x.Videographer)
                 .Include(x => x.Editor)
                 .SingleOrDefaultAsync(predicate);
