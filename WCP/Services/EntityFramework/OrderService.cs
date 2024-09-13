@@ -34,6 +34,10 @@ namespace WCPShared.Services.EntityFramework
                 _context.Brands.Attach(obj.Brand);
             if (obj.Creators is not null)
                 _context.Creators.AttachRange(obj.Creators);
+            if (obj.Videographer is not null)
+                _context.Creators.Attach(obj.Videographer);
+            if (obj.Editor is not null)
+                _context.Creators.Attach(obj.Editor);
 
             await _context.Orders.AddAsync(obj);
             await _context.SaveChangesAsync();
@@ -58,6 +62,8 @@ namespace WCPShared.Services.EntityFramework
                 .Include(x => x.Brand)
                 .ThenInclude(b => b.Organization)
                 .Include(x => x.Creators)
+                .Include(x => x.Videographer)
+                .Include(x => x.Editor)
                 .SingleOrDefaultAsync(x => x.Id == id);
         }
 
@@ -67,6 +73,8 @@ namespace WCPShared.Services.EntityFramework
                 .Include(x => x.Brand)
                 .ThenInclude(b => b.Organization)
                 .Include(x => x.Creators)
+                .Include(x => x.Videographer)
+                .Include(x => x.Editor)
                 .SingleOrDefaultAsync(predicate);
         }
 
@@ -82,6 +90,8 @@ namespace WCPShared.Services.EntityFramework
                 .Include(x => x.Brand)
                 .ThenInclude(b => b.Organization)
                 .Include(x => x.Creators)
+                .Include(x => x.Videographer)
+                .Include(x => x.Editor)
                 .ToListAsync();
         }
 
@@ -108,7 +118,6 @@ namespace WCPShared.Services.EntityFramework
 
             Order copyOfExistingOrder = DtoConverter.CloneOrder(existingOrder);
 
-            existingOrder.BrandId = order.BrandId;
             existingOrder.Price = order.Price;
             existingOrder.Status = order.Status;
             existingOrder.Content = order.Content;
@@ -156,6 +165,20 @@ namespace WCPShared.Services.EntityFramework
                 }
             }
 
+            if (existingOrder.Videographer is not null && order.VideographerId is not null && order.VideographerId != existingOrder.Videographer.Id)
+            {
+                Creator? newVideographer = await _creatorService.GetObject(order.VideographerId.Value);
+                if (newVideographer is not null)
+                    existingOrder.Videographer = newVideographer;
+            }
+
+            if (existingOrder.Editor is not null && order.EditorId is not null && order.EditorId != existingOrder.Editor.Id)
+            {
+                Creator? newEditor = await _creatorService.GetObject(order.EditorId.Value);
+                if (newEditor is not null)
+                    existingOrder.Videographer = newEditor;
+            }
+
             _context.Update(existingOrder);
             await _context.SaveChangesAsync();
             await _slackNetService.SendStatusNotifications(existingOrder, copyOfExistingOrder);
@@ -177,6 +200,11 @@ namespace WCPShared.Services.EntityFramework
             order.Creators = creators;
             order.Status = 0;
 
+            if (obj.VideographerId is not null)
+                order.Videographer = await _creatorService.GetObject(obj.VideographerId.Value);
+            if (obj.EditorId is not null)
+                order.Editor = await _creatorService.GetObject(obj.EditorId.Value);
+
             await _context.AddAsync(order);
             await _context.SaveChangesAsync();
             return order;
@@ -189,6 +217,8 @@ namespace WCPShared.Services.EntityFramework
                 .ThenInclude(b => b.Organization)
                 .Include(x => x.Creators)
                 .ThenInclude(x => x.User)
+                .Include(x => x.Videographer)
+                .Include(x => x.Editor)
                 .Select(x => _viewConverter.Convert(x))
                 .ToListAsync();
         }
@@ -201,6 +231,8 @@ namespace WCPShared.Services.EntityFramework
                 .ThenInclude(b => b.Organization)
                 .Include(x => x.Creators)
                 .ThenInclude(x => x.User)
+                .Include(x => x.Videographer)
+                .Include(x => x.Editor)
                 .Select(x => _viewConverter.Convert(x))
                 .ToListAsync();
         }
@@ -211,6 +243,8 @@ namespace WCPShared.Services.EntityFramework
                 .Include(x => x.Brand)
                 .ThenInclude(b => b.Organization)
                 .Include(x => x.Creators)
+                .Include(x => x.Videographer)
+                .Include(x => x.Editor)
                 .SingleOrDefaultAsync(predicate);
 
             if (order is not null)

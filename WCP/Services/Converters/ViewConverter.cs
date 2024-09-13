@@ -12,6 +12,13 @@ namespace WCPShared.Services.Converters
             OrderView view = new OrderView(obj);
             view.Brand = Convert(obj.Brand);
             view.Creators = obj.Creators.Select(x => Convert(x)).ToList();
+
+            if (obj.Videographer is not null)
+                view.Videographer = Convert(obj.Videographer);
+
+            if (obj.Editor is not null)
+                view.Editor = Convert(obj.Editor);
+
             view.StaticTemplates = obj.StaticTemplates.Select(x => Convert(x)).ToList();
             return view;
         }

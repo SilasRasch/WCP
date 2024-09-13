@@ -13,6 +13,8 @@ namespace WCPShared.Models.DTOs
         public int DeliveryTimeFrom { get; set; }
         public int DeliveryTimeTo { get; set; }
         public int Status { get; set; }
+        public int? VideographerId { get; set; }
+        public int? EditorId { get; set; }
         public List<int> Creators { get; set; } = new List<int>();
 
         // Drive-links
