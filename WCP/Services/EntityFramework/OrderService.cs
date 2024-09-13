@@ -142,6 +142,7 @@ namespace WCPShared.Services.EntityFramework
             existingOrder.RelevantFiles = order.RelevantFiles;
             existingOrder.Scripts = order.Scripts;
             existingOrder.Other = order.Other;
+            existingOrder.CreatorDeliveryStatus = order.CreatorDeliveryStatus;
 
             if (order.BrandId != existingOrder.BrandId)
             {
