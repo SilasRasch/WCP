@@ -112,7 +112,8 @@ namespace WCPShared.Services
         {
             User? user = await _userService.GetUserByEmail(request.Email);
 
-            if (user is null) return null;
+            if (user is null) throw new ArgumentException("User not found");
+            if (!user.IsActive) throw new ArgumentException("User deactivated");
 
             if (user.Email.ToLower() != request.Email.ToLower())
             {

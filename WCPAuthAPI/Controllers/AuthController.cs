@@ -88,15 +88,22 @@ namespace WCPAuthAPI.Controllers
         [HttpPost("Login"), AllowAnonymous]
         public async Task<ActionResult<string?>> Login(UserDto request)
         {
-            AuthResponse? auth = await _authService.Login(request);
-            if (auth == null) return BadRequest("Forkert brugernavn eller kodeord");
+            try
+            {
+                AuthResponse? auth = await _authService.Login(request);
+                if (auth == null) return BadRequest("Forkert brugernavn eller kodeord");
 
-            if (!await _authService.CheckLoginAttempts(request))
-                return BadRequest("Du er blevet midlertidigt udelukket grundet for mange mislykkede loginforsøg");
+                if (!await _authService.CheckLoginAttempts(request))
+                    return BadRequest("Du er blevet midlertidigt udelukket grundet for mange mislykkede loginforsøg");
 
-            Response.Cookies.Append(Secrets.RefreshTokenCookieName, auth.RefreshToken, cookieOptions);
+                Response.Cookies.Append(Secrets.RefreshTokenCookieName, auth.RefreshToken, cookieOptions);
 
-            return Ok(auth.Token);
+                return Ok(auth.Token);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPost("Refresh"), AllowAnonymous]
@@ -129,7 +136,7 @@ namespace WCPAuthAPI.Controllers
 
             var id = user.Id;
             var roles = _userContextService.GetRoles();
-            var displayName = user.Name;
+            var name = user.Name;
             var phone = user.Phone;
             var orgId = 0;
 
@@ -137,9 +144,9 @@ namespace WCPAuthAPI.Controllers
                 orgId = user.Organization.Id;
 
             if (orgId == 0)
-                return Ok(new { id, email, roles, displayName, phone });
+                return Ok(new { id, email, roles, name, phone });
 
-            return Ok(new { id, orgId, email, roles, displayName, phone });
+            return Ok(new { id, orgId, email, roles, name, phone });
         }
 
         [HttpPost("AddAdmin"), Authorize(Roles = "Admin")]
@@ -186,7 +193,7 @@ namespace WCPAuthAPI.Controllers
         {
             User? user = await _userService.GetUserByResetToken(request.Token);
 
-            if (user == null) return BadRequest();
+            if (user == null) return BadRequest("Forkert reset token, start venligst forfra");
             if (user.PasswordResetToken != request.Token) return BadRequest("Reset token mismatch...");
             if (user.ResetTokenExpiry < DateTime.Now) return BadRequest("Reset token forældet, start venligst forfra");
 
