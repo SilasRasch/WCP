@@ -19,6 +19,7 @@ namespace WCPShared.Models
         public Creator? Editor { get; set; }
         public List<Creator> Creators { get; set; } = [];
         public List<StaticTemplate> StaticTemplates { get; set; } = [];
+        public Dictionary<int, bool> CreatorDeliveryStatus { get; set; } = new Dictionary<int, bool>();
 
         // Drive-links
         public string Scripts { get; set; } = string.Empty;
