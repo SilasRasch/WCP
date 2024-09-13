@@ -71,9 +71,6 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Custom settings
-builder.Services.Configure<S3Settings>(builder.Configuration.GetSection(nameof(S3Settings)));
-
 // Custom services
 builder.Services.AddScoped<IS3Client, S3Client>();
 builder.Services.AddSingleton<UserContextService>();

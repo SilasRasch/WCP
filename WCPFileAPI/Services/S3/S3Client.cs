@@ -1,6 +1,8 @@
 ﻿using Amazon.S3.Model;
 using Amazon.S3;
 using Microsoft.Extensions.Options;
+using WCPShared.Models;
+using WCPShared.Services.StaticHelpers;
 
 namespace WCPFileAPI.Services.S3
 {
@@ -8,9 +10,9 @@ namespace WCPFileAPI.Services.S3
     {
         private readonly S3Settings _settings;
 
-        public S3Client(IOptionsMonitor<S3Settings> optionsMonitor)
+        public S3Client(IConfiguration configuration)
         {
-            _settings = optionsMonitor.CurrentValue;
+            _settings = Secrets.GetS3Settings(configuration);
         }
 
         public async Task<string> UploadImage(string fileName, Stream fileStream, string? fileType = "image/jpg")
@@ -36,14 +38,5 @@ namespace WCPFileAPI.Services.S3
                 ServiceURL = $"https://{_settings.ServiceUrl}/",
             }
         );
-    }
-
-    public class S3Settings
-    {
-        public string AccessKey { get; set; } = string.Empty;
-        public string SecretKey { get; set; } = string.Empty;
-        public string ServiceUrl { get; set; } = string.Empty;
-        public string Bucket { get; set; } = string.Empty;
-        public string Root { get; set; } = string.Empty;
     }
 }

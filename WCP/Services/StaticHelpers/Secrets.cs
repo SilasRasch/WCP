@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WCPShared.Models;
 
 namespace WCPShared.Services.StaticHelpers
 {
@@ -12,11 +13,6 @@ namespace WCPShared.Services.StaticHelpers
         public const string Issuer = "https://webcontent.dk";
         public const string Audience = "https://wcp.dk";
         public const string RefreshTokenCookieName = "_WCRefreshToken";
-
-        public const string MongoCollectionName = "orders";
-        public const string MongoCreatorCollectionName = "creators";
-        public const string MongoBrandCollectionName = "brands";
-        public const string MongoDBName = "webcontent";
 
         public static bool IsProd
         {
@@ -44,17 +40,6 @@ namespace WCPShared.Services.StaticHelpers
                 appsetting = config.GetSection("TestConnectionString").Value!;
             }
 
-
-            if (env != null)
-                return env;
-
-            return appsetting;
-        }
-
-        public static string GetMongoConnectionString(IConfiguration config)
-        {
-            var env = Environment.GetEnvironmentVariable("MONGO_CONNECTION_STRING")!;
-            var appsetting = config.GetSection("MongoConnectionString").Value!;
 
             if (env != null)
                 return env;
@@ -100,6 +85,32 @@ namespace WCPShared.Services.StaticHelpers
                 return env;
 
             return appsetting;
+        }
+
+        public static S3Settings GetS3Settings(IConfiguration config)
+        {
+            if (IsProd)
+            {
+                return new S3Settings
+                {
+                    AccessKey = Environment.GetEnvironmentVariable("S3_ACCESS_KEY")!,
+                    SecretKey = Environment.GetEnvironmentVariable("S3_ACCESS_KEY")!,
+                    ServiceUrl = Environment.GetEnvironmentVariable("S3_SERVICE_URL")!,
+                    Bucket = Environment.GetEnvironmentVariable("S3_BUCKET")!,
+                    Root = Environment.GetEnvironmentVariable("S3_ROOT")!,
+                };
+            }
+            else
+            {
+                return new S3Settings
+                {
+                    AccessKey = config.GetSection("S3Settings:AccessKey").Value!,
+                    SecretKey = config.GetSection("S3Settings:SecretKey").Value!,
+                    ServiceUrl = config.GetSection("S3Settings:ServiceUrl").Value!,
+                    Bucket = config.GetSection("S3Settings:Bucket").Value!,
+                    Root = config.GetSection("S3Settings:Root").Value!
+                };
+            }
         }
 
         public static readonly string[] Origins = [
