@@ -166,14 +166,14 @@ namespace WCPShared.Services.EntityFramework
                 }
             }
 
-            if (order.VideographerId is not null)
+            if (order.VideographerId is not null && order.VideographerId != existingOrder.VideographerId)
             {
                 Creator? newVideographer = await _creatorService.GetObject(order.VideographerId.Value);
                 if (newVideographer is not null)
                     existingOrder.Videographer = newVideographer;
             }
 
-            if (order.EditorId is not null)
+            if (order.EditorId is not null && order.EditorId != existingOrder.EditorId)
             {
                 Creator? newEditor = await _creatorService.GetObject(order.EditorId.Value);
                 if (newEditor is not null)
