@@ -19,7 +19,9 @@ namespace WCPShared.Models.Views
         public int DeliveryTimeFrom { get; set; }
         public int DeliveryTimeTo { get; set; }
         public int Status { get; set; }
+        public int? VideographerId { get; set; }
         public CreatorView? Videographer { get; set; }
+        public int? EditorId { get; set; }
         public CreatorView? Editor { get; set; }
         public List<CreatorView> Creators { get; set; } = new List<CreatorView>();
         public List<StaticTemplateView> StaticTemplates { get; set; } = new List<StaticTemplateView>();
@@ -70,6 +72,8 @@ namespace WCPShared.Models.Views
         {
             Id = obj.Id;
             BrandId = obj.BrandId;
+            VideographerId = obj.VideographerId;
+            EditorId = obj.EditorId;
             Price = obj.Price;
             Status = obj.Status;
             Content = obj.Content;
