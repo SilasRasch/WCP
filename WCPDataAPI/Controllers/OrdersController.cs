@@ -31,7 +31,7 @@ namespace WCPDataAPI.Controllers
         // TODO: Refactor Get endpoint to use claims/roles instead of query parameters... (for security)
 
         // GET: api/<OrdersController>
-        [HttpGet, AllowAnonymous]
+        [HttpGet]
         public async Task<ActionResult<IEnumerable<OrderView>>> Get([FromQuery] int status, [FromQuery] int? statusTo = null, [FromQuery] int? userId = null, [FromQuery] int? orgId = null)
         {   
             IEnumerable<OrderView> orders = new List<OrderView>();

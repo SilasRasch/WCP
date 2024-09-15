@@ -11,7 +11,7 @@ namespace WCPShared.Models.UserModels
         public string? Address { get; set; } = string.Empty;
         public string? Speciality { get; set; } = string.Empty;
         public string? ImgURL { get; set; }
-        public bool IsEditor { get; set; }
+        public string SubType { get; set; } = string.Empty;
         public int UserId { get; set; }
         public User User { get; set; } = new User();
         public List<Language>? Languages { get; set; } = new List<Language>();
@@ -20,7 +20,7 @@ namespace WCPShared.Models.UserModels
 
         public bool Validate()
         {
-            if (!IsEditor && string.IsNullOrWhiteSpace(Address))
+            if (SubType == "UGC" && string.IsNullOrWhiteSpace(Address))
                 return false;
 
             return true;

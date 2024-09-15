@@ -232,7 +232,9 @@ namespace WCPShared.Services.EntityFramework
                 .Include(x => x.Creators)
                 .ThenInclude(x => x.User)
                 .Include(x => x.Videographer)
+                .ThenInclude(x => x.User)
                 .Include(x => x.Editor)
+                .ThenInclude(x => x.User)
                 .Select(x => _viewConverter.Convert(x))
                 .ToListAsync();
         }
@@ -246,7 +248,9 @@ namespace WCPShared.Services.EntityFramework
                 .Include(x => x.Creators)
                 .ThenInclude(x => x.User)
                 .Include(x => x.Videographer)
+                .ThenInclude(x => x.User)
                 .Include(x => x.Editor)
+                .ThenInclude(x => x.User)
                 .Select(x => _viewConverter.Convert(x))
                 .ToListAsync();
         }
@@ -259,7 +263,9 @@ namespace WCPShared.Services.EntityFramework
                 .Include(x => x.Creators)
                 .ThenInclude(x => x.User)
                 .Include(x => x.Videographer)
+                .ThenInclude(x => x.User)
                 .Include(x => x.Editor)
+                .ThenInclude(x => x.User)
                 .SingleOrDefaultAsync(predicate);
 
             if (order is not null)

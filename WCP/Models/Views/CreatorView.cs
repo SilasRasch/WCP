@@ -16,7 +16,7 @@ namespace WCPShared.Models.Views
         public string? Address { get; set; } = string.Empty;
         public string? Speciality { get; set; } = string.Empty;
         public string? ImgURL { get; set; }
-        public bool IsEditor { get; set; }
+        public string SubType { get; set; } = string.Empty;
         public int? UserId { get; set; }
         public List<string>? Languages { get; set; } = new List<string>();
         public string Gender { get; set; } = string.Empty;
@@ -27,7 +27,7 @@ namespace WCPShared.Models.Views
             Address = obj.Address;
             Gender = obj.Gender;
             UserId = obj.UserId;
-            IsEditor = obj.IsEditor;
+            SubType = obj.SubType;
             Languages = obj.Languages.Select(x => x.Name).ToList();
             DateOfBirth = obj.DateOfBirth;
             Speciality = obj.Speciality;

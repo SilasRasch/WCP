@@ -34,7 +34,7 @@ namespace WCPDataAPI.Controllers
         }
 
         [HttpGet, AllowAnonymous]
-        public async Task<ActionResult<IEnumerable<CreatorView>>> Get([FromQuery] int? orderId = null, [FromQuery] string? searchTerm = null)
+        public async Task<ActionResult<IEnumerable<CreatorView>>> Get([FromQuery] int? orderId = null, [FromQuery] string? searchTerm = null, [FromQuery] string? subType = null)
         {
             List<CreatorView> creators = await _creatorService.GetAllObjectsView();
 
@@ -46,6 +46,11 @@ namespace WCPDataAPI.Controllers
                 {
                     creators = creators.Where(x => order.Creators.Any(c => c.Id == x.Id)).ToList();
                 }
+            }
+
+            if (subType is not null)
+            {
+                creators = creators.Where(x => x.SubType.ToLower() == subType.ToLower()).ToList();
             }
 
             if (searchTerm is not null)

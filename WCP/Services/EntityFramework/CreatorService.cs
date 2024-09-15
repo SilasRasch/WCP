@@ -125,7 +125,7 @@ namespace WCPShared.Services.EntityFramework
                 Gender = obj.Gender,
                 DateOfBirth = obj.DateOfBirth,
                 ImgURL = obj.ImgURL,
-                IsEditor = obj.IsEditor,
+                SubType = obj.SubType,
                 Languages = new List<Language>(),
                 Speciality = obj.Speciality,
                 UserId = obj.UserId.Value,
