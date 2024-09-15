@@ -166,7 +166,7 @@ namespace WCPShared.Services.EntityFramework
                 }
             }
 
-            if (order.VideographerId is not null && order.VideographerId != existingOrder.VideographerId)
+            if (order.VideographerId != existingOrder.VideographerId)
             {
                 if (order.VideographerId is null)
                 {
