@@ -177,7 +177,7 @@ namespace WCPShared.Services.EntityFramework
             {
                 Creator? newEditor = await _creatorService.GetObject(order.EditorId.Value);
                 if (newEditor is not null)
-                    existingOrder.Videographer = newEditor;
+                    existingOrder.Editor = newEditor;
             }
 
             _context.Update(existingOrder);
