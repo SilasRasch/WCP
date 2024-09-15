@@ -36,6 +36,18 @@ namespace WCPShared.Models
                 .WithMany(x => x.Orders);
 
             modelBuilder.Entity<Order>()
+                .HasMany(x => x.Creators)
+                .WithMany(x => x.Orders);
+
+            modelBuilder.Entity<Order>()
+                .HasOne(x => x.Videographer)
+                .WithMany(x => x.Orders);
+
+            modelBuilder.Entity<Order>()
+                .HasOne(x => x.Editor)
+                .WithMany(x => x.Orders);
+
+            modelBuilder.Entity<Order>()
                 .Property(x => x.Ideas)
                 .HasConversion(new ValueConverter<List<string>, string>(
                     v => JsonConvert.SerializeObject(v),
