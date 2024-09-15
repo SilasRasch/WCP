@@ -168,16 +168,30 @@ namespace WCPShared.Services.EntityFramework
 
             if (order.VideographerId is not null && order.VideographerId != existingOrder.VideographerId)
             {
-                Creator? newVideographer = await _creatorService.GetObject(order.VideographerId.Value);
-                if (newVideographer is not null)
-                    existingOrder.Videographer = newVideographer;
+                if (order.VideographerId is null)
+                {
+                    existingOrder.Videographer = null;
+                }
+                else
+                {
+                    Creator? newVideographer = await _creatorService.GetObject(order.VideographerId.Value);
+                    if (newVideographer is not null)
+                        existingOrder.Videographer = newVideographer;
+                }
             }
 
-            if (order.EditorId is not null && order.EditorId != existingOrder.EditorId)
+            if (order.EditorId != existingOrder.EditorId)
             {
-                Creator? newEditor = await _creatorService.GetObject(order.EditorId.Value);
-                if (newEditor is not null)
-                    existingOrder.Editor = newEditor;
+                if (order.EditorId is null)
+                {
+                    existingOrder.Editor = null;
+                }
+                else
+                {
+                    Creator? newEditor = await _creatorService.GetObject(order.EditorId.Value);
+                    if (newEditor is not null)
+                        existingOrder.Editor = newEditor;
+                }
             }
 
             _context.Update(existingOrder);
