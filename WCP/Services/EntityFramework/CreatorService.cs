@@ -72,6 +72,7 @@ namespace WCPShared.Services.EntityFramework
             oldCreator.Speciality = obj.Speciality;
             oldCreator.ImgURL = obj.ImgURL;
             oldCreator.Gender = obj.Gender;
+            oldCreator.SubType = obj.SubType;
 
             if (obj.Languages is not null)
             {
