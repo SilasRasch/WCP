@@ -64,6 +64,24 @@ namespace WCPShared.Models
                         (c1, c2) => c1.SequenceEqual(c2),
                         c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
                         c => c.ToList()));
+
+            //modelBuilder.Entity<Order>()
+            //    .OwnsMany(order => order.Products, ownedNavigationBuilder =>
+            //    {
+            //        ownedNavigationBuilder.ToJson();
+            //    });
+
+            //modelBuilder.Entity<Order>()
+            //    .OwnsMany(order => order.Ideas, ownedNavigationBuilder =>
+            //    {
+            //        ownedNavigationBuilder.ToJson();
+            //    });
+
+            //modelBuilder.Entity<Order>()
+            //    .OwnsOne(x => x.CreatorDeliveryStatus, ownedNavigationBuilder =>
+            //    {
+            //        ownedNavigationBuilder.ToJson();
+            //    });
         }
     }
 }
