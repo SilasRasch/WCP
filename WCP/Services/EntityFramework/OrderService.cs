@@ -112,45 +112,24 @@ namespace WCPShared.Services.EntityFramework
 
         public async Task<Order?> UpdateObject(int id, OrderDto order)
         {
+            // Check if order exists
             Order? existingOrder = await GetObject(id);
             if (existingOrder is null)
                 return null;
 
+            // Copy order for comparison when generating notifications
             Order copyOfExistingOrder = DtoConverter.CloneOrder(existingOrder);
 
-            existingOrder.Price = order.Price;
-            existingOrder.Status = order.Status;
-            existingOrder.Content = order.Content;
-            existingOrder.ContentCount = order.ContentCount;
-            existingOrder.ContentLength = order.ContentLength;
-            existingOrder.Delivery = order.Delivery;
-            existingOrder.DeliveryTimeFrom = order.DeliveryTimeFrom;
-            existingOrder.DeliveryTimeTo = order.DeliveryTimeTo;
-            existingOrder.Email = order.Email;
-            existingOrder.Name = order.Name;
-            existingOrder.Phone = order.Phone;
-            existingOrder.ExtraCreator = order.ExtraCreator;
-            existingOrder.ExtraHook = order.ExtraHook;
-            existingOrder.ExtraNotes = order.ExtraNotes;
-            existingOrder.FocusPoints = order.FocusPoints;
-            existingOrder.Format = order.Format;
-            existingOrder.Ideas = order.Ideas;
-            existingOrder.Platforms = order.Platforms;
-            existingOrder.Products = order.Products;
-            existingOrder.ProjectName = order.ProjectName;
-            existingOrder.ProjectType = order.ProjectType;
-            existingOrder.RelevantFiles = order.RelevantFiles;
-            existingOrder.Scripts = order.Scripts;
-            existingOrder.Other = order.Other;
-            //existingOrder.CreatorDeliveryStatus = order.CreatorDeliveryStatus;
+            existingOrder = DtoConverter.ChangeProperties(order, existingOrder);
 
+            // Update brand
             if (order.BrandId != existingOrder.BrandId)
             {
                 Brand? brand = await _brandService.GetObject(order.BrandId);
-                if (brand is not null)
-                    existingOrder.Brand = brand;
+                if (brand is not null) existingOrder.Brand = brand;
             }
 
+            // Update creators
             if (order.Creators is not null)
             {
                 var newCreators = (await _creatorService.GetAllObjects()).Where(x => order.Creators.Contains(x.Id)).ToList();
@@ -166,6 +145,7 @@ namespace WCPShared.Services.EntityFramework
                 }
             }
 
+            // Update videographer
             if (order.VideographerId != existingOrder.VideographerId)
             {
                 if (order.VideographerId is null)
@@ -180,6 +160,7 @@ namespace WCPShared.Services.EntityFramework
                 }
             }
 
+            // Update editor
             if (order.EditorId != existingOrder.EditorId)
             {
                 if (order.EditorId is null)
@@ -194,6 +175,7 @@ namespace WCPShared.Services.EntityFramework
                 }
             }
 
+            // Save updates
             _context.Update(existingOrder);
             await _context.SaveChangesAsync();
             await _slackNetService.SendStatusNotifications(existingOrder, copyOfExistingOrder);
@@ -207,14 +189,15 @@ namespace WCPShared.Services.EntityFramework
             if (brand is null)
                 return null;
 
-            List<Creator> creators = await _creatorService.GetAllObjects();
-            creators = creators.Where(x => obj.Creators.Contains(x.Id)).ToList();
+            List<Creator> creators = (await _creatorService.GetAllObjects())
+                .Where(x => obj.Creators.Contains(x.Id))
+                .ToList();
 
-            var order = DtoConverter.OrderDtoToOrder(obj);
+            Order order = DtoConverter.OrderDtoToOrder(obj);
             order.Brand = brand;
             order.Creators = creators;
-            //order.CreatorDeliveryStatus = creators.ToDictionary(x => x.Id, x => false);
             order.Status = 0;
+            //order.CreatorDeliveryStatus = creators.ToDictionary(x => x.Id, x => false);
 
             if (obj.VideographerId is not null)
             {

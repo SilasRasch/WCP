@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿using EllipticCurve.Utils;
+using System.Data;
 using WCPShared.Models;
 using WCPShared.Models.DTOs;
 using WCPShared.Models.UserModels;
@@ -40,6 +41,36 @@ namespace WCPShared.Services.StaticHelpers
                 Creators = new List<Creator>(obj.Creators),
                 Id = obj.Id
             };
+        }
+
+        public static Order ChangeProperties(OrderDto input, Order output)
+        {
+            output.Price = input.Price;
+            output.Status = input.Status;
+            output.Content = input.Content;
+            output.ContentCount = input.ContentCount;
+            output.ContentLength = input.ContentLength;
+            output.Delivery = input.Delivery;
+            output.DeliveryTimeFrom = input.DeliveryTimeFrom;
+            output.DeliveryTimeTo = input.DeliveryTimeTo;
+            output.Email = input.Email;
+            output.Name = input.Name;
+            output.Phone = input.Phone;
+            output.ExtraCreator = input.ExtraCreator;
+            output.ExtraHook = input.ExtraHook;
+            output.ExtraNotes = input.ExtraNotes;
+            output.FocusPoints = input.FocusPoints;
+            output.Format = input.Format;
+            output.Ideas = input.Ideas;
+            output.Platforms = input.Platforms;
+            output.Products = input.Products;
+            output.ProjectName = input.ProjectName;
+            output.ProjectType = input.ProjectType;
+            output.RelevantFiles = input.RelevantFiles;
+            output.Scripts = input.Scripts;
+            output.Other = input.Other;
+            return output;
+            //output.CreatorDeliveryStatus = input.CreatorDeliveryStatus;
         }
 
         public static Order OrderDtoToOrder(OrderDto obj)
