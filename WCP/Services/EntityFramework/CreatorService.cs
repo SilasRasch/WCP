@@ -162,7 +162,7 @@ namespace WCPShared.Services.EntityFramework
                 .SingleOrDefaultAsync(predicate);
 
             if (creator is not null)
-                _viewConverter.Convert(creator);
+                return _viewConverter.Convert(creator);
             return null;
         }
 
