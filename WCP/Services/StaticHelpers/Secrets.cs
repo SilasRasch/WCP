@@ -94,7 +94,7 @@ namespace WCPShared.Services.StaticHelpers
                 return new S3Settings
                 {
                     AccessKey = Environment.GetEnvironmentVariable("S3_ACCESS_KEY")!,
-                    SecretKey = Environment.GetEnvironmentVariable("S3_ACCESS_KEY")!,
+                    SecretKey = Environment.GetEnvironmentVariable("S3_SECRET_KEY")!,
                     ServiceUrl = Environment.GetEnvironmentVariable("S3_SERVICE_URL")!,
                     Bucket = Environment.GetEnvironmentVariable("S3_BUCKET")!,
                     Root = Environment.GetEnvironmentVariable("S3_ROOT")!,
