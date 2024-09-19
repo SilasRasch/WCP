@@ -25,7 +25,9 @@ namespace WCPShared.Models.Views
         public CreatorView? Editor { get; set; }
         public List<CreatorView> Creators { get; set; } = new List<CreatorView>();
         public List<StaticTemplateView> StaticTemplates { get; set; } = new List<StaticTemplateView>();
-        //public Dictionary<int, bool> CreatorDeliveryStatus { get; set; } = new Dictionary<int, bool>();
+        public DateTime Created { get; set; }
+        public DateTime Updated { get; set; }
+        public Dictionary<int, bool> CreatorDeliveryStatus { get; set; } = new Dictionary<int, bool>();
 
         // Drive-links
         public string Scripts { get; set; } = string.Empty;
@@ -98,7 +100,8 @@ namespace WCPShared.Models.Views
             RelevantFiles = obj.RelevantFiles;
             Scripts = obj.Scripts;
             Other = obj.Other;
-            
+            Created = obj.Created;
+            Updated = obj.Updated;
         }
     }
 }

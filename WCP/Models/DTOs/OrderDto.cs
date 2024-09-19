@@ -16,7 +16,7 @@ namespace WCPShared.Models.DTOs
         public int? VideographerId { get; set; }
         public int? EditorId { get; set; }
         public List<int> Creators { get; set; } = new List<int>();
-        //public Dictionary<int, bool> CreatorDeliveryStatus { get; set; } = new Dictionary<int, bool>();
+        public Dictionary<int, bool> CreatorDeliveryStatus { get; set; } = new Dictionary<int, bool>();
 
         // Drive-links
         public string Scripts { get; set; } = string.Empty;

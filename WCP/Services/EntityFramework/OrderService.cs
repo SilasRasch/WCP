@@ -39,6 +39,8 @@ namespace WCPShared.Services.EntityFramework
             if (obj.Editor is not null)
                 _context.Creators.Attach(obj.Editor);
 
+            obj.Created = DateTime.Now;
+
             await _context.Orders.AddAsync(obj);
             await _context.SaveChangesAsync();
             return obj;
@@ -103,6 +105,7 @@ namespace WCPShared.Services.EntityFramework
                 return null!;
 
             _context.ChangeTracker.Clear();
+            existingOrder.Updated = DateTime.Now;
             _context.Update(obj);
             await _context.SaveChangesAsync();
             await _slackNetService.SendStatusNotifications(obj, existingOrder);
@@ -175,6 +178,8 @@ namespace WCPShared.Services.EntityFramework
                 }
             }
 
+            existingOrder.Updated = DateTime.Now;
+
             // Save updates
             _context.Update(existingOrder);
             await _context.SaveChangesAsync();
@@ -197,22 +202,23 @@ namespace WCPShared.Services.EntityFramework
             order.Brand = brand;
             order.Creators = creators;
             order.Status = 0;
-            //order.CreatorDeliveryStatus = creators.ToDictionary(x => x.Id, x => false);
+            order.Created = DateTime.Now;
+            order.CreatorDeliveryStatus = creators.ToDictionary(x => x.Id, x => false);
 
             if (obj.VideographerId is not null)
             {
                 order.Videographer = await _creatorService.GetObject(obj.VideographerId.Value);
 
-                //if (order.Videographer is not null)
-                //    order.CreatorDeliveryStatus.Add(obj.VideographerId.Value, false);
+                if (order.Videographer is not null)
+                    order.CreatorDeliveryStatus.Add(obj.VideographerId.Value, false);
             }
                 
             if (obj.EditorId is not null)
             {
                 order.Editor = await _creatorService.GetObject(obj.EditorId.Value);
 
-                //if (order.Editor is not null)
-                //    order.CreatorDeliveryStatus.Add(obj.EditorId.Value, false);
+                if (order.Editor is not null)
+                    order.CreatorDeliveryStatus.Add(obj.EditorId.Value, false);
             }
                 
 

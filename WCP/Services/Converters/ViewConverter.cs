@@ -25,7 +25,7 @@ namespace WCPShared.Services.Converters
 
         public OrganizationView Convert(Organization obj)
         {
-            if (obj is null) return null;
+            if (obj is null) return null!;
             return new OrganizationView(obj);
         }
 

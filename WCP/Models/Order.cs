@@ -21,7 +21,9 @@ namespace WCPShared.Models
         public Creator? Editor { get; set; }
         public List<Creator> Creators { get; set; } = [];
         public List<StaticTemplate> StaticTemplates { get; set; } = [];
-        //public Dictionary<int, bool> CreatorDeliveryStatus { get; set; } = new Dictionary<int, bool>();
+        public DateTime Created { get; set; }
+        public DateTime Updated { get; set; }
+        public Dictionary<int, bool> CreatorDeliveryStatus { get; set; } = new Dictionary<int, bool>();
 
         // Drive-links
         public string Scripts { get; set; } = string.Empty;
@@ -93,6 +95,11 @@ namespace WCPShared.Models
         {
             return other is not null &&
                    Id == other.Id;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Id);
         }
     }
 }
