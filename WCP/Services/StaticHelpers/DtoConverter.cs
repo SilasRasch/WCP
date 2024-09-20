@@ -69,8 +69,8 @@ namespace WCPShared.Services.StaticHelpers
             output.RelevantFiles = input.RelevantFiles;
             output.Scripts = input.Scripts;
             output.Other = input.Other;
+            output.CreatorDeliveryStatus = input.CreatorDeliveryStatus;
             return output;
-            //output.CreatorDeliveryStatus = input.CreatorDeliveryStatus;
         }
 
         public static Order OrderDtoToOrder(OrderDto obj)

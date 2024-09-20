@@ -18,11 +18,8 @@ namespace WCPShared.Models
         public DbSet<Language> Languages { get; set; }
         public DbSet<StaticTemplate> StaticTemplates { get; set; }
 
-        private readonly IConfiguration _configuration;
-
-        public TestDbContext(DbContextOptions<TestDbContext> options, IConfiguration config) : base(options)
+        public TestDbContext(DbContextOptions<TestDbContext> options) : base(options)
         {
-            _configuration = config;
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -77,11 +74,11 @@ namespace WCPShared.Models
             //        ownedNavigationBuilder.ToJson();
             //    });
 
-            //modelBuilder.Entity<Order>()
-            //    .OwnsOne(x => x.CreatorDeliveryStatus, ownedNavigationBuilder =>
-            //    {
-            //        ownedNavigationBuilder.ToJson();
-            //    });
+            modelBuilder.Entity<Order>()
+                .OwnsOne(x => x.CreatorDeliveryStatus, ownedNavigationBuilder =>
+                {
+                    ownedNavigationBuilder.ToJson();
+                });
         }
     }
 }

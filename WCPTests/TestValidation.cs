@@ -1,4 +1,5 @@
 using WCPShared.Models;
+using WCPShared.Models.DTOs;
 using WCPShared.Models.UserModels;
 using WCPShared.Services.StaticHelpers;
 
@@ -88,6 +89,26 @@ namespace WCPTests
         }
 
         [TestMethod]
+        public void TestValidateBrandDto()
+        {
+            BrandDto legal = new BrandDto()
+            {
+                Name = "WebContent",
+                URL = "WebContent.dk"
+            };
+
+            Assert.IsTrue(legal.Validate());
+
+            BrandDto illegal = new BrandDto()
+            {
+                Name = "",
+                URL = "WebContent"
+            };
+
+            Assert.IsFalse(illegal.Validate());
+        }
+
+        [TestMethod]
         public void TestValidateOrder()
         {
             Order legal = new Order()
@@ -108,6 +129,37 @@ namespace WCPTests
             Order illegal = new Order()
             {
                 Brand = new Brand() { Name = "WebContent.dk", URL = "WebContent.dk" },
+                BrandId = 0,
+                Email = "info@webcontent.dk",
+                Phone = "22255123",
+                Name = "Mathias Hansen",
+                ProjectName = "My Project",
+                ProjectType = "User Generated Content",
+                Platforms = "TikTok, Instagram"
+            };
+
+            Assert.IsFalse(illegal.Validate());
+        }
+
+        [TestMethod]
+        public void TestValidateOrderDto()
+        {
+            OrderDto legal = new OrderDto()
+            {
+                BrandId = 1,
+                Email = "info@webcontent.dk",
+                Phone = "22255123",
+                Name = "Mathias Hansen",
+                ProjectName = "My Project",
+                ProjectType = "User Generated Content",
+                Platforms = "TikTok, Instagram",
+                Format = "4:5, 1:1"
+            };
+
+            Assert.IsTrue(legal.Validate());
+
+            OrderDto illegal = new OrderDto()
+            {
                 BrandId = 0,
                 Email = "info@webcontent.dk",
                 Phone = "22255123",
@@ -144,6 +196,29 @@ namespace WCPTests
         }
 
         [TestMethod]
+        public void TestValidateRegisterDto()
+        {
+            RegisterDto legal = new RegisterDto()
+            {
+                Email = "info@webcontent.dk",
+                Role = "Bruger",
+                Phone = "12341234",
+                Name = "Mathias Hansen"
+            };
+
+            Assert.IsTrue(legal.Validate());
+
+            RegisterDto illegal = new RegisterDto()
+            {
+                Email = "info@webcontent.dk",
+                Phone = "12341234",
+                Name = "Mathias Hansen"
+            };
+
+            Assert.IsFalse(illegal.Validate());
+        }
+
+        [TestMethod]
         public void TestValidateCreator()
         {
             Creator legal = new Creator()
@@ -156,6 +231,31 @@ namespace WCPTests
             Assert.IsTrue(legal.Validate());
 
             Creator illegal = new Creator()
+            {
+                SubType = string.Empty,
+                Gender = "Mand"
+            };
+
+            Assert.IsFalse(illegal.Validate());
+
+            illegal.SubType = "UGC";
+            illegal.Gender = string.Empty;
+            Assert.IsFalse(illegal.Validate());
+        }
+
+        [TestMethod]
+        public void TestValidateCreatorDto()
+        {
+            CreatorDto legal = new CreatorDto()
+            {
+                SubType = "UGC",
+                Address = "Kirkevej 43, 4000 Roskilde",
+                Gender = "Mand"
+            };
+
+            Assert.IsTrue(legal.Validate());
+
+            CreatorDto illegal = new CreatorDto()
             {
                 SubType = string.Empty,
                 Gender = "Mand"

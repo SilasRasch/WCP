@@ -68,7 +68,7 @@ namespace WCPShared.Services.EntityFramework
         {
             Organization? oldOrg = await GetObject(id);
 
-            if (oldOrg is null || id != organization.Id)
+            if (oldOrg is null)
                 return null!;
 
             _context.Update(organization);
