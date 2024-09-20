@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using WCPShared.Interfaces;
 using WCPShared.Services.StaticHelpers;
+using Microsoft.IdentityModel.Tokens;
 
 namespace WCPShared.Models.UserModels
 {
@@ -22,10 +23,10 @@ namespace WCPShared.Models.UserModels
             if (!Validation.ValidateEmail(Email))
                 return false;
 
-            if (Role != "Bruger" || Role != "Creator" || Role != "Admin" || Role != "Editor")
+            if (Role != "Bruger" && Role != "Creator" && Role != "Admin" && Role != "Editor")
                 return false;
 
-            if (Phone is not null && !Validation.ValidatePhone(Phone))
+            if (!Phone.IsNullOrEmpty() && !Validation.ValidatePhone(Phone!))
                 return false;
 
             if (!Validation.ValidateDisplayName(Name))

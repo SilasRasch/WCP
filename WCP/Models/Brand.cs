@@ -19,7 +19,7 @@ namespace WCPShared.Models
             if (!Validation.ValidateBrandURL(URL))
                 return false;
 
-            if (Validation.ValidateDisplayName(Name))
+            if (!Validation.ValidateDisplayName(Name))
                 return false;
 
             return true;

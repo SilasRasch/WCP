@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WCPDataAPI", "WCPDataAPI\WC
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WCPFrontEnd", "WCPFrontEnd\WCPFrontEnd\WCPFrontEnd.csproj", "{53E8DA69-C83B-4590-A906-CE3ECF441A59}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WCPTests", "WCPTests\WCPTests.csproj", "{D7F70826-C4F5-49C1-B493-2353B522AD06}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{53E8DA69-C83B-4590-A906-CE3ECF441A59}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{53E8DA69-C83B-4590-A906-CE3ECF441A59}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{53E8DA69-C83B-4590-A906-CE3ECF441A59}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D7F70826-C4F5-49C1-B493-2353B522AD06}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D7F70826-C4F5-49C1-B493-2353B522AD06}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D7F70826-C4F5-49C1-B493-2353B522AD06}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D7F70826-C4F5-49C1-B493-2353B522AD06}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

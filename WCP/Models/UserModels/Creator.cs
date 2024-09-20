@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.IdentityModel.Tokens;
 
 namespace WCPShared.Models.UserModels
 {
@@ -20,7 +21,10 @@ namespace WCPShared.Models.UserModels
 
         public bool Validate()
         {
-            if (SubType == "UGC" && string.IsNullOrWhiteSpace(Address))
+            if (SubType.IsNullOrEmpty())
+                return false;
+
+            if (SubType == "UGC" && (string.IsNullOrWhiteSpace(Address) || string.IsNullOrWhiteSpace(Gender)))
                 return false;
 
             return true;
@@ -40,16 +44,6 @@ namespace WCPShared.Models.UserModels
         public override int GetHashCode()
         {
             return HashCode.Combine(Id);
-        }
-
-        public static bool operator ==(Creator? left, Creator? right)
-        {
-            return EqualityComparer<Creator>.Default.Equals(left, right);
-        }
-
-        public static bool operator !=(Creator? left, Creator? right)
-        {
-            return !(left == right);
         }
     }
 }
