@@ -6,7 +6,6 @@ using WCPShared.Interfaces.DataServices;
 using WCPShared.Models;
 using WCPShared.Models.DTOs;
 using WCPShared.Services.StaticHelpers;
-using MongoDB.Driver;
 using EllipticCurve.Utils;
 using WCPShared.Models.DTOs.RangeDTOs;
 using WCPShared.Models.Views;
