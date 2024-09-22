@@ -10,13 +10,28 @@ using Microsoft.EntityFrameworkCore;
 using WCPShared.Models;
 using WCPShared.Interfaces.DataServices;
 using SlackNet.AspNetCore;
-using Microsoft.AspNetCore.Server.Kestrel.Core;
 using WCPShared.Services.Converters;
 using WCPShared.Services.EntityFramework;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(resource => resource.AddService("WCP"))
+    .WithMetrics(metrics =>
+    {
+        metrics
+            .AddRuntimeInstrumentation()
+            .AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation();
+
+        metrics.AddPrometheusExporter();
+        metrics.AddOtlpExporter(opt => opt.Endpoint = Secrets.OtlpEndpoint);
+    });
+
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IOrderService, OrderService>();

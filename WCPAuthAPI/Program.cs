@@ -11,10 +11,43 @@ using WCPShared.Interfaces.Auth;
 using WCPShared.Interfaces.DataServices;
 using WCPShared.Services.Converters;
 using WCPShared.Services.EntityFramework;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Trace;
+using OpenTelemetry.Logs;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(resource => resource.AddService("WCP"))
+    .WithMetrics(metrics =>
+    {
+        metrics
+            .AddRuntimeInstrumentation()
+            .AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation();
+
+        metrics.AddPrometheusExporter();
+        metrics.AddOtlpExporter(opt => opt.Endpoint = Secrets.OtlpEndpoint);
+    });
+    //.WithTracing(tracing =>
+    //{
+    //    tracing
+    //        .AddAspNetCoreInstrumentation()
+    //        .AddHttpClientInstrumentation()
+    //        .AddEntityFrameworkCoreInstrumentation();
+
+    //    tracing.AddOtlpExporter(opt => opt.Endpoint = Secrets.OtlpEndpoint);
+    //});
+
+//builder.Logging.AddOpenTelemetry(logging =>
+//{
+//    logging.IncludeScopes = true;
+//    logging.IncludeFormattedMessage = true;
+//    logging.AddOtlpExporter(opt => opt.Endpoint = Secrets.OtlpEndpoint);
+//});
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -95,6 +128,8 @@ app.UseHttpsRedirection();
 app.UseCors(allowAll);
 
 app.UseAuthorization();
+
+app.MapPrometheusScrapingEndpoint();
 
 app.MapControllers();
 
