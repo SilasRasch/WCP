@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WCPShared.Models;
 
@@ -11,9 +12,11 @@ using WCPShared.Models;
 namespace WCPShared.Migrations.TestDb
 {
     [DbContext(typeof(TestDbContext))]
-    partial class TestDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240922133723_multi-creator-delivery")]
+    partial class multicreatordelivery
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -116,10 +119,6 @@ namespace WCPShared.Migrations.TestDb
 
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("CreatorDeliveryStatus")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Delivery")
                         .IsRequired()
@@ -453,7 +452,25 @@ namespace WCPShared.Migrations.TestDb
                         .WithMany()
                         .HasForeignKey("VideographerId");
 
+                    b.OwnsOne("System.Collections.Generic.Dictionary<int, bool>", "CreatorDeliveryStatus", b1 =>
+                        {
+                            b1.Property<int>("OrderId")
+                                .HasColumnType("int");
+
+                            b1.HasKey("OrderId");
+
+                            b1.ToTable("Orders");
+
+                            b1.ToJson("CreatorDeliveryStatus");
+
+                            b1.WithOwner()
+                                .HasForeignKey("OrderId");
+                        });
+
                     b.Navigation("Brand");
+
+                    b.Navigation("CreatorDeliveryStatus")
+                        .IsRequired();
 
                     b.Navigation("Editor");
 

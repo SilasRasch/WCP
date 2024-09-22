@@ -15,5 +15,6 @@ namespace WCPShared.Interfaces.DataServices
     {
         Task<List<Order>> GetObjectsBy(Expression<Func<Order, bool>> predicate);
         Task<Order?> GetObjectBy(Expression<Func<Order, bool>> predicate);
+        Task<Order?> CreatorDelivery(int orderId, int creatorId);
     }
 }

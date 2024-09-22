@@ -66,6 +66,7 @@ namespace WCPShared.Services.EntityFramework
                 .Include(x => x.Creators)
                 .Include(x => x.Videographer)
                 .Include(x => x.Editor)
+                .AsSplitQuery()
                 .SingleOrDefaultAsync(x => x.Id == id);
         }
 
@@ -77,6 +78,7 @@ namespace WCPShared.Services.EntityFramework
                 .Include(x => x.Creators)
                 .Include(x => x.Videographer)
                 .Include(x => x.Editor)
+                .AsSplitQuery()
                 .SingleOrDefaultAsync(predicate);
         }
 
@@ -94,6 +96,7 @@ namespace WCPShared.Services.EntityFramework
                 .Include(x => x.Creators)
                 .Include(x => x.Videographer)
                 .Include(x => x.Editor)
+                .AsSplitQuery()
                 .ToListAsync();
         }
 
@@ -135,16 +138,29 @@ namespace WCPShared.Services.EntityFramework
             // Update creators
             if (order.Creators is not null)
             {
-                var newCreators = (await _creatorService.GetAllObjects()).Where(x => order.Creators.Contains(x.Id)).ToList();
+                var creators = (await _creatorService.GetAllObjects()).Where(x => order.Creators.Contains(x.Id)).ToList();
+                var newCreators = creators.Except(existingOrder.Creators);
 
-                if (existingOrder.Creators is not null)
+                existingOrder.Creators = creators;
+
+                if (existingOrder.CreatorDeliveryStatus is null)
                 {
-                    existingOrder.Creators.Clear();
-                    existingOrder.Creators = newCreators;
+                    existingOrder.CreatorDeliveryStatus = creators.ToDictionary(x => x.Id, x => false);
                 }
                 else
                 {
-                    existingOrder.Creators = newCreators;
+                    // Remove excess
+                    foreach (var c in existingOrder.CreatorDeliveryStatus)
+                    {
+                        if (!creators.Any(x => x.Id == c.Key))
+                            existingOrder.CreatorDeliveryStatus.Remove(c.Key);
+                    }
+                }
+
+                // Add new creators to delivery system
+                foreach (Creator creator in newCreators)
+                {
+                    existingOrder.CreatorDeliveryStatus.Add(creator.Id, false);
                 }
             }
 
@@ -153,13 +169,16 @@ namespace WCPShared.Services.EntityFramework
             {
                 if (order.VideographerId is null)
                 {
-                    existingOrder.Videographer = null;
+                    existingOrder.Videographer = null; // Removal
                 }
                 else
                 {
                     Creator? newVideographer = await _creatorService.GetObject(order.VideographerId.Value);
                     if (newVideographer is not null)
+                    {
                         existingOrder.Videographer = newVideographer;
+                        existingOrder.CreatorDeliveryStatus.Add(newVideographer.Id, false);
+                    }
                 }
             }
 
@@ -168,13 +187,16 @@ namespace WCPShared.Services.EntityFramework
             {
                 if (order.EditorId is null)
                 {
-                    existingOrder.Editor = null;
+                    existingOrder.Editor = null; // Removal
                 }
                 else
                 {
                     Creator? newEditor = await _creatorService.GetObject(order.EditorId.Value);
                     if (newEditor is not null)
+                    {
                         existingOrder.Editor = newEditor;
+                        existingOrder.CreatorDeliveryStatus.Add(newEditor.Id, false);
+                    }
                 }
             }
 
@@ -186,6 +208,24 @@ namespace WCPShared.Services.EntityFramework
             await _slackNetService.SendStatusNotifications(existingOrder, copyOfExistingOrder);
 
             return existingOrder;
+        }
+
+        public async Task<Order?> CreatorDelivery(int orderId, int creatorId)
+        {
+            Order? order = await GetObject(orderId);
+
+            if (order is null)
+                return null;
+
+            order.CreatorDeliveryStatus[creatorId] = true;
+
+            // If all creators have delivered, send to editing
+            if (order.CreatorDeliveryStatus.All(x => x.Value))
+                order.Status = 4;
+
+            _context.Update(order);
+            await _context.SaveChangesAsync();
+            return order;
         }
 
         public async Task<Order?> AddObject(OrderDto obj)
@@ -221,7 +261,6 @@ namespace WCPShared.Services.EntityFramework
                     order.CreatorDeliveryStatus.Add(obj.EditorId.Value, false);
             }
                 
-
             await _context.AddAsync(order);
             await _context.SaveChangesAsync();
             return order;
@@ -239,6 +278,7 @@ namespace WCPShared.Services.EntityFramework
                 .Include(x => x.Editor)
                 .ThenInclude(x => x.User)
                 .Select(x => _viewConverter.Convert(x))
+                .AsSplitQuery()
                 .ToListAsync();
         }
 
@@ -255,6 +295,7 @@ namespace WCPShared.Services.EntityFramework
                 .Include(x => x.Editor)
                 .ThenInclude(x => x.User)
                 .Select(x => _viewConverter.Convert(x))
+                .AsSplitQuery()
                 .ToListAsync();
         }
 
@@ -269,6 +310,7 @@ namespace WCPShared.Services.EntityFramework
                 .ThenInclude(x => x.User)
                 .Include(x => x.Editor)
                 .ThenInclude(x => x.User)
+                .AsSplitQuery()
                 .SingleOrDefaultAsync(predicate);
 
             if (order is not null)

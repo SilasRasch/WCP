@@ -62,6 +62,16 @@ namespace WCPShared.Models
                         c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
                         c => c.ToList()));
 
+            modelBuilder.Entity<Order>()
+                .Property(x => x.CreatorDeliveryStatus)
+                .HasConversion(new ValueConverter<Dictionary<int, bool>, string>(
+                    v => JsonConvert.SerializeObject(v),
+                    v => JsonConvert.DeserializeObject<Dictionary<int, bool>>(v)),
+                    new ValueComparer<Dictionary<int, bool>>(
+                        (c1, c2) => c1.SequenceEqual(c2),
+                        c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                        c => c.ToDictionary()));
+
             //modelBuilder.Entity<Order>()
             //    .OwnsMany(order => order.Products, ownedNavigationBuilder =>
             //    {
@@ -74,11 +84,11 @@ namespace WCPShared.Models
             //        ownedNavigationBuilder.ToJson();
             //    });
 
-            modelBuilder.Entity<Order>()
-                .OwnsOne(x => x.CreatorDeliveryStatus, ownedNavigationBuilder =>
-                {
-                    ownedNavigationBuilder.ToJson();
-                });
+            //modelBuilder.Entity<Order>()
+            //    .OwnsOne(x => x.CreatorDeliveryStatus, ownedNavigationBuilder =>
+            //    {
+            //        ownedNavigationBuilder.ToJson();
+            //    });
         }
     }
 }

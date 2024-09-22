@@ -10,6 +10,7 @@ using WCPShared.Models.AuthModels;
 using WCPShared.Interfaces.Auth;
 using WCPShared.Interfaces.DataServices;
 using WCPShared.Models.DTOs;
+using System.Security.Cryptography;
 
 namespace WCPAuthAPI.Controllers
 {
@@ -21,6 +22,7 @@ namespace WCPAuthAPI.Controllers
         private readonly IAuthService _authService;
         private readonly IUserService _userService;
         private readonly IEmailService _emailService;
+        private readonly ICreatorService _creatorService;
         private readonly UserContextService _userContextService;
         private readonly CookieOptions cookieOptions = new CookieOptions
         {
@@ -31,11 +33,12 @@ namespace WCPAuthAPI.Controllers
             SameSite = Secrets.IsProd ? SameSiteMode.Strict : SameSiteMode.None,
         };
 
-        public AuthController(IJwtService tokenService, IAuthService authService, IUserService userService, IEmailService emailService, UserContextService userContextService)
+        public AuthController(IJwtService tokenService, IAuthService authService, IUserService userService, IEmailService emailService, ICreatorService creatorService, UserContextService userContextService)
         {
             _tokenService = tokenService;
             _userService = userService;
             _emailService = emailService;
+            _creatorService = creatorService;
             _userContextService = userContextService;
             _authService = authService;
         }
@@ -138,15 +141,24 @@ namespace WCPAuthAPI.Controllers
             var roles = _userContextService.GetRoles();
             var name = user.Name;
             var phone = user.Phone;
-            var orgId = 0;
 
-            if (user.Organization is not null)
-                orgId = user.Organization.Id;
+            if (user.Role == "Bruger" && user.Organization is not null)
+            {
+                int orgId = user.Organization.Id;
+                return Ok(new { id, orgId, email, roles, name, phone });
+            }
+            
+            if (user.Role == "Creator")
+            {
+                var creator = await _creatorService.GetObjectViewBy(x => x.UserId == _userContextService.GetId());
+                if (creator is not null)
+                {
+                    var creatorId = creator.Id;
+                    return Ok(new { id, creatorId, email, roles, name, phone });
+                }
+            }
 
-            if (orgId == 0)
-                return Ok(new { id, email, roles, name, phone });
-
-            return Ok(new { id, orgId, email, roles, name, phone });
+            return Ok(new { id, email, roles, name, phone });
         }
 
         [HttpPost("AddAdmin"), Authorize(Roles = "Admin")]

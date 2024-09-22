@@ -105,6 +105,27 @@ namespace WCPDataAPI.Controllers
             return Created();
         }
 
+        [HttpPost("CreatorDelivery")]
+        public async Task<IActionResult> CreatorDelivery([FromQuery] int order, [FromQuery] int creator)
+        {
+            Order? existingOrder = await _orderService.GetObject(order);
+            if (existingOrder is null) return NotFound("Order not found");
+
+            var callingUser = await _creatorService.GetObjectViewBy(x => x.UserId == _userContextService.GetId());
+            if (callingUser is null) return Unauthorized("You are not a creator");
+            
+
+            bool isAdmin = _userContextService.GetRoles().Contains("Admin");
+            bool isCreator = _userContextService.GetRoles().Contains("Creator");
+            bool creatorAllowed = existingOrder.Creators.Exists(x => x.Id == creator) && callingUser.Id == creator;
+
+            if (!isAdmin && (isCreator && !creatorAllowed))
+                return Unauthorized("Du har ikke tilladelse til at ændre denne ordre");
+
+            await _orderService.CreatorDelivery(order, creator);
+            return NoContent();
+        }
+
         // PUT api/<OrdersController>/5
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(OrderDto order, int id)

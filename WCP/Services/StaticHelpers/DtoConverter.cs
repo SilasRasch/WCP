@@ -39,7 +39,15 @@ namespace WCPShared.Services.StaticHelpers
                 Other = obj.Other,
                 Brand = obj.Brand,
                 Creators = new List<Creator>(obj.Creators),
-                Id = obj.Id
+                Id = obj.Id,
+                Created = obj.Created,
+                CreatorDeliveryStatus = obj.CreatorDeliveryStatus,
+                Editor = obj.Editor,
+                EditorId = obj.EditorId,
+                StaticTemplates = obj.StaticTemplates,
+                Updated = obj.Updated,
+                Videographer = obj.Videographer,
+                VideographerId = obj.VideographerId 
             };
         }
 
@@ -69,7 +77,6 @@ namespace WCPShared.Services.StaticHelpers
             output.RelevantFiles = input.RelevantFiles;
             output.Scripts = input.Scripts;
             output.Other = input.Other;
-            output.CreatorDeliveryStatus = input.CreatorDeliveryStatus;
             return output;
         }
 
@@ -101,7 +108,9 @@ namespace WCPShared.Services.StaticHelpers
                 ProjectType = obj.ProjectType,
                 RelevantFiles = obj.RelevantFiles,
                 Scripts = obj.Scripts,
-                Other = obj.Other
+                Other = obj.Other,
+                EditorId = obj.EditorId,
+                VideographerId = obj.VideographerId,
             };
 
             return order;

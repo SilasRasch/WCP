@@ -102,6 +102,7 @@ namespace WCPShared.Models.Views
             Other = obj.Other;
             Created = obj.Created;
             Updated = obj.Updated;
+            CreatorDeliveryStatus = obj.CreatorDeliveryStatus;
         }
     }
 }
