@@ -116,6 +116,8 @@ app.UseCors(allowAll);
 
 app.UseAuthorization();
 
+app.MapPrometheusScrapingEndpoint();
+
 app.MapControllers();
 
 await app.RunAsync();
