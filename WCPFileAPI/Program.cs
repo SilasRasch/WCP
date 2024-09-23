@@ -105,7 +105,8 @@ app.UseCors(allowAll);
 
 app.UseAuthorization();
 
-app.MapPrometheusScrapingEndpoint();
+app.MapPrometheusScrapingEndpoint()
+    .RequireHost("*:9090");
 
 app.MapControllers();
 
