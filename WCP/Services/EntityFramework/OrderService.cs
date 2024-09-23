@@ -28,24 +28,6 @@ namespace WCPShared.Services.EntityFramework
             _slackNetService = slackNetService;
         }
 
-        public async Task<Order> AddObject(Order obj)
-        {
-            if (obj.Brand is not null)
-                _context.Brands.Attach(obj.Brand);
-            if (obj.Creators is not null)
-                _context.Creators.AttachRange(obj.Creators);
-            if (obj.Videographer is not null)
-                _context.Creators.Attach(obj.Videographer);
-            if (obj.Editor is not null)
-                _context.Creators.Attach(obj.Editor);
-
-            obj.Created = DateTime.Now;
-
-            await _context.Orders.AddAsync(obj);
-            await _context.SaveChangesAsync();
-            return obj;
-        }
-
         public async Task<Order?> DeleteObject(int id)
         {
             Order? obj = await GetObject(id);
@@ -107,7 +89,6 @@ namespace WCPShared.Services.EntityFramework
             if (existingOrder is null)
                 return null!;
 
-            _context.ChangeTracker.Clear();
             existingOrder.Updated = DateTime.Now;
             _context.Update(obj);
             await _context.SaveChangesAsync();

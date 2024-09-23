@@ -41,8 +41,10 @@ namespace WCPDataAPI.Controllers
                 orders = await _orderService.GetObjectsViewBy(x => x.Brand.OrganizationId == _userContextService.GetOrganizationId());
 
             // Get creator's projects
-            else if (_userContextService.GetRoles().Contains("Creator") || _userContextService.GetRoles().Contains("Editor"))
-                orders = await _orderService.GetObjectsViewBy(x => x.Creators!.Any(x => x.UserId == _userContextService.GetId()));
+            else if (_userContextService.GetRoles().Contains("Creator"))
+                orders = await _orderService.GetObjectsViewBy(x => 
+                (x.Creators!.Any(x => x.UserId == _userContextService.GetId()) || x.EditorId == _userContextService.GetId() || x.VideographerId == _userContextService.GetId()) && // If creator is in 
+                !x.CreatorDeliveryStatus[_userContextService.GetId()]); // 
 
             if (_userContextService.GetRoles().Contains("Admin"))
                 orders = await _orderService.GetAllObjectsView();

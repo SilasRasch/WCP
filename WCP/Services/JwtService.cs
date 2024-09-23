@@ -32,38 +32,6 @@ namespace WCPShared.Services
             _creatorService = creatorService;
         }
 
-        public async Task<User> Register(RegisterDto request)
-        {
-            if (await _userService.GetUserByEmail(request.Email) is not null)
-                throw new ArgumentException("A user with that email already exists...");
-
-            Organization? org = null;
-            if (request.OrganizationId != 0 && request.OrganizationId is not null)
-                org = await _organizationService.GetObject(request.OrganizationId!.Value);
-
-            string generatedPassword = GenerateRandomString(32);
-            string passwordHash = BCrypt.Net.BCrypt.HashPassword(generatedPassword);
-            string verificationToken = GenerateRandomString(64);
-
-            User user = new User()
-            {
-                Email = request.Email,
-                Name = request.Name,
-                PasswordHash = passwordHash,
-                Phone = request.Phone,
-                Role = request.Role,
-                IsActive = false,
-                VerificationToken = verificationToken,
-                OrganizationId = request.OrganizationId,
-                Organization = org
-            };
-
-            user = await _userService.AddObject(user);
-            await _emailService.SendRegistrationEmail(user, verificationToken);
-
-            return user;
-        }
-
         public async Task<User> Register(RegisterCreatorDto request)
         {
             if (await _userService.GetUserByEmail(request.User.Email) is not null)
@@ -92,7 +60,7 @@ namespace WCPShared.Services
 
             user = await _userService.AddObject(user);
 
-            if (request.Creator is not null && user is not null && user.Id != 0 && (request.User.Role == "Creator" || request.User.Role == "Editor"))
+            if (request.Creator is not null && user is not null && user.Id != 0 && request.User.Role == "Creator")
             {
                 await _emailService.SendRegistrationEmail(user, verificationToken);
                 request.Creator.UserId = user.Id;

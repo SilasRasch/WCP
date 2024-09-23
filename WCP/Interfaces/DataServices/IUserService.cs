@@ -14,5 +14,6 @@ namespace WCPShared.Interfaces.DataServices
         Task<User?> GetUserByVerificationToken(string token);
         Task<User?> GetUserByResetToken(string resetToken);
         Task<User?> GetUserByEmail(string email);
+        Task<User> AddObject(User user);
     }
 }

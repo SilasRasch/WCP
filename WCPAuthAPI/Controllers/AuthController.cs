@@ -10,7 +10,6 @@ using WCPShared.Models.AuthModels;
 using WCPShared.Interfaces.Auth;
 using WCPShared.Interfaces.DataServices;
 using WCPShared.Models.DTOs;
-using System.Security.Cryptography;
 
 namespace WCPAuthAPI.Controllers
 {
@@ -43,23 +42,6 @@ namespace WCPAuthAPI.Controllers
             _authService = authService;
         }
 
-        //[HttpPost("Register"), Authorize(Roles = "Admin")]
-        //public async Task<ActionResult<int>> Register(RegisterDto request)
-        //{
-        //    if (!request.Validate())
-        //        return BadRequest("Valideringsfejl, tjek venligst felterne igen...");
-
-        //    try
-        //    {
-        //        User? user = await _authService.Register(request);
-        //        return user.Role != "Bruger" ? Created($"auth/{user.Id}", user.Id) : Created($"auth/{user.Id}", new { id = user.Id, orgId = user.OrganizationId });
-        //    }
-        //    catch (ArgumentException ex)
-        //    {
-        //        return BadRequest(ex.Message);
-        //    }
-        //}
-
         [HttpPost("Register"), Authorize(Roles = "Admin")]
         public async Task<ActionResult<int>> Register(RegisterCreatorDto request)
         {
@@ -71,16 +53,8 @@ namespace WCPAuthAPI.Controllers
 
             try
             {
-                if (request.Creator is not null)
-                {
-                    User? user = await _authService.Register(request);
-                    return user.Role != "Bruger" ? Created($"auth/{user.Id}", user.Id) : Created($"auth/{user.Id}", new { id = user.Id, orgId = user.OrganizationId });
-                }
-                else
-                {
-                    User? user = await _authService.Register(request.User);
-                    return user.Role != "Bruger" ? Created($"auth/{user.Id}", user.Id) : Created($"auth/{user.Id}", new { id = user.Id, orgId = user.OrganizationId });
-                }
+                User? user = await _authService.Register(request);
+                return user.Role != "Bruger" ? Created($"auth/{user.Id}", user.Id) : Created($"auth/{user.Id}", new { id = user.Id, orgId = user.OrganizationId });
             }
             catch (ArgumentException ex)
             {

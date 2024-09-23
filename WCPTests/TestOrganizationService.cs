@@ -14,108 +14,98 @@ namespace WCPTests
     [TestClass]
     public class TestOrganizationService
     {
-        private IOrganizationService _organizationService;
-        private ViewConverter _viewConverter;
+    private IOrganizationService _organizationService;
+    private ViewConverter _viewConverter;
 
-        [TestInitialize]
-        public void Init()
-        {
-            // Set up new DbContextOptions with an InMemory database.
-            var options = new DbContextOptionsBuilder<TestDbContext>()
-                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString()) // Use a new in-memory database for each test
-                .Options;
+    [TestInitialize]
+    public void Init()
+    {
+        // Set up new DbContextOptions with an InMemory database.
+        var options = new DbContextOptionsBuilder<TestDbContext>()
+            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString()) // Use a new in-memory database for each test
+            .Options;
 
-            IWcpDbContext context = new TestDbContext(options);
-            _viewConverter = new ViewConverter();
-            _organizationService = new OrganizationService(context, _viewConverter);
-        }
+        IWcpDbContext context = new TestDbContext(options);
+        _viewConverter = new ViewConverter();
+        _organizationService = new OrganizationService(context, _viewConverter);
+    }
         
-        [TestMethod]
-        public async Task TestAdd()
+    [TestMethod]
+    public async Task TestAdd()
+    {
+        var dto = new OrganizationDto()
         {
-            var org = new Organization()
-            {
-                Name = "First Org",
-                CVR = "12341234"
-            };
+            Name = "First Org",
+            CVR = "12341234"
+        };
 
-            var dto = new OrganizationDto()
-            {
-                Name = "First Org",
-                CVR = "12341234"
-            };
+        var resultDto = await _organizationService.AddObject(dto);
+        Assert.IsNotNull(resultDto);
+        Assert.AreEqual(dto.Name, resultDto.Name);
+    }
 
-            var result = await _organizationService.AddObject(org);
-            Assert.IsNotNull(result);
-            Assert.AreEqual(org.Name, result.Name);
-
-            var resultDto = await _organizationService.AddObject(dto);
-            Assert.IsNotNull(resultDto);
-            Assert.AreEqual(dto.Name, resultDto.Name);
-        }
-
-        [TestMethod]
-        public async Task TestGet()
+    [TestMethod]
+    public async Task TestGet()
+    {
+        var result = await _organizationService.AddObject(new OrganizationDto()
         {
-            var result = await _organizationService.AddObject(new Organization()
-            {
-                Name = "First Org",
-                CVR = "12341234"
-            });
+            Name = "First Org",
+            CVR = "12341234"
+        });
 
-            var orgs = await _organizationService.GetAllObjects();
+        var orgs = await _organizationService.GetAllObjects();
 
-            Assert.IsNotNull(orgs);
-            Assert.IsTrue(orgs.Any());
-            Assert.AreEqual(orgs.Count, 1);
+        Assert.IsNotNull(orgs);
+        Assert.IsTrue(orgs.Any());
+        Assert.AreEqual(orgs.Count, 1);
 
-            var org = await _organizationService.GetObject(result.Id);
-            Assert.IsNotNull(org);
-            Assert.AreEqual(result.Name, org.Name);
-        }
+        var org = await _organizationService.GetObject(result.Id);
+        Assert.IsNotNull(org);
+        Assert.AreEqual(result.Name, org.Name);
+    }
 
-        [TestMethod]
-        public async Task TestUpdate()
+    [TestMethod]
+    public async Task TestUpdate()
+    {
+        Organization? addResult = await _organizationService.AddObject(new OrganizationDto()
         {
-            Organization addResult = await _organizationService.AddObject(new Organization()
-            {
-                Name = "First Org",
-                CVR = "12341234"
-            });
+            Name = "First Org",
+            CVR = "12341234"
+        });
 
-            Assert.AreEqual(1, (await _organizationService.GetAllObjects()).Count);
+        Assert.AreEqual(1, (await _organizationService.GetAllObjects()).Count);
 
-            var existing = await _organizationService.GetObject(addResult.Id);
-            Assert.IsNotNull(existing);
+        var existing = await _organizationService.GetObject(addResult.Id);
+        Assert.IsNotNull(existing);
 
-            string updatedName = "Second Org";
-            existing.Name = updatedName;
+        string updatedName = "Second Org";
+        existing.Name = updatedName;
 
-            Organization? updatedResult = await _organizationService.UpdateObject(addResult.Id, existing);
-            Assert.IsNotNull(updatedResult);
-            Assert.AreEqual(updatedName, updatedResult.Name);
+        Organization? updatedResult = await _organizationService.UpdateObject(addResult.Id, existing);
+        Assert.IsNotNull(updatedResult);
+        Assert.AreEqual(updatedName, updatedResult.Name);
 
-            Assert.AreEqual(1, (await _organizationService.GetAllObjects()).Count);
+        Assert.AreEqual(1, (await _organizationService.GetAllObjects()).Count);
 
-            Organization? updatedGet = await _organizationService.GetObject(addResult.Id);
-            Assert.IsNotNull(updatedGet);
-            Assert.AreEqual(updatedName, updatedGet.Name);
-        }
+        Organization? updatedGet = await _organizationService.GetObject(addResult.Id);
+        Assert.IsNotNull(updatedGet);
+        Assert.AreEqual(updatedName, updatedGet.Name);
+    }
 
-        [TestMethod]
-        public async Task TestDelete()
+    [TestMethod]
+    public async Task TestDelete()
+    {
+        var result = await _organizationService.AddObject(new OrganizationDto()
         {
-            var result = await _organizationService.AddObject(new Organization()
-            {
-                Name = "First Org",
-                CVR = "12341234"
-            });
+            Name = "First Org",
+            CVR = "12341234"
+        });
 
-            Assert.IsNotNull(await _organizationService.GetObject(result.Id));
+        Assert.IsNotNull(await _organizationService.GetObject(result.Id));
 
-            var deleted = await _organizationService.DeleteObject(result.Id);
-            Assert.IsNotNull(deleted);
-            Assert.AreEqual(result.Name, deleted.Name);
-        }
+        var deleted = await _organizationService.DeleteObject(result.Id);
+        Assert.IsNotNull(deleted);
+        Assert.AreEqual(result.Name, deleted.Name);
+    }
     }
 }

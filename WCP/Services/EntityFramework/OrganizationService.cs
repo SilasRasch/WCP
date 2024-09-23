@@ -21,13 +21,6 @@ namespace WCPShared.Services.EntityFramework
             _viewConverter = viewConverter;
         }
 
-        public async Task<Organization> AddObject(Organization organization)
-        {
-            await _context.Organizations.AddAsync(organization);
-            await _context.SaveChangesAsync();
-            return organization;
-        }
-
         public async Task<Organization?> DeleteObject(int id)
         {
             Organization? organization = await GetObject(id);

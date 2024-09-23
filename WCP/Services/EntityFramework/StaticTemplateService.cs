@@ -21,13 +21,6 @@ namespace WCPShared.Services.EntityFramework
             _viewConverter = viewConverter;
         }
 
-        public async Task<StaticTemplate> AddObject(StaticTemplate obj)
-        {
-            await _context.AddAsync(obj);
-            await _context.SaveChangesAsync();
-            return obj;
-        }
-
         public async Task<StaticTemplate?> DeleteObject(int id)
         {
             StaticTemplate? obj = await GetObject(id);

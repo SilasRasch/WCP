@@ -10,5 +10,6 @@ namespace WCPShared.Interfaces.DataServices
 {
     public interface ILanguageService : IDatabaseService<Language>
     {
+        Task<Language> AddObject(Language language);
     }
 }

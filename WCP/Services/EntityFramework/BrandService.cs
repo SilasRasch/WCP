@@ -23,14 +23,6 @@ namespace WCPShared.Services.EntityFramework
             _viewConverter = viewConverter;
         }
 
-        public async Task<Brand> AddObject(Brand brand)
-        {
-            _context.Organizations.Attach(brand.Organization);
-            await _context.Brands.AddAsync(brand);
-            await _context.SaveChangesAsync();
-            return brand;
-        }
-
         public async Task<Brand?> DeleteObject(int id)
         {
             Brand? brand = await GetObject(id);
@@ -60,7 +52,6 @@ namespace WCPShared.Services.EntityFramework
             if (oldBrand is null || id != brand.Id)
                 return null!;
 
-            //_context.ChangeTracker.Clear();
             _context.Update(brand);
             await _context.SaveChangesAsync();
             return brand;
