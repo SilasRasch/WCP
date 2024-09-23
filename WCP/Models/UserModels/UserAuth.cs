@@ -10,5 +10,7 @@
         public DateTime? RefreshTokenExpiry { get; set; }
         public int LoginTries { get; set; }
         public DateTime? LastLoginAttempt { get; set; }
+        public bool NotificationsOn { get; set; }
+        public string NotificationSetting { get; set; } = string.Empty;
     }
 }

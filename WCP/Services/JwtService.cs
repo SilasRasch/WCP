@@ -34,7 +34,7 @@ namespace WCPShared.Services
 
         public async Task<User> Register(RegisterCreatorDto request)
         {
-            if (await _userService.GetUserByEmail(request.User.Email) is not null)
+            if (await _userService.GetObjectBy(x => x.Email == request.User.Email) is not null)
                 throw new ArgumentException("A user with that email already exists...");
 
             Organization? org = null;
@@ -55,7 +55,9 @@ namespace WCPShared.Services
                 IsActive = false,
                 VerificationToken = verificationToken,
                 OrganizationId = request.User.OrganizationId,
-                Organization = org
+                Organization = org,
+                NotificationsOn = true,
+                NotificationSetting = "Slack"
             };
 
             user = await _userService.AddObject(user);
@@ -83,14 +85,13 @@ namespace WCPShared.Services
                     // ignore for now
                 }
             }
-                
 
             return user;
         }
 
         public async Task<AuthResponse?> Login(UserDto request)
         {
-            User? user = await _userService.GetUserByEmail(request.Email);
+            User? user = await _userService.GetObjectBy(x => x.Email == request.Email);
 
             if (user is null) throw new ArgumentException("User not found");
             if (!user.IsActive) throw new ArgumentException("User deactivated");
@@ -176,7 +177,7 @@ namespace WCPShared.Services
 
         public async Task<string?> RefreshToken(string email, string refreshToken)
         {
-            User? user = await _userService.GetUserByEmail(email);
+            User? user = await _userService.GetObjectBy(x => x.Email == email);
 
             if (user is null || user.RefreshToken != refreshToken || user.RefreshTokenExpiry < DateTime.Now)
                 return null;
@@ -219,7 +220,7 @@ namespace WCPShared.Services
 
         public async Task<bool> CheckLoginAttempts(UserDto request)
         {
-            User? user = await _userService.GetUserByEmail(request.Email);
+            User? user = await _userService.GetObjectBy(x => x.Email == request.Email);
 
             if (user is null) return false;
 

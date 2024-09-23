@@ -106,7 +106,7 @@ namespace WCPAuthAPI.Controllers
         public async Task<ActionResult<string>> Authenticate()
         {
             string email = _userContextService.GetEmail();
-            User? user = await _userService.GetUserByEmail(email);
+            User? user = await _userService.GetObjectBy(x => x.Email == email);
 
             if (user is null)
                 return BadRequest("No user with the given email");
@@ -161,7 +161,7 @@ namespace WCPAuthAPI.Controllers
         [HttpPost("Verify"), AllowAnonymous]
         public async Task<IActionResult> Verify(VerifyUserDTO request)
         {
-            var user = await _userService.GetUserByVerificationToken(request.VerificationToken);
+            var user = await _userService.GetObjectBy(x => x.VerificationToken == request.VerificationToken);
 
             if (user == null) return BadRequest();
 
@@ -177,7 +177,7 @@ namespace WCPAuthAPI.Controllers
         [HttpPut("Reset-password"), AllowAnonymous]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto request)
         {
-            User? user = await _userService.GetUserByResetToken(request.Token);
+            User? user = await _userService.GetObjectBy(x => x.PasswordResetToken == request.Token);
 
             if (user == null) return BadRequest("Forkert reset token, start venligst forfra");
             if (user.PasswordResetToken != request.Token) return BadRequest("Reset token mismatch...");
@@ -195,7 +195,7 @@ namespace WCPAuthAPI.Controllers
         [HttpPost("Forgot-password"), AllowAnonymous]
         public async Task<IActionResult> ForgotPassword(EmailOnly email)
         {
-            var user = await _userService.GetUserByEmail(email.Email);
+            var user = await _userService.GetObjectBy(x => x.Email == email.Email);
 
             if (user is null) return BadRequest();
 

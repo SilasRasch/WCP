@@ -167,7 +167,7 @@ namespace WCPTests
                 Password = "Password"
             };
 
-            var user = await _userService.GetUserByVerificationToken(request.VerificationToken);
+            var user = await _userService.GetObjectBy(x => x.VerificationToken == request.VerificationToken);
             Assert.IsNotNull(user);
 
             var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
@@ -211,7 +211,7 @@ namespace WCPTests
                 Password = "Password"
             };
 
-            var user = await _userService.GetUserByVerificationToken(request.VerificationToken);
+            var user = await _userService.GetObjectBy(x => x.VerificationToken == request.VerificationToken);
             var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
             user.PasswordHash = passwordHash;
             user.IsActive = true;

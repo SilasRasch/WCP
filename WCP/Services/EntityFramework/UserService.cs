@@ -52,21 +52,6 @@ namespace WCPShared.Services.EntityFramework
             return await _context.Users.Include(x => x.Organization).SingleOrDefaultAsync(x => x.Id == id);
         }
 
-        public async Task<User?> GetUserByResetToken(string resetToken)
-        {
-            return await _context.Users.Include(x => x.Organization).SingleOrDefaultAsync(x => x.PasswordResetToken == resetToken);
-        }
-
-        public async Task<User?> GetUserByEmail(string email)
-        {
-            return await _context.Users.Include(x => x.Organization).SingleOrDefaultAsync(x => x.Email.ToLower() == email.ToLower());
-        }
-
-        public async Task<User?> GetUserByVerificationToken(string token)
-        {
-            return await _context.Users.Include(x => x.Organization).SingleOrDefaultAsync(x => x.VerificationToken == token);
-        }
-
         public async Task<List<User>> GetAllObjects()
         {
             return await _context.Users.Include(x => x.Organization).ToListAsync();
@@ -149,6 +134,13 @@ namespace WCPShared.Services.EntityFramework
                 .Include(x => x.Organization)
                 .Select(x => _viewConverter.Convert(x))
                 .ToListAsync();
+        }
+
+        public async Task<User?> GetObjectBy(Expression<Func<User, bool>> predicate)
+        {
+            return await _context.Users
+                .Include(x => x.Organization)
+                .SingleOrDefaultAsync(predicate);
         }
     }
 }

@@ -11,22 +11,26 @@ namespace WCPShared.Services
     {
         private readonly ISlackApiClient _slackApiClient;
         private readonly ICreatorService _creatorService;
+        private readonly IUserService _userService;
         private bool EnableNotifications = Secrets.IsProd;
 
-        public SlackNotificationService(ISlackApiClient slackApiClient, ICreatorService creatorService)
+        public SlackNotificationService(ISlackApiClient slackApiClient, ICreatorService creatorService, IUserService userService)
         {
             _slackApiClient = slackApiClient;
             _creatorService = creatorService;
+            _userService = userService;
         }
 
         public async Task SendMessageToUser(string username, string message)
         {
             if (!EnableNotifications) return;
-            
-            User? user = await FetchUser(username);
 
-            if (user is not null)
-                await SendMessage(user.Id, message);
+            var user = await _userService.GetObjectBy(x => x.Name == username);
+            if (user is null || !user.NotificationsOn || user.NotificationSetting !=  "Slack") return;
+
+            User? slackUser = await FetchUser(username);
+            if (slackUser is not null)
+                await SendMessage(slackUser.Id, message);
         }
 
         public async Task SendMessageToChannel(string channel, string message)
