@@ -11,14 +11,14 @@ using WCPShared.Interfaces;
 
 namespace WCPShared.Services.EntityFramework
 {
-    public class CreatorService : ICreatorService
+    public class CreatorService : IDatabaseService<Creator>, IDtoExtensions<CreatorDto, Creator>, IObjectViewService<Creator, CreatorView>
     {
         private readonly IWcpDbContext _context;
-        private readonly IUserService _userService;
-        private readonly ILanguageService _languageService;
+        private readonly UserService _userService;
+        private readonly LanguageService _languageService;
         private readonly ViewConverter _viewConverter;
 
-        public CreatorService(IWcpDbContext context, ILanguageService languageService, IUserService userService, ViewConverter viewConverter)
+        public CreatorService(IWcpDbContext context, LanguageService languageService, UserService userService, ViewConverter viewConverter)
         {
             _context = context;
             _languageService = languageService;

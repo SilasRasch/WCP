@@ -6,7 +6,7 @@ using WCPShared.Models.UserModels;
 
 namespace WCPShared.Services.EntityFramework
 {
-    public class LanguageService : ILanguageService
+    public class LanguageService : IDatabaseService<Language>
     {
         private readonly IWcpDbContext _context;
 

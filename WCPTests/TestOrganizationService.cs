@@ -1,9 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using WCPShared.Interfaces;
-using WCPShared.Interfaces.DataServices;
 using WCPShared.Models;
 using WCPShared.Models.DTOs;
 using WCPShared.Services.Converters;
@@ -14,7 +10,7 @@ namespace WCPTests
     [TestClass]
     public class TestOrganizationService
     {
-    private IOrganizationService _organizationService;
+    private OrganizationService _organizationService;
     private ViewConverter _viewConverter;
 
     [TestInitialize]

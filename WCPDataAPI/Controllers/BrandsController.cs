@@ -2,10 +2,10 @@
 using Microsoft.AspNetCore.Mvc;
 using WCPShared.Services;
 using WCPShared.Models;
-using WCPShared.Interfaces.DataServices;
 using WCPShared.Models.DTOs.RangeDTOs;
 using WCPShared.Models.Views;
 using WCPShared.Models.DTOs;
+using WCPShared.Services.EntityFramework;
 
 namespace WCPDataAPI.Controllers
 {
@@ -14,11 +14,11 @@ namespace WCPDataAPI.Controllers
     [ApiController]
     public class BrandsController : ControllerBase
     {
-        private readonly IBrandService _brandService;
-        private readonly IOrganizationService _organizationService;
+        private readonly BrandService _brandService;
+        private readonly OrganizationService _organizationService;
         private readonly UserContextService _userContextService;
 
-        public BrandsController(IBrandService brandService, UserContextService userContextService, IOrganizationService organizationService)
+        public BrandsController(BrandService brandService, UserContextService userContextService, OrganizationService organizationService)
         {
             _userContextService = userContextService;
             _brandService = brandService;

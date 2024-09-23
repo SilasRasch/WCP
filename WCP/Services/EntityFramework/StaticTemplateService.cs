@@ -10,7 +10,7 @@ using WCPShared.Services.Converters;
 
 namespace WCPShared.Services.EntityFramework
 {
-    public class StaticTemplateService : IStaticTemplateService
+    public class StaticTemplateService : IDatabaseService<StaticTemplate>, IObjectViewService<StaticTemplate, StaticTemplateView>, IDtoExtensions<StaticTemplateDto, StaticTemplate>
     {
         private readonly IWcpDbContext _context;
         private readonly ViewConverter _viewConverter;

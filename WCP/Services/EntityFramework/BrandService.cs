@@ -10,13 +10,13 @@ using WCPShared.Services.Converters;
 
 namespace WCPShared.Services.EntityFramework
 {
-    public class BrandService : IBrandService
+    public class BrandService : IDatabaseService<Brand>, IDtoExtensions<BrandDto, Brand>, IObjectViewService<Brand, BrandView>
     {
         private readonly IWcpDbContext _context;
-        private readonly IOrganizationService _organizationService;
+        private readonly OrganizationService _organizationService;
         private readonly ViewConverter _viewConverter;
 
-        public BrandService(IWcpDbContext context, IOrganizationService organizationService, ViewConverter viewConverter)
+        public BrandService(IWcpDbContext context, OrganizationService organizationService, ViewConverter viewConverter)
         {
             _context = context;
             _organizationService = organizationService;

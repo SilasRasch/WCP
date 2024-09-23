@@ -11,15 +11,15 @@ using WCPShared.Interfaces;
 
 namespace WCPShared.Services.EntityFramework
 {
-    public class OrderService : IOrderService
+    public class OrderService : IDatabaseService<Order>, IDtoExtensions<OrderDto, Order>, IObjectViewService<Order, OrderView>
     {
         private readonly IWcpDbContext _context;
-        private readonly IBrandService _brandService;
-        private readonly ICreatorService _creatorService;
+        private readonly BrandService _brandService;
+        private readonly CreatorService _creatorService;
         private readonly ViewConverter _viewConverter;
         private readonly SlackNotificationService _slackNetService;
 
-        public OrderService(IWcpDbContext context, IBrandService brandService, ICreatorService creatorService, ViewConverter viewConverter, SlackNotificationService slackNetService)
+        public OrderService(IWcpDbContext context, BrandService brandService, CreatorService creatorService, ViewConverter viewConverter, SlackNotificationService slackNetService)
         {
             _context = context;
             _brandService = brandService;

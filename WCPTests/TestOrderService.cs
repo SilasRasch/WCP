@@ -15,12 +15,12 @@ namespace WCPTests
     {
         #region Initialize
 
-        private IOrganizationService _organizationService;
-        private ICreatorService _creatorService;
-        private IBrandService _brandService;
-        private IOrderService _orderService;
-        private IUserService _userService;
-        private ILanguageService _languageService;
+        private OrganizationService _organizationService;
+        private CreatorService _creatorService;
+        private BrandService _brandService;
+        private OrderService _orderService;
+        private UserService _userService;
+        private LanguageService _languageService;
         private SlackNotificationService _slackNotificationService;
         private ViewConverter _viewConverter;
 
@@ -72,7 +72,7 @@ namespace WCPTests
             _languageService = new LanguageService(context);
             _userService = new UserService(context, _organizationService, _viewConverter);
             _creatorService = new CreatorService(context, _languageService, _userService, _viewConverter);
-            _slackNotificationService = new SlackNotificationService(new SlackNet.SlackApiClient("mock"), _creatorService);
+            _slackNotificationService = new SlackNotificationService(new SlackNet.SlackApiClient("mock"), _creatorService, _userService);
             _orderService = new OrderService(context, _brandService, _creatorService, _viewConverter, _slackNotificationService);
 
             _organization = await _organizationService.AddObject(new OrganizationDto() { Name = "Org", CVR = "12345678" });

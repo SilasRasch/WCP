@@ -2,13 +2,10 @@
 using Microsoft.AspNetCore.Mvc;
 using WCPShared.Services;
 using WCPShared.Models.UserModels;
-using WCPShared.Interfaces.DataServices;
 using WCPShared.Models;
 using WCPShared.Models.DTOs;
-using WCPShared.Services.StaticHelpers;
-using EllipticCurve.Utils;
-using WCPShared.Models.DTOs.RangeDTOs;
 using WCPShared.Models.Views;
+using WCPShared.Services.EntityFramework;
 
 namespace WCPDataAPI.Controllers
 {
@@ -18,12 +15,12 @@ namespace WCPDataAPI.Controllers
     public class CreatorsController : ControllerBase
     {
         private readonly UserContextService _userContextService;
-        private readonly ICreatorService _creatorService;
-        private readonly IOrderService _orderService;
-        private readonly IUserService _userService;
-        private readonly ILanguageService _languageService;
+        private readonly CreatorService _creatorService;
+        private readonly OrderService _orderService;
+        private readonly UserService _userService;
+        private readonly LanguageService _languageService;
 
-        public CreatorsController(UserContextService userContextService, ICreatorService creatorService, IOrderService orderService, IUserService userService, ILanguageService languageService)
+        public CreatorsController(UserContextService userContextService, CreatorService creatorService, OrderService orderService, UserService userService, LanguageService languageService)
         {
             _orderService = orderService;
             _userContextService = userContextService;

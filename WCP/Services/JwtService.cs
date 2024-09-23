@@ -11,6 +11,7 @@ using WCPShared.Models;
 using WCPShared.Models.AuthModels;
 using WCPShared.Models.DTOs;
 using WCPShared.Models.UserModels;
+using WCPShared.Services.EntityFramework;
 using WCPShared.Services.StaticHelpers;
 
 namespace WCPShared.Services
@@ -18,12 +19,12 @@ namespace WCPShared.Services
     public class JwtService : IJwtService, IAuthService
     {
         private readonly IConfiguration _configuration;
-        private readonly IUserService _userService;
-        private readonly IOrganizationService _organizationService;
         private readonly IEmailService _emailService;
-        private readonly ICreatorService _creatorService;
+        private readonly UserService _userService;
+        private readonly OrganizationService _organizationService;
+        private readonly CreatorService _creatorService;
 
-        public JwtService(IConfiguration configuration, IUserService userService, IEmailService emailService, IOrganizationService organizationService, ICreatorService creatorService)
+        public JwtService(IConfiguration configuration, UserService userService, IEmailService emailService, OrganizationService organizationService, CreatorService creatorService)
         {
             _configuration = configuration;
             _userService = userService;

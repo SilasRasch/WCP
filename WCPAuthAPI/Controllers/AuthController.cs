@@ -8,8 +8,8 @@ using WCPShared.Services;
 using System.Net;
 using WCPShared.Models.AuthModels;
 using WCPShared.Interfaces.Auth;
-using WCPShared.Interfaces.DataServices;
 using WCPShared.Models.DTOs;
+using WCPShared.Services.EntityFramework;
 
 namespace WCPAuthAPI.Controllers
 {
@@ -19,9 +19,9 @@ namespace WCPAuthAPI.Controllers
     {
         private readonly IJwtService _tokenService;
         private readonly IAuthService _authService;
-        private readonly IUserService _userService;
+        private readonly UserService _userService;
         private readonly IEmailService _emailService;
-        private readonly ICreatorService _creatorService;
+        private readonly CreatorService _creatorService;
         private readonly UserContextService _userContextService;
         private readonly CookieOptions cookieOptions = new CookieOptions
         {
@@ -32,7 +32,7 @@ namespace WCPAuthAPI.Controllers
             SameSite = Secrets.IsProd ? SameSiteMode.Strict : SameSiteMode.None,
         };
 
-        public AuthController(IJwtService tokenService, IAuthService authService, IUserService userService, IEmailService emailService, ICreatorService creatorService, UserContextService userContextService)
+        public AuthController(IJwtService tokenService, IAuthService authService, UserService userService, IEmailService emailService, CreatorService creatorService, UserContextService userContextService)
         {
             _tokenService = tokenService;
             _userService = userService;

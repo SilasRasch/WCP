@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using WCPShared.Interfaces.DataServices;
 using WCPShared.Models.UserModels;
 using WCPShared.Models.Views;
 using WCPShared.Services;
+using WCPShared.Services.EntityFramework;
 
 namespace WCPDataAPI.Controllers
 {
@@ -12,10 +12,10 @@ namespace WCPDataAPI.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
-        private readonly IUserService _userService;
+        private readonly UserService _userService;
         private readonly UserContextService _userContextService;
 
-        public UsersController(IUserService userService, UserContextService userContextService)
+        public UsersController(UserService userService, UserContextService userContextService)
         {
             _userService = userService;
             _userContextService = userContextService;

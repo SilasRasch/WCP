@@ -12,13 +12,13 @@ using WCPShared.Models.Views;
 
 namespace WCPShared.Services.EntityFramework
 {
-    public class UserService : IUserService
+    public class UserService : IDatabaseService<User>, IDtoExtensions<RegisterDto, User>, IObjectViewService<User, UserView>
     {
         private readonly IWcpDbContext _context;
-        private readonly IOrganizationService _organizationService;
+        private readonly OrganizationService _organizationService;
         private readonly ViewConverter _viewConverter;
 
-        public UserService(IWcpDbContext context, IOrganizationService organizationService, ViewConverter viewConverter)
+        public UserService(IWcpDbContext context, OrganizationService organizationService, ViewConverter viewConverter)
         {
             _context = context;
             _organizationService = organizationService;

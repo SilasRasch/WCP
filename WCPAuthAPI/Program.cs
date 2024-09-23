@@ -54,14 +54,14 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
 // Auth API services
-builder.Services.AddHttpContextAccessor(); // To get user in service-file instead of the controller (SOC)!
+builder.Services.AddHttpContextAccessor(); // To get user in service-file instead of the controller
+builder.Services.AddScoped<IEmailService, SendGridEmailService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IAuthService, JwtService>();
-builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<ICreatorService, CreatorService>();
-builder.Services.AddScoped<ILanguageService, LanguageService>();
-builder.Services.AddScoped<IOrganizationService, OrganizationService>();
-builder.Services.AddScoped<IEmailService, SendGridEmailService>();
+builder.Services.AddScoped<UserService, UserService>();
+builder.Services.AddScoped<CreatorService, CreatorService>();
+builder.Services.AddScoped<LanguageService, LanguageService>();
+builder.Services.AddScoped<OrganizationService, OrganizationService>();
 builder.Services.AddScoped<UserContextService>();
 builder.Services.AddScoped<ViewConverter>();
 if (Secrets.IsProd)

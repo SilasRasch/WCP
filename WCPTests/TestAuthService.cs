@@ -20,14 +20,14 @@ namespace WCPTests
     {
         #region Initialize
 
-        private IOrganizationService _organizationService;
-        private ICreatorService _creatorService;
-        private IBrandService _brandService;
-        private IOrderService _orderService;
-        private IUserService _userService;
+        private OrganizationService _organizationService;
+        private CreatorService _creatorService;
+        private BrandService _brandService;
+        private OrderService _orderService;
+        private UserService _userService;
         private JwtService _jwtService;
         private IEmailService _emailService;
-        private ILanguageService _languageService;
+        private LanguageService _languageService;
         private ViewConverter _viewConverter;
 
         private Organization _organization;

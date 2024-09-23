@@ -1,12 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using WCPShared.Services;
 using Microsoft.AspNetCore.Authorization;
-using WCPShared.Interfaces.DataServices;
 using WCPShared.Models;
 using WCPShared.Models.DTOs;
 using WCPShared.Models.UserModels;
 using WCPShared.Models.DTOs.RangeDTOs;
 using WCPShared.Models.Views;
+using WCPShared.Services.EntityFramework;
 
 namespace WCPDataAPI.Controllers
 {
@@ -16,11 +16,11 @@ namespace WCPDataAPI.Controllers
     public class OrdersController : ControllerBase
     {
         private readonly UserContextService _userContextService;
-        private readonly IOrderService _orderService;
-        private readonly IBrandService _brandService;
-        private readonly ICreatorService _creatorService;
+        private readonly OrderService _orderService;
+        private readonly BrandService _brandService;
+        private readonly CreatorService _creatorService;
 
-        public OrdersController(UserContextService userContextService, IOrderService orderService, IBrandService brandService, ICreatorService creatorService)
+        public OrdersController(UserContextService userContextService, OrderService orderService, BrandService brandService, CreatorService creatorService)
         {
             _userContextService = userContextService;
             _orderService = orderService;

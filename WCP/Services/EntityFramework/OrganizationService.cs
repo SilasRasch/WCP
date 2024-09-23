@@ -10,7 +10,7 @@ using System;
 
 namespace WCPShared.Services.EntityFramework
 {
-    public class OrganizationService : IOrganizationService
+    public class OrganizationService : IDatabaseService<Organization>, IDtoExtensions<OrganizationDto, Organization>, IObjectViewService<Organization, OrganizationView>
     {
         private readonly IWcpDbContext _context;
         private readonly ViewConverter _viewConverter;

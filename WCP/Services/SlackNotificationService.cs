@@ -3,6 +3,7 @@ using SlackNet.WebApi;
 using WCPShared.Interfaces.DataServices;
 using WCPShared.Models;
 using WCPShared.Models.Views;
+using WCPShared.Services.EntityFramework;
 using WCPShared.Services.StaticHelpers;
 
 namespace WCPShared.Services
@@ -10,11 +11,11 @@ namespace WCPShared.Services
     public class SlackNotificationService
     {
         private readonly ISlackApiClient _slackApiClient;
-        private readonly ICreatorService _creatorService;
-        private readonly IUserService _userService;
+        private readonly CreatorService _creatorService;
+        private readonly UserService _userService;
         private bool EnableNotifications = Secrets.IsProd;
 
-        public SlackNotificationService(ISlackApiClient slackApiClient, ICreatorService creatorService, IUserService userService)
+        public SlackNotificationService(ISlackApiClient slackApiClient, CreatorService creatorService, UserService userService)
         {
             _slackApiClient = slackApiClient;
             _creatorService = creatorService;
