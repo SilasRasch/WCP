@@ -28,12 +28,10 @@ namespace WCPDataAPI.Controllers
             _creatorService = creatorService;
         }
 
-        // TODO: Refactor Get endpoint to use claims/roles instead of query parameters... (for security)
-
         // GET: api/<OrdersController>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<OrderView>>> Get([FromQuery] int status, [FromQuery] int? statusTo = null, [FromQuery] int? userId = null, [FromQuery] int? orgId = null)
-        {   
+        {
             IEnumerable<OrderView> orders = new List<OrderView>();
 
             // Get user's projects
@@ -43,8 +41,7 @@ namespace WCPDataAPI.Controllers
             // Get creator's projects
             else if (_userContextService.GetRoles().Contains("Creator"))
                 orders = await _orderService.GetObjectsViewBy(x => 
-                (x.Creators!.Any(x => x.UserId == _userContextService.GetId()) || x.EditorId == _userContextService.GetId() || x.VideographerId == _userContextService.GetId()) && // If creator is in 
-                !x.CreatorDeliveryStatus[_userContextService.GetId()]); // 
+                (x.Creators!.Any(x => x.UserId == _userContextService.GetId()) || x.EditorId == _userContextService.GetId() || x.VideographerId == _userContextService.GetId())); // 
 
             if (_userContextService.GetRoles().Contains("Admin"))
                 orders = await _orderService.GetAllObjectsView();
