@@ -216,7 +216,6 @@ namespace WCPAuthAPI.Controllers
             User? user = await _userService.GetObject(id);
 
             if (user == null) return BadRequest();
-            var myid = _userContextService.GetId();
             if (_userContextService.GetId() != id && !_userContextService.GetRoles().Contains("Admin"))
                 return Unauthorized("Adgang nægtet...");
 
@@ -224,6 +223,26 @@ namespace WCPAuthAPI.Controllers
             user.PasswordHash = passwordHash;
             await _userService.UpdateObject(user.Id, user);
 
+            return Ok();
+        }
+
+        [HttpPost("UpdateNotificationSettings"), Authorize]
+        public async Task<IActionResult> UpdateNotificationSettings([FromQuery] int userId, [FromQuery] string setting)
+        {
+            User? user = await _userService.GetObject(userId);
+            if (user == null) return BadRequest();
+
+            if (_userContextService.GetId() != userId && !_userContextService.GetRoles().Contains("Admin"))
+                return Unauthorized("Adgang nægtet...");
+            
+            setting = setting.ToLower();
+            if (setting != "slack" && setting != "email" && setting != "off")
+                return BadRequest("Setting not accepted");
+            
+            user.NotificationSetting = setting;
+            user.NotificationsOn = setting == "off" ? false : true;  
+
+            await _userService.UpdateObject(user.Id, user);
             return Ok();
         }
     }
