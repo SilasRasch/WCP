@@ -62,7 +62,6 @@ namespace WCPShared.Services
 
             if (request.Creator is not null && user is not null && user.Id != 0 && request.User.Role == "Creator")
             {
-                await _emailService.SendRegistrationEmail(user, verificationToken);
                 request.Creator.UserId = user.Id;
                 Creator? creator = await _creatorService.AddObject(request.Creator);
 
@@ -72,7 +71,20 @@ namespace WCPShared.Services
                     throw new ArgumentException("Adding creator failed...");
                 }
             }
+
+            if (user is not null)
+            {
+                try
+                {
+                    await _emailService.SendRegistrationEmail(user, verificationToken);
+                }
+                catch
+                {
+                    // ignore for now
+                }
+            }
                 
+
             return user;
         }
 
@@ -82,12 +94,6 @@ namespace WCPShared.Services
 
             if (user is null) throw new ArgumentException("User not found");
             if (!user.IsActive) throw new ArgumentException("User deactivated");
-
-            if (user.Email.ToLower() != request.Email.ToLower())
-            {
-                await LoginAttempt(false, user);
-                return null;
-            }
 
             if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
             {

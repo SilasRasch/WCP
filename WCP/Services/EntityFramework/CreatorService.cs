@@ -102,7 +102,7 @@ namespace WCPShared.Services.EntityFramework
 
         public async Task<Creator?> AddObject(CreatorDto obj)
         {
-            if (obj.UserId is null) return null!;
+            if (obj.UserId is null || !obj.Validate()) return null!;
 
             var user = await _userService.GetObject(obj.UserId.Value);
             if (user is null)
