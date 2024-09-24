@@ -58,7 +58,7 @@ namespace WCPShared.Services
                 OrganizationId = request.User.OrganizationId,
                 Organization = org,
                 NotificationsOn = true,
-                NotificationSetting = "Slack"
+                NotificationSetting = "slack"
             };
 
             user = await _userService.AddObject(user);

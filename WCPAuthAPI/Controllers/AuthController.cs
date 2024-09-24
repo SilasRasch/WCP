@@ -284,7 +284,7 @@ namespace WCPAuthAPI.Controllers
             var user = await _userService.GetObjectBy(x => x.VerificationToken == verificationToken);
             if (user == null) return NotFound("No user found with the given verification token...");
 
-            return Ok(new { email = user.Email, role = user.Role });
+            return Ok(new { email = user.Email, role = user.Role, id = user.Id });
         }
     }
 }
