@@ -115,11 +115,12 @@ namespace WCPAuthAPI.Controllers
             var roles = _userContextService.GetRoles();
             var name = user.Name;
             var phone = user.Phone;
+            var notificationSetting = user.NotificationSetting;
 
             if (user.Role == "Bruger" && user.Organization is not null)
             {
                 int orgId = user.Organization.Id;
-                return Ok(new { id, orgId, email, roles, name, phone });
+                return Ok(new { id, orgId, email, roles, name, phone, notificationSetting });
             }
             
             if (user.Role == "Creator")
@@ -128,11 +129,11 @@ namespace WCPAuthAPI.Controllers
                 if (creator is not null)
                 {
                     var creatorId = creator.Id;
-                    return Ok(new { id, creatorId, email, roles, name, phone });
+                    return Ok(new { id, creatorId, email, roles, name, phone, notificationSetting });
                 }
             }
 
-            return Ok(new { id, email, roles, name, phone });
+            return Ok(new { id, email, roles, name, phone, notificationSetting });
         }
 
         [HttpPost("AddAdmin"), Authorize(Roles = "Admin")]
@@ -226,7 +227,7 @@ namespace WCPAuthAPI.Controllers
             return Ok();
         }
 
-        [HttpPost("UpdateNotificationSettings"), Authorize]
+        [HttpPost("NotificationSettings"), Authorize]
         public async Task<IActionResult> UpdateNotificationSettings([FromQuery] int userId, [FromQuery] string setting)
         {
             User? user = await _userService.GetObject(userId);
