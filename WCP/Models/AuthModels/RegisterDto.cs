@@ -22,7 +22,7 @@ namespace WCPShared.Models.UserModels
             if (!Phone.IsNullOrEmpty() && !Validation.ValidatePhone(Phone!))
                 return false;
 
-            if (!Validation.ValidateDisplayName(Name))
+            if (!Name.IsNullOrEmpty() && !Validation.ValidateDisplayName(Name))
                 return false;
 
             return true;

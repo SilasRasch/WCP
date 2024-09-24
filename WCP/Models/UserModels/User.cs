@@ -23,7 +23,7 @@ namespace WCPShared.Models.UserModels
             if (!Validation.ValidateEmail(Email))
                 return false;
 
-            if (Role != "Bruger" && Role != "Creator" && Role != "Admin" && Role != "Editor")
+            if (Role != "Bruger" && Role != "Creator" && Role != "Admin")
                 return false;
 
             if (!Phone.IsNullOrEmpty() && !Validation.ValidatePhone(Phone!))

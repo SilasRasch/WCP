@@ -19,7 +19,7 @@ namespace WCPShared.Services
             _configuration = configuration;
         }
 
-        public async Task<HttpStatusCode> SendRegistrationEmail(User user, string token)
+        public async Task<HttpStatusCode> SendRegistrationEmail(User user, string token, bool selfRegister = false)
         {
             var apiKey = Secrets.GetSendGridAPI(_configuration);
             var client = new SendGridClient(apiKey);
@@ -28,10 +28,12 @@ namespace WCPShared.Services
             msg.AddTo(new EmailAddress(user.Email, user.Name));
             msg.SetTemplateId("d-09b4d4101889434eb93492fd812ddaf4");
 
+            string endpoint = selfRegister ? "register" : "verify";
+
             var dynamicTemplateDate = new
             {
                 name = user.Name,
-                link = Secrets.IsProd ? $"https://wcp.dk/verify?token={token}" : $"https://test.wcp.dk/verify?token={token}",
+                link = Secrets.IsProd ? $"https://wcp.dk/{endpoint}?token={token}" : $"https://test.wcp.dk/{endpoint}?token={token}",
             };
             msg.SetTemplateData(dynamicTemplateDate);
 

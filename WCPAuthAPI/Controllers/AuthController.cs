@@ -43,7 +43,7 @@ namespace WCPAuthAPI.Controllers
         }
 
         [HttpPost("Register"), Authorize(Roles = "Admin")]
-        public async Task<ActionResult<int>> Register(RegisterCreatorDto request)
+        public async Task<ActionResult<int>> Register(RegisterCreatorDto request, [FromQuery] bool selfRegister = false)
         {
             if (!request.User.Validate())
                 return BadRequest("Valideringsfejl på bruger, tjek venligst felterne igen...");
@@ -53,7 +53,7 @@ namespace WCPAuthAPI.Controllers
 
             try
             {
-                User? user = await _authService.Register(request);
+                User? user = await _authService.Register(request, selfRegister);
                 return user.Role != "Bruger" ? Created($"auth/{user.Id}", user.Id) : Created($"auth/{user.Id}", new { id = user.Id, orgId = user.OrganizationId });
             }
             catch (ArgumentException ex)
@@ -163,7 +163,6 @@ namespace WCPAuthAPI.Controllers
         public async Task<IActionResult> Verify(VerifyUserDTO request)
         {
             var user = await _userService.GetObjectBy(x => x.VerificationToken == request.VerificationToken);
-
             if (user == null) return BadRequest();
 
             var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
@@ -173,6 +172,38 @@ namespace WCPAuthAPI.Controllers
             await _userService.UpdateObject(user.Id, user);
 
             return Ok();
+        }
+
+        // POST /auth/verify
+        [HttpPost("SelfRegister"), AllowAnonymous]
+        public async Task<IActionResult> SelfRegister(RegisterSelfDto request)
+        {
+            var user = await _userService.GetObjectBy(x => x.VerificationToken == request.VerificationToken);
+            if (user == null) return BadRequest();
+
+            var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
+            user.PasswordHash = passwordHash;
+            user.Phone = request.User.Phone;
+            user.Name = request.User.Name;
+            user.IsActive = true;
+
+            if (!user.Validate()) return BadRequest("Validation failed...");
+
+            var updateResult = await _userService.UpdateObject(user.Id, user);
+            if (updateResult is null) return BadRequest("Updating user failed...");
+
+            if (user.Role == "Creator" && request.Creator is not null)
+            {
+                if (!request.Creator.Validate()) return BadRequest("Creator validation failed");
+
+                var result = await _creatorService.AddObject(request.Creator);
+                if (result is null) return BadRequest("Something went wrong...");
+            }
+
+            user.VerificationToken = null;
+            updateResult = await _userService.UpdateObject(user.Id, user);
+
+            return updateResult is not null ? Ok() : BadRequest("Verification token removal failed");
         }
 
         [HttpPut("Reset-password"), AllowAnonymous]

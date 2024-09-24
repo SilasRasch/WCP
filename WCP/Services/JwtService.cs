@@ -33,7 +33,7 @@ namespace WCPShared.Services
             _creatorService = creatorService;
         }
 
-        public async Task<User> Register(RegisterCreatorDto request)
+        public async Task<User> Register(RegisterCreatorDto request, bool selfRegister = false)
         {
             if (await _userService.GetObjectBy(x => x.Email == request.User.Email) is not null)
                 throw new ArgumentException("A user with that email already exists...");
@@ -79,7 +79,7 @@ namespace WCPShared.Services
             {
                 try
                 {
-                    await _emailService.SendRegistrationEmail(user, verificationToken);
+                    await _emailService.SendRegistrationEmail(user, verificationToken, selfRegister);
                 }
                 catch
                 {
