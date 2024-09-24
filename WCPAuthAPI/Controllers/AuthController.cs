@@ -277,5 +277,14 @@ namespace WCPAuthAPI.Controllers
             await _userService.UpdateObject(user.Id, user);
             return Ok();
         }
+
+        [HttpGet("UserToVerify/{verificationToken}"), AllowAnonymous]
+        public async Task<ActionResult<string>> GetUserToVerify(string verificationToken)
+        {
+            var user = await _userService.GetObjectBy(x => x.VerificationToken == verificationToken);
+            if (user == null) return NotFound("No user found with the given verification token...");
+
+            return Ok(new { email = user.Email, role = user.Role });
+        }
     }
 }
