@@ -75,16 +75,8 @@ namespace WCPShared.Services
             }
 
             if (user is not null)
-            {
-                try
-                {
-                    await _emailService.SendRegistrationEmail(user, verificationToken, selfRegister);
-                }
-                catch
-                {
-                    // ignore for now
-                }
-            }
+                try { await _emailService.SendRegistrationEmail(user, verificationToken, selfRegister); } 
+                catch { /* ignore */ }
 
             return user;
         }
@@ -93,7 +85,7 @@ namespace WCPShared.Services
         {
             User? user = await _userService.GetObjectBy(x => x.Email == request.Email);
 
-            if (user is null) throw new ArgumentException("User not found");
+            if (user is null) throw new NotFoundException("User not found");
             if (!user.IsActive) throw new ArgumentException("User deactivated");
 
             if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
@@ -214,26 +206,19 @@ namespace WCPShared.Services
             var id = user.Id;
             var roles = _userContextService.GetRoles();
             var name = user.Name;
-            var phone = user.Phone;
             var notificationSetting = user.NotificationSetting;
 
             if (user.Role == "Bruger" && user.Organization is not null)
-            {
-                int orgId = user.Organization.Id;
-                return new { id, orgId, email, roles, name, phone, notificationSetting };
-            }
+                return new { id, orgId = user.Organization.Id, email, roles, name, notificationSetting };
 
             if (user.Role == "Creator")
             {
                 var creator = await _creatorService.GetObjectViewBy(x => x.UserId == _userContextService.GetId());
                 if (creator is not null)
-                {
-                    var creatorId = creator.Id;
-                    return new { id, creatorId, email, roles, name, phone, notificationSetting };
-                }
+                    return new { id, creatorId = creator.Id, email, roles, name, notificationSetting };
             }
 
-            return new { id, email, roles, name, phone, notificationSetting };
+            return new { id, email, roles, name, notificationSetting };
         }
     }
 }

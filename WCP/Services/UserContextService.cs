@@ -32,11 +32,6 @@ namespace WCPShared.Services
             return Convert.ToInt16(GetClaimValue("OrganizationId"));
         }
 
-        public string? GetPhone()
-        {
-            return GetClaimValue(ClaimTypes.MobilePhone);
-        }
-
         public IEnumerable<string> GetRoles()
         {
             var result = new List<string>();

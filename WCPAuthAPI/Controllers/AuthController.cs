@@ -66,83 +66,6 @@ namespace WCPAuthAPI.Controllers
             }
         }
 
-        [HttpPost("Login"), AllowAnonymous]
-        public async Task<ActionResult<string?>> Login(UserDto request)
-        {
-            try
-            {
-                AuthResponse? auth = await _authService.Login(request);
-                if (auth == null) return BadRequest("Forkert brugernavn eller kodeord");
-
-                if (!await _authService.CheckLoginAttempts(request))
-                    return BadRequest("Du er blevet midlertidigt udelukket grundet for mange mislykkede loginforsøg");
-
-                Response.Cookies.Append(Secrets.RefreshTokenCookieName, auth.RefreshToken, cookieOptions);
-
-                return Ok(auth.Token);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-
-        [HttpPost("Refresh"), AllowAnonymous]
-        public async Task<ActionResult<string?>> RefreshToken([FromQuery] int? id = null, [FromQuery] string? email = null)
-        {
-            var refreshToken = Request.Cookies[Secrets.RefreshTokenCookieName];
-
-            if (String.IsNullOrEmpty(refreshToken)) return BadRequest("Credentials not found");
-
-            string? auth = null;
-
-            if (id is not null)
-                auth = await _tokenService.RefreshToken(id.Value, refreshToken);
-
-            if (email is not null)
-                auth = await _tokenService.RefreshToken(email, refreshToken);
-
-            if (auth is null) return BadRequest("Credentials invalid");
-            return Ok(auth);
-        }
-
-        [HttpGet("Authenticate"), Authorize]
-        public async Task<ActionResult<string>> Authenticate()
-        {
-            try
-            {
-                var response = await _authService.Authenticate();
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                if (ex.GetType() == typeof(NotFoundException))
-                    return NotFound();
-                else return BadRequest(ex.Message);
-            }
-        }
-
-        [HttpPost("AddAdmin"), Authorize(Roles = "Admin")]
-        public async Task<IActionResult> AddAdmin(int id)
-        {
-            return await _authService.AddAdmin(id) ? NoContent() : BadRequest("Der blev ikke fundet nogen bruger med det id. Eller brugeren er allerede admin...");
-        }
-
-        [HttpPost("Revoke"), Authorize]
-        public async Task<IActionResult> Revoke()
-        {
-            try
-            {
-                int id = _userContextService.GetId();
-                await _tokenService.RevokeSession(id);
-                return NoContent();
-            }
-            catch
-            {
-                return BadRequest("Session invalid");
-            }
-        }
-
         // POST /auth/verify
         [HttpPost("Verify"), AllowAnonymous]
         public async Task<IActionResult> Verify(VerifyUserDto request)
@@ -175,6 +98,62 @@ namespace WCPAuthAPI.Controllers
                     return NotFound();
                 else return BadRequest(ex.Message);
             }
+        }
+
+        [HttpPost("Login"), AllowAnonymous]
+        public async Task<ActionResult<string?>> Login(UserDto request)
+        {
+            try
+            {
+                AuthResponse? auth = await _authService.Login(request);
+                if (auth == null) return BadRequest("Forkert brugernavn eller kodeord");
+
+                if (!await _authService.CheckLoginAttempts(request))
+                    return BadRequest("Du er blevet midlertidigt udelukket grundet for mange mislykkede loginforsøg");
+
+                Response.Cookies.Append(Secrets.RefreshTokenCookieName, auth.RefreshToken, cookieOptions);
+
+                return Ok(auth.Token);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("Authenticate"), Authorize]
+        public async Task<ActionResult<string>> Authenticate()
+        {
+            try
+            {
+                var response = await _authService.Authenticate();
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                if (ex.GetType() == typeof(NotFoundException))
+                    return NotFound();
+                else return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("Refresh"), AllowAnonymous]
+        public async Task<ActionResult<string?>> RefreshToken([FromQuery] int? id = null, [FromQuery] string? email = null)
+        {
+            var refreshToken = Request.Cookies[Secrets.RefreshTokenCookieName];
+
+            if (String.IsNullOrEmpty(refreshToken)) return BadRequest("Credentials not found");
+
+            string? auth = null;
+
+            if (id is not null)
+                auth = await _tokenService.RefreshToken(id.Value, refreshToken);
+
+            if (email is not null)
+                auth = await _tokenService.RefreshToken(email, refreshToken);
+
+            if (auth is null) return BadRequest("Credentials invalid");
+            return Ok(auth);
         }
 
         [HttpPut("Reset-password"), AllowAnonymous]
@@ -257,5 +236,27 @@ namespace WCPAuthAPI.Controllers
 
             return Ok(new { email = user.Email, role = user.Role, id = user.Id });
         }
+
+        [HttpPost("AddAdmin"), Authorize(Roles = "Admin")]
+        public async Task<IActionResult> AddAdmin(int id)
+        {
+            return await _authService.AddAdmin(id) ? NoContent() : BadRequest("Der blev ikke fundet nogen bruger med det id. Eller brugeren er allerede admin...");
+        }
+
+        [HttpPost("Revoke"), Authorize]
+        public async Task<IActionResult> Revoke()
+        {
+            try
+            {
+                int id = _userContextService.GetId();
+                await _tokenService.RevokeSession(id);
+                return NoContent();
+            }
+            catch
+            {
+                return BadRequest("Session invalid");
+            }
+        }
+
     }
 }
