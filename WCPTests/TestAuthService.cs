@@ -202,7 +202,7 @@ namespace WCPTests
 
             var registration = await _authService.Register(dto);
 
-            NotFoundException inactiveException = await Assert.ThrowsExceptionAsync<NotFoundException>(async () => await _authService.Login(new UserDto
+            ArgumentException inactiveException = await Assert.ThrowsExceptionAsync<ArgumentException>(async () => await _authService.Login(new UserDto
             {
                 Email = dto.User.Email,
                 Password = "Doesnt matter"
@@ -228,7 +228,7 @@ namespace WCPTests
 
             Assert.IsNotNull(result);
 
-            ArgumentException exception = await Assert.ThrowsExceptionAsync<ArgumentException>(async () => await _authService.Login(new UserDto
+            NotFoundException exception = await Assert.ThrowsExceptionAsync<NotFoundException>(async () => await _authService.Login(new UserDto
             {
                 Email = "Does@not.exist",
                 Password = "Something wrong"
