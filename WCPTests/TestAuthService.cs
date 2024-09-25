@@ -12,6 +12,7 @@ using Azure.Core;
 using WCPAuthAPI.Models.DTOs;
 using WCPShared.Models.AuthModels;
 using Amazon.Runtime.Internal.Transform;
+using SendGrid.Helpers.Errors.Model;
 
 namespace WCPTests
 {
@@ -201,7 +202,7 @@ namespace WCPTests
 
             var registration = await _authService.Register(dto);
 
-            ArgumentException inactiveException = await Assert.ThrowsExceptionAsync<ArgumentException>(async () => await _authService.Login(new UserDto
+            NotFoundException inactiveException = await Assert.ThrowsExceptionAsync<NotFoundException>(async () => await _authService.Login(new UserDto
             {
                 Email = dto.User.Email,
                 Password = "Doesnt matter"
