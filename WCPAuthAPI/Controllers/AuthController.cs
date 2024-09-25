@@ -10,6 +10,7 @@ using WCPShared.Models.AuthModels;
 using WCPShared.Interfaces.Auth;
 using WCPShared.Models.DTOs;
 using WCPShared.Services.EntityFramework;
+using SendGrid.Helpers.Errors.Model;
 
 namespace WCPAuthAPI.Controllers
 {
@@ -54,7 +55,10 @@ namespace WCPAuthAPI.Controllers
             try
             {
                 User? user = await _authService.Register(request, selfRegister);
-                return user.Role != "Bruger" ? Created($"auth/{user.Id}", user.Id) : Created($"auth/{user.Id}", new { id = user.Id, orgId = user.OrganizationId });
+                if (user is not null)
+                    return user.Role != "Bruger" ? Created($"auth/{user.Id}", user.Id) : Created($"auth/{user.Id}", new { id = user.Id, orgId = user.OrganizationId });
+                return BadRequest("Something went wrong...");
+
             }
             catch (ArgumentException ex)
             {
@@ -105,41 +109,23 @@ namespace WCPAuthAPI.Controllers
         [HttpGet("Authenticate"), Authorize]
         public async Task<ActionResult<string>> Authenticate()
         {
-            string email = _userContextService.GetEmail();
-            User? user = await _userService.GetObjectBy(x => x.Email == email);
-
-            if (user is null)
-                return BadRequest("No user with the given email");
-
-            var id = user.Id;
-            var roles = _userContextService.GetRoles();
-            var name = user.Name;
-            var phone = user.Phone;
-            var notificationSetting = user.NotificationSetting;
-
-            if (user.Role == "Bruger" && user.Organization is not null)
+            try
             {
-                int orgId = user.Organization.Id;
-                return Ok(new { id, orgId, email, roles, name, phone, notificationSetting });
+                var response = await _authService.Authenticate();
+                return Ok(response);
             }
-            
-            if (user.Role == "Creator")
+            catch (Exception ex)
             {
-                var creator = await _creatorService.GetObjectViewBy(x => x.UserId == _userContextService.GetId());
-                if (creator is not null)
-                {
-                    var creatorId = creator.Id;
-                    return Ok(new { id, creatorId, email, roles, name, phone, notificationSetting });
-                }
+                if (ex.GetType() == typeof(NotFoundException))
+                    return NotFound();
+                else return BadRequest(ex.Message);
             }
-
-            return Ok(new { id, email, roles, name, phone, notificationSetting });
         }
 
         [HttpPost("AddAdmin"), Authorize(Roles = "Admin")]
         public async Task<IActionResult> AddAdmin(int id)
         {
-            return await _tokenService.AddAdmin(id) ? NoContent() : BadRequest("Der blev ikke fundet nogen bruger med det id. Eller brugeren er allerede admin...");
+            return await _authService.AddAdmin(id) ? NoContent() : BadRequest("Der blev ikke fundet nogen bruger med det id. Eller brugeren er allerede admin...");
         }
 
         [HttpPost("Revoke"), Authorize]
@@ -149,7 +135,6 @@ namespace WCPAuthAPI.Controllers
             {
                 int id = _userContextService.GetId();
                 await _tokenService.RevokeSession(id);
-
                 return NoContent();
             }
             catch
@@ -160,50 +145,36 @@ namespace WCPAuthAPI.Controllers
 
         // POST /auth/verify
         [HttpPost("Verify"), AllowAnonymous]
-        public async Task<IActionResult> Verify(VerifyUserDTO request)
+        public async Task<IActionResult> Verify(VerifyUserDto request)
         {
-            var user = await _userService.GetObjectBy(x => x.VerificationToken == request.VerificationToken);
-            if (user == null) return BadRequest();
-
-            var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
-            user.PasswordHash = passwordHash;
-            user.IsActive = true;
-
-            await _userService.UpdateObject(user.Id, user);
-
-            return Ok();
+            try
+            {
+                var response = await _authService.Verify(request);
+                return response is not null ? Ok() : BadRequest("Something went wrong...");
+            }
+            catch (Exception ex)
+            {
+                if (ex.GetType() == typeof(NotFoundException))
+                    return NotFound();
+                else return BadRequest(ex.Message);
+            }
         }
 
         // POST /auth/verify
         [HttpPost("SelfRegister"), AllowAnonymous]
-        public async Task<IActionResult> SelfRegister(RegisterSelfDto request)
+        public async Task<IActionResult> SelfRegister(SelfRegisterDto request)
         {
-            var user = await _userService.GetObjectBy(x => x.VerificationToken == request.VerificationToken);
-            if (user == null) return BadRequest();
-
-            var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
-            user.PasswordHash = passwordHash;
-            user.Phone = request.User.Phone;
-            user.Name = request.User.Name;
-            user.IsActive = true;
-
-            if (!user.Validate()) return BadRequest("Validation failed...");
-
-            var updateResult = await _userService.UpdateObject(user.Id, user);
-            if (updateResult is null) return BadRequest("Updating user failed...");
-
-            if (user.Role == "Creator" && request.Creator is not null)
+            try
             {
-                if (!request.Creator.Validate()) return BadRequest("Creator validation failed");
-
-                var result = await _creatorService.AddObject(request.Creator);
-                if (result is null) return BadRequest("Something went wrong...");
+                var response = await _authService.SelfRegister(request);
+                return response is not null ? NoContent() : BadRequest("Something went wrong...");
             }
-
-            user.VerificationToken = null;
-            updateResult = await _userService.UpdateObject(user.Id, user);
-
-            return updateResult is not null ? Ok() : BadRequest("Verification token removal failed");
+            catch (Exception ex)
+            {
+                if (ex.GetType() == typeof(NotFoundException))
+                    return NotFound();
+                else return BadRequest(ex.Message);
+            }
         }
 
         [HttpPut("Reset-password"), AllowAnonymous]

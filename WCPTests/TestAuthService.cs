@@ -25,6 +25,7 @@ namespace WCPTests
         private BrandService _brandService;
         private OrderService _orderService;
         private UserService _userService;
+        private AuthService _authService;
         private JwtService _jwtService;
         private IEmailService _emailService;
         private LanguageService _languageService;
@@ -57,8 +58,9 @@ namespace WCPTests
             _emailService = new SendGridEmailService(configuration);
             _userService = new UserService(context, _organizationService, _viewConverter);
             _creatorService = new CreatorService(context, _languageService, _userService, _viewConverter);
-            _jwtService = new JwtService(configuration, _userService, _emailService, _organizationService, _creatorService);
-            
+            _jwtService = new JwtService(configuration, _userService, _emailService, _organizationService, _creatorService, null);
+            _authService = new AuthService(configuration, _userService, _emailService, _organizationService, _creatorService, null, _jwtService);
+
 
             _organization = await _organizationService.AddObject(new OrganizationDto() { Name = "Org", CVR = "12345678" });
         }
@@ -82,12 +84,12 @@ namespace WCPTests
                 User = user,
             };
 
-            var result = await _jwtService.Register(dto);
+            var result = await _authService.Register(dto);
             Assert.IsNotNull(result);
             Assert.AreEqual(result.Email, user.Email);
             Assert.IsNotNull(result.Organization);
 
-            await Assert.ThrowsExceptionAsync<ArgumentException>(async () => await _jwtService.Register(dto));
+            await Assert.ThrowsExceptionAsync<ArgumentException>(async () => await _authService.Register(dto));
         }
 
         [TestMethod]
@@ -110,14 +112,14 @@ namespace WCPTests
                 }
             };
 
-            var result = await _jwtService.Register(dto);
+            var result = await _authService.Register(dto);
             Assert.IsNotNull(result);
             Assert.AreEqual(result.Email, dto.User.Email);
 
             Creator? creator = (await _creatorService.GetAllObjects()).Where(x => x.UserId == result.Id).FirstOrDefault();
             Assert.IsNotNull(creator);
 
-            await Assert.ThrowsExceptionAsync<ArgumentException>(async () => await _jwtService.Register(dto));
+            await Assert.ThrowsExceptionAsync<ArgumentException>(async () => await _authService.Register(dto));
         }
 
         [TestMethod]
@@ -140,7 +142,7 @@ namespace WCPTests
                 }
             };
 
-            await Assert.ThrowsExceptionAsync<ArgumentException>(async () => await _jwtService.Register(dto));
+            await Assert.ThrowsExceptionAsync<ArgumentException>(async () => await _authService.Register(dto));
         }
 
         [TestMethod]
@@ -158,10 +160,10 @@ namespace WCPTests
                 }
             };
 
-            var result = await _jwtService.Register(dto);
+            var result = await _authService.Register(dto);
             Assert.IsNotNull(result.VerificationToken);
 
-            VerifyUserDTO request = new VerifyUserDTO()
+            VerifyUserDto request = new VerifyUserDto()
             {
                 VerificationToken = result.VerificationToken,
                 Password = "Password"
@@ -197,15 +199,15 @@ namespace WCPTests
                 }
             };
 
-            var registration = await _jwtService.Register(dto);
+            var registration = await _authService.Register(dto);
 
-            ArgumentException inactiveException = await Assert.ThrowsExceptionAsync<ArgumentException>(async () => await _jwtService.Login(new UserDto
+            ArgumentException inactiveException = await Assert.ThrowsExceptionAsync<ArgumentException>(async () => await _authService.Login(new UserDto
             {
                 Email = dto.User.Email,
                 Password = "Doesnt matter"
             }));
 
-            VerifyUserDTO request = new VerifyUserDTO()
+            VerifyUserDto request = new VerifyUserDto()
             {
                 VerificationToken = registration.VerificationToken,
                 Password = "Password"
@@ -217,7 +219,7 @@ namespace WCPTests
             user.IsActive = true;
             await _userService.UpdateObject(user.Id, user);
 
-            var result = await _jwtService.Login(new UserDto
+            var result = await _authService.Login(new UserDto
             {
                 Email = dto.User.Email,
                 Password = request.Password
@@ -225,14 +227,14 @@ namespace WCPTests
 
             Assert.IsNotNull(result);
 
-            ArgumentException exception = await Assert.ThrowsExceptionAsync<ArgumentException>(async () => await _jwtService.Login(new UserDto
+            ArgumentException exception = await Assert.ThrowsExceptionAsync<ArgumentException>(async () => await _authService.Login(new UserDto
             {
                 Email = "Does@not.exist",
                 Password = "Something wrong"
             }));
             Assert.AreEqual("User not found", exception.Message);
 
-            Assert.IsNull(await _jwtService.Login(new UserDto()
+            Assert.IsNull(await _authService.Login(new UserDto()
             {
                 Email = dto.User.Email,
                 Password = "Wrong password"

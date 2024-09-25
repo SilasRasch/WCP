@@ -32,22 +32,6 @@ builder.Services.AddOpenTelemetry()
         metrics.AddPrometheusExporter();
         metrics.AddOtlpExporter(opt => opt.Endpoint = Secrets.OtlpEndpoint);
     });
-    //.WithTracing(tracing =>
-    //{
-    //    tracing
-    //        .AddAspNetCoreInstrumentation()
-    //        .AddHttpClientInstrumentation()
-    //        .AddEntityFrameworkCoreInstrumentation();
-
-    //    tracing.AddOtlpExporter(opt => opt.Endpoint = Secrets.OtlpEndpoint);
-    //});
-
-//builder.Logging.AddOpenTelemetry(logging =>
-//{
-//    logging.IncludeScopes = true;
-//    logging.IncludeFormattedMessage = true;
-//    logging.AddOtlpExporter(opt => opt.Endpoint = Secrets.OtlpEndpoint);
-//});
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -57,7 +41,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddHttpContextAccessor(); // To get user in service-file instead of the controller
 builder.Services.AddScoped<IEmailService, SendGridEmailService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
-builder.Services.AddScoped<IAuthService, JwtService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<UserService, UserService>();
 builder.Services.AddScoped<CreatorService, CreatorService>();
 builder.Services.AddScoped<LanguageService, LanguageService>();

@@ -6,128 +6,29 @@ using System.Security.Cryptography;
 using System.Text;
 using WCPShared.Interfaces;
 using WCPShared.Interfaces.Auth;
-using WCPShared.Interfaces.DataServices;
-using WCPShared.Models;
-using WCPShared.Models.AuthModels;
-using WCPShared.Models.DTOs;
 using WCPShared.Models.UserModels;
 using WCPShared.Services.EntityFramework;
 using WCPShared.Services.StaticHelpers;
 
 namespace WCPShared.Services
 {
-    public class JwtService : IJwtService, IAuthService
+    public class JwtService : IJwtService
     {
         private readonly IConfiguration _configuration;
         private readonly IEmailService _emailService;
         private readonly UserService _userService;
         private readonly OrganizationService _organizationService;
         private readonly CreatorService _creatorService;
+        private readonly UserContextService _userContextService;
 
-        public JwtService(IConfiguration configuration, UserService userService, IEmailService emailService, OrganizationService organizationService, CreatorService creatorService)
+        public JwtService(IConfiguration configuration, UserService userService, IEmailService emailService, OrganizationService organizationService, CreatorService creatorService, UserContextService userContextService)
         {
             _configuration = configuration;
             _userService = userService;
             _emailService = emailService;
             _organizationService = organizationService;
             _creatorService = creatorService;
-        }
-
-        public async Task<User> Register(RegisterCreatorDto request, bool selfRegister = false)
-        {
-            if (await _userService.GetObjectBy(x => x.Email == request.User.Email) is not null)
-                throw new ArgumentException("A user with that email already exists...");
-
-            Organization? org = null;
-            if (request.User.OrganizationId != 0 && request.User.OrganizationId is not null)
-                org = await _organizationService.GetObject(request.User.OrganizationId!.Value);
-
-            string generatedPassword = GenerateRandomString(32);
-            string passwordHash = BCrypt.Net.BCrypt.HashPassword(generatedPassword);
-            string verificationToken = GenerateRandomString(64);
-
-            User user = new User()
-            {
-                Email = request.User.Email,
-                Name = request.User.Name,
-                PasswordHash = passwordHash,
-                Phone = request.User.Phone,
-                Role = request.User.Role,
-                IsActive = false,
-                VerificationToken = verificationToken,
-                OrganizationId = request.User.OrganizationId,
-                Organization = org,
-                NotificationsOn = true,
-                NotificationSetting = "slack"
-            };
-
-            user = await _userService.AddObject(user);
-
-            if (request.Creator is not null && user is not null && user.Id != 0 && request.User.Role == "Creator")
-            {
-                request.Creator.UserId = user.Id;
-                Creator? creator = await _creatorService.AddObject(request.Creator);
-
-                if (creator is null || creator.Id is 0)
-                {
-                    await _userService.DeleteObject(user.Id);
-                    throw new ArgumentException("Adding creator failed...");
-                }
-            }
-
-            if (user is not null)
-            {
-                try
-                {
-                    await _emailService.SendRegistrationEmail(user, verificationToken, selfRegister);
-                }
-                catch
-                {
-                    // ignore for now
-                }
-            }
-
-            return user;
-        }
-
-        public async Task<AuthResponse?> Login(UserDto request)
-        {
-            User? user = await _userService.GetObjectBy(x => x.Email == request.Email);
-
-            if (user is null) throw new ArgumentException("User not found");
-            if (!user.IsActive) throw new ArgumentException("User deactivated");
-
-            if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
-            {
-                await LoginAttempt(false, user);
-                return null;
-            }
-
-            var refreshToken = GenerateRandomString(64);
-            await SetRefreshToken(user.Id, refreshToken);
-            string token = CreateToken(user); // Create JWT
-
-            await LoginAttempt(true, user);
-
-            return new AuthResponse
-            {
-                Token = token,
-                RefreshToken = refreshToken
-            };
-        }
-
-        public async Task<bool> AddAdmin(int id)
-        {
-            User? user = await _userService.GetObject(id);
-            if (user is null)
-                return false;
-
-            if (user.Role != "Admin")
-                return false;
-
-            user.Role = "Admin";
-            await _userService.UpdateObject(id, user);
-            return true;
+            _userContextService = userContextService;
         }
 
         public string CreateToken(User user)
@@ -186,7 +87,7 @@ namespace WCPShared.Services
             return CreateToken(user);
         }
 
-        private async Task SetRefreshToken(int userId, string token)
+        public async Task SetRefreshToken(int userId, string token)
         {
             User? user = await _userService.GetObject(userId);
 
@@ -206,33 +107,6 @@ namespace WCPShared.Services
         public string GenerateRandomString(int byteCount)
         {
             return Convert.ToHexString(RandomNumberGenerator.GetBytes(byteCount));
-        }
-
-        public async Task LoginAttempt(bool success, User user)
-        {
-            if (success)
-                user.LoginTries = 0;
-            else if (user.LoginTries < 3)
-                user.LoginTries += 1;
-
-            user.LastLoginAttempt = DateTime.Now;
-            await _userService.UpdateObject(user.Id, user);
-        }
-
-        public async Task<bool> CheckLoginAttempts(UserDto request)
-        {
-            User? user = await _userService.GetObjectBy(x => x.Email == request.Email);
-
-            if (user is null) return false;
-
-            // Check login attempts
-            if (user.LoginTries > 0 && user.LastLoginAttempt is not null)
-                if (user.LastLoginAttempt.Value.AddMinutes(15) > DateTime.Now && user.LoginTries >= 3)
-                    return false;
-                else if (user.LastLoginAttempt.Value.AddMinutes(15) < DateTime.Now)
-                    await LoginAttempt(true, user); // Reset login tries after the 15 minutes
-
-            return true;
         }
 
         public async Task<bool> ValidateToken(string token)
