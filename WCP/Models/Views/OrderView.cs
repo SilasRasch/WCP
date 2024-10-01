@@ -1,13 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using WCPShared.Models.UserModels;
-using WCPShared.Services.StaticHelpers;
-using WCPShared.Models.Entities;
+﻿using WCPShared.Models.Entities;
 
 namespace WCPShared.Models.Views
 {

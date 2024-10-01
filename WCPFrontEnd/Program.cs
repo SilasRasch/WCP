@@ -1,5 +1,5 @@
-using WCPFrontEnd.Components;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using WCPFrontEnd.Components;
 
 var builder = WebApplication.CreateBuilder(args);
 

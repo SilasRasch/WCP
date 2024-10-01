@@ -8,6 +8,7 @@ using WCPShared.Services.EntityFramework;
 using WCPShared.Services;
 using WCPShared.Models.Entities;
 using WCPShared.Models.Entities.UserModels;
+using WCPShared.Models.Entities.AuthModels;
 
 namespace WCPTests
 {
@@ -17,6 +18,7 @@ namespace WCPTests
         #region Initialize
 
         private OrganizationService _organizationService;
+        private StaticTemplateService _staticTemplateService;
         private CreatorService _creatorService;
         private BrandService _brandService;
         private OrderService _orderService;
@@ -70,11 +72,12 @@ namespace WCPTests
             _viewConverter = new ViewConverter();
             _organizationService = new OrganizationService(context, _viewConverter);
             _brandService = new BrandService(context, _organizationService, _viewConverter);
+            _staticTemplateService = new StaticTemplateService(context, _viewConverter);
             _languageService = new LanguageService(context);
             _userService = new UserService(context, _organizationService, _viewConverter);
             _creatorService = new CreatorService(context, _languageService, _userService, _viewConverter);
             _slackNotificationService = new SlackNotificationService(new SlackNet.SlackApiClient("mock"), _creatorService, _userService);
-            _orderService = new OrderService(context, _brandService, _creatorService, _viewConverter, _slackNotificationService);
+            _orderService = new OrderService(context, _brandService, _creatorService, _viewConverter, _slackNotificationService, _staticTemplateService);
 
             _organization = await _organizationService.AddObject(new OrganizationDto() { Name = "Org", CVR = "12345678" });
             _brand = await _brandService.AddObject(new BrandDto() { Name = "Brand", URL = "brand.dk", OrganizationId = _organization!.Id });
