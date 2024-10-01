@@ -1,0 +1,69 @@
+﻿@page "/login"
+
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Authentication.Cookies
+@using WCPShared.Models.AuthModels
+@inject NavigationManager NavigationManager
+
+<div class="row">
+    <div class="col-lg-4 offset-lg-4 pt-4 pb-4 border">
+        <EditForm Model="@Model" OnValidSubmit="Authenticate" FormName="LoginForm">
+            <DataAnnotationsValidator />
+            <div>
+                Login
+            </div>
+            <div>
+                <label>User Name</label>
+                <InputText @bind-Value="Model.Email" class="form-control" placeholder="Username" />
+                <ValidationMessage For="() => Model.Email" />
+            </div>
+            <div>
+                <label>Password</label>
+                <InputText @bind-Value="Model.Password" class="form-control" placeholder="Password" />
+                <ValidationMessage For="() => Model.Password" />
+            </div>
+            <div>
+                <span class="text-danger">@errorMessage</span>
+            </div>
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary">Login</button>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    [CascadingParameter]
+    public HttpContext? HttpContext { get; set; }
+
+    [SupplyParameterFromForm]
+    public UserDto Model { get; set; } = new();
+    private string? errorMessage;
+
+    private async Task Authenticate()
+    {
+        if (String.IsNullOrEmpty(Model.Email) || String.IsNullOrEmpty(Model.Password))
+        {
+            errorMessage = "Invalid username or password";
+            return;
+        }
+
+        var user = new
+        {
+            Email = Model.Email,
+            Role = "Admin"
+        };
+
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.Name, user.Email),
+            new Claim(ClaimTypes.Role, user.Role)
+        };
+
+        var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+        var principal = new ClaimsPrincipal(identity);
+        await HttpContext.SignInAsync(principal);
+        NavigationManager.NavigateTo("/");
+    }
+}
