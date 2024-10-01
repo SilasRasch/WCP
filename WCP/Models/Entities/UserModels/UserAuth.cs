@@ -1,4 +1,4 @@
-﻿namespace WCPShared.Models.UserModels
+﻿namespace WCPShared.Models.Entities.UserModels
 {
     public class UserAuth
     {

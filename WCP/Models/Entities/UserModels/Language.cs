@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 
-namespace WCPShared.Models.UserModels
+namespace WCPShared.Models.Entities.UserModels
 {
     public class Language
     {

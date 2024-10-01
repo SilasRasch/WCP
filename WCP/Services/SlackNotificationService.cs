@@ -1,7 +1,7 @@
 ﻿using SlackNet;
 using SlackNet.WebApi;
 using WCPShared.Interfaces.DataServices;
-using WCPShared.Models;
+using WCPShared.Models.Entities;
 using WCPShared.Models.Views;
 using WCPShared.Services.EntityFramework;
 using WCPShared.Services.StaticHelpers;

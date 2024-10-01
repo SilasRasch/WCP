@@ -6,7 +6,7 @@ using System.Security.Cryptography;
 using System.Text;
 using WCPShared.Interfaces;
 using WCPShared.Interfaces.Auth;
-using WCPShared.Models.UserModels;
+using WCPShared.Models.Entities.UserModels;
 using WCPShared.Services.EntityFramework;
 using WCPShared.Services.StaticHelpers;
 

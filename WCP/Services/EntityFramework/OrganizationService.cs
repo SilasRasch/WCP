@@ -1,5 +1,4 @@
-﻿using WCPShared.Models;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using WCPShared.Interfaces.DataServices;
 using WCPShared.Models.DTOs;
 using WCPShared.Interfaces;
@@ -7,6 +6,7 @@ using WCPShared.Models.Views;
 using System.Linq.Expressions;
 using WCPShared.Services.Converters;
 using System;
+using WCPShared.Models.Entities;
 
 namespace WCPShared.Services.EntityFramework
 {

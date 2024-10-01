@@ -4,7 +4,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using WCPShared.Interfaces;
-using WCPShared.Models.UserModels;
+using WCPShared.Models.Entities;
+using WCPShared.Models.Entities.UserModels;
 
 namespace WCPShared.Models
 {

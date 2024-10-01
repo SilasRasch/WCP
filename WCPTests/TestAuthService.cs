@@ -2,7 +2,6 @@
 using WCPShared.Interfaces.DataServices;
 using WCPShared.Interfaces;
 using WCPShared.Models.DTOs;
-using WCPShared.Models.UserModels;
 using WCPShared.Models;
 using WCPShared.Services.Converters;
 using WCPShared.Services.EntityFramework;
@@ -10,9 +9,11 @@ using WCPShared.Services;
 using Microsoft.Extensions.Configuration;
 using Azure.Core;
 using WCPAuthAPI.Models.DTOs;
-using WCPShared.Models.AuthModels;
 using Amazon.Runtime.Internal.Transform;
 using SendGrid.Helpers.Errors.Model;
+using WCPShared.Models.Entities;
+using WCPShared.Models.Entities.AuthModels;
+using WCPShared.Models.Entities.UserModels;
 
 namespace WCPTests
 {

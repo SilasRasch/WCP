@@ -1,7 +1,4 @@
-﻿
-using WCPShared.Models.AuthModels;
-
-namespace WCPShared.Models.DTOs
+﻿namespace WCPShared.Models.Entities.AuthModels
 {
     public class SelfRegisterDto : RegisterCreatorDto
     {

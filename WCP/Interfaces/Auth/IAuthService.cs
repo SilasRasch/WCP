@@ -1,6 +1,5 @@
-﻿using WCPShared.Models.AuthModels;
-using WCPShared.Models.DTOs;
-using WCPShared.Models.UserModels;
+﻿using WCPShared.Models.Entities.AuthModels;
+using WCPShared.Models.Entities.UserModels;
 
 namespace WCPShared.Interfaces.Auth
 {

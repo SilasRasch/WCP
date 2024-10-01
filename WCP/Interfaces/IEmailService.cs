@@ -1,6 +1,6 @@
 ﻿using System.Net;
-using WCPShared.Models;
-using WCPShared.Models.UserModels;
+using WCPShared.Models.Entities;
+using WCPShared.Models.Entities.UserModels;
 
 namespace WCPShared.Interfaces
 {

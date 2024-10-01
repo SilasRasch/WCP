@@ -6,7 +6,8 @@ using WCPShared.Models;
 using WCPShared.Services.Converters;
 using WCPShared.Services.EntityFramework;
 using WCPShared.Services;
-using WCPShared.Models.UserModels;
+using WCPShared.Models.Entities;
+using WCPShared.Models.Entities.UserModels;
 
 namespace WCPTests
 {

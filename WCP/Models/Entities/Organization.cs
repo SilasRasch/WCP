@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using WCPShared.Services.StaticHelpers;
 
-namespace WCPShared.Models
+namespace WCPShared.Models.Entities
 {
     public class Organization
     {

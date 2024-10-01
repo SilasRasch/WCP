@@ -2,6 +2,7 @@
 using WCPShared.Interfaces;
 using WCPShared.Models;
 using WCPShared.Models.DTOs;
+using WCPShared.Models.Entities;
 using WCPShared.Services.Converters;
 using WCPShared.Services.EntityFramework;
 

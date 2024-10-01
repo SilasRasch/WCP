@@ -1,11 +1,11 @@
 ﻿using Microsoft.Extensions.Configuration;
 using System.Net;
 using WCPShared.Interfaces;
-using WCPShared.Models.UserModels;
 using WCPShared.Services.StaticHelpers;
 using SendGrid.Helpers.Mail;
 using SendGrid;
-using WCPShared.Models;
+using WCPShared.Models.Entities;
+using WCPShared.Models.Entities.UserModels;
 
 namespace WCPShared.Services
 {

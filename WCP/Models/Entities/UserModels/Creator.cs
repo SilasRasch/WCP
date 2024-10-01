@@ -1,8 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.IdentityModel.Tokens;
+using WCPShared.Models.Entities;
 
-namespace WCPShared.Models.UserModels
+namespace WCPShared.Models.Entities.UserModels
 {
     public class Creator : IEquatable<Creator?>
     {
@@ -17,7 +18,7 @@ namespace WCPShared.Models.UserModels
         public User User { get; set; } = new User();
         public List<Language>? Languages { get; set; } = new List<Language>();
         public List<Order> Orders { get; set; } = new List<Order>();
-        public string? Gender {  get; set; } = string.Empty;
+        public string? Gender { get; set; } = string.Empty;
 
         public bool Validate()
         {

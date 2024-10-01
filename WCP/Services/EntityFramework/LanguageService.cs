@@ -2,7 +2,7 @@
 using WCPShared.Interfaces;
 using WCPShared.Interfaces.DataServices;
 using WCPShared.Models;
-using WCPShared.Models.UserModels;
+using WCPShared.Models.Entities.UserModels;
 
 namespace WCPShared.Services.EntityFramework
 {

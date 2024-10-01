@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using WCPShared.Models.UserModels;
-using WCPShared.Models;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
+using WCPShared.Models.Entities;
+using WCPShared.Models.Entities.UserModels;
 
 namespace WCPShared.Interfaces
 {

@@ -2,15 +2,14 @@
 using Microsoft.AspNetCore.Mvc;
 using WCPAuthAPI.Models.DTOs;
 using WCPShared.Interfaces;
-using WCPShared.Models.UserModels;
 using WCPShared.Services.StaticHelpers;
 using WCPShared.Services;
 using System.Net;
-using WCPShared.Models.AuthModels;
 using WCPShared.Interfaces.Auth;
-using WCPShared.Models.DTOs;
 using WCPShared.Services.EntityFramework;
 using SendGrid.Helpers.Errors.Model;
+using WCPShared.Models.Entities.AuthModels;
+using WCPShared.Models.Entities.UserModels;
 
 namespace WCPAuthAPI.Controllers
 {

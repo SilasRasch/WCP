@@ -1,8 +1,8 @@
 ﻿using EllipticCurve.Utils;
 using System.Data;
-using WCPShared.Models;
 using WCPShared.Models.DTOs;
-using WCPShared.Models.UserModels;
+using WCPShared.Models.Entities;
+using WCPShared.Models.Entities.UserModels;
 
 namespace WCPShared.Services.StaticHelpers
 {

@@ -3,11 +3,10 @@ using SendGrid.Helpers.Errors.Model;
 using System.Security.Cryptography;
 using WCPShared.Interfaces;
 using WCPShared.Interfaces.Auth;
-using WCPShared.Models.AuthModels;
-using WCPShared.Models.DTOs;
-using WCPShared.Models.UserModels;
-using WCPShared.Models;
 using WCPShared.Services.EntityFramework;
+using WCPShared.Models.Entities;
+using WCPShared.Models.Entities.AuthModels;
+using WCPShared.Models.Entities.UserModels;
 
 namespace WCPShared.Services
 {

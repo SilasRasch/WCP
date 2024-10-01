@@ -1,6 +1,4 @@
-﻿using WCPShared.Models.UserModels;
-using WCPShared.Models;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using WCPShared.Interfaces.DataServices;
 using WCPShared.Models.AuthModels;
 using Azure.Core;
@@ -9,6 +7,9 @@ using System.Linq.Expressions;
 using WCPShared.Services.Converters;
 using System;
 using WCPShared.Models.Views;
+using WCPShared.Models.Entities;
+using WCPShared.Models.Entities.AuthModels;
+using WCPShared.Models.Entities.UserModels;
 
 namespace WCPShared.Services.EntityFramework
 {

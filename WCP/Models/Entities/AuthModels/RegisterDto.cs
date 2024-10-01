@@ -1,7 +1,7 @@
 ﻿using Microsoft.IdentityModel.Tokens;
 using WCPShared.Services.StaticHelpers;
 
-namespace WCPShared.Models.UserModels
+namespace WCPShared.Models.Entities.AuthModels
 {
     public class RegisterDto
     {

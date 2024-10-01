@@ -1,11 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WCPShared.Services;
-using WCPShared.Models;
 using WCPShared.Models.DTOs.RangeDTOs;
 using WCPShared.Models.Views;
 using WCPShared.Models.DTOs;
 using WCPShared.Services.EntityFramework;
+using WCPShared.Models.Entities;
 
 namespace WCPDataAPI.Controllers
 {

@@ -5,6 +5,7 @@ namespace WCPShared.Models.DTOs
     public class StaticTemplateDto
     {
         public string Name { get; set; } = string.Empty;
+        public string DisplayName { get; set; } = string.Empty;
         public string TemplateImgOne { get; set; } = string.Empty;
         public string TemplateImgTwo { get; set; } = string.Empty;
         public string ExampleImg { get; set; } = string.Empty;

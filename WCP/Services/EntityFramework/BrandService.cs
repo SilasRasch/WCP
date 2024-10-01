@@ -3,8 +3,8 @@ using System;
 using System.Linq.Expressions;
 using WCPShared.Interfaces;
 using WCPShared.Interfaces.DataServices;
-using WCPShared.Models;
 using WCPShared.Models.DTOs;
+using WCPShared.Models.Entities;
 using WCPShared.Models.Views;
 using WCPShared.Services.Converters;
 

@@ -1,9 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
-using WCPShared.Models.UserModels;
 using WCPShared.Services.StaticHelpers;
+using WCPShared.Models.Entities.UserModels;
 
-namespace WCPShared.Models
+namespace WCPShared.Models.Entities
 {
     public class Order : IEquatable<Order?>
     {

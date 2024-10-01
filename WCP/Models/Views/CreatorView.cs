@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WCPShared.Models.DTOs;
-using WCPShared.Models.UserModels;
+using WCPShared.Models.Entities.UserModels;
 
 namespace WCPShared.Models.Views
 {

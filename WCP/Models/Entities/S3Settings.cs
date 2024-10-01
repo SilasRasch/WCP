@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WCPShared.Models
+namespace WCPShared.Models.Entities
 {
     public class S3Settings
     {

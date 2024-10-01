@@ -3,8 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using WCPShared.Interfaces;
 using WCPShared.Interfaces.DataServices;
-using WCPShared.Models;
 using WCPShared.Models.DTOs;
+using WCPShared.Models.Entities;
 using WCPShared.Models.Views;
 using WCPShared.Services.Converters;
 
@@ -88,6 +88,7 @@ namespace WCPShared.Services.EntityFramework
             StaticTemplate template = new StaticTemplate
             {
                 Name = obj.Name,
+                DisplayName = obj.DisplayName,
                 TemplateImgOne = obj.TemplateImgOne,
                 TemplateImgTwo = obj.TemplateImgTwo,
                 ExampleImg = obj.ExampleImg,
@@ -106,6 +107,7 @@ namespace WCPShared.Services.EntityFramework
                 return null;
 
             existingObject.Name = obj.Name;
+            existingObject.DisplayName = obj.DisplayName;
             existingObject.TemplateImgOne = obj.TemplateImgOne;
             existingObject.TemplateImgTwo = obj.TemplateImgTwo;
             existingObject.ExampleImg = obj.ExampleImg;

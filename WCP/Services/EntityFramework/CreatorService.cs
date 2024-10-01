@@ -1,13 +1,13 @@
 ﻿using WCPShared.Interfaces.DataServices;
 using WCPShared.Models;
 using Microsoft.EntityFrameworkCore;
-using WCPShared.Models.UserModels;
 using WCPShared.Models.DTOs;
 using WCPShared.Models.Views;
 using System.Linq.Expressions;
 using WCPShared.Services.Converters;
 using System;
 using WCPShared.Interfaces;
+using WCPShared.Models.Entities.UserModels;
 
 namespace WCPShared.Services.EntityFramework
 {

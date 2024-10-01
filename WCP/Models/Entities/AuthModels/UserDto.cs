@@ -5,12 +5,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WCPShared.Models.AuthModels
+namespace WCPShared.Models.Entities.AuthModels
 {
-    public class VerifyUserDto
+    public class UserDto
     {
         [Required]
-        public string VerificationToken { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
         [Required]
         public string Password { get; set; } = string.Empty;
     }

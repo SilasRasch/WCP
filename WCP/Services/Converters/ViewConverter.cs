@@ -1,6 +1,6 @@
 ﻿using WCPShared.Interfaces.DataServices;
-using WCPShared.Models;
-using WCPShared.Models.UserModels;
+using WCPShared.Models.Entities;
+using WCPShared.Models.Entities.UserModels;
 using WCPShared.Models.Views;
 
 namespace WCPShared.Services.Converters

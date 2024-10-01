@@ -4,9 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WCPShared.Models.DTOs;
-using WCPShared.Models.UserModels;
 
-namespace WCPShared.Models.AuthModels
+namespace WCPShared.Models.Entities.AuthModels
 {
     public class RegisterCreatorDto
     {

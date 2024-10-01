@@ -3,8 +3,9 @@ using System.ComponentModel.DataAnnotations;
 using WCPShared.Interfaces;
 using WCPShared.Services.StaticHelpers;
 using Microsoft.IdentityModel.Tokens;
+using WCPShared.Models.Entities;
 
-namespace WCPShared.Models.UserModels
+namespace WCPShared.Models.Entities.UserModels
 {
     public class User : UserAuth, IUser
     {

@@ -1,6 +1,7 @@
-using WCPShared.Models;
 using WCPShared.Models.DTOs;
-using WCPShared.Models.UserModels;
+using WCPShared.Models.Entities;
+using WCPShared.Models.Entities.AuthModels;
+using WCPShared.Models.Entities.UserModels;
 using WCPShared.Services.StaticHelpers;
 
 namespace WCPTests
