@@ -1,13 +1,5 @@
 using WCPFrontEnd.Components;
-using Microsoft.AspNetCore.Components.Authorization;
-using WCPShared.Interfaces.Auth;
-using WCPShared.Interfaces;
-using WCPShared.Services;
-using WCPShared.Models;
-using Microsoft.EntityFrameworkCore;
-using WCPShared.Services.StaticHelpers;
-using WCPShared.Interfaces.DataServices;
-using WCPShared.Services.EntityFramework;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,14 +7,27 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-builder.Services.AddHttpContextAccessor(); // To get user in service-file instead of the controller (SOC)!
-builder.Services.AddScoped<IJwtService, JwtService>();
-builder.Services.AddScoped<UserService, UserService>();
-builder.Services.AddScoped<IEmailService, SendGridEmailService>();
-builder.Services.AddScoped<UserContextService>();
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.Cookie.Name = "auth_token";
+        options.LoginPath = "/login";
+        options.Cookie.MaxAge = TimeSpan.FromMinutes(30);
+        options.AccessDeniedPath = "/access-denied";
+    });
+builder.Services.AddAuthorization();
+builder.Services.AddCascadingAuthenticationState();
 
-builder.Services.AddDbContext<WcpDbContext>(
-    options => options.UseSqlServer(Secrets.GetConnectionString(builder.Configuration)));
+//builder.Services.AddHttpContextAccessor(); // To get user in service-file instead of the controller (SOC)!
+//builder.Services.AddScoped<IAuthService, AuthService>();
+//builder.Services.AddScoped<IJwtService, JwtService>();
+//builder.Services.AddScoped<IEmailService, SendGridEmailService>();
+//builder.Services.AddScoped<UserService>();
+//builder.Services.AddScoped<OrganizationService>();
+//builder.Services.AddScoped<UserContextService>();
+
+//builder.Services.AddDbContext<IWcpDbContext>(
+//    options => options.UseSqlServer(Secrets.GetConnectionString(builder.Configuration)));
 
 var app = builder.Build();
 
@@ -38,8 +43,8 @@ app.UseHttpsRedirection();
 
 app.UseStaticFiles();
 app.UseAntiforgery();
-//app.UseAuthentication();
-//app.UseAuthorization();
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();

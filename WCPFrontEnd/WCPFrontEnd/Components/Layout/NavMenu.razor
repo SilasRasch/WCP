@@ -14,6 +14,26 @@
             </NavLink>
         </div>
 
+        <AuthorizeView Roles="Admin,User">
+            <Authorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="counter">
+                        <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
+                    </NavLink>
+                </div>
+            </Authorized>
+        </AuthorizeView>
+
+        <AuthorizeView Roles="Admin">
+            <Authorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="weather">
+                        <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
+                    </NavLink>
+                </div>
+            </Authorized>
+        </AuthorizeView>
+
         <div class="px-3">
             <a class="nav-link" href="https://webcontent.dk" target="_blank"><img src="https://webcontent.dk/wp-content/uploads/2024/01/cropped-logo-hjemmeside-1-32x32.png" height="32" width="32"/></a>
         </div>

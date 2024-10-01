@@ -1,9 +1,18 @@
 ﻿@page "/"
-@using WCPShared.Models.AuthModels
 @rendermode InteractiveServer
 
+<div class="flex flex-col justify-center">
+    <AuthorizeView>
+        <NotAuthorized>
+            <span>You are not logged in. Please <a href="/login">click here</a> to login</span>
+        </NotAuthorized>
+        <Authorized>
+            <span>Logged in as <b>@context.User.Identity.Name</b>. <a class="fw-bolder" href="/logout">Click here</a> to logout</span>
+        </Authorized>
+    </AuthorizeView>
+</div>
 
-<div class="flex flex-col gap-4 justify-center items-center my-32">
+@* <div class="flex flex-col gap-4 justify-center items-center my-32">
 @if (!ShowLogin)
 {
     <h1 class="font-bold text-red-500 text-3xl md:text-5xl text-center w-[65vw]">Velkommen til WebContents bestillingsplatform</h1>
@@ -51,9 +60,9 @@ else
     </div>
 
 }
-</div>
+</div> *@
 
-@code {
+@* @code {
     [SupplyParameterFromForm]
     public UserDto User { get; set; } = new();
 
@@ -69,4 +78,4 @@ else
     private async Task Login()
     {
     }
-}
+} *@
