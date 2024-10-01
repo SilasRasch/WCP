@@ -19,16 +19,14 @@ namespace WCPShared.Services
         private readonly UserService _userService;
         private readonly OrganizationService _organizationService;
         private readonly CreatorService _creatorService;
-        private readonly UserContextService _userContextService;
 
-        public JwtService(IConfiguration configuration, UserService userService, IEmailService emailService, OrganizationService organizationService, CreatorService creatorService, UserContextService userContextService)
+        public JwtService(IConfiguration configuration, UserService userService, IEmailService emailService, OrganizationService organizationService, CreatorService creatorService)
         {
             _configuration = configuration;
             _userService = userService;
             _emailService = emailService;
             _organizationService = organizationService;
             _creatorService = creatorService;
-            _userContextService = userContextService;
         }
 
         public string CreateToken(User user)
