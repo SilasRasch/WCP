@@ -19,7 +19,9 @@ namespace WCPShared.Services.Converters
             if (obj.Editor is not null)
                 view.Editor = Convert(obj.Editor);
 
-            view.StaticTemplates = obj.StaticTemplates.Select(x => Convert(x)).ToList();
+            if (obj.StaticTemplates is not null)
+                view.StaticTemplates = obj.StaticTemplates.Select(x => Convert(x)).ToList();
+
             return view;
         }
 

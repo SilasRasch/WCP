@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
-using WCPShared.Models.UserModels;
 using WCPShared.Services.StaticHelpers;
 
 namespace WCPShared.Models.DTOs
@@ -16,6 +15,7 @@ namespace WCPShared.Models.DTOs
         public int? VideographerId { get; set; }
         public int? EditorId { get; set; }
         public List<int> Creators { get; set; } = new List<int>();
+        public List<int> StaticTemplates { get; set; } = new List<int>();
 
         // Drive-links
         public string Scripts { get; set; } = string.Empty;

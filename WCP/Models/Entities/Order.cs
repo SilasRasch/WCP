@@ -20,7 +20,7 @@ namespace WCPShared.Models.Entities
         public int? EditorId { get; set; }
         public Creator? Editor { get; set; }
         public List<Creator> Creators { get; set; } = [];
-        public List<StaticTemplate> StaticTemplates { get; set; } = [];
+        public List<StaticTemplate>? StaticTemplates { get; set; }
         public DateTime Created { get; set; }
         public DateTime Updated { get; set; }
         public Dictionary<int, bool> CreatorDeliveryStatus { get; set; } = new Dictionary<int, bool>();

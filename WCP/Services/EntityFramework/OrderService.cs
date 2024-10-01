@@ -17,15 +17,17 @@ namespace WCPShared.Services.EntityFramework
         private readonly BrandService _brandService;
         private readonly CreatorService _creatorService;
         private readonly ViewConverter _viewConverter;
+        private readonly StaticTemplateService _templateService;
         private readonly SlackNotificationService _slackNetService;
 
-        public OrderService(IWcpDbContext context, BrandService brandService, CreatorService creatorService, ViewConverter viewConverter, SlackNotificationService slackNetService)
+        public OrderService(IWcpDbContext context, BrandService brandService, CreatorService creatorService, ViewConverter viewConverter, SlackNotificationService slackNetService, StaticTemplateService staticTemplateService)
         {
             _context = context;
             _brandService = brandService;
             _creatorService = creatorService;
             _viewConverter = viewConverter;
             _slackNetService = slackNetService;
+            _templateService = staticTemplateService;
         }
 
         public async Task<Order?> DeleteObject(int id)
@@ -48,6 +50,7 @@ namespace WCPShared.Services.EntityFramework
                 .Include(x => x.Creators)
                 .Include(x => x.Videographer)
                 .Include(x => x.Editor)
+                .Include(x => x.StaticTemplates)
                 .AsSplitQuery()
                 .SingleOrDefaultAsync(x => x.Id == id);
         }
@@ -60,6 +63,7 @@ namespace WCPShared.Services.EntityFramework
                 .Include(x => x.Creators)
                 .Include(x => x.Videographer)
                 .Include(x => x.Editor)
+                .Include(x => x.StaticTemplates)
                 .AsSplitQuery()
                 .SingleOrDefaultAsync(predicate);
         }
@@ -78,6 +82,7 @@ namespace WCPShared.Services.EntityFramework
                 .Include(x => x.Creators)
                 .Include(x => x.Videographer)
                 .Include(x => x.Editor)
+                .Include(x => x.StaticTemplates)
                 .AsSplitQuery()
                 .ToListAsync();
         }
@@ -219,9 +224,14 @@ namespace WCPShared.Services.EntityFramework
                 .Where(x => obj.Creators.Contains(x.Id))
                 .ToList();
 
+            List<StaticTemplate> staticTemplates = (await _templateService.GetAllObjects())
+                .Where(x => obj.StaticTemplates.Contains(x.Id))
+                .ToList();
+
             Order order = DtoConverter.OrderDtoToOrder(obj);
             order.Brand = brand;
             order.Creators = creators;
+            order.StaticTemplates = staticTemplates;
             order.Status = 0;
             order.Created = DateTime.Now;
             order.CreatorDeliveryStatus = creators.ToDictionary(x => x.Id, x => false);
@@ -258,6 +268,7 @@ namespace WCPShared.Services.EntityFramework
                 .ThenInclude(x => x.User)
                 .Include(x => x.Editor)
                 .ThenInclude(x => x.User)
+                .Include(x => x.StaticTemplates)
                 .Select(x => _viewConverter.Convert(x))
                 .AsSplitQuery()
                 .ToListAsync();
@@ -275,6 +286,7 @@ namespace WCPShared.Services.EntityFramework
                 .ThenInclude(x => x.User)
                 .Include(x => x.Editor)
                 .ThenInclude(x => x.User)
+                .Include(x => x.StaticTemplates)
                 .Select(x => _viewConverter.Convert(x))
                 .AsSplitQuery()
                 .ToListAsync();
@@ -291,6 +303,7 @@ namespace WCPShared.Services.EntityFramework
                 .ThenInclude(x => x.User)
                 .Include(x => x.Editor)
                 .ThenInclude(x => x.User)
+                .Include(x => x.StaticTemplates)
                 .AsSplitQuery()
                 .SingleOrDefaultAsync(predicate);
 
