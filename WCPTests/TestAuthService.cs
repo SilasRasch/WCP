@@ -25,7 +25,6 @@ namespace WCPTests
         private OrganizationService _organizationService;
         private CreatorService _creatorService;
         private BrandService _brandService;
-        private OrderService _orderService;
         private UserService _userService;
         private AuthService _authService;
         private JwtService _jwtService;

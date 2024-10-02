@@ -36,7 +36,7 @@ namespace WCPShared.Services
         {
             var result = new List<string>();
 
-            if (_contextAccessor.HttpContext.User.Claims.Any())
+            if (_contextAccessor.HttpContext!.User.Claims.Any())
             {
                 result = _contextAccessor.HttpContext.User.Claims
                     .Where(c => c.Type == ClaimTypes.Role)
@@ -51,7 +51,7 @@ namespace WCPShared.Services
         {
             string result = null!;
 
-            if (_contextAccessor.HttpContext.User.Claims.Any())
+            if (_contextAccessor.HttpContext!.User.Claims.Any())
                 result = _contextAccessor.HttpContext.User.FindFirst(claimType)!.Value;
 
             return result!;
