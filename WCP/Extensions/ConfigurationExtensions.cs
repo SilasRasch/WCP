@@ -102,7 +102,7 @@ namespace WCPShared.Extensions
             return services;
         }
 
-        public static IServiceCollection ConfigureDataServices(this IServiceCollection services)
+        public static IServiceCollection AddDataServices(this IServiceCollection services)
         {
             services.AddHttpContextAccessor();
             services.AddScoped<UserService>();
@@ -119,7 +119,7 @@ namespace WCPShared.Extensions
             return services;
         }
 
-        public static IServiceCollection ConfigureAuthenticationServices(this IServiceCollection services)
+        public static IServiceCollection AddAuthenticationServices(this IServiceCollection services)
         {
             services.AddScoped<IJwtService, JwtService>();
             services.AddScoped<IAuthService, AuthService>();

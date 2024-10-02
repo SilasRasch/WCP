@@ -4,8 +4,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 builder.Services.ConfigurePrometheus();
 builder.Services.ConfigureDbContext(builder.Configuration);
@@ -16,8 +16,8 @@ var corsPolicyName = "dev";
 builder.Services.ConfigureCors(corsPolicyName);
 
 // Adds all EF and custom services
-builder.Services.ConfigureDataServices();
-builder.Services.ConfigureAuthenticationServices();
+builder.Services.AddDataServices();
+builder.Services.AddAuthenticationServices();
 
 var app = builder.Build();
 
