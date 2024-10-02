@@ -19,7 +19,7 @@ namespace WCPShared.Models.Views
         public string SubType { get; set; } = string.Empty;
         public int? UserId { get; set; }
         public List<string>? Languages { get; set; } = new List<string>();
-        public string Gender { get; set; } = string.Empty;
+        public string? Gender { get; set; } = string.Empty;
 
         public CreatorView(Creator obj)
         {
@@ -28,10 +28,12 @@ namespace WCPShared.Models.Views
             Gender = obj.Gender;
             UserId = obj.UserId;
             SubType = obj.SubType;
-            Languages = obj.Languages.Select(x => x.Name).ToList();
             DateOfBirth = obj.DateOfBirth;
             Speciality = obj.Speciality;
             ImgURL = obj.ImgURL;
+
+            if (obj.Languages is not null)
+                Languages = obj.Languages.Select(x => x.Name).ToList();
         }
     }
 }

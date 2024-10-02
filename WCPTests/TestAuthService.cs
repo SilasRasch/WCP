@@ -22,17 +22,17 @@ namespace WCPTests
     {
         #region Initialize
 
-        private OrganizationService _organizationService;
-        private CreatorService _creatorService;
-        private BrandService _brandService;
-        private UserService _userService;
-        private AuthService _authService;
-        private JwtService _jwtService;
-        private IEmailService _emailService;
-        private LanguageService _languageService;
-        private ViewConverter _viewConverter;
+        private OrganizationService? _organizationService;
+        private CreatorService? _creatorService;
+        private BrandService? _brandService;
+        private UserService? _userService;
+        private AuthService? _authService;
+        private JwtService? _jwtService;
+        private IEmailService? _emailService;
+        private LanguageService? _languageService;
+        private ViewConverter? _viewConverter;
 
-        private Organization _organization;
+        private Organization? _organization;
 
         [TestInitialize]
         public async Task Init()
@@ -48,7 +48,7 @@ namespace WCPTests
             };
 
             var configuration = new ConfigurationBuilder()
-                .AddInMemoryCollection(myConfiguration)
+                .AddInMemoryCollection(myConfiguration!)
                 .Build();
 
             IWcpDbContext context = new TestDbContext(options);
@@ -60,7 +60,7 @@ namespace WCPTests
             _userService = new UserService(context, _organizationService, _viewConverter);
             _creatorService = new CreatorService(context, _languageService, _userService, _viewConverter);
             _jwtService = new JwtService(configuration, _userService, _emailService, _organizationService, _creatorService);
-            _authService = new AuthService(configuration, _userService, _emailService, _organizationService, _creatorService, null, _jwtService);
+            _authService = new AuthService(configuration, _userService, _emailService, _organizationService, _creatorService, null!, _jwtService);
 
 
             _organization = await _organizationService.AddObject(new OrganizationDto() { Name = "Org", CVR = "12345678" });
@@ -85,7 +85,7 @@ namespace WCPTests
                 User = user,
             };
 
-            var result = await _authService.Register(dto);
+            var result = await _authService!.Register(dto);
             Assert.IsNotNull(result);
             Assert.AreEqual(result.Email, user.Email);
             Assert.IsNotNull(result.Organization);
@@ -113,11 +113,11 @@ namespace WCPTests
                 }
             };
 
-            var result = await _authService.Register(dto);
+            var result = await _authService!.Register(dto);
             Assert.IsNotNull(result);
             Assert.AreEqual(result.Email, dto.User.Email);
 
-            Creator? creator = (await _creatorService.GetAllObjects()).Where(x => x.UserId == result.Id).FirstOrDefault();
+            Creator? creator = (await _creatorService!.GetAllObjects()).Where(x => x.UserId == result.Id).FirstOrDefault();
             Assert.IsNotNull(creator);
 
             await Assert.ThrowsExceptionAsync<ArgumentException>(async () => await _authService.Register(dto));
@@ -143,7 +143,7 @@ namespace WCPTests
                 }
             };
 
-            await Assert.ThrowsExceptionAsync<ArgumentException>(async () => await _authService.Register(dto));
+            await Assert.ThrowsExceptionAsync<ArgumentException>(async () => await _authService!.Register(dto));
         }
 
         [TestMethod]
@@ -161,7 +161,8 @@ namespace WCPTests
                 }
             };
 
-            var result = await _authService.Register(dto);
+            var result = await _authService!.Register(dto);
+            Assert.IsNotNull(result);
             Assert.IsNotNull(result.VerificationToken);
 
             VerifyUserDto request = new VerifyUserDto()
@@ -170,7 +171,7 @@ namespace WCPTests
                 Password = "Password"
             };
 
-            var user = await _userService.GetObjectBy(x => x.VerificationToken == request.VerificationToken);
+            var user = await _userService!.GetObjectBy(x => x.VerificationToken == request.VerificationToken);
             Assert.IsNotNull(user);
 
             var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
@@ -200,7 +201,7 @@ namespace WCPTests
                 }
             };
 
-            var registration = await _authService.Register(dto);
+            var registration = await _authService!.Register(dto);
 
             ArgumentException inactiveException = await Assert.ThrowsExceptionAsync<ArgumentException>(async () => await _authService.Login(new UserDto
             {
@@ -210,13 +211,13 @@ namespace WCPTests
 
             VerifyUserDto request = new VerifyUserDto()
             {
-                VerificationToken = registration.VerificationToken,
+                VerificationToken = registration!.VerificationToken!,
                 Password = "Password"
             };
 
-            var user = await _userService.GetObjectBy(x => x.VerificationToken == request.VerificationToken);
+            var user = await _userService!.GetObjectBy(x => x.VerificationToken == request.VerificationToken);
             var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
-            user.PasswordHash = passwordHash;
+            user!.PasswordHash = passwordHash;
             user.IsActive = true;
             await _userService.UpdateObject(user.Id, user);
 
