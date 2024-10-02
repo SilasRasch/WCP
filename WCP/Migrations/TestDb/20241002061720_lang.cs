@@ -15,7 +15,7 @@ namespace WCPShared.Migrations.TestDb
                 table: "Users",
                 type: "int",
                 nullable: false,
-                defaultValue: 0);
+                defaultValue: 1);
 
             migrationBuilder.AddColumn<string>(
                 name: "DisplayName",
@@ -29,7 +29,7 @@ namespace WCPShared.Migrations.TestDb
                 table: "Organizations",
                 type: "int",
                 nullable: false,
-                defaultValue: 0);
+                defaultValue: 1);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Users_LanguageId",
@@ -47,7 +47,7 @@ namespace WCPShared.Migrations.TestDb
                 column: "LanguageId",
                 principalTable: "Languages",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.NoAction);
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Users_Languages_LanguageId",
@@ -55,7 +55,7 @@ namespace WCPShared.Migrations.TestDb
                 column: "LanguageId",
                 principalTable: "Languages",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.NoAction);
         }
 
         /// <inheritdoc />

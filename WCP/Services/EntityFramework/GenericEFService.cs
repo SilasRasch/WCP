@@ -2,14 +2,13 @@
 using System.Linq.Expressions;
 using WCPShared.Interfaces;
 using WCPShared.Interfaces.DataServices;
-using WCPShared.Models;
 
 namespace WCPShared.Services.EntityFramework
 {
     public class GenericEFService<T> : IDatabaseService<T>, IDatabaseServiceExtensions<T>
         where T : class, IWcpEntity
     {
-        IWcpDbContext _context;
+        private readonly IWcpDbContext _context;
 
         public GenericEFService(IWcpDbContext context)
         {
