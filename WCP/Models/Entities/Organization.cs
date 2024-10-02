@@ -1,11 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using WCPShared.Interfaces;
 using WCPShared.Models.Entities.UserModels;
 using WCPShared.Services.StaticHelpers;
 
 namespace WCPShared.Models.Entities
 {
-    public class Organization
+    public class Organization : IWcpEntity
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }

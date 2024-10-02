@@ -10,37 +10,15 @@ using WCPShared.Models.Entities;
 
 namespace WCPShared.Services.EntityFramework
 {
-    public class OrganizationService : IDatabaseService<Organization>, IDtoExtensions<OrganizationDto, Organization>, IObjectViewService<Organization, OrganizationView>
+    public class OrganizationService : GenericEFService<Organization>, IDtoExtensions<OrganizationDto, Organization>, IObjectViewService<Organization, OrganizationView>
     {
         private readonly IWcpDbContext _context;
         private readonly ViewConverter _viewConverter;
 
-        public OrganizationService(IWcpDbContext context, ViewConverter viewConverter)
+        public OrganizationService(IWcpDbContext context, ViewConverter viewConverter) : base(context)
         {
             _context = context;
             _viewConverter = viewConverter;
-        }
-
-        public async Task<Organization?> DeleteObject(int id)
-        {
-            Organization? organization = await GetObject(id);
-
-            if (organization is null)
-                return null!;
-
-            _context.Organizations.Remove(organization);
-            await _context.SaveChangesAsync();
-            return organization;
-        }
-
-        public async Task<Organization?> GetObject(int id)
-        {
-            return await _context.Organizations.Include(x => x.Brands).SingleOrDefaultAsync(x => x.Id == id);
-        }
-
-        public async Task<List<Organization>> GetAllObjects()
-        {
-            return await _context.Organizations.Include(x => x.Brands).ToListAsync();
         }
 
         public async Task<Organization?> GetObject(int id, bool includeBrands = false)
@@ -55,18 +33,6 @@ namespace WCPShared.Services.EntityFramework
             if (includeBrands)
                 return await _context.Organizations.Include(x => x.Brands).ToListAsync();
             return await _context.Organizations.ToListAsync();
-        }
-
-        public async Task<Organization?> UpdateObject(int id, Organization organization)
-        {
-            Organization? oldOrg = await GetObject(id);
-
-            if (oldOrg is null)
-                return null!;
-
-            _context.Update(organization);
-            await _context.SaveChangesAsync();
-            return organization;
         }
 
         public async Task<Organization?> UpdateObject(int id, OrganizationDto organization)

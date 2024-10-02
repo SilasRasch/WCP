@@ -1,9 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using WCPShared.Interfaces;
 
 namespace WCPShared.Models.Entities
 {
-    public class StaticTemplate
+    public class StaticTemplate : IWcpEntity
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }

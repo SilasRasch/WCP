@@ -2,10 +2,11 @@
 using System.ComponentModel.DataAnnotations;
 using WCPShared.Services.StaticHelpers;
 using WCPShared.Models.Entities.UserModels;
+using WCPShared.Interfaces;
 
 namespace WCPShared.Models.Entities
 {
-    public class Order : IEquatable<Order?>
+    public class Order : IEquatable<Order?>, IWcpEntity
     {
         #region Base
 

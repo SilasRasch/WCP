@@ -10,51 +10,17 @@ using WCPShared.Services.Converters;
 
 namespace WCPShared.Services.EntityFramework
 {
-    public class BrandService : IDatabaseService<Brand>, IDtoExtensions<BrandDto, Brand>, IObjectViewService<Brand, BrandView>
+    public class BrandService : GenericEFService<Brand>, IDtoExtensions<BrandDto, Brand>, IObjectViewService<Brand, BrandView>
     {
         private readonly IWcpDbContext _context;
         private readonly OrganizationService _organizationService;
         private readonly ViewConverter _viewConverter;
 
-        public BrandService(IWcpDbContext context, OrganizationService organizationService, ViewConverter viewConverter)
+        public BrandService(IWcpDbContext context, OrganizationService organizationService, ViewConverter viewConverter) : base(context)
         {
             _context = context;
             _organizationService = organizationService;
             _viewConverter = viewConverter;
-        }
-
-        public async Task<Brand?> DeleteObject(int id)
-        {
-            Brand? brand = await GetObject(id);
-
-            if (brand is null)
-                return null!;
-
-            _context.Brands.Remove(brand);
-            await _context.SaveChangesAsync();
-            return brand;
-        }
-
-        public async Task<Brand?> GetObject(int id)
-        {
-            return await _context.Brands.Include(x => x.Organization).SingleOrDefaultAsync(x => x.Id == id);
-        }
-
-        public async Task<List<Brand>> GetAllObjects()
-        {
-            return await _context.Brands.Include(x => x.Organization).ToListAsync();
-        }
-
-        public async Task<Brand?> UpdateObject(int id, Brand brand)
-        {
-            Brand? oldBrand = await GetObject(id);
-
-            if (oldBrand is null || id != brand.Id)
-                return null!;
-
-            _context.Update(brand);
-            await _context.SaveChangesAsync();
-            return brand;
         }
 
         public async Task<Brand?> UpdateObject(int id, BrandDto brand)

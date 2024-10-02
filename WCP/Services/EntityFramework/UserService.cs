@@ -10,59 +10,25 @@ using WCPShared.Models.Entities.UserModels;
 
 namespace WCPShared.Services.EntityFramework
 {
-    public class UserService : IDatabaseService<User>, IDtoExtensions<RegisterDto, User>, IObjectViewService<User, UserView>
+    public class UserService : GenericEFService<User>, IDtoExtensions<RegisterDto, User>, IObjectViewService<User, UserView>
     {
         private readonly IWcpDbContext _context;
         private readonly OrganizationService _organizationService;
         private readonly ViewConverter _viewConverter;
 
-        public UserService(IWcpDbContext context, OrganizationService organizationService, ViewConverter viewConverter)
+        public UserService(IWcpDbContext context, OrganizationService organizationService, ViewConverter viewConverter) : base(context)
         {
             _context = context;
             _organizationService = organizationService;
             _viewConverter = viewConverter;
         }
 
-        public async Task<User> AddObject(User user)
+        public override async Task<User?> AddObject(User user)
         {
             if (user.Organization is not null)
                 _context.Organizations.Attach(user.Organization);
 
             await _context.Users.AddAsync(user);
-            await _context.SaveChangesAsync();
-            return user;
-        }
-
-        public async Task<User?> DeleteObject(int id)
-        {
-            User? user = await GetObject(id);
-
-            if (user is null)
-                return null!;
-
-            _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
-            return user;
-        }
-
-        public async Task<User?> GetObject(int id)
-        {
-            return await _context.Users.Include(x => x.Organization).SingleOrDefaultAsync(x => x.Id == id);
-        }
-
-        public async Task<List<User>> GetAllObjects()
-        {
-            return await _context.Users.Include(x => x.Organization).ToListAsync();
-        }
-
-        public async Task<User?> UpdateObject(int id, User user)
-        {
-            User? oldUser = await GetObject(id);
-
-            if (oldUser is null || id != user.Id)
-                return null!;
-
-            _context.Update(user);
             await _context.SaveChangesAsync();
             return user;
         }
@@ -132,13 +98,6 @@ namespace WCPShared.Services.EntityFramework
                 .Include(x => x.Organization)
                 .Select(x => _viewConverter.Convert(x))
                 .ToListAsync();
-        }
-
-        public async Task<User?> GetObjectBy(Expression<Func<User, bool>> predicate)
-        {
-            return await _context.Users
-                .Include(x => x.Organization)
-                .SingleOrDefaultAsync(predicate);
         }
     }
 }

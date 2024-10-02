@@ -11,7 +11,7 @@ using WCPShared.Models.Entities.UserModels;
 
 namespace WCPShared.Services.EntityFramework
 {
-    public class OrderService : IDatabaseService<Order>, IDtoExtensions<OrderDto, Order>, IObjectViewService<Order, OrderView>
+    public class OrderService : GenericEFService<Order>, IDtoExtensions<OrderDto, Order>, IObjectViewService<Order, OrderView>
     {
         private readonly IWcpDbContext _context;
         private readonly BrandService _brandService;
@@ -21,6 +21,7 @@ namespace WCPShared.Services.EntityFramework
         private readonly SlackNotificationService _slackNetService;
 
         public OrderService(IWcpDbContext context, BrandService brandService, CreatorService creatorService, ViewConverter viewConverter, SlackNotificationService slackNetService, StaticTemplateService staticTemplateService)
+            : base(context)
         {
             _context = context;
             _brandService = brandService;
@@ -30,64 +31,7 @@ namespace WCPShared.Services.EntityFramework
             _templateService = staticTemplateService;
         }
 
-        public async Task<Order?> DeleteObject(int id)
-        {
-            Order? obj = await GetObject(id);
-
-            if (obj is null)
-                return null!;
-
-            _context.Orders.Remove(obj);
-            await _context.SaveChangesAsync();
-            return obj;
-        }
-
-        public async Task<Order?> GetObject(int id)
-        {
-            return await _context.Orders
-                .Include(x => x.Brand)
-                .ThenInclude(b => b.Organization)
-                .Include(x => x.Creators)
-                .Include(x => x.Videographer)
-                .Include(x => x.Editor)
-                .Include(x => x.StaticTemplates)
-                .AsSplitQuery()
-                .SingleOrDefaultAsync(x => x.Id == id);
-        }
-
-        public async Task<Order?> GetObjectBy(Expression<Func<Order, bool>> predicate)
-        {
-            return await _context.Orders
-                .Include(x => x.Brand)
-                .ThenInclude(b => b.Organization)
-                .Include(x => x.Creators)
-                .Include(x => x.Videographer)
-                .Include(x => x.Editor)
-                .Include(x => x.StaticTemplates)
-                .AsSplitQuery()
-                .SingleOrDefaultAsync(predicate);
-        }
-
-        public async Task<List<Order>> GetAllObjects()
-        {
-            return await _context.Orders.ToListAsync();
-        }
-
-        public async Task<List<Order>> GetObjectsBy(Expression<Func<Order, bool>> predicate)
-        {
-            return await _context.Orders
-                .Where(predicate)
-                .Include(x => x.Brand)
-                .ThenInclude(b => b.Organization)
-                .Include(x => x.Creators)
-                .Include(x => x.Videographer)
-                .Include(x => x.Editor)
-                .Include(x => x.StaticTemplates)
-                .AsSplitQuery()
-                .ToListAsync();
-        }
-
-        public async Task<Order?> UpdateObject(int id, Order obj)
+        public override async Task<Order?> UpdateObject(int id, Order obj)
         {
             Order? existingOrder = await GetObject(id);
 
@@ -265,9 +209,9 @@ namespace WCPShared.Services.EntityFramework
                 .Include(x => x.Creators)
                 .ThenInclude(x => x.User)
                 .Include(x => x.Videographer)
-                .ThenInclude(x => x.User)
+                .ThenInclude(x => x!.User)
                 .Include(x => x.Editor)
-                .ThenInclude(x => x.User)
+                .ThenInclude(x => x!.User)
                 .Include(x => x.StaticTemplates)
                 .Select(x => _viewConverter.Convert(x))
                 .AsSplitQuery()
@@ -283,9 +227,9 @@ namespace WCPShared.Services.EntityFramework
                 .Include(x => x.Creators)
                 .ThenInclude(x => x.User)
                 .Include(x => x.Videographer)
-                .ThenInclude(x => x.User)
+                .ThenInclude(x => x!.User)
                 .Include(x => x.Editor)
-                .ThenInclude(x => x.User)
+                .ThenInclude(x => x!.User)
                 .Include(x => x.StaticTemplates)
                 .Select(x => _viewConverter.Convert(x))
                 .AsSplitQuery()
@@ -300,9 +244,9 @@ namespace WCPShared.Services.EntityFramework
                 .Include(x => x.Creators)
                 .ThenInclude(x => x.User)
                 .Include(x => x.Videographer)
-                .ThenInclude(x => x.User)
+                .ThenInclude(x => x!.User)
                 .Include(x => x.Editor)
-                .ThenInclude(x => x.User)
+                .ThenInclude(x => x!.User)
                 .Include(x => x.StaticTemplates)
                 .AsSplitQuery()
                 .SingleOrDefaultAsync(predicate);

@@ -2,10 +2,11 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.IdentityModel.Tokens;
 using WCPShared.Models.Entities;
+using WCPShared.Interfaces;
 
 namespace WCPShared.Models.Entities.UserModels
 {
-    public class Creator : IEquatable<Creator?>
+    public class Creator : IEquatable<Creator?>, IWcpEntity
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }

@@ -11,41 +11,19 @@ using WCPShared.Models.Entities.UserModels;
 
 namespace WCPShared.Services.EntityFramework
 {
-    public class CreatorService : IDatabaseService<Creator>, IDtoExtensions<CreatorDto, Creator>, IObjectViewService<Creator, CreatorView>
+    public class CreatorService : GenericEFService<Creator>, IDtoExtensions<CreatorDto, Creator>, IObjectViewService<Creator, CreatorView>
     {
         private readonly IWcpDbContext _context;
         private readonly UserService _userService;
         private readonly LanguageService _languageService;
         private readonly ViewConverter _viewConverter;
 
-        public CreatorService(IWcpDbContext context, LanguageService languageService, UserService userService, ViewConverter viewConverter)
+        public CreatorService(IWcpDbContext context, LanguageService languageService, UserService userService, ViewConverter viewConverter) : base(context)
         {
             _context = context;
             _languageService = languageService;
             _userService = userService;
             _viewConverter = viewConverter;
-        }
-
-        public async Task<Creator?> DeleteObject(int id)
-        {
-            Creator? obj = await GetObject(id);
-
-            if (obj is null)
-                return null!;
-
-            _context.Creators.Remove(obj);
-            await _context.SaveChangesAsync();
-            return obj;
-        }
-
-        public async Task<Creator?> GetObject(int id)
-        {
-            return await _context.Creators.Include(x => x.Languages).SingleOrDefaultAsync(x => x.Id == id);
-        }
-
-        public async Task<List<Creator>> GetAllObjects()
-        {
-            return await _context.Creators.Include(x => x.Languages).ToListAsync();
         }
 
         public async Task<Creator?> UpdateObject(int id, CreatorDto obj)
@@ -82,18 +60,6 @@ namespace WCPShared.Services.EntityFramework
                     oldCreator.User = user;
                 }
             }
-
-            _context.Update(oldCreator);
-            await _context.SaveChangesAsync();
-            return oldCreator;
-        }
-
-        public async Task<Creator?> UpdateObject(int id, Creator obj)
-        {
-            Creator? oldCreator = await GetObject(id);
-
-            if (oldCreator is null)
-                return null!;
 
             _context.Update(oldCreator);
             await _context.SaveChangesAsync();

@@ -7,7 +7,7 @@ using WCPShared.Models.Entities;
 
 namespace WCPShared.Models.Entities.UserModels
 {
-    public class User : UserAuth, IUser
+    public class User : UserAuth, IUser, IWcpEntity
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
