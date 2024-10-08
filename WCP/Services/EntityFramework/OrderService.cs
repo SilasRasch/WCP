@@ -54,9 +54,9 @@ namespace WCPShared.Services.EntityFramework
                 return null;
 
             // Copy order for comparison when generating notifications
-            Order copyOfExistingOrder = DtoConverter.CloneOrder(existingOrder);
+            Order copyOfExistingOrder = DtoHelper.CloneOrder(existingOrder);
 
-            existingOrder = DtoConverter.ChangeProperties(order, existingOrder);
+            existingOrder = DtoHelper.MapProperties(order, existingOrder);
 
             // Update brand
             if (order.BrandId != existingOrder.BrandId)
@@ -172,7 +172,7 @@ namespace WCPShared.Services.EntityFramework
                 .Where(x => obj.StaticTemplates.Contains(x.Id))
                 .ToList();
 
-            Order order = DtoConverter.OrderDtoToOrder(obj);
+            Order order = DtoHelper.OrderDtoToOrder(obj);
             order.Brand = brand;
             order.Creators = creators;
             order.StaticTemplates = staticTemplates;

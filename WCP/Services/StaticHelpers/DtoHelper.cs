@@ -1,12 +1,10 @@
-﻿using EllipticCurve.Utils;
-using System.Data;
-using WCPShared.Models.DTOs;
+﻿using WCPShared.Models.DTOs;
 using WCPShared.Models.Entities;
 using WCPShared.Models.Entities.UserModels;
 
 namespace WCPShared.Services.StaticHelpers
 {
-    public static class DtoConverter
+    public static class DtoHelper
     {
         public static Order CloneOrder(Order obj)
         {
@@ -51,7 +49,7 @@ namespace WCPShared.Services.StaticHelpers
             };
         }
 
-        public static Order ChangeProperties(OrderDto input, Order output)
+        public static Order MapProperties(OrderDto input, Order output)
         {
             output.Price = input.Price;
             output.Status = input.Status;
