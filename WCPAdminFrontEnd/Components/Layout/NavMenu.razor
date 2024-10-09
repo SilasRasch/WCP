@@ -1,37 +1,45 @@
-﻿﻿<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">WCP Admin Panel</a>
-    </div>
-</div>
+﻿<nav class="flex justify-between gap-2 p-4 w-full bg-gray-950 text-white items-center text-lg">
+    <a class="font-semibold flex items-center" href="">
+        <img src="https://wcp.dk/assets/webcontent-B3eGu9V2.png" class="max-h-16 -mr-4" /> Administration
+    </a>
+    
 
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
-
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
-
+    <div class="flex items-center gap-4">
         <AuthorizeView Roles="Admin,User">
             <Authorized>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="counter">
-                        <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
-                    </NavLink>
-                </div>
+                <NavLink class="flex items-center" href="counter">
+                    <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
+                </NavLink>
             </Authorized>
         </AuthorizeView>
 
         <AuthorizeView Roles="Admin">
             <Authorized>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="weather">
-                        <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
-                    </NavLink>
-                </div>
+                <NavLink class="flex items-center" href="weather">
+                    <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
+                </NavLink>
+            </Authorized>
+        </AuthorizeView> 
+        
+        <AuthorizeView Roles="Admin">
+            <Authorized>
+                <NavLink class="flex items-center" href="/projects">
+                    Projekter
+                </NavLink>
             </Authorized>
         </AuthorizeView>
-    </nav>
-</div>
+
+        <AuthorizeView>
+            <NotAuthorized>
+                <NavLink class="" href="/login">
+                    Login
+                </NavLink>
+            </NotAuthorized>
+            <Authorized>
+                <NavLink class="" href="/logout">
+                    Logout
+                </NavLink>
+            </Authorized>
+        </AuthorizeView>
+    </div>
+</nav>

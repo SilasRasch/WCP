@@ -13,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WCPDataAPI", "WCPDataAPI\WC
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WCPTests", "WCPTests\WCPTests.csproj", "{D7F70826-C4F5-49C1-B493-2353B522AD06}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WCPAdminFrontEnd", "WCPAdminFrontEnd\WCPAdminFrontEnd.csproj", "{5D1A843E-D3C9-4066-813F-CB6047AE4364}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WCPAdminFrontEnd", "WCPAdminFrontEnd\WCPAdminFrontEnd.csproj", "{5D1A843E-D3C9-4066-813F-CB6047AE4364}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

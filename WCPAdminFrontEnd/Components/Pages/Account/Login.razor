@@ -7,11 +7,11 @@
 @using WCPShared.Models.Entities.AuthModels
 @inject NavigationManager NavigationManager
 
-<div class="row">
-    <div class="col-lg-4 offset-lg-4 pt-4 pb-4 border">
-        <EditForm Model="@Model" OnValidSubmit="Authenticate" FormName="LoginForm">
+<div class="">
+    <div class="grid justify-center gap-2 pt-4 pb-4">
+        <EditForm Model="@Model" OnValidSubmit="Authenticate" FormName="LoginForm" class="border-1 border-gray-400 p-4 rounded-lg">
             <DataAnnotationsValidator />
-            <div>
+            <div class="font-semibold">
                 Login
             </div>
             <div>
@@ -25,10 +25,10 @@
                 <ValidationMessage For="() => Model.Password" />
             </div>
             <div>
-                <span class="text-danger">@errorMessage</span>
+                <span class="text-red-600">@errorMessage</span>
             </div>
-            <div class="d-grid gap-2">
-                <button type="submit" class="btn btn-primary">Login</button>
+            <div class="grid mt-2">
+                <button type="submit" class="btn bg-red-500 text-white">Login</button>
             </div>
         </EditForm>
     </div>
