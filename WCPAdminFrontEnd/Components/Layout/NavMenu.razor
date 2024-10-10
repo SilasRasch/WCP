@@ -1,13 +1,13 @@
 ﻿<nav class="flex justify-between gap-2 p-4 w-full bg-gray-950 text-white items-center text-lg">
-    <a class="font-semibold flex items-center" href="">
+    <a class="font-semibold flex items-center text-white" href="">
         <img src="https://wcp.dk/assets/webcontent-B3eGu9V2.png" class="max-h-16 -mr-4" /> Administration
     </a>
     
 
-    <div class="flex items-center gap-4">
+    <div class="flex items-center gap-4 text-white">
         <AuthorizeView Roles="Admin,User">
             <Authorized>
-                <NavLink class="flex items-center" href="counter">
+                <NavLink class="flex items-center text-white" href="counter">
                     <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
                 </NavLink>
             </Authorized>
@@ -15,7 +15,7 @@
 
         <AuthorizeView Roles="Admin">
             <Authorized>
-                <NavLink class="flex items-center" href="weather">
+                <NavLink class="flex items-center text-white" href="weather">
                     <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
                 </NavLink>
             </Authorized>
@@ -23,7 +23,7 @@
         
         <AuthorizeView Roles="Admin">
             <Authorized>
-                <NavLink class="flex items-center" href="/projects">
+                <NavLink class="flex items-center text-white" href="/projects">
                     Projekter
                 </NavLink>
             </Authorized>
@@ -31,12 +31,12 @@
 
         <AuthorizeView>
             <NotAuthorized>
-                <NavLink class="" href="/login">
+                <NavLink class="text-white" href="/login">
                     Login
                 </NavLink>
             </NotAuthorized>
             <Authorized>
-                <NavLink class="" href="/logout">
+                <NavLink class="text-white" href="/logout">
                     Logout
                 </NavLink>
             </Authorized>
