@@ -1,0 +1,59 @@
+﻿@page "/projects"
+@using Microsoft.AspNetCore.Authorization
+@using WCPAdminFrontEnd.Services
+@using WCPShared.Models.Views
+@using WCPShared.Services.EntityFramework
+@inject OrderService OrderService
+
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = "Admin")]
+
+<div class="grid justify-center">
+    <h1 class="text-3xl font-semibold text-center my-4">Kontrolpanel</h1>
+    <div class="grid bg-gray-950 text-white rounded-lg w-fit p-4">
+        <div class="flex font-semibold">
+            <div @onclick="OrderById" class="border-r-2 border-white p-2 w-32 cursor-pointer">Bestillings ID</div>
+            <div @onclick="OrderByName" class="border-r-2 border-white text-center p-2 w-32 cursor-pointer">Projektnavn</div>
+            <div @onclick="OrderByBrand" class="border-r-2 border-white text-center p-2 w-32 cursor-pointer">Brand</div>
+            <div class="border-r-2 border-white text-center p-2 w-32">Creator/Editor</div>
+            <div @onclick="OrderByDeadline" class="border-r-2 border-white text-center p-2 w-32 cursor-pointer">Deadline</div>
+            <div @onclick="OrderByStatus" class="border-r-2 border-white text-center p-2 w-32 cursor-pointer">Status</div>
+            <div class="p-2">Feedback</div>
+        </div>
+
+        @foreach (var project in Projects)
+        {
+            <div class="flex hover:bg-stone-900 rounded-lg">
+                <div class="border-r-2 border-white p-2 w-32">@project.Id</div>
+                <div class="border-r-2 border-white text-center p-2 w-32">@project.ProjectName</div>
+                <div class="border-r-2 border-white text-center p-2 w-32">@project.Brand.Name</div>
+                <div class="border-r-2 border-white text-center p-2 w-32">
+                    @foreach (var creator in project.Creators)
+                    {
+                        <div class="bg-red-500 rounded-lg">@creator.User.Name</div>
+                    }
+                </div>
+                <div class="border-r-2 border-white text-center p-2 w-32">@DateTime.Now.AddDays(project.DeliveryTimeTo).ToShortDateString()</div>
+                <div class="border-r-2 border-white text-center p-2 w-32 bg-green-500">@ProjectHelper.GetStatusString(project.Status)</div>
+                <div class="p-2 italic">Noter</div>
+            </div>
+        }
+    </div>
+</div>
+
+
+@code {
+    public IEnumerable<OrderView> Projects = Enumerable.Empty<OrderView>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        Projects = (await OrderService.GetAllObjectsView()).OrderBy(x => x.Status);
+    }
+
+    public void OrderByStatus() => Projects = Projects.OrderBy(x => x.Status);
+    public void OrderById() => Projects = Projects.OrderBy(x => x.Id);
+    public void OrderByBrand() => Projects = Projects.OrderBy(x => x.Brand.Name);
+    public void OrderByName() => Projects = Projects.OrderBy(x => x.ProjectName);
+    public void OrderByDeadline() => Projects = Projects.OrderBy(x => x.DeliveryTimeTo);
+}
