@@ -9,17 +9,17 @@
 <MudLayout>
     <MudAppBar Elevation="1">
         <a href="/" class="mt-2">
-            <MudImage Src="https://wcp.dk/assets/webcontent-B3eGu9V2.png" Alt="WebContent logo" Height="64" />
+            <MudImage Src="https://wcp.dk/assets/webcontent-B3eGu9V2.png" Class="max-h-[64px]" Alt="WebContent logo" />
         </a>
         <MudSpacer />
         <MudIconButton Icon="@(DarkLightModeButtonIcon)" Color="Color.Inherit" OnClick="@DarkModeToggle" />
         @* <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit" Edge="Edge.End" /> *@
         <AuthorizeView>
             <Authorized>
-                <MudNavLink Style="max-width: fit-content" Href="/logout" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Logout">Logout</MudNavLink>
+                <MudNavLink Style="max-width: fit-content" Href="/logout" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Logout">Log ud</MudNavLink>
             </Authorized>
             <NotAuthorized>
-                <MudNavLink Style="max-width: fit-content" Href="/login" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Login">Login</MudNavLink>
+                <MudNavLink Style="max-width: fit-content" Href="/login" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Login">Log ind</MudNavLink>
             </NotAuthorized>
         </AuthorizeView>
 

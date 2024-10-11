@@ -15,12 +15,7 @@ builder.Services.AddRazorComponents()
 builder.Services.AddMudServices();
 
 builder.Services.ConfigureDbContext(builder.Configuration);
-builder.Services.AddDataServices();
-builder.Services.AddScoped<SlackNotificationService>();
-builder.Services.AddSlackNet(options =>
-{
-    options.UseApiToken(Secrets.GetSlackKey(builder.Configuration));
-});
+builder.Services.AddDataServices(builder.Configuration);
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>

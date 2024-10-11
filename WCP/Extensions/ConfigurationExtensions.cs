@@ -14,6 +14,7 @@ using WCPShared.Services.EntityFramework;
 using WCPShared.Services;
 using WCPShared.Services.StaticHelpers;
 using WCPShared.Interfaces.Auth;
+using SlackNet.AspNetCore;
 
 namespace WCPShared.Extensions
 {
@@ -102,7 +103,7 @@ namespace WCPShared.Extensions
             return services;
         }
 
-        public static IServiceCollection AddDataServices(this IServiceCollection services)
+        public static IServiceCollection AddDataServices(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddHttpContextAccessor();
             services.AddScoped<UserService>();
@@ -115,6 +116,12 @@ namespace WCPShared.Extensions
             services.AddScoped<LanguageService>();
             services.AddScoped<UserContextService>();
             services.AddScoped<ViewConverter>();
+
+            services.AddScoped<SlackNotificationService>();
+            services.AddSlackNet(options =>
+            {
+                options.UseApiToken(Secrets.GetSlackKey(configuration));
+            });
 
             return services;
         }

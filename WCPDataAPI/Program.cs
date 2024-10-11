@@ -18,7 +18,7 @@ string corsPolicyName = "dev";
 builder.Services.ConfigureCors(corsPolicyName);
 
 // Adds all EF custom services
-builder.Services.AddDataServices();
+builder.Services.AddDataServices(builder.Configuration);
 
 builder.Services.AddScoped<SlackNotificationService>();
 builder.Services.AddSlackNet(options =>

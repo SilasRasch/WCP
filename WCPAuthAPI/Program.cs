@@ -16,7 +16,7 @@ var corsPolicyName = "dev";
 builder.Services.ConfigureCors(corsPolicyName);
 
 // Adds all EF and custom services
-builder.Services.AddDataServices();
+builder.Services.AddDataServices(builder.Configuration);
 builder.Services.AddAuthenticationServices();
 
 var app = builder.Build();
