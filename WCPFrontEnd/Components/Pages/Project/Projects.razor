@@ -35,8 +35,7 @@
 </MudDataGrid>
 @code {
     private IEnumerable<OrderView> ProjectList = new List<OrderView>();
-    private string _searchString;
-    private bool _sortNameByLength;
+    private string? _searchString;
     private List<string> _events = new();
     // custom sort by name length
     private Func<OrderView, object> _sortBy => x =>
