@@ -1,0 +1,23 @@
+﻿@page "/logout"
+@attribute [ExcludeFromInteractiveRouting]
+
+@using Microsoft.AspNetCore.Authentication
+@inject NavigationManager navigationManager
+
+<h3>You've successfully logged out of the application</h3>
+
+@code {
+    [CascadingParameter]
+    public HttpContext? HttpContext { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        if (HttpContext.User.Identity.IsAuthenticated)
+        {
+            await HttpContext.SignOutAsync();
+
+            navigationManager.NavigateTo("/");
+        }
+    }
+}
