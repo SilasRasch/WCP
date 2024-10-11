@@ -1,0 +1,84 @@
+﻿@page "/mudprojects"
+@using System.Net.Http.Json
+@using WCPAdminFrontEnd.Services
+@using WCPShared.Models.Views
+@using WCPShared.Services.EntityFramework
+@inject OrderService OrderService
+@attribute [Authorize(Roles = "Admin")]
+
+<h3>Projects</h3>
+
+<MudDataGrid T="OrderView" SelectOnRowClick="true" MultiSelection="true" Items="@ProjectList" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter"
+    Hideable="true" RowClick="@RowClicked" RowContextMenuClick="RowRightClicked" SelectedItemsChanged="@SelectedItemsChanged">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Projekter</MudText>
+        <MudSpacer />
+        <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
+                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+    </ToolBarContent>
+    <Columns>
+        <SelectColumn T="OrderView" />
+        <PropertyColumn Property="x => x.Id" Title="Nr" Sortable="false" Filterable="false" />
+        <PropertyColumn Property="x => x.ProjectName" Title="Projektnavn" />
+        <PropertyColumn Property="x => x.Brand.Name" SortBy="@_sortBy" Title="Brand" />
+        <PropertyColumn Property="x => x.ProjectType" Title="Type" />
+        <PropertyColumn Property="x => ProjectHelper.GetStatusString(x.Status)" Title="Status" />
+        <PropertyColumn Property="x => x.Created" Title="Deadline">
+            <CellTemplate>
+                @context.Item.Created.ToString("d")
+            </CellTemplate>
+        </PropertyColumn>
+    </Columns>
+    <PagerContent>
+        <MudDataGridPager T="OrderView" />
+    </PagerContent>
+</MudDataGrid>
+@code {
+    private IEnumerable<OrderView> ProjectList = new List<OrderView>();
+    private string _searchString;
+    private bool _sortNameByLength;
+    private List<string> _events = new();
+    // custom sort by name length
+    private Func<OrderView, object> _sortBy => x =>
+    {
+       return x.ProjectName;
+    };
+    // quick filter - filter globally across multiple columns with the same input
+    private Func<OrderView, bool> _quickFilter => x =>
+    {
+        if (string.IsNullOrWhiteSpace(_searchString))
+            return true;
+
+        if (x.ProjectName.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if (x.Brand.Name.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if ($"{x.ProjectName} {x.ProjectType} {x.Brand.Name}".Contains(_searchString))
+            return true;
+
+        return false;
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        // ProjectList = (await OrderService.GetAllObjectsView()).OrderBy(x => x.Status);
+    }
+
+    // events
+    void RowClicked(DataGridRowClickEventArgs<OrderView> args)
+    {
+        _events.Insert(0, $"Event = RowClick, Index = {args.RowIndex}, Data = {System.Text.Json.JsonSerializer.Serialize(args.Item)}");
+    }
+
+    void RowRightClicked(DataGridRowClickEventArgs<OrderView> args)
+    {
+        _events.Insert(0, $"Event = RowRightClick, Index = {args.RowIndex}, Data = {System.Text.Json.JsonSerializer.Serialize(args.Item)}");
+    }
+
+    void SelectedItemsChanged(HashSet<OrderView> items)
+    {
+        _events.Insert(0, $"Event = SelectedItemsChanged, Data = {System.Text.Json.JsonSerializer.Serialize(items)}");
+    }
+}
