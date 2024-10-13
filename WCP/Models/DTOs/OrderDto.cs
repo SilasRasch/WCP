@@ -11,6 +11,7 @@ namespace WCPShared.Models.DTOs
         public double Price { get; set; }
         public int DeliveryTimeFrom { get; set; }
         public int DeliveryTimeTo { get; set; }
+        public DateTime DeliveryDate { get; set; }
         public int Status { get; set; }
         public int? VideographerId { get; set; }
         public int? EditorId { get; set; }

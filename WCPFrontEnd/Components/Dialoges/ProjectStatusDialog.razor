@@ -1,0 +1,49 @@
+﻿@using WCPAdminFrontEnd.Services
+@using WCPShared.Models.Views
+@using WCPShared.Services.EntityFramework
+@inject OrderService OrderService
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            Skift status
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudStack Row="true">
+            <MudTextField Value="@Project.Id.ToString()" Label="Projekt ID" ReadOnly="true" />
+            <MudTextField Value="@Project.ProjectName" Label="Projektnavn" ReadOnly="true" />
+        </MudStack>
+        <MudSelect @bind-Value="Project.Status" Label="Status" Placeholder="Vælg ny status" AnchorOrigin="Origin.BottomCenter">
+            <MudSelectItem Value="0">Ubekræftet</MudSelectItem>
+            <MudSelectItem Value="1">I kø</MudSelectItem>
+            <MudSelectItem Value="2">Planlægning</MudSelectItem>
+            <MudSelectItem Value="3">Creator magi</MudSelectItem>
+            <MudSelectItem Value="4">Klipperummet</MudSelectItem>
+            <MudSelectItem Value="5">Feedback</MudSelectItem>
+            <MudSelectItem Value="6">Færdig</MudSelectItem>
+            <MudSelectItem Value="-1">Annulleret</MudSelectItem>
+        </MudSelect>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel" Color="Color.Error"><MudIcon Icon="@Icons.Material.Filled.Cancel" Class="mr-2" /> Luk</MudButton>
+        <MudButton OnClick="Submit" Color="Color.Success"><MudIcon Icon="@Icons.Material.Filled.Save" Class="mr-2" /> Gem</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; }
+
+    [Parameter]
+    public OrderView Project { get; set; } = new();
+
+    private async void Submit()
+    {
+        await OrderService.UpdateObject(Project.Id, Project.ToDto());
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}
+

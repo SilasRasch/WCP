@@ -1,4 +1,5 @@
-﻿using WCPShared.Models.Entities;
+﻿using WCPShared.Models.DTOs;
+using WCPShared.Models.Entities;
 
 namespace WCPShared.Models.Views
 {
@@ -8,6 +9,7 @@ namespace WCPShared.Models.Views
 
         public int Id { get; set; }
         public double Price { get; set; }
+        public DateTime DeliveryDate { get; set; }
         public int DeliveryTimeFrom { get; set; }
         public int DeliveryTimeTo { get; set; }
         public int Status { get; set; }
@@ -62,6 +64,11 @@ namespace WCPShared.Models.Views
 
         #endregion
 
+
+        public OrderView()
+        {
+        }
+
         public OrderView(Order obj)
         {
             Id = obj.Id;
@@ -74,6 +81,7 @@ namespace WCPShared.Models.Views
             ContentCount = obj.ContentCount;
             ContentLength = obj.ContentLength;
             Delivery = obj.Delivery;
+            DeliveryDate = obj.DeliveryDate;
             DeliveryTimeFrom = obj.DeliveryTimeFrom;
             DeliveryTimeTo = obj.DeliveryTimeTo;
             Email = obj.Email;
@@ -95,6 +103,43 @@ namespace WCPShared.Models.Views
             Created = obj.Created;
             Updated = obj.Updated;
             CreatorDeliveryStatus = obj.CreatorDeliveryStatus;
+        }
+
+        public OrderDto ToDto()
+        {
+            return new OrderDto()
+            {
+                BrandId = BrandId,
+                VideographerId = VideographerId,
+                EditorId = EditorId,
+                Price = Price,
+                Status = Status,
+                Content = Content,
+                ContentCount = ContentCount,
+                ContentLength = ContentLength,
+                Delivery = Delivery,
+                DeliveryDate = DeliveryDate,
+                DeliveryTimeFrom = DeliveryTimeFrom,
+                DeliveryTimeTo = DeliveryTimeTo,
+                Email = Email,
+                Name = Name,
+                Phone = Phone,
+                ExtraCreator = ExtraCreator,
+                ExtraHook = ExtraHook,
+                ExtraNotes = ExtraNotes,
+                FocusPoints = FocusPoints,
+                Format = Format,
+                Ideas = Ideas,
+                Platforms = Platforms,
+                Products = Products,
+                ProjectName = ProjectName,
+                ProjectType = ProjectType,
+                RelevantFiles = RelevantFiles,
+                Scripts = Scripts,
+                Other = Other,
+                Creators = new List<int>(Creators.Select(x => x.Id)),
+                StaticTemplates = new List<int>(StaticTemplates.Select(x => x.Id)),
+            };
         }
     }
 }
