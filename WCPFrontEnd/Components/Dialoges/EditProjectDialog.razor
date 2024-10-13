@@ -5,7 +5,7 @@
 
 <MudDialog>
     <TitleContent>
-        <MudText Typo="Typo.h6">
+        <MudText Typo="Typo.h5">
             Rediger @Project.ProjectName
         </MudText>
     </TitleContent>
@@ -15,9 +15,13 @@
             <MudTextField @bind-Value="@Project.ProjectName" Label="Projektnavn" />
         </MudStack>
 
-        <MudTextField Value="@Project.Brand.Name" Label="Brand" ReadOnly="true" />
-        <MudTextField Value="@Project.ProjectType" Label="Projekttype" ReadOnly="true" />
+        <MudStack Row="true">
+            <MudTextField @bind-Value="@Project.ContentCount" Label="Mængde af indhold" />
+            <MudTextField @bind-Value="@Project.ContentLength" Label="Længde af indhold" />
+            <MudTextField @bind-Value="@Project.Format" Label="Format" />
+        </MudStack>
 
+        <MudTextField @bind-Value="@Project.Platforms" Label="Tiltænkte platforme" />
         <MudSelect @bind-Value="Project.Status" Label="Status" Placeholder="Vælg ny status" AnchorOrigin="Origin.BottomCenter">
             <MudSelectItem Value="0">Ubekræftet</MudSelectItem>
             <MudSelectItem Value="1">I kø</MudSelectItem>
@@ -29,6 +33,28 @@
             <MudSelectItem Value="-1">Annulleret</MudSelectItem>
         </MudSelect>
 
+        <MudText Typo="Typo.h6" Class="mt-2">Content</MudText>
+            
+        <MudStack Row="true">
+            @* <MudTextField @bind-Value="@Project.ExtraHook" Label="Ekstra hook" />
+            <MudSwitch @bind-Value="@Project.ExtraCreator" Color="Color.Primary">Ekstra creator</MudSwitch> *@
+            @Project.ExtraCreator
+            @Project.ExtraHook
+        </MudStack>
+            
+        <MudText Typo="Typo.h6" Class="mt-2">Kontakt</MudText>
+
+        <MudStack Row="true">
+            <MudTextField Value="@Project.Brand.Name" Label="Brand" ReadOnly="true" />
+            <MudTextField Value="@Project.Brand.URL" Label="URL" ReadOnly="true" />
+        </MudStack>
+
+        <MudStack Row="true">
+            <MudTextField Value="@Project.Name" Label="Kontaktperson" ReadOnly="true" />
+            <MudTextField Value="@Project.Phone" Label="Kontaktnummer" ReadOnly="true" />
+            <MudTextField Value="@Project.Email" Label="Kontaktmail" ReadOnly="true" />
+        </MudStack>
+        
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="Cancel" Color="Color.Error"><MudIcon Icon="@Icons.Material.Filled.Cancel" Class="mr-2" /> Luk</MudButton>
