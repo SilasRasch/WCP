@@ -59,6 +59,7 @@ namespace WCPShared.Services.StaticHelpers
             output.Delivery = input.Delivery;
             output.DeliveryTimeFrom = input.DeliveryTimeFrom;
             output.DeliveryTimeTo = input.DeliveryTimeTo;
+            output.DeliveryDate = input.DeliveryDate;
             output.Email = input.Email;
             output.Name = input.Name;
             output.Phone = input.Phone;

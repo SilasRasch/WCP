@@ -12,11 +12,11 @@
             <MudImage Src="https://wcp.dk/assets/webcontent-B3eGu9V2.png" Class="max-h-[64px]" Alt="WebContent logo" />
         </a>
         <MudSpacer />
-        <MudIconButton Icon="@(DarkLightModeButtonIcon)" Color="Color.Inherit" OnClick="@DarkModeToggle" />
+        <MudIconButton Icon="@(DarkLightModeButtonIcon)" Color="Color.Warning" OnClick="@DarkModeToggle" />
         @* <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit" Edge="Edge.End" /> *@
         <AuthorizeView>
             <Authorized>
-                <MudNavLink Style="max-width: fit-content" Href="/logout" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Logout">Log ud</MudNavLink>
+                <MudNavLink Style="max-width: fit-content" Href="/logout" Match="NavLinkMatch.Prefix" IconColor="Color.Error" Icon="@Icons.Material.Filled.Logout">Log ud</MudNavLink>
             </Authorized>
             <NotAuthorized>
                 <MudNavLink Style="max-width: fit-content" Href="/login" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Login">Log ind</MudNavLink>

@@ -9,14 +9,15 @@
 
 <PageTitle>Projekter</PageTitle>
 
-<MudDataGrid T="OrderView" SelectOnRowClick="@_selectable" MultiSelection="@_selectable" Items="@ProjectList" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter" Hideable="@_hidable"
+<MudDataGrid T="OrderView" SelectOnRowClick="@_selectable" MultiSelection="@_selectable" Items="@ProjectList" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter" Hideable="@_hidable" Striped="@_striped" Elevation="3"
     RowClick="@RowClicked" RowContextMenuClick="RowRightClicked" SelectedItemsChanged="@SelectedItemsChanged" ColumnResizeMode="@(_resizable ? ResizeMode.Column : ResizeMode.None)" DragDropColumnReordering="_movable">
     <ToolBarContent>
         <MudText Typo="Typo.h6">Projekter</MudText>
         <MudSpacer />
         <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
         AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
-        <MudIconButton Icon="@Icons.Material.Filled.Settings" OnClick="ToggleOpenTableSettings"></MudIconButton>
+        <MudIconButton onclick="FetchProjects" Icon="@Icons.Material.Filled.Refresh" Class="hover:animate-spin-once"></MudIconButton>
+        <MudIconButton Icon="@Icons.Material.Filled.Settings" OnClick="ToggleOpenTableSettings" Class="hover:animate-spin-once"></MudIconButton>
         <MudPopover Open="@_open" Fixed="true" Class="px-4 pt-4" AnchorOrigin="Origin.BottomRight">
             <div class="d-flex flex-column">
                 <MudText>Tabel-indstillinger</MudText>
@@ -29,8 +30,13 @@
                 <MudDivider></MudDivider>
                 <MudSwitch @bind-Value="_hidable" Color="Color.Primary">Hidable</MudSwitch>
                 <MudDivider></MudDivider>
+                <MudSwitch @bind-Value="_groupBrand" Color="Color.Primary">Gruppér brands</MudSwitch>
+                <MudDivider></MudDivider>
+                <MudSwitch @bind-Value="_striped" Color="Color.Primary">Zebra</MudSwitch>
+                <MudDivider></MudDivider>
                 <MudSwitch @bind-Value="_stickyActions" Color="Color.Primary">Sticky actions</MudSwitch>
                 <MudDivider></MudDivider>
+                
                 <MudButton OnClick="@ToggleOpenTableSettings" Class="ml-auto mr-n3 mb-1" Color="Color.Error">Luk</MudButton>
             </div>
         </MudPopover>
@@ -40,9 +46,15 @@
         {
             <SelectColumn T="OrderView" />
         }
-        <PropertyColumn Property="x => x.Id" Title="Nr" />
+        <TemplateColumn Property="x => x.Id" Title="Id">
+            <CellTemplate>
+                <div @onclick="() => OpenDialogAsync(context.Item)" class="flex justify-center rounded-full w-10 p-2 cursor-pointer bg-red-500 text-white">
+                    <MudText>@context.Item.Id</MudText>
+                </div>
+            </CellTemplate>
+        </TemplateColumn>
         <PropertyColumn Property="x => x.ProjectName" Title="Projektnavn" />
-        <PropertyColumn Property="x => x.Brand.Name" SortBy="@_sortBy" Title="Brand" />
+        <PropertyColumn Property="x => x.Brand.Name" SortBy="@_sortBy" Title="Brand" Grouping="_groupBrand" />
         <TemplateColumn Title="Creators">
             <CellTemplate>
                 <MudAvatarGroup Max="3" Spacing="3">
@@ -68,16 +80,33 @@
         <PropertyColumn Property="x => x.ProjectType" Title="Type" />
         <PropertyColumn Property="x => x.Status" Title="Status" CellClass="cursor-pointer">
             <CellTemplate>
-                <div class="@ProjectHelper.GetStatusColor(context.Item.Status)" @onclick="() => OpenStatusDialog(context.Item)">
+                <div class="@ProjectHelper.GetStatusColor(context.Item.Status)" @onclick="() => OpenStatusDialogAdmin(context.Item)">
                     @ProjectHelper.GetStatusString(context.Item.Status)
                 </div>
             </CellTemplate>
         </PropertyColumn>
-        <PropertyColumn Property="x => x.Created" Title="Deadline">
+        <PropertyColumn Property="x => x.DeliveryDate" Title="Deadline">
+            <CellTemplate>
+                @if(context.Item.DeliveryDate != DateTime.MinValue) 
+                {
+                    <p>@context.Item.DeliveryDate.ToString("d") (@((context.Item.DeliveryDate - DateTime.Now).Days) dage)</p>
+                }
+                else
+                {
+                    <p>-</p>
+                }
+            </CellTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.DeliveryDate" Title="Oprettet">
             <CellTemplate>
                 @context.Item.Created.ToString("d")
             </CellTemplate>
         </PropertyColumn>
+@*         <PropertyColumn Property="x => x.Updated" Title="Opdateret">
+            <CellTemplate>
+                @context.Item.Updated.ToString("d")
+            </CellTemplate>
+        </PropertyColumn> *@
         <TemplateColumn Title="Actions" StickyRight="@_stickyActions">
             <CellTemplate>
                 <MudMenu Icon="@Icons.Material.Filled.MoreHoriz" AriaLabel="Åben aktionsmenu" AnchorOrigin="Origin.BottomCenter">
@@ -89,7 +118,7 @@
                     </MudMenuItem>
                     @if (context.Item.Status == 0)
                     {
-                        <MudMenuItem>
+                        <MudMenuItem OnClick="@((e) => OpenStatusDialog(context.Item, 1))">
                             <MudStack Row="true">
                                 <MudIcon Icon="@Icons.Material.Filled.Check"></MudIcon>
                                 <MudText>Bekræft</MudText>
@@ -98,7 +127,7 @@
                     }
                     @if (context.Item.Status <= 6 && context.Item.Status > 0)
                     {
-                        <MudMenuItem>
+                        <MudMenuItem OnClick="@((e) => OpenStatusDialog(context.Item, context.Item.Status + 1))">
                             <MudStack Row="true">
                                 <MudIcon Icon="@Icons.Material.Filled.KeyboardDoubleArrowRight"></MudIcon>
                                 <MudText>Ryk frem</MudText>
@@ -107,14 +136,14 @@
                     }
                     @if (context.Item.Status > 0)
                     {
-                        <MudMenuItem>
+                        <MudMenuItem OnClick="@((e) => OpenStatusDialog(context.Item, context.Item.Status - 1))">
                             <MudStack Row="true">
                                 <MudIcon Icon="@Icons.Material.Filled.KeyboardDoubleArrowLeft"></MudIcon>
                                 <MudText>Ryk tilbage</MudText>
                             </MudStack>
                         </MudMenuItem>
                     }
-                    <MudMenuItem>
+                    <MudMenuItem OnClick="@((e) => OpenStatusDialog(context.Item, -1))">
                         <MudStack Row="true">
                             <MudIcon Icon="@Icons.Material.Filled.Delete" Color="Color.Error"></MudIcon>
                             <MudText>Annullér</MudText>
@@ -136,7 +165,9 @@
     private bool _resizable = false;
     private bool _movable = false;
     private bool _hidable = false;
+    private bool _striped = true;
     private bool _stickyActions = true;
+    private bool _groupBrand = false;
 
     private IEnumerable<OrderView> ProjectList = new List<OrderView>();
     private string? _searchString;
@@ -170,7 +201,7 @@
     }
 
     // events
-    void RowClicked(DataGridRowClickEventArgs<OrderView> args)
+    async Task RowClicked(DataGridRowClickEventArgs<OrderView> args)
     {
         _events.Insert(0, $"Event = RowClick, Index = {args.RowIndex}, Data = {System.Text.Json.JsonSerializer.Serialize(args.Item)}");
     }
@@ -203,16 +234,35 @@
         }
     }
 
-    private async Task OpenStatusDialog(OrderView project)
+    private async Task OpenStatusDialog(OrderView project, int newStatus)
     {
         var parameters = new DialogParameters<Dialoges.ProjectStatusDialog>
+        {
+            { x => x.Project, project },
+            { x => x.NewStatus, newStatus }
+        };
+
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+
+        var dialog = await DialogService.ShowAsync<Dialoges.ProjectStatusDialog>("Status dialog", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await FetchProjects();
+        }
+    }
+
+    private async Task OpenStatusDialogAdmin(OrderView project)
+    {
+        var parameters = new DialogParameters<Dialoges.ProjectStatusDialog_Admin>
         {
             { x => x.Project, project }
         };
 
         var options = new DialogOptions { CloseOnEscapeKey = true };
 
-        var dialog = await DialogService.ShowAsync<Dialoges.ProjectStatusDialog>("Status dialog", parameters, options);
+        var dialog = await DialogService.ShowAsync<Dialoges.ProjectStatusDialog_Admin>("Status admin dialog", parameters, options);
         var result = await dialog.Result;
 
         if (!result.Canceled)

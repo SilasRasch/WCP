@@ -5,24 +5,30 @@
 
 <MudDialog>
     <TitleContent>
-        <MudText Typo="Typo.h5">
-            Rediger @Project.ProjectName
-        </MudText>
+        <MudStack Row="true">
+            <MudText Typo="Typo.h5">
+                @Project.ProjectName
+            </MudText>
+            <MudSpacer />
+            <MudIconButton OnClick="ToggleEditable" Icon="@Icons.Material.Filled.Edit"></MudIconButton>
+        </MudStack>
     </TitleContent>
     <DialogContent>
+        <MudText Typo="Typo.h6" Class="mt-2">Projekt</MudText>
+
         <MudStack Row="true">
             <MudTextField Value="@Project.Id.ToString()" Label="Projekt ID" ReadOnly="true" />
-            <MudTextField @bind-Value="@Project.ProjectName" Label="Projektnavn" />
+            <MudTextField @bind-Value="@Project.ProjectName" Label="Projektnavn" ReadOnly="!_editable" />
         </MudStack>
 
         <MudStack Row="true">
-            <MudTextField @bind-Value="@Project.ContentCount" Label="Mængde af indhold" />
-            <MudTextField @bind-Value="@Project.ContentLength" Label="Længde af indhold" />
-            <MudTextField @bind-Value="@Project.Format" Label="Format" />
+            <MudTextField @bind-Value="@Project.ContentCount" Label="Mængde af indhold" ReadOnly="!_editable" />
+            <MudTextField @bind-Value="@Project.ContentLength" Label="Længde af indhold" ReadOnly="!_editable" />
+            <MudTextField @bind-Value="@Project.Format" Label="Format" ReadOnly="!_editable" />
         </MudStack>
 
-        <MudTextField @bind-Value="@Project.Platforms" Label="Tiltænkte platforme" />
-        <MudSelect @bind-Value="Project.Status" Label="Status" Placeholder="Vælg ny status" AnchorOrigin="Origin.BottomCenter">
+        <MudTextField @bind-Value="@Project.Platforms" Label="Tiltænkte platforme" ReadOnly="!_editable" />
+        <MudSelect @bind-Value="Project.Status" Label="Status" Placeholder="Vælg ny status" AnchorOrigin="Origin.BottomCenter" Disabled="!_editable">
             <MudSelectItem Value="0">Ubekræftet</MudSelectItem>
             <MudSelectItem Value="1">I kø</MudSelectItem>
             <MudSelectItem Value="2">Planlægning</MudSelectItem>
@@ -36,11 +42,14 @@
         <MudText Typo="Typo.h6" Class="mt-2">Content</MudText>
             
         <MudStack Row="true">
-            @* <MudTextField @bind-Value="@Project.ExtraHook" Label="Ekstra hook" />
-            <MudSwitch @bind-Value="@Project.ExtraCreator" Color="Color.Primary">Ekstra creator</MudSwitch> *@
-            @Project.ExtraCreator
-            @Project.ExtraHook
+            <MudTextField @bind-Value="@Project.ExtraHook" Label="Ekstra hook" ReadOnly="!_editable" />
+            <MudSpacer />
+            <MudSwitch @bind-Value="@Project.ExtraCreator" Color="Color.Primary" ReadOnly="!_editable">Ekstra creator</MudSwitch>
         </MudStack>
+
+        <MudTextField @bind-Value="@Project.FocusPoints" Label="Fokuspunkter" ReadOnly="!_editable" />
+        <MudTextField @bind-Value="@Project.ExtraNotes" Label="Ekstra noter" ReadOnly="!_editable" />
+        <MudTextField @bind-Value="@Project.RelevantFiles" Label="Relevant filer" ReadOnly="!_editable" />
             
         <MudText Typo="Typo.h6" Class="mt-2">Kontakt</MudText>
 
@@ -50,15 +59,37 @@
         </MudStack>
 
         <MudStack Row="true">
-            <MudTextField Value="@Project.Name" Label="Kontaktperson" ReadOnly="true" />
-            <MudTextField Value="@Project.Phone" Label="Kontaktnummer" ReadOnly="true" />
-            <MudTextField Value="@Project.Email" Label="Kontaktmail" ReadOnly="true" />
+            <MudTextField Value="@Project.Name" Label="Kontaktperson" ReadOnly="!_editable" />
+            <MudTextField Value="@Project.Phone" Label="Kontaktnummer" ReadOnly="!_editable" />
+            <MudTextField Value="@Project.Email" Label="Kontaktmail" ReadOnly="!_editable" />
+        </MudStack>
+
+
+        @if (Project.Status > 0)
+        {
+            <MudText Typo="Typo.h6" Class="mt-2">Links</MudText>
+
+            <MudTextField @bind-Value="Project.Scripts" Label="Scripts" Placeholder="Link til script-mappe" Immediate="true" ReadOnly="!_editable"></MudTextField>
+            <MudTextField @bind-Value="Project.Content" Label="Content" Placeholder="Link til content-mappe" Immediate="true" ReadOnly="!_editable"></MudTextField>
+            <MudTextField @bind-Value="Project.Delivery" Label="Levering" Placeholder="Link til afleverings-mappe" Immediate="true" ReadOnly="!_editable"></MudTextField>
+            <MudTextField @bind-Value="Project.Other" Label="Andet" Placeholder="Link til mappe" Immediate="true" ReadOnly="!_editable"></MudTextField>
+        }
+
+        <MudText Typo="Typo.h6" Class="mt-2">Pris og leveringstid</MudText>
+        <MudStack Row="true">
+            <MudTextField Value="@Project.Price" Label="Pris" ReadOnly="!_editable" />
+            <MudDatePicker @bind-Date="_deliveryDate" Label="Leveringsdato" Placeholder="Estimeret leveringsdato" ReadOnly="!_editable"></MudDatePicker>
         </MudStack>
         
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="Cancel" Color="Color.Error"><MudIcon Icon="@Icons.Material.Filled.Cancel" Class="mr-2" /> Luk</MudButton>
-        <MudButton OnClick="Submit" Color="Color.Success"><MudIcon Icon="@Icons.Material.Filled.Save" Class="mr-2" /> Gem</MudButton>
+
+        @if (_editable)
+        {
+            <MudButton OnClick="Submit" Color="Color.Success"><MudIcon Icon="@Icons.Material.Filled.Save" Class="mr-2" /> Gem</MudButton>
+        }
+        
     </DialogActions>
 </MudDialog>
 
@@ -69,12 +100,23 @@
     [Parameter]
     public OrderView Project { get; set; } = new();
 
+    private bool _editable = false;
+    private DateTime? _deliveryDate = DateTime.MinValue;
+
     private async void Submit()
     {
+        if (_deliveryDate != DateTime.MinValue)
+            Project.DeliveryDate = _deliveryDate!.Value.AddHours(23).AddMinutes(59).AddSeconds(59);
+
         await OrderService.UpdateObject(Project.Id, Project.ToDto());
         MudDialog.Close(DialogResult.Ok(true));
     }
 
     private void Cancel() => MudDialog.Cancel();
+
+    private void ToggleEditable()
+    {
+        _editable = !_editable;
+    }
 }
 
