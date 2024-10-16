@@ -85,7 +85,7 @@ namespace WCPAuthAPI.Controllers
             }
         }
 
-        [HttpPost("Login"), AllowAnonymous]
+        [HttpPost("Login"), AllowAnonymous] // Virk!
         public async Task<ActionResult<string?>> Login(UserDto request)
         {
             try
