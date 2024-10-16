@@ -57,11 +57,11 @@
         <PropertyColumn Property="x => x.Brand.Name" SortBy="@_sortBy" Title="Brand" Grouping="_groupBrand" />
         <TemplateColumn Title="Creators">
             <CellTemplate>
-                <MudAvatarGroup Max="3" Spacing="3">
+                <MudAvatarGroup Max="1" Spacing="3" Class="cursor-pointer" @onclick="(() => OpenCreatorDialog(context.Item))">
                     @foreach (var creator in context.Item.Creators)
                     {
                         <div class="flex flex-col justify-center items-center">
-                            <MudAvatar Color="Color.Primary">
+                            <MudAvatar Color="Color.Primary"> 
                                 @if (creator.ImgURL is not null)
                                 {
                                     <MudImage Src="@creator.ImgURL" />
@@ -71,8 +71,12 @@
                                     @creator.User.Name.First();
                                 }
                             </MudAvatar>
-                            <MudText>@creator.User.Name.Split(" ").First() @creator.User.Name.Split(" ").Skip(1).First().First().</MudText>
                         </div>
+                    }
+
+                    @if (context.Item.Creators.Count == 0)
+                    {
+                        <MudText Class="p-2 cursor-pointer">-</MudText>
                     }
                 </MudAvatarGroup>
             </CellTemplate>
@@ -263,6 +267,24 @@
         var options = new DialogOptions { CloseOnEscapeKey = true };
 
         var dialog = await DialogService.ShowAsync<Dialoges.ProjectStatusDialog_Admin>("Status admin dialog", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await FetchProjects();
+        }
+    }
+
+    private async Task OpenCreatorDialog(OrderView project)
+    {
+        var parameters = new DialogParameters<Dialoges.CreatorSelectionDialog>
+        {
+            { x => x.Project, project }
+        };
+
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+
+        var dialog = await DialogService.ShowAsync<Dialoges.CreatorSelectionDialog>("Creator dialog", parameters, options);
         var result = await dialog.Result;
 
         if (!result.Canceled)

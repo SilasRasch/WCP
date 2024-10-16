@@ -1,0 +1,93 @@
+﻿@using WCPShared.Models.Views
+
+<MudStack Class="bg-gray-950 p-4 rounded-lg">
+    <MudStack Row="true" Spacing="2" @onclick="() => OnExpandCollapseClick()">
+        @if (!String.IsNullOrEmpty(Creator.ImgURL))
+        {
+            <MudImage Src="@Creator.ImgURL" Class="max-h-24 rounded-full" Alt="Creator profile pic"></MudImage>
+        }
+        <MudStack Spacing="0">
+            <MudText Class="font-semibold">@Creator.User.Name</MudText>
+
+            <MudStack Row="true" Spacing="1"> 
+                @if (Creator.DateOfBirth is not null)
+                {
+                    <MudText>@CalculateAge(Creator.DateOfBirth.Value) år</MudText>
+                }
+                @if (Creator.Gender == "Kvinde")
+                {
+                    <MudText> / </MudText>
+                    <MudIcon Icon="@Icons.Material.Filled.Female" Size="Size.Small"></MudIcon>
+                }
+                else
+                {
+                    <MudText> / </MudText>
+                    <MudIcon Icon="@Icons.Material.Filled.Male" Size="Size.Small"></MudIcon>
+                }
+            </MudStack>
+            
+            <MudText>@Creator.Address</MudText>
+            <MudText>@Creator.User.Phone</MudText>
+        </MudStack>
+    </MudStack>
+
+    <MudDivider />
+
+    <MudCollapse Expanded="_expanded">
+        
+        <MudStack Row="true">
+            <div>
+                <MudStack Row="true" Spacing="1">
+                    <MudIcon Icon="@Icons.Material.Filled.Email"></MudIcon>
+                    <MudText>@Creator.User.Email</MudText>
+                </MudStack>
+                <MudStack Row="true" Spacing="1">
+                    <MudIcon Icon="@Icons.Material.Filled.Cake"></MudIcon>
+                    <MudText>@Creator.DateOfBirth.Value.ToString("d")</MudText>
+                </MudStack>
+            </div>
+            <MudSpacer />
+            <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error"></MudIconButton>
+        </MudStack>
+        
+        
+        
+    </MudCollapse>
+    
+</MudStack>
+
+@code {
+    [Parameter]
+    public CreatorView Creator { get; set; }
+
+    bool _expanded = false;
+
+    private void OnExpandCollapseClick()
+    {
+        _expanded = !_expanded;
+    }
+
+
+    private int CalculateAge(DateTime birthday)
+    {
+        var now = DateTime.Now;
+        int age = now.Year - birthday.Year;
+
+        if (now.Month < birthday.Month || (now.Month == birthday.Month && now.Day < birthday.Day))
+            age--;
+
+        return age;
+    }
+
+    private string CountryStringToFlag(string country)
+    {
+        if (country == "DAN") return "🇩🇰";
+        if (country == "ENG") return "🇬🇧";
+        if (country == "SPA") return "🇪🇸";
+        if (country == "GER") return "🇩🇪";
+        if (country == "SWE") return "🇸🇪";
+        if (country == "NOR") return "🇳🇴";
+
+        return "";
+    }
+}
