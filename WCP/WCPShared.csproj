@@ -29,9 +29,9 @@
     <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.9.0" />
     <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.9.0" />
     <PackageReference Include="SendGrid" Version="9.29.3" />
-    <PackageReference Include="SlackNet" Version="0.14.0" />
-    <PackageReference Include="SlackNet.AspNetCore" Version="0.14.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.8.1" />
+    <PackageReference Include="SlackNet" Version="0.15.0" />
+    <PackageReference Include="SlackNet.AspNetCore" Version="0.15.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.9.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="8.0.2" />
   </ItemGroup>
 
