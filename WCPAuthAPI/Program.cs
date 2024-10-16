@@ -31,6 +31,7 @@ builder.Services.AddScoped<IOrganizationService, OrganizationService>();
 builder.Services.AddScoped<IEmailService, SendGridEmailService>();
 builder.Services.AddScoped<UserContextService>();
 builder.Services.AddScoped<ViewConverter>();
+
 if (Secrets.IsProd)
 {
     builder.Services.AddDbContext<IWcpDbContext, WcpDbContext>(
@@ -89,8 +90,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
-//app.UseHttpsRedirection();
 
 app.UseCors(allowAll);
 
