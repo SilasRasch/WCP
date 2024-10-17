@@ -7,12 +7,16 @@
 @inject IDialogService DialogService
 @attribute [Authorize(Roles = "Admin")]
 
-<PageTitle>Projekter</PageTitle>
+<PageTitle>Brugere</PageTitle>
 
 <MudDataGrid T="UserView" SelectOnRowClick="@_selectable" MultiSelection="@_selectable" Items="@UserList" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter" Hideable="@_hidable" Striped="@_striped" Elevation="3"
         RowClick="@RowClicked" RowContextMenuClick="RowRightClicked" SelectedItemsChanged="@SelectedItemsChanged" ColumnResizeMode="@(_resizable ? ResizeMode.Column : ResizeMode.None)" DragDropColumnReordering="_movable">
     <ToolBarContent>
-        <MudText Typo="Typo.h6">Projekter</MudText>
+        <MudStack Row="true" AlignItems="AlignItems.Center">
+            <MudText Typo="Typo.h6">Brugere</MudText>
+            <MudIconButton Icon="@Icons.Material.Filled.Add"></MudIconButton>
+        </MudStack>
+        
         <MudSpacer />
         <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
                       AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
@@ -29,6 +33,8 @@
                 <MudSwitch @bind-Value="_movable" Color="Color.Primary">Movable</MudSwitch>
                 <MudDivider></MudDivider>
                 <MudSwitch @bind-Value="_hidable" Color="Color.Primary">Hidable</MudSwitch>
+                <MudDivider></MudDivider>
+                <MudSwitch @bind-Value="_groupRoles" Color="Color.Primary">Gruppér Roller</MudSwitch>
                 <MudDivider></MudDivider>
                 <MudSwitch @bind-Value="_striped" Color="Color.Primary">Zebra</MudSwitch>
                 <MudDivider></MudDivider>
@@ -60,7 +66,7 @@
                 </MudText>
             </CellTemplate>
         </PropertyColumn>
-        <PropertyColumn Property="x => x.Role" Title="Rolle" />
+        <PropertyColumn Property="x => x.Role" Title="Rolle" Grouping="_groupRoles" />
         <PropertyColumn Property="x => x.Phone" Title="Telefon">
             <CellTemplate>
                 @if (!String.IsNullOrEmpty(context.Item.Phone))
@@ -69,7 +75,7 @@
                 }
             </CellTemplate>
         </PropertyColumn>
-        <PropertyColumn Property="x => x.Organization" Title="Organisation" Grouping="_groupOrganization">
+        <PropertyColumn Property="x => x.Organization" Title="Organisation">
             <CellTemplate>
                 @if (context.Item.Organization is not null)
                 {
@@ -93,6 +99,12 @@
                             <MudText>@(context.Item.IsActive ? "Deaktivér" : "Aktivér")</MudText>
                         </MudStack>
                     </MudMenuItem>
+                    <MudMenuItem>
+                        <MudStack Row="true">
+                            <MudIcon Icon="@Icons.Material.Filled.Delete" Color="Color.Error"></MudIcon>
+                            <MudText>Slet</MudText>
+                        </MudStack>
+                    </MudMenuItem>
                 </MudMenu>
             </CellTemplate>
         </TemplateColumn>
@@ -111,7 +123,7 @@
     private bool _hidable = false;
     private bool _striped = true;
     private bool _stickyActions = true;
-    private bool _groupOrganization = false;
+    private bool _groupRoles = false;
 
     private IEnumerable<UserView> UserList = new List<UserView>();
     private string? _searchString;

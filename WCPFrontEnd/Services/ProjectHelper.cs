@@ -49,5 +49,30 @@ namespace WCPAdminFrontEnd.Services
 
             return colorClass + " text-white p-2 rounded-lg";
         }
+
+
+
+        public static int CalculateAge(DateTime birthday)
+        {
+            var now = DateTime.Now;
+            int age = now.Year - birthday.Year;
+
+            if (now.Month < birthday.Month || (now.Month == birthday.Month && now.Day < birthday.Day))
+                age--;
+
+            return age;
+        }
+
+        public static string CountryStringToFlag(string country)
+        {
+            if (country == "DAN") return "🇩🇰";
+            if (country == "ENG") return "🇬🇧";
+            if (country == "SPA") return "🇪🇸";
+            if (country == "GER") return "🇩🇪";
+            if (country == "SWE") return "🇸🇪";
+            if (country == "NOR") return "🇳🇴";
+
+            return "";
+        }
     }
 }

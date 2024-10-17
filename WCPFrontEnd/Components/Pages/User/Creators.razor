@@ -7,12 +7,15 @@
 @inject IDialogService DialogService
 @attribute [Authorize(Roles = "Admin")]
 
-<PageTitle>Projekter</PageTitle>
+<PageTitle>Creators</PageTitle>
 
 <MudDataGrid T="CreatorView" SelectOnRowClick="@_selectable" MultiSelection="@_selectable" Items="@CreatorList" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter" Hideable="@_hidable" Striped="@_striped" Elevation="3"
              RowClick="@RowClicked" RowContextMenuClick="RowRightClicked" SelectedItemsChanged="@SelectedItemsChanged" ColumnResizeMode="@(_resizable ? ResizeMode.Column : ResizeMode.None)" DragDropColumnReordering="_movable">
     <ToolBarContent>
-        <MudText Typo="Typo.h6">Projekter</MudText>
+        <MudStack Row="true" AlignItems="AlignItems.Center">
+            <MudText Typo="Typo.h6">Creators</MudText>
+            <MudIconButton Icon="@Icons.Material.Filled.Add"></MudIconButton>
+        </MudStack>
         <MudSpacer />
         <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
                       AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
@@ -95,7 +98,7 @@
             <CellTemplate>
                 @if (context.Item.DateOfBirth is not null)
                 {
-                    <MudText>@context.Item.DateOfBirth.Value.ToString("d") (_ år)</MudText>
+                    <MudText>@context.Item.DateOfBirth.Value.ToString("d") (@ProjectHelper.CalculateAge(context.Item.DateOfBirth.Value) år)</MudText>
                 }
             </CellTemplate>
         </PropertyColumn>
@@ -107,9 +110,9 @@
                     <div class="flex justify-center gap-2">
                         @foreach (string lang in context.Item.Languages)
                         {
-                            <div class="p-2 rounded-lg bg-red-500 text-white">
-                                @lang
-                            </div>
+                            <MudText Typo="Typo.h5">
+                                @ProjectHelper.CountryStringToFlag(lang)
+                            </MudText>
                         }
                     </div>
                 }
@@ -138,6 +141,12 @@
                         <MudStack Row="true">
                             <MudIcon Icon="@(context.Item.User.IsActive ? Icons.Material.Filled.Close : Icons.Material.Filled.Check)" Color="@(context.Item.User.IsActive ? Color.Error : Color.Success)"></MudIcon>
                             <MudText>@(context.Item.User.IsActive ? "Deaktivér" : "Aktivér")</MudText>
+                        </MudStack>
+                    </MudMenuItem>
+                    <MudMenuItem>
+                        <MudStack Row="true">
+                            <MudIcon Icon="@Icons.Material.Filled.Delete" Color="Color.Error"></MudIcon>
+                            <MudText>Slet</MudText>
                         </MudStack>
                     </MudMenuItem>
                 </MudMenu>

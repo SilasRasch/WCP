@@ -1,4 +1,5 @@
-﻿@using WCPShared.Models.Views
+﻿@using WCPAdminFrontEnd.Services
+@using WCPShared.Models.Views
 
 <MudStack Class="bg-gray-950 p-4 rounded-lg">
     <MudStack Row="true" Spacing="2" @onclick="() => OnExpandCollapseClick()">
@@ -12,7 +13,7 @@
             <MudStack Row="true" Spacing="1"> 
                 @if (Creator.DateOfBirth is not null)
                 {
-                    <MudText>@CalculateAge(Creator.DateOfBirth.Value) år</MudText>
+                    <MudText>@ProjectHelper.CalculateAge(Creator.DateOfBirth.Value) år</MudText>
                 }
                 @if (Creator.Gender is not null && Creator.Gender == "Kvinde")
                 {
@@ -76,17 +77,17 @@
 
                 @if (Creator.Languages is not null)
                 {
-                    <MudStack Row="true" Spacing="1">
+                    <div class="flex gap-1 items-center">
                         <MudIcon Icon="@Icons.Material.Filled.Language"></MudIcon>
                         <MudStack Row="true" Spacing="1">
                             @foreach (string lang in Creator.Languages)
                             {
-                                <div class="px-2 rounded-lg bg-red-500 text-white">
-                                    @lang
-                                </div>
+                                <MudText Typo="Typo.h6">
+                                    @ProjectHelper.CountryStringToFlag(lang)
+                                </MudText>
                             }
                         </MudStack>
-                    </MudStack>
+                    </div>
                     
                 }
 
@@ -124,29 +125,5 @@
     private void OnExpandCollapseClick()
     {
         _expanded = !_expanded;
-    }
-
-
-    private int CalculateAge(DateTime birthday)
-    {
-        var now = DateTime.Now;
-        int age = now.Year - birthday.Year;
-
-        if (now.Month < birthday.Month || (now.Month == birthday.Month && now.Day < birthday.Day))
-            age--;
-
-        return age;
-    }
-
-    private string CountryStringToFlag(string country)
-    {
-        if (country == "DAN") return "🇩🇰";
-        if (country == "ENG") return "🇬🇧";
-        if (country == "SPA") return "🇪🇸";
-        if (country == "GER") return "🇩🇪";
-        if (country == "SWE") return "🇸🇪";
-        if (country == "NOR") return "🇳🇴";
-
-        return "";
     }
 }
