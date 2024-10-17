@@ -1,6 +1,7 @@
 ﻿@page "/creators"
 @using System.Net.Http.Json
 @using WCPAdminFrontEnd.Services
+@using WCPFrontEnd.Components.Shared
 @using WCPShared.Models.Views
 @using WCPShared.Services.EntityFramework
 @inject CreatorService CreatorService
@@ -143,7 +144,7 @@
                             <MudText>@(context.Item.User.IsActive ? "Deaktivér" : "Aktivér")</MudText>
                         </MudStack>
                     </MudMenuItem>
-                    <MudMenuItem>
+                    <MudMenuItem OnClick="() => ToggleDeleteModal(context.Item.Id)">
                         <MudStack Row="true">
                             <MudIcon Icon="@Icons.Material.Filled.Delete" Color="Color.Error"></MudIcon>
                             <MudText>Slet</MudText>
@@ -216,6 +217,24 @@
         {
             creator.User.IsActive = !creator.User.IsActive;
             await CreatorService.UpdateObject(creator.Id, creator);
+            await FetchCreators();
+        }
+    }
+
+    private async Task ToggleDeleteModal(int id)
+    {
+        var parameters = new DialogParameters<DeleteModal>
+        {
+            { x => x.Type, "creator" }
+        };
+
+        var options = new DialogOptions { CloseOnEscapeKey = true, CloseButton = true };
+        var dialog = await DialogService.ShowAsync<DeleteModal>("Delete dialog", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await CreatorService.DeleteObject(id);
             await FetchCreators();
         }
     }

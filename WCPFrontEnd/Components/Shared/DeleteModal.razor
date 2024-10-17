@@ -1,0 +1,35 @@
+﻿@using WCPAdminFrontEnd.Services
+@using WCPShared.Interfaces
+@using WCPShared.Models.Views
+@using WCPShared.Services.EntityFramework
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            Slet @Type?
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudText>Sletningen vil være permanent.</MudText>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="@Color.Error" Variant="Variant.Filled" OnClick="Submit">Slet</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; }
+
+    [Parameter]
+    public string Type { get; set; }
+
+    private void Submit()
+    {
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}
+

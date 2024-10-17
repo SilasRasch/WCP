@@ -1,6 +1,7 @@
 ﻿@page "/brands"
 @using System.Net.Http.Json
 @using WCPAdminFrontEnd.Services
+@using WCPFrontEnd.Components.Shared
 @using WCPShared.Models.Views
 @using WCPShared.Services.EntityFramework
 @inject BrandService BrandService
@@ -69,7 +70,7 @@
                             <MudText>Rediger</MudText>
                         </MudStack>
                     </MudMenuItem>
-                    <MudMenuItem>
+                    <MudMenuItem OnClick="() => ToggleDeleteModal(context.Item.Id)">
                         <MudStack Row="true">
                             <MudIcon Icon="@Icons.Material.Filled.Delete" Color="Color.Error"></MudIcon>
                             <MudText>Slet</MudText>
@@ -133,6 +134,24 @@
     private async Task FetchBrands()
     {
         BrandList = await BrandService.GetAllObjectsView();
+    }
+
+    private async Task ToggleDeleteModal(int id)
+    {
+        var parameters = new DialogParameters<DeleteModal>
+        {
+            { x => x.Type, "brand" }
+        };
+
+        var options = new DialogOptions { CloseOnEscapeKey = true, CloseButton = true };
+        var dialog = await DialogService.ShowAsync<DeleteModal>("Delete dialog", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await BrandService.DeleteObject(id);
+            await FetchBrands();
+        }
     }
 
     private void ToggleOpenTableSettings() => _open = !_open;

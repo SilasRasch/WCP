@@ -1,6 +1,7 @@
 ﻿@page "/statics"
 @using System.Net.Http.Json
 @using WCPAdminFrontEnd.Services
+@using WCPFrontEnd.Components.Shared
 @using WCPShared.Models.Views
 @using WCPShared.Services.EntityFramework
 @inject StaticTemplateService StaticTemplateService
@@ -66,7 +67,7 @@
                             <MudText>Rediger</MudText>
                         </MudStack>
                     </MudMenuItem>
-                    <MudMenuItem>
+                    <MudMenuItem OnClick="() => ToggleDeleteModal(context.Item.Id)">
                         <MudStack Row="true">
                             <MudIcon Icon="@Icons.Material.Filled.Delete" Color="Color.Error"></MudIcon>
                             <MudText>Slet</MudText>
@@ -135,6 +136,24 @@
     private void MockMenu(StaticTemplateView template)
     {
         
+    }
+
+    private async Task ToggleDeleteModal(int id)
+    {
+        var parameters = new DialogParameters<DeleteModal>
+        {
+            { x => x.Type, "template" }
+        };
+
+        var options = new DialogOptions { CloseOnEscapeKey = true, CloseButton = true };
+        var dialog = await DialogService.ShowAsync<DeleteModal>("Delete dialog", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await StaticTemplateService.DeleteObject(id);
+            await FetchStatics();
+        }
     }
 
     private void ToggleOpenTableSettings() => _open = !_open;
