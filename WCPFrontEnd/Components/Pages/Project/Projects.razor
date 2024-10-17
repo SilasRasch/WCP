@@ -46,13 +46,13 @@
         {
             <SelectColumn T="OrderView" />
         }
-        <TemplateColumn Property="x => x.Id" Title="Id">
+        <PropertyColumn Property="x => x.Id" Title="Id">
             <CellTemplate>
                 <div @onclick="() => OpenDialogAsync(context.Item)" class="flex justify-center rounded-full w-10 p-2 cursor-pointer bg-red-500 text-white">
                     <MudText>@context.Item.Id</MudText>
                 </div>
             </CellTemplate>
-        </TemplateColumn>
+        </PropertyColumn>
         <PropertyColumn Property="x => x.ProjectName" Title="Projektnavn" />
         <PropertyColumn Property="x => x.Brand.Name" SortBy="@_sortBy" Title="Brand" Grouping="_groupBrand" />
         <TemplateColumn Title="Creators">
@@ -231,11 +231,7 @@
 
         var dialog = await DialogService.ShowAsync<Dialoges.EditProjectDialog>("Edit dialog", parameters, options);
         var result = await dialog.Result;
-
-        if (!result.Canceled)
-        {
-            await FetchProjects();
-        }
+        await FetchProjects();
     }
 
     private async Task OpenStatusDialog(OrderView project, int newStatus)
@@ -250,11 +246,7 @@
 
         var dialog = await DialogService.ShowAsync<Dialoges.ProjectStatusDialog>("Status dialog", parameters, options);
         var result = await dialog.Result;
-
-        if (!result.Canceled)
-        {
-            await FetchProjects();
-        }
+        await FetchProjects();
     }
 
     private async Task OpenStatusDialogAdmin(OrderView project)
@@ -268,11 +260,7 @@
 
         var dialog = await DialogService.ShowAsync<Dialoges.ProjectStatusDialog_Admin>("Status admin dialog", parameters, options);
         var result = await dialog.Result;
-
-        if (!result.Canceled)
-        {
-            await FetchProjects();
-        }
+        await FetchProjects();
     }
 
     private async Task OpenCreatorDialog(OrderView project)
@@ -286,11 +274,7 @@
 
         var dialog = await DialogService.ShowAsync<Dialoges.CreatorSelectionDialog>("Creator dialog", parameters, options);
         var result = await dialog.Result;
-
-        if (!result.Canceled)
-        {
-            await FetchProjects();
-        }
+        await FetchProjects();
     }
 
     private async Task FetchProjects()

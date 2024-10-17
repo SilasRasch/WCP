@@ -208,6 +208,8 @@ namespace WCPShared.Services.EntityFramework
                 .ThenInclude(b => b.Organization)
                 .Include(x => x.Creators)
                 .ThenInclude(x => x.User)
+                .Include(x => x.Creators)
+                .ThenInclude(x => x.Languages)
                 .Include(x => x.Videographer)
                 .ThenInclude(x => x!.User)
                 .Include(x => x.Editor)

@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WCPShared.Interfaces;
+using WCPShared.Models.Entities;
+using WCPShared.Models.Entities.AuthModels;
 
 namespace WCPShared.Models.Views
 {

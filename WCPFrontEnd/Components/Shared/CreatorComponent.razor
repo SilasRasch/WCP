@@ -4,7 +4,7 @@
     <MudStack Row="true" Spacing="2" @onclick="() => OnExpandCollapseClick()">
         @if (!String.IsNullOrEmpty(Creator.ImgURL))
         {
-            <MudImage Src="@Creator.ImgURL" Class="max-h-24 rounded-full" Alt="Creator profile pic"></MudImage>
+            <MudImage Src="@Creator.ImgURL" Class="max-h-12 rounded-full" Alt="Creator profile pic"></MudImage>
         }
         <MudStack Spacing="0">
             <MudText Class="font-semibold">@Creator.User.Name</MudText>
@@ -14,51 +14,110 @@
                 {
                     <MudText>@CalculateAge(Creator.DateOfBirth.Value) år</MudText>
                 }
-                @if (Creator.Gender == "Kvinde")
+                @if (Creator.Gender is not null && Creator.Gender == "Kvinde")
                 {
                     <MudText> / </MudText>
                     <MudIcon Icon="@Icons.Material.Filled.Female" Size="Size.Small"></MudIcon>
                 }
-                else
+                else if (Creator.Gender is not null)
                 {
                     <MudText> / </MudText>
                     <MudIcon Icon="@Icons.Material.Filled.Male" Size="Size.Small"></MudIcon>
                 }
             </MudStack>
-            
-            <MudText>@Creator.Address</MudText>
-            <MudText>@Creator.User.Phone</MudText>
         </MudStack>
+
+        <MudSpacer></MudSpacer>
+
+        @if (Addable)
+        {
+            <div class="flex justify-center items-center">
+                <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Success" OnClick="() => AddCreator.InvokeAsync(Creator)"></MudIconButton>
+            </div>
+        }
     </MudStack>
 
     <MudDivider />
 
     <MudCollapse Expanded="_expanded">
-        
         <MudStack Row="true">
             <div>
-                <MudStack Row="true" Spacing="1">
-                    <MudIcon Icon="@Icons.Material.Filled.Email"></MudIcon>
-                    <MudText>@Creator.User.Email</MudText>
-                </MudStack>
-                <MudStack Row="true" Spacing="1">
-                    <MudIcon Icon="@Icons.Material.Filled.Cake"></MudIcon>
-                    <MudText>@Creator.DateOfBirth.Value.ToString("d")</MudText>
-                </MudStack>
+                @if (!String.IsNullOrEmpty(Creator.User.Email))
+                {
+                    <MudStack Row="true" Spacing="1">
+                        <MudIcon Icon="@Icons.Material.Filled.Email"></MudIcon>
+                        <MudText>@Creator.User.Email</MudText>
+                    </MudStack>
+                }
+
+                @if (Creator.DateOfBirth is not null)
+                {
+                    <MudStack Row="true" Spacing="1">
+                        <MudIcon Icon="@Icons.Material.Filled.Cake"></MudIcon>
+                        <MudText>@Creator.DateOfBirth.Value.ToString("d")</MudText>
+                    </MudStack>
+                }
+                
+                @if (!String.IsNullOrEmpty(Creator.Address))
+                {
+                    <MudStack Row="true" Spacing="1">
+                        <MudIcon Icon="@Icons.Material.Filled.House"></MudIcon>
+                        <MudText>@Creator.Address</MudText>
+                    </MudStack>
+                }
+
+                @if (!String.IsNullOrEmpty(Creator.User.Phone))
+                {
+                    <MudStack Row="true" Spacing="1">
+                        <MudIcon Icon="@Icons.Material.Filled.Phone"></MudIcon>
+                        <MudText>@Creator.User.Phone</MudText>
+                    </MudStack>
+                }
+
+                @if (Creator.Languages is not null)
+                {
+                    <MudStack Row="true" Spacing="1">
+                        <MudIcon Icon="@Icons.Material.Filled.Language"></MudIcon>
+                        <MudStack Row="true" Spacing="1">
+                            @foreach (string lang in Creator.Languages)
+                            {
+                                <div class="px-2 rounded-lg bg-red-500 text-white">
+                                    @lang
+                                </div>
+                            }
+                        </MudStack>
+                    </MudStack>
+                    
+                }
+
             </div>
             <MudSpacer />
-            <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error"></MudIconButton>
+
+            @if (Editable)
+            {
+                <div class="flex justify-center items-center">
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => RemoveCreator.InvokeAsync(Creator)"></MudIconButton>
+                </div>
+            }
         </MudStack>
-        
-        
-        
     </MudCollapse>
-    
 </MudStack>
 
 @code {
     [Parameter]
     public CreatorView Creator { get; set; }
+
+    [Parameter]
+    public EventCallback<CreatorView> RemoveCreator { get; set; }
+    
+    [Parameter]
+    public EventCallback<CreatorView> AddCreator { get; set; }
+
+    [Parameter]
+    public bool Editable { get; set; }
+    
+    [Parameter]
+    public bool Addable { get; set; }
 
     bool _expanded = false;
 

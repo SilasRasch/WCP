@@ -1,0 +1,110 @@
+﻿@using WCPAdminFrontEnd.Services
+@using WCPShared.Models.Entities.UserModels
+@using WCPShared.Models.Views
+@using WCPShared.Services.EntityFramework
+@using WCPFrontEnd.Components.Shared
+@inject OrderService OrderService
+@inject CreatorService CreatorService
+
+<MudDialog>
+    <TitleContent>
+        <MudStack Row="true">
+            <MudText Typo="Typo.h6">
+                @Project.ProjectName - Creators
+            </MudText>
+            <MudSpacer />
+            <MudIconButton OnClick="ToggleEditable" Icon="@Icons.Material.Filled.Edit"></MudIconButton>
+        </MudStack>
+        
+    </TitleContent>
+    <DialogContent>
+        <MudStack Row="true">
+            <MudTextField Value="@Project.Id.ToString()" Label="Projekt ID" ReadOnly="true" />
+            <MudTextField Value="@Project.ProjectName" Label="Projektnavn" ReadOnly="true" />
+        </MudStack>
+
+        <MudStack Class="mt-2" Spacing="1">
+            @foreach (var creator in Project.Creators)
+            {
+                <CreatorComponent Creator="creator" RemoveCreator="CallbackRemoveCreator" Editable="_editable"></CreatorComponent>
+            }
+
+            @if (_editable)
+            {
+                <div class="flex justify-center bg-gray-950 rounded-lg p-2">
+                    <MudIconButton Icon="@Icons.Material.Filled.Add" OnClick="async () => await ToggleAdding()"></MudIconButton>
+                </div>
+            }
+        </MudStack>
+
+        @if (_adding && _editable && AllCreators.Count() > 0)
+        {
+            <MudStack Row="true" Class="mt-2">
+                <MudText Typo="Typo.h6">Creator-katalog</MudText>
+                <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
+                    AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+            </MudStack>
+            
+            <MudStack Spacing="1" Class="mt-1">
+                @foreach (var creator in AllCreators.Where(x => Filter(x)))
+                {
+                    <CreatorComponent Creator="creator" AddCreator="CallbackAddCreator" Addable="true"></CreatorComponent>
+                }
+            </MudStack>
+        }
+        
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel" Color="Color.Error"><MudIcon Icon="@Icons.Material.Filled.Cancel" Class="mr-2" /> Annuller</MudButton>
+
+        @if (_editable)
+        {
+            <MudButton OnClick="Submit" Color="Color.Success"><MudIcon Icon="@Icons.Material.Filled.Save" Class="mr-2" /> Bekræft</MudButton>
+        }
+        
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; }
+
+    [Parameter]
+    public OrderView Project { get; set; } = new();
+
+    private IEnumerable<CreatorView> AllCreators { get; set; } = new List<CreatorView>();
+    private bool _editable = false;
+    private bool _adding = false;
+    private DateTime? _deliveryDate;
+    private string? _searchString;
+
+    private async void Submit()
+    {
+        await OrderService.UpdateObject(Project.Id, Project.ToDto());
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+
+    private async Task ToggleAdding()
+    {
+        if (_adding == false) AllCreators = (await CreatorService.GetObjectsViewBy(x => x.User.IsActive && x.SubType == "UGC"))
+            .Where(x => !Project.Creators.Any(c => c.Id == x.Id));
+        _adding = !_adding;
+    }
+
+    private bool Filter(CreatorView creator)
+    {
+        if (string.IsNullOrWhiteSpace(_searchString))
+            return true;
+
+        if ($"{creator.User.Name} {creator.User.Email} {creator.Address} {creator.Gender} {creator.User.Phone}".Contains(_searchString))
+            return true;
+
+        return false;
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+    private void ToggleEditable() => _editable = !_editable;
+    private void CallbackRemoveCreator(CreatorView creator) => Project.Creators.Remove(creator);
+    private void CallbackAddCreator(CreatorView creator) => Project.Creators.Add(creator);
+}
+

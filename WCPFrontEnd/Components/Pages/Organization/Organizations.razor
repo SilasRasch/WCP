@@ -1,0 +1,133 @@
+﻿@page "/organizations"
+@using System.Net.Http.Json
+@using WCPAdminFrontEnd.Services
+@using WCPShared.Models.Views
+@using WCPShared.Services.EntityFramework
+@inject OrganizationService OrganizationService
+@inject IDialogService DialogService
+@attribute [Authorize(Roles = "Admin")]
+
+<PageTitle>Projekter</PageTitle>
+
+<MudDataGrid T="OrganizationView" SelectOnRowClick="@_selectable" MultiSelection="@_selectable" Items="@UserList" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter" Hideable="@_hidable" Striped="@_striped" Elevation="3"
+             RowClick="@RowClicked" RowContextMenuClick="RowRightClicked" SelectedItemsChanged="@SelectedItemsChanged" ColumnResizeMode="@(_resizable ? ResizeMode.Column : ResizeMode.None)" DragDropColumnReordering="_movable">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Projekter</MudText>
+        <MudSpacer />
+        <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
+                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+        <MudIconButton onclick="FetchOrganizations" Icon="@Icons.Material.Filled.Refresh" Class="hover:animate-spin-once"></MudIconButton>
+        <MudIconButton Icon="@Icons.Material.Filled.Settings" OnClick="ToggleOpenTableSettings" Class="hover:animate-spin-once"></MudIconButton>
+        <MudPopover Open="@_open" Fixed="true" Class="px-4 pt-4" AnchorOrigin="Origin.BottomRight">
+            <div class="d-flex flex-column">
+                <MudText>Tabel-indstillinger</MudText>
+                <MudDivider></MudDivider>
+                <MudSwitch @bind-Value="_selectable" Color="Color.Primary">Selectable</MudSwitch>
+                <MudDivider></MudDivider>
+                <MudSwitch @bind-Value="_resizable" Color="Color.Primary">Resizable</MudSwitch>
+                <MudDivider></MudDivider>
+                <MudSwitch @bind-Value="_movable" Color="Color.Primary">Movable</MudSwitch>
+                <MudDivider></MudDivider>
+                <MudSwitch @bind-Value="_hidable" Color="Color.Primary">Hidable</MudSwitch>
+                <MudDivider></MudDivider>
+                <MudSwitch @bind-Value="_striped" Color="Color.Primary">Zebra</MudSwitch>
+                <MudDivider></MudDivider>
+                <MudSwitch @bind-Value="_stickyActions" Color="Color.Primary">Sticky actions</MudSwitch>
+                <MudDivider></MudDivider>
+
+                <MudButton OnClick="@ToggleOpenTableSettings" Class="ml-auto mr-n3 mb-1" Color="Color.Error">Luk</MudButton>
+            </div>
+        </MudPopover>
+    </ToolBarContent>
+    <Columns>
+        @if (_selectable)
+        {
+            <SelectColumn T="OrganizationView" />
+        }
+        <PropertyColumn Property="x => x.Id" Title="Id">
+            <CellTemplate>
+                <div class="flex justify-center rounded-full w-10 p-2 cursor-pointer bg-red-500 text-white">
+                    <MudText>@context.Item.Id</MudText>
+                </div>
+            </CellTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.Name" Title="Navn" />
+        <PropertyColumn Property="x => x.CVR" Title="CVR" />
+
+@*         <TemplateColumn Title="Actions" StickyRight="@_stickyActions">
+            <CellTemplate>
+                <MudMenu Icon="@Icons.Material.Filled.MoreHoriz" AriaLabel="Åben aktionsmenu" AnchorOrigin="Origin.BottomCenter">
+                    <MudMenuItem OnClick="@((e) => ToggleUserActivation(context.Item))">
+                        <MudStack Row="true">
+                            <MudIcon Icon="@Icons.Material.Filled.Edit"></MudIcon>
+                            <MudText>Rediger</MudText>
+                        </MudStack>
+                    </MudMenuItem>
+                    <MudMenuItem OnClick="@((e) => ToggleUserActivation(context.Item))">
+                        <MudStack Row="true">
+                            <MudIcon Icon="@(context.Item.IsActive ? Icons.Material.Filled.Close : Icons.Material.Filled.Check)" Color="@(context.Item.IsActive ? Color.Error : Color.Success)"></MudIcon>
+                            <MudText>@(context.Item.IsActive ? "Deaktivér" : "Aktivér")</MudText>
+                        </MudStack>
+                    </MudMenuItem>
+                </MudMenu>
+            </CellTemplate>
+        </TemplateColumn> *@
+    </Columns>
+    <PagerContent>
+        <MudDataGridPager T="OrganizationView" />
+    </PagerContent>
+</MudDataGrid>
+
+@code {
+    // Open table settings
+    private bool _open = false;
+    private bool _selectable = false;
+    private bool _resizable = false;
+    private bool _movable = false;
+    private bool _hidable = false;
+    private bool _striped = true;
+    private bool _stickyActions = true;
+    private bool _groupOrganization = false;
+
+    private IEnumerable<OrganizationView> UserList = new List<OrganizationView>();
+    private string? _searchString;
+    private List<string> _events = new();
+
+    private Func<OrganizationView, bool> _quickFilter => x =>
+    {
+        if (string.IsNullOrWhiteSpace(_searchString))
+            return true;
+
+        if (x.Name.Contains(_searchString))
+            return true;
+
+        return false;
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        await FetchOrganizations();
+    }
+
+    void RowClicked(DataGridRowClickEventArgs<OrganizationView> args)
+    {
+        _events.Insert(0, $"Event = RowClick, Index = {args.RowIndex}, Data = {System.Text.Json.JsonSerializer.Serialize(args.Item)}");
+    }
+
+    void RowRightClicked(DataGridRowClickEventArgs<OrganizationView> args)
+    {
+        _events.Insert(0, $"Event = RowRightClick, Index = {args.RowIndex}, Data = {System.Text.Json.JsonSerializer.Serialize(args.Item)}");
+    }
+
+    void SelectedItemsChanged(HashSet<OrganizationView> items)
+    {
+        _events.Insert(0, $"Event = SelectedItemsChanged, Data = {System.Text.Json.JsonSerializer.Serialize(items)}");
+    }
+
+    private async Task FetchOrganizations()
+    {
+        UserList = await OrganizationService.GetAllObjectsView();
+    }
+
+    private void ToggleOpenTableSettings() => _open = !_open;
+}
