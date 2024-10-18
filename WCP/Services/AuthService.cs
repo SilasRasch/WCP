@@ -13,6 +13,7 @@ namespace WCPShared.Services
     public class AuthService : IAuthService
     {
         private readonly IConfiguration _configuration;
+        private readonly LanguageService _languageService;
         private readonly IEmailService _emailService;
         private readonly UserService _userService;
         private readonly OrganizationService _organizationService;
@@ -20,7 +21,7 @@ namespace WCPShared.Services
         private readonly UserContextService _userContextService;
         private readonly IJwtService _jwtService;
 
-        public AuthService(IConfiguration configuration, UserService userService, IEmailService emailService, OrganizationService organizationService, CreatorService creatorService, UserContextService userContextService, IJwtService jwtService)
+        public AuthService(IConfiguration configuration, UserService userService, IEmailService emailService, OrganizationService organizationService, CreatorService creatorService, UserContextService userContextService, IJwtService jwtService, LanguageService languageService)
         {
             _configuration = configuration;
             _userService = userService;
@@ -29,6 +30,7 @@ namespace WCPShared.Services
             _creatorService = creatorService;
             _userContextService = userContextService;
             _jwtService = jwtService;
+            _languageService = languageService;
         }
 
         public async Task<User?> Register(RegisterCreatorDto request, bool selfRegister = false)
@@ -39,6 +41,8 @@ namespace WCPShared.Services
             Organization? org = null;
             if (request.User.OrganizationId != 0 && request.User.OrganizationId is not null)
                 org = await _organizationService.GetObject(request.User.OrganizationId!.Value);
+
+            var language = await _languageService.GetObject(request.User.LanguageId);
 
             string generatedPassword = GenerateRandomString(32);
             string passwordHash = BCrypt.Net.BCrypt.HashPassword(generatedPassword);
@@ -58,6 +62,13 @@ namespace WCPShared.Services
                 NotificationsOn = true,
                 NotificationSetting = "slack"
             };
+
+            if (language is not null)
+            {
+                user.Language = language;
+                user.LanguageId = language.Id;
+            }
+                
 
             user = await _userService.AddObject(user);
 

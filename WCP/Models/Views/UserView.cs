@@ -18,5 +18,6 @@ namespace WCPShared.Models.Views
         public string Role { get; set; } = string.Empty;
         public bool IsActive { get; set; }
         public OrganizationView? Organization { get; set; }
+        public string Language { get; set; } = string.Empty;
     }
 }

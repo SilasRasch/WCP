@@ -70,10 +70,10 @@ namespace WCPTests
 
             IWcpDbContext context = new TestDbContext(options);
             _viewConverter = new ViewConverter();
-            _organizationService = new OrganizationService(context, _viewConverter);
+            _languageService = new LanguageService(context);
+            _organizationService = new OrganizationService(context, _viewConverter, _languageService);
             _brandService = new BrandService(context, _organizationService, _viewConverter);
             _staticTemplateService = new StaticTemplateService(context, _viewConverter);
-            _languageService = new LanguageService(context);
             _userService = new UserService(context, _organizationService, _viewConverter);
             _creatorService = new CreatorService(context, _languageService, _userService, _viewConverter);
             _slackNotificationService = new SlackNotificationService(new SlackNet.SlackApiClient("mock"), _creatorService, _userService);

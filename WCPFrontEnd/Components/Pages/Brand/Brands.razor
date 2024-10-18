@@ -15,7 +15,7 @@
     <ToolBarContent>
         <MudStack Row="true" AlignItems="AlignItems.Center">
             <MudText Typo="Typo.h6">Brands</MudText>
-            <MudIconButton Icon="@Icons.Material.Filled.Add"></MudIconButton>
+            <MudIconButton Icon="@Icons.Material.Filled.Add" OnClick="ToggleAddDialog"></MudIconButton>
         </MudStack>
         <MudSpacer />
         <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
@@ -59,7 +59,14 @@
         </PropertyColumn>
         <PropertyColumn Property="x => x.Name" Title="Navn" />
         <PropertyColumn Property="x => x.URL" Title="URL" />
-        <PropertyColumn Property="x => x.Organization.Name" Title="Organisation" Grouping="_groupOrganization" />
+        <PropertyColumn Property="x => x.Organization.Name" Title="Organisation" Grouping="_groupOrganization">
+            <CellTemplate>
+                <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
+                    <MudText Typo="Typo.h6">@ProjectHelper.CountryStringToFlag(context.Item.Organization.Language) </MudText>
+                    @context.Item.Organization.Name
+                </MudStack>
+            </CellTemplate>
+        </PropertyColumn>
         
         <TemplateColumn Title="Actions" StickyRight="@_stickyActions">
             <CellTemplate>
@@ -152,6 +159,16 @@
             await BrandService.DeleteObject(id);
             await FetchBrands();
         }
+    }
+
+    private async Task ToggleAddDialog()
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true, CloseButton = true };
+        var dialog = await DialogService.ShowAsync<Dialoges.AddBrandDialog>("Add dialog", options);
+        var result = await dialog.Result;
+
+        if (result is not null && !result.Canceled)
+            await FetchBrands();
     }
 
     private void ToggleOpenTableSettings() => _open = !_open;

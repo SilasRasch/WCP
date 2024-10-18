@@ -14,25 +14,27 @@ namespace WCPShared.Services.EntityFramework
     {
         private readonly IWcpDbContext _context;
         private readonly ViewConverter _viewConverter;
+        private readonly LanguageService _languageService;
 
-        public OrganizationService(IWcpDbContext context, ViewConverter viewConverter) : base(context)
+        public OrganizationService(IWcpDbContext context, ViewConverter viewConverter, LanguageService languageService) : base(context)
         {
             _context = context;
             _viewConverter = viewConverter;
+            _languageService = languageService;
         }
 
         public async Task<Organization?> GetObject(int id, bool includeBrands = false)
         {
             if (includeBrands)
                 return await _context.Organizations.Include(x => x.Brands).SingleOrDefaultAsync(x => x.Id == id);
-            return await _context.Organizations.SingleOrDefaultAsync(x => x.Id == id);
+            return await _context.Organizations.Include(x => x.Language).SingleOrDefaultAsync(x => x.Id == id);
         }
 
         public async Task<List<Organization>> GetAllObjects(bool includeBrands = false)
         {
             if (includeBrands)
-                return await _context.Organizations.Include(x => x.Brands).ToListAsync();
-            return await _context.Organizations.ToListAsync();
+                return await _context.Organizations.Include(x => x.Brands).Include(x => x.Language).ToListAsync();
+            return await _context.Organizations.Include(x => x.Language).ToListAsync();
         }
 
         public async Task<Organization?> UpdateObject(int id, OrganizationDto organization)
@@ -41,6 +43,17 @@ namespace WCPShared.Services.EntityFramework
 
             if (oldOrg is null)
                 return null!;
+
+            if (oldOrg.Language.Id != organization.LanguageId)
+            {
+                var lang = await _languageService.GetObject(organization.LanguageId);
+                
+                if (lang is not null)
+                {
+                    oldOrg.LanguageId = lang.Id;
+                    oldOrg.Language = lang;
+                }
+            }
 
             oldOrg.Name = organization.Name;
             oldOrg.CVR = organization.CVR;
@@ -52,10 +65,17 @@ namespace WCPShared.Services.EntityFramework
 
         public async Task<Organization?> AddObject(OrganizationDto obj)
         {
+            var lang = await _languageService.GetObject(obj.LanguageId);
+            
+            if (lang is null)
+                return null!;
+
             Organization organization = new Organization
             {
                 CVR = obj.CVR,
-                Name = obj.Name
+                Name = obj.Name,
+                LanguageId = obj.LanguageId,
+                Language = lang
             };
 
             await _context.AddAsync(organization);
@@ -66,6 +86,7 @@ namespace WCPShared.Services.EntityFramework
         public async Task<List<OrganizationView>> GetObjectsViewBy(Expression<Func<Organization, bool>> predicate)
         {
             return await _context.Organizations
+                .Include(x => x.Language)
                 .Where(predicate)
                 .Select(x => _viewConverter.Convert(x))
                 .ToListAsync();
@@ -73,7 +94,7 @@ namespace WCPShared.Services.EntityFramework
 
         public async Task<OrganizationView?> GetObjectViewBy(Expression<Func<Organization, bool>> predicate)
         {
-            var organization = await _context.Organizations.SingleOrDefaultAsync(predicate);
+            var organization = await _context.Organizations.Include(x => x.Language).SingleOrDefaultAsync(predicate);
 
             if (organization is not null)
                 return _viewConverter.Convert(organization);
@@ -83,6 +104,7 @@ namespace WCPShared.Services.EntityFramework
         public async Task<List<OrganizationView>> GetAllObjectsView()
         {
             return await _context.Organizations
+                .Include(x => x.Language)
                 .Select(x => _viewConverter.Convert(x))
                 .ToListAsync();
         }

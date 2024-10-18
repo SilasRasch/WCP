@@ -17,8 +17,9 @@ namespace WCPShared.Models.Entities.UserModels
         public string Role { get; set; } = string.Empty;
         public bool IsActive { get; set; }
         public int? OrganizationId { get; set; }
-        public Language Language { get; set; }
         public Organization? Organization { get; set; }
+        public int LanguageId { get; set; }
+        public Language Language { get; set; }
 
         public bool Validate()
         {

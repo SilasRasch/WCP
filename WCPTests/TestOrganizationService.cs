@@ -13,6 +13,7 @@ namespace WCPTests
     {
     private OrganizationService _organizationService;
     private ViewConverter _viewConverter;
+    private LanguageService _languageService;
 
     [TestInitialize]
     public void Init()
@@ -24,7 +25,8 @@ namespace WCPTests
 
         IWcpDbContext context = new TestDbContext(options);
         _viewConverter = new ViewConverter();
-        _organizationService = new OrganizationService(context, _viewConverter);
+        _languageService = new LanguageService(context);
+        _organizationService = new OrganizationService(context, _viewConverter, _languageService);
     }
         
     [TestMethod]

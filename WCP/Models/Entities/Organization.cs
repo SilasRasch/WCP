@@ -12,6 +12,7 @@ namespace WCPShared.Models.Entities
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
         public string CVR { get; set; } = string.Empty;
+        public int LanguageId { get; set; }
         public Language Language { get; set; }
         public List<Brand> Brands { get; set; } = new List<Brand>();
 
@@ -21,6 +22,9 @@ namespace WCPShared.Models.Entities
                 return false;
 
             if (!Validation.ValidateDisplayName(Name))
+                return false;
+
+            if (LanguageId == default)
                 return false;
 
             return true;

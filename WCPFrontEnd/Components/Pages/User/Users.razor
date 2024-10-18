@@ -15,7 +15,7 @@
     <ToolBarContent>
         <MudStack Row="true" AlignItems="AlignItems.Center">
             <MudText Typo="Typo.h6">Brugere</MudText>
-            <MudIconButton Icon="@Icons.Material.Filled.Add"></MudIconButton>
+            <MudIconButton Icon="@Icons.Material.Filled.Add" OnClick="ToggleAddDialog"></MudIconButton>
         </MudStack>
         
         <MudSpacer />
@@ -80,7 +80,21 @@
             <CellTemplate>
                 @if (context.Item.Organization is not null)
                 {
-                    <MudText>@context.Item.Organization.Name</MudText>
+                    <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
+                        <MudText Typo="Typo.h6">@ProjectHelper.CountryStringToFlag(context.Item.Organization.Language) </MudText>
+                        @context.Item.Organization.Name
+                    </MudStack>
+                }
+            </CellTemplate>
+        </PropertyColumn>
+
+        <PropertyColumn Property="x => x.Language" Title="Sprog/Land">
+            <CellTemplate>
+                @if (context.Item.Language is not null)
+                {
+                    <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
+                        <MudText Typo="Typo.h6">@ProjectHelper.CountryStringToFlag(context.Item.Language) </MudText>
+                    </MudStack>
                 }
             </CellTemplate>
         </PropertyColumn>
@@ -201,6 +215,16 @@
             await UserService.DeleteObject(id);
             await FetchUsers();
         }
+    }
+
+    private async Task ToggleAddDialog()
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true, CloseButton = true };
+        var dialog = await DialogService.ShowAsync<Dialoges.AddUserDialog>("Add dialog", options);
+        var result = await dialog.Result;
+
+        if (result is not null && !result.Canceled)
+            await FetchUsers();
     }
 
     private void ToggleOpenTableSettings() => _open = !_open;

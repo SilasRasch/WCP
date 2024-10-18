@@ -6,6 +6,7 @@ namespace WCPShared.Models.DTOs
     {
         public string Name { get; set; } = string.Empty;
         public string CVR { get; set; } = string.Empty;
+        public int LanguageId { get; set; }
 
         public bool Validate()
         {
@@ -13,6 +14,9 @@ namespace WCPShared.Models.DTOs
                 return false;
 
             if (!Validation.ValidateDisplayName(Name))
+                return false;
+
+            if (LanguageId == default)
                 return false;
 
             return true;

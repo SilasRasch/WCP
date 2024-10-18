@@ -55,7 +55,8 @@ namespace WCPShared.Services.Converters
                 IsActive = obj.IsActive,
                 Organization = Convert(obj.Organization!),
                 Phone = obj.Phone,
-                Role = obj.Role
+                Role = obj.Role,
+                Language = obj.Language.Name
             };
         }
 

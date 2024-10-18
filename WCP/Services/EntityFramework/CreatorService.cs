@@ -104,6 +104,7 @@ namespace WCPShared.Services.EntityFramework
                 .Where(predicate)
                 .Include(x => x.Languages)
                 .Include(x => x.User)
+                .ThenInclude(x => x.Language)
                 .Select(x => _viewConverter.Convert(x))
                 .ToListAsync();
         }
@@ -113,6 +114,7 @@ namespace WCPShared.Services.EntityFramework
             var creator = await _context.Creators
                 .Include(x => x.Languages)
                 .Include(x => x.User)
+                .ThenInclude(x => x.Language)
                 .SingleOrDefaultAsync(predicate);
 
             if (creator is not null)
@@ -125,6 +127,7 @@ namespace WCPShared.Services.EntityFramework
             return await _context.Creators
                 .Include(x => x.Languages)
                 .Include(x => x.User)
+                .ThenInclude(x => x.Language)
                 .Select(x => _viewConverter.Convert(x))
                 .ToListAsync();
         }

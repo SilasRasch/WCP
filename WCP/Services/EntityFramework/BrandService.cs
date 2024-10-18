@@ -74,6 +74,7 @@ namespace WCPShared.Services.EntityFramework
             return await _context.Brands
                 .Where(predicate)
                 .Include(x => x.Organization)
+                .ThenInclude(x => x.Language)
                 .Select(x => _viewConverter.Convert(x))
                 .ToListAsync();
         }
@@ -82,6 +83,7 @@ namespace WCPShared.Services.EntityFramework
         {
             var brand = await _context.Brands
                 .Include(x => x.Organization)
+                .ThenInclude(x => x.Language)
                 .SingleOrDefaultAsync(predicate);
 
             if (brand is not null)
@@ -93,6 +95,7 @@ namespace WCPShared.Services.EntityFramework
         {
             return await _context.Brands
                 .Include(x => x.Organization)
+                .ThenInclude(x => x.Language)
                 .Select(x => _viewConverter.Convert(x))
                 .ToListAsync();
         }

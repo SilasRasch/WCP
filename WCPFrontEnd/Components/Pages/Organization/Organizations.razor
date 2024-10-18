@@ -15,7 +15,7 @@
     <ToolBarContent>
         <MudStack Row="true" AlignItems="AlignItems.Center">
             <MudText Typo="Typo.h6">Organisationer</MudText>
-            <MudIconButton Icon="@Icons.Material.Filled.Add"></MudIconButton>
+            <MudIconButton Icon="@Icons.Material.Filled.Add" OnClick="ToggleAddDialog"></MudIconButton>
         </MudStack>
         <MudSpacer />
         <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
@@ -57,6 +57,13 @@
         </PropertyColumn>
         <PropertyColumn Property="x => x.Name" Title="Navn" />
         <PropertyColumn Property="x => x.CVR" Title="CVR" />
+        <PropertyColumn Property="x => x.Language" Title="Sprog">
+            <CellTemplate>
+                <MudText Typo="Typo.h5">
+                    @ProjectHelper.CountryStringToFlag(context.Item.Language)
+                </MudText>
+            </CellTemplate>
+        </PropertyColumn>
 
         <TemplateColumn Title="Actions" StickyRight="@_stickyActions">
             <CellTemplate>
@@ -144,11 +151,21 @@
         var dialog = await DialogService.ShowAsync<DeleteModal>("Delete dialog", parameters, options);
         var result = await dialog.Result;
 
-        if (!result.Canceled)
+        if (result is not null && !result.Canceled)
         {
             await OrganizationService.DeleteObject(id);
             await FetchOrganizations();
         }
+    }
+
+    private async Task ToggleAddDialog()
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true, CloseButton = true };
+        var dialog = await DialogService.ShowAsync<Dialoges.AddOrganizationDialog>("Add dialog", options);
+        var result = await dialog.Result;
+
+        if (result is not null && !result.Canceled)
+            await FetchOrganizations();
     }
 
     private void ToggleOpenTableSettings() => _open = !_open;

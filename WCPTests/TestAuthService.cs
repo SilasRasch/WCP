@@ -52,11 +52,11 @@ namespace WCPTests
                 .Build();
 
             IWcpDbContext context = new TestDbContext(options);
-            _viewConverter = new ViewConverter();
-            _organizationService = new OrganizationService(context, _viewConverter);
-            _brandService = new BrandService(context, _organizationService, _viewConverter);
             _languageService = new LanguageService(context);
             _emailService = new SendGridEmailService(configuration);
+            _viewConverter = new ViewConverter();
+            _organizationService = new OrganizationService(context, _viewConverter, _languageService);
+            _brandService = new BrandService(context, _organizationService, _viewConverter);
             _userService = new UserService(context, _organizationService, _viewConverter);
             _creatorService = new CreatorService(context, _languageService, _userService, _viewConverter);
             _jwtService = new JwtService(configuration, _userService, _emailService, _organizationService, _creatorService);

@@ -28,6 +28,9 @@ namespace WCPShared.Services.EntityFramework
             if (user.Organization is not null)
                 _context.Organizations.Attach(user.Organization);
 
+            if (user.Language is not null)
+                _context.Languages.Attach(user.Language);
+
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
             return user;
@@ -77,6 +80,8 @@ namespace WCPShared.Services.EntityFramework
             return await _context.Users
                 .Where(predicate)
                 .Include(x => x.Organization)
+                .ThenInclude(x => x.Language)
+                .Include(x => x.Language)
                 .Select(x => _viewConverter.Convert(x))
                 .ToListAsync();
         }
@@ -85,6 +90,8 @@ namespace WCPShared.Services.EntityFramework
         {
             var user = await _context.Users
                 .Include(x => x.Organization)
+                .ThenInclude(x => x.Language)
+                .Include(x => x.Language)
                 .SingleOrDefaultAsync(predicate);
 
             if (user is not null)
@@ -96,6 +103,8 @@ namespace WCPShared.Services.EntityFramework
         {
             return await _context.Users
                 .Include(x => x.Organization)
+                .ThenInclude(x => x.Language)
+                .Include(x => x.Language)
                 .Select(x => _viewConverter.Convert(x))
                 .ToListAsync();
         }

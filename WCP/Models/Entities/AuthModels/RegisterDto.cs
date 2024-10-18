@@ -10,6 +10,7 @@ namespace WCPShared.Models.Entities.AuthModels
         public string? Phone { get; set; }
         public string Role { get; set; } = string.Empty;
         public int? OrganizationId { get; set; } = null!;
+        public int LanguageId { get; set; }
 
         public bool Validate()
         {
