@@ -15,7 +15,7 @@
     <ToolBarContent>
         <MudStack Row="true" AlignItems="AlignItems.Center">
             <MudText Typo="Typo.h6">Static Templates</MudText>
-            <MudIconButton Icon="@Icons.Material.Filled.Add"></MudIconButton>
+            <MudIconButton Icon="@Icons.Material.Filled.Add" OnClick="ToggleAddDialog"></MudIconButton>
         </MudStack>
         <MudSpacer />
         <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
@@ -154,6 +154,16 @@
             await StaticTemplateService.DeleteObject(id);
             await FetchStatics();
         }
+    }
+
+    private async Task ToggleAddDialog()
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true, CloseButton = true };
+        var dialog = await DialogService.ShowAsync<Dialoges.AddStaticDialog>("Add dialog", options);
+        var result = await dialog.Result;
+
+        if (result is not null && !result.Canceled)
+            await FetchStatics();
     }
 
     private void ToggleOpenTableSettings() => _open = !_open;
