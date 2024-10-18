@@ -4,9 +4,11 @@
 @using WCPShared.Models.DTOs
 @using WCPShared.Models.Entities.UserModels
 @using WCPShared.Models.Views
+@using WCPShared.Services
 @using WCPShared.Services.EntityFramework
 @using WCPShared.Services.StaticHelpers
 @inject StaticTemplateService StaticTemplateService
+@inject S3Service S3Service
 
 <MudDialog>
     <TitleContent>
@@ -17,13 +19,13 @@
     <DialogContent>
         <MudForm @ref="_form" @bind-IsValid="@_success" @bind-Errors="@_errors">
             <MudStack Row="true">
-                <MudTextField T="string" @bind-Value="_static.Name" Label="Brandnavn" Required="true" Validation="@(new Func<string, string>(ValidationHelpers.NameValidation))" RequiredError="Dette felt er påkrævet" />
+                <MudTextField T="string" @bind-Value="_static.Name" Label="Navn" Required="true" Validation="@(new Func<string, string>(ValidationHelpers.NameValidation))" RequiredError="Dette felt er påkrævet" />
                 <MudTextField T="string" @bind-Value="_static.DisplayName" Label="Displaynavn" Required="true" Validation="@(new Func<string, string>(ValidationHelpers.NameValidation))" RequiredError="Dette felt er påkrævet" />
             </MudStack>
 
             <MudStack Row="true">
-                <MudStack Row="true" AlignItems="AlignItems.Center">
-                    <MudFileUpload Class="mt-2" T="IBrowserFile" FilesChanged="(e) => pic1 = e" MaximumFileCount="1" Accept="image/png, image/jpg, image/jpeg">
+                <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center">
+                    <MudFileUpload Class="mt-2" Required="true" T="IBrowserFile" FilesChanged="(e) => pic1 = e" MaximumFileCount="1" Accept="image/png, image/jpg, image/jpeg">
                         <ActivatorContent>
                             <MudFab Color="Color.Primary"
                                     StartIcon="@Icons.Material.Filled.Image"
@@ -36,8 +38,8 @@
                         <MudText Class="cursor-pointer hover:text-red-500 duration-200" @onclick="() => pic1 = null!">@pic1.Name</MudText>
                     }
                 </MudStack>
-                <MudStack Row="true" AlignItems="AlignItems.Center">
-                    <MudFileUpload Class="mt-2" T="IBrowserFile" FilesChanged="(e) => pic2 = e" MaximumFileCount="1" Accept="image/png, image/jpg, image/jpeg">
+                <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center">
+                    <MudFileUpload Class="mt-2" Required="true" T="IBrowserFile" FilesChanged="(e) => pic2 = e" MaximumFileCount="1" Accept="image/png, image/jpg, image/jpeg">
                         <ActivatorContent>
                             <MudFab Color="Color.Primary"
                                     StartIcon="@Icons.Material.Filled.Image"
@@ -50,8 +52,8 @@
                         <MudText Class="cursor-pointer hover:text-red-500 duration-200" @onclick="() => pic2 = null!">@pic2.Name</MudText>
                     }
                 </MudStack>
-                <MudStack Row="true" AlignItems="AlignItems.Center">
-                    <MudFileUpload Class="mt-2" T="IBrowserFile" FilesChanged="(e) => pic3 = e" MaximumFileCount="1" Accept="image/png, image/jpg, image/jpeg">
+                <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center">
+                    <MudFileUpload Class="mt-2" Required="true" T="IBrowserFile" FilesChanged="(e) => pic3 = e" MaximumFileCount="1" Accept="image/png, image/jpg, image/jpeg">
                         <ActivatorContent>
                             <MudFab Color="Color.Primary"
                                     StartIcon="@Icons.Material.Filled.Image"
@@ -82,14 +84,21 @@
     private string[] _errors = { };
     private StaticTemplateDto _static = new();
 
-    private IBrowserFile pic1 = null;
-    private IBrowserFile pic2 = null;
-    private IBrowserFile pic3 = null;
+    private IBrowserFile pic1 = null!;
+    private IBrowserFile pic2 = null!;
+    private IBrowserFile pic3 = null!;
 
     private async Task Submit()
     {
-        if (_static.Validate())
-            await StaticTemplateService.AddObject(_static);
+        if (pic1 is not null & pic2 is not null && pic3 is not null)
+        {
+            _static.TemplateImgOne = await S3Service.UploadStaticTemplateImage(pic1);
+            _static.TemplateImgTwo = await S3Service.UploadStaticTemplateImage(pic2);
+            _static.ExampleImg = await S3Service.UploadStaticTemplateImage(pic3);
+
+            if (_static.Validate())
+                await StaticTemplateService.AddObject(_static);
+        }
 
         MudDialog.Close(DialogResult.Ok(true));
     }

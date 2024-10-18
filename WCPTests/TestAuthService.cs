@@ -60,7 +60,7 @@ namespace WCPTests
             _userService = new UserService(context, _organizationService, _viewConverter);
             _creatorService = new CreatorService(context, _languageService, _userService, _viewConverter);
             _jwtService = new JwtService(configuration, _userService, _emailService, _organizationService, _creatorService);
-            _authService = new AuthService(configuration, _userService, _emailService, _organizationService, _creatorService, null!, _jwtService);
+            _authService = new AuthService(configuration, _userService, _emailService, _organizationService, _creatorService, null!, _jwtService, _languageService);
 
 
             _organization = await _organizationService.AddObject(new OrganizationDto() { Name = "Org", CVR = "12345678" });

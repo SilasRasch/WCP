@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using MudBlazor.Services;
 using WCPFrontEnd.Components;
 using WCPShared.Extensions;
+using WCPShared.Interfaces;
+using WCPShared.Models;
 using WCPShared.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +17,8 @@ builder.Services.AddMudServices();
 builder.Services.ConfigureDbContext(builder.Configuration);
 builder.Services.AddDataServices(builder.Configuration);
 builder.Services.AddAuthenticationServices();
+builder.Services.AddScoped<IS3Client, S3Client>();
+builder.Services.AddScoped<S3Service>();
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>

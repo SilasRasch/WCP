@@ -5,10 +5,12 @@
 @using WCPShared.Models.Entities.AuthModels
 @using WCPShared.Models.Entities.UserModels
 @using WCPShared.Models.Views
+@using WCPShared.Services
 @using WCPShared.Services.EntityFramework
 @inject IAuthService AuthService
 @inject OrganizationService OrganizationService
 @inject LanguageService LanguageService
+@inject S3Service S3Service
 
 <MudDialog>
     <TitleContent>
@@ -160,6 +162,9 @@
 
             if (_user.User.Role == "Creator" && !_selfRegister)
             {
+                if (_profilePicture is not null)
+                    _creator.ImgURL = await S3Service.UploadProfilePicture(_profilePicture);
+
                 _creator.Languages = _selectedLanguages.ToList();
                 _user.Creator = _creator;
             }
