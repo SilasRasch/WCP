@@ -1,17 +1,20 @@
 ﻿@page "/creators"
 @using System.Net.Http.Json
+@using Microsoft.EntityFrameworkCore
 @using WCPAdminFrontEnd.Services
 @using WCPFrontEnd.Components.Shared
-@using WCPShared.Models.Views
+@using WCPShared.Interfaces
+@using WCPShared.Models.Entities.UserModels
 @using WCPShared.Services.EntityFramework
 @inject CreatorService CreatorService
+@inject IWcpDbContext Context
 @inject IDialogService DialogService
 @attribute [Authorize(Roles = "Admin")]
 
 <PageTitle>Creators</PageTitle>
 
-<MudDataGrid T="CreatorView" SelectOnRowClick="@_selectable" MultiSelection="@_selectable" Items="@CreatorList" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter" Hideable="@_hidable" Striped="@_striped" Elevation="3"
-             RowClick="@RowClicked" RowContextMenuClick="RowRightClicked" SelectedItemsChanged="@SelectedItemsChanged" ColumnResizeMode="@(_resizable ? ResizeMode.Column : ResizeMode.None)" DragDropColumnReordering="_movable">
+<MudDataGrid T="Creator" SelectOnRowClick="@_selectable" MultiSelection="@_selectable" Items="@CreatorList" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter" Hideable="@_hidable" Striped="@_striped" Elevation="3"
+    ColumnResizeMode="@(_resizable ? ResizeMode.Column : ResizeMode.None)" DragDropColumnReordering="_movable">
     <ToolBarContent>
         <MudStack Row="true" AlignItems="AlignItems.Center">
             <MudText Typo="Typo.h6">Creators</MudText>
@@ -46,7 +49,7 @@
     <Columns>
         @if (_selectable)
         {
-            <SelectColumn T="CreatorView" />
+            <SelectColumn T="Creator" />
         }
 
         <PropertyColumn Property="x => x.Id" Title="Id">
@@ -109,10 +112,10 @@
                 @if (context.Item.Languages is not null)
                 {
                     <div class="flex justify-center gap-2">
-                        @foreach (string lang in context.Item.Languages)
+                        @foreach (Language lang in context.Item.Languages)
                         {
                             <MudText Typo="Typo.h5">
-                                @ProjectHelper.CountryStringToFlag(lang)
+                                @ProjectHelper.CountryStringToFlag(lang.Name)
                             </MudText>
                         }
                     </div>
@@ -125,7 +128,7 @@
                 @if (context.Item.User.Language is not null)
                 {
                     <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
-                        <MudText Typo="Typo.h5">@ProjectHelper.CountryStringToFlag(context.Item.User.Language) </MudText>
+                        <MudText Typo="Typo.h5">@ProjectHelper.CountryStringToFlag(context.Item.User.Language.Name) </MudText>
                     </MudStack>
                 }
             </CellTemplate>
@@ -143,7 +146,7 @@
         <TemplateColumn Title="Actions" StickyRight="@_stickyActions">
             <CellTemplate>
                 <MudMenu Icon="@Icons.Material.Filled.MoreHoriz" AriaLabel="Åben aktionsmenu" AnchorOrigin="Origin.BottomCenter">
-                    <MudMenuItem OnClick="@((e) => ToggleUserActivation(context.Item))">
+                    <MudMenuItem OnClick="(() => ToggleEditDialog(context.Item))">
                         <MudStack Row="true">
                             <MudIcon Icon="@Icons.Material.Filled.Edit"></MudIcon>
                             <MudText>Rediger</MudText>
@@ -166,7 +169,7 @@
         </TemplateColumn>
     </Columns>
     <PagerContent>
-        <MudDataGridPager T="CreatorView" />
+        <MudDataGridPager T="Creator" />
     </PagerContent>
 </MudDataGrid>
 
@@ -180,11 +183,11 @@
     private bool _striped = true;
     private bool _stickyActions = true;
 
-    private IEnumerable<CreatorView> CreatorList = new List<CreatorView>();
+    private IEnumerable<Creator> CreatorList = new List<Creator>();
     private string? _searchString;
     private List<string> _events = new();
 
-    private Func<CreatorView, bool> _quickFilter => x =>
+    private Func<Creator, bool> _quickFilter => x =>
     {
         if (string.IsNullOrWhiteSpace(_searchString))
             return true;
@@ -200,36 +203,20 @@
         await FetchCreators();
     }
 
-    async Task RowClicked(DataGridRowClickEventArgs<CreatorView> args)
-    {
-        _events.Insert(0, $"Event = RowClick, Index = {args.RowIndex}, Data = {System.Text.Json.JsonSerializer.Serialize(args.Item)}");
-    }
-
-    void RowRightClicked(DataGridRowClickEventArgs<CreatorView> args)
-    {
-        _events.Insert(0, $"Event = RowRightClick, Index = {args.RowIndex}, Data = {System.Text.Json.JsonSerializer.Serialize(args.Item)}");
-    }
-
-    void SelectedItemsChanged(HashSet<CreatorView> items)
-    {
-        _events.Insert(0, $"Event = SelectedItemsChanged, Data = {System.Text.Json.JsonSerializer.Serialize(items)}");
-    }
-
     private async Task FetchCreators()
     {
-        CreatorList = await CreatorService.GetAllObjectsView();
+        CreatorList = await Context.Creators
+            .Include(x => x.User)
+            .ThenInclude(x => x.Language)
+            .Include(x => x.Languages)
+            .ToListAsync();
     }
 
-    private async Task ToggleUserActivation(CreatorView view)
+    private async Task ToggleUserActivation(Creator creator)
     {
-        var creator = await CreatorService.GetObject(view.Id);
-
-        if (creator is not null)
-        {
-            creator.User.IsActive = !creator.User.IsActive;
-            await CreatorService.UpdateObject(creator.Id, creator);
-            await FetchCreators();
-        }
+        creator.User.IsActive = !creator.User.IsActive;
+        await CreatorService.UpdateObject(creator.Id, creator);
+        await FetchCreators();
     }
 
     private async Task ToggleDeleteModal(int id)
@@ -258,6 +245,25 @@
 
         if (result is not null && !result.Canceled)
         await FetchCreators();
+    }
+
+    private async Task ToggleEditDialog(Creator creator)
+    {
+        var parameters = new DialogParameters<Dialoges.EditUserDialog>
+        {
+            { x => x.Creator, creator },
+            { x => x.User, creator.User },
+        };
+
+        var options = new DialogOptions { CloseOnEscapeKey = true, CloseButton = true };
+
+        var dialog = await DialogService.ShowAsync<Dialoges.EditUserDialog>("Edit dialog", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await FetchCreators();
+        }
     }
 
     private void ToggleOpenTableSettings() => _open = !_open;
