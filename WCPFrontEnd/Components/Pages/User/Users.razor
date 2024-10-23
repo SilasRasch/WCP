@@ -57,7 +57,7 @@
         }
         <PropertyColumn Property="x => x.Id" Title="Id" Editable="false">
             <CellTemplate>
-                <div class="flex justify-center rounded-full w-10 p-2 cursor-pointer bg-red-500 text-white">
+                <div @onclick="() => ToggleEditDialog(context.Item)" class="flex justify-center rounded-full w-10 p-2 cursor-pointer bg-red-500 text-white">
                     <MudText>@context.Item.Id</MudText>
                 </div>
             </CellTemplate>
