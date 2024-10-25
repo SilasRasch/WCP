@@ -108,7 +108,7 @@
         if (pic3 is not null)
             Static.ExampleImg = await S3Service.UploadStaticTemplateImage(pic3);
         
-        await StaticTemplateService.UpdateObject(Static.Id, Static);
+        await StaticTemplateService.UpdateObject(Static);
 
         MudDialog.Close(DialogResult.Ok(true));
     }

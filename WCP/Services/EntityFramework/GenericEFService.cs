@@ -58,6 +58,13 @@ namespace WCPShared.Services.EntityFramework
             return obj;
         }
 
+        public virtual async Task<T?> UpdateObject(T obj)
+        {
+            _context.Update(obj);
+            await _context.SaveChangesAsync();
+            return obj;
+        }
+
         public virtual async Task<T?> DeleteObject(int id)
         {
             if (!await ExistsAsync(id)) return null;
