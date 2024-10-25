@@ -14,7 +14,7 @@
 <PageTitle>Organisationer</PageTitle>
 
 <MudDataGrid T="Organization" SelectOnRowClick="@_selectable" MultiSelection="@_selectable" Items="@OrganizationList" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter" Hideable="@_hidable" Striped="@_striped" Elevation="3"
-    ReadOnly="false" EditMode="DataGridEditMode.Form" EditTrigger="DataGridEditTrigger.Manual" ColumnResizeMode="@(_resizable ? ResizeMode.Column : ResizeMode.None)" DragDropColumnReordering="_movable">
+    ColumnResizeMode="@(_resizable ? ResizeMode.Column : ResizeMode.None)" DragDropColumnReordering="_movable">
     <ToolBarContent>
         <MudStack Row="true" AlignItems="AlignItems.Center">
             <MudText Typo="Typo.h6">Organisationer</MudText>
@@ -53,7 +53,7 @@
         }
         <PropertyColumn Property="x => x.Id" Title="Id">
             <CellTemplate>
-                <div class="flex justify-center rounded-full w-10 p-2 cursor-pointer bg-red-500 text-white">
+                <div @onclick="() => ToggleEditDialog(context.Item)" class="flex justify-center rounded-full w-10 p-2 cursor-pointer bg-red-500 text-white">
                     <MudText>@context.Item.Id</MudText>
                 </div>
             </CellTemplate>
@@ -71,7 +71,7 @@
         <TemplateColumn Title="Actions" StickyRight="@_stickyActions">
             <CellTemplate>
                 <MudMenu Icon="@Icons.Material.Filled.MoreHoriz" AriaLabel="Åben aktionsmenu" AnchorOrigin="Origin.BottomCenter">
-                    <MudMenuItem OnClick="@context.Actions.StartEditingItemAsync">
+                    <MudMenuItem OnClick="() => ToggleEditDialog(context.Item)">
                         <MudStack Row="true">
                             <MudIcon Icon="@Icons.Material.Filled.Edit"></MudIcon>
                             <MudText>Rediger</MudText>
@@ -150,6 +150,21 @@
     {
         var options = new DialogOptions { CloseOnEscapeKey = true, CloseButton = true };
         var dialog = await DialogService.ShowAsync<Dialoges.AddOrganizationDialog>("Add dialog", options);
+        var result = await dialog.Result;
+
+        if (result is not null && !result.Canceled)
+            await FetchOrganizations();
+    }
+
+    private async Task ToggleEditDialog(Organization organization)
+    {
+        var parameters = new DialogParameters<Dialoges.EditOrganizationDialog>
+        {
+            { x => x.Organization, organization }
+        };
+
+        var options = new DialogOptions { CloseOnEscapeKey = true, CloseButton = true };
+        var dialog = await DialogService.ShowAsync<Dialoges.EditOrganizationDialog>("Delete dialog", parameters, options);
         var result = await dialog.Result;
 
         if (result is not null && !result.Canceled)

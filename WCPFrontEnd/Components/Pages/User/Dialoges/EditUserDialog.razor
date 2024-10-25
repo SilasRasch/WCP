@@ -142,12 +142,11 @@
     private IEnumerable<Organization> _organizations = new List<Organization>();
     private IEnumerable<Language> _languages = new List<Language>();
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        _languages = await Context.Languages.ToListAsync();
-        _organizations = await Context.Organizations
-            .Include(x => x.Language)
-            .ToListAsync();
+        _languages = Context.Languages;
+        _organizations = Context.Organizations
+            .Include(x => x.Language);
 
         if (_isCreator && Creator is not null && Creator.Languages is not null)
             _selectedLanguages = Creator.Languages.Select(x => x.Name);

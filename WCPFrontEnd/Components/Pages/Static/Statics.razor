@@ -2,16 +2,19 @@
 @using System.Net.Http.Json
 @using WCPAdminFrontEnd.Services
 @using WCPFrontEnd.Components.Shared
+@using WCPShared.Interfaces
+@using WCPShared.Models.Entities
 @using WCPShared.Models.Views
 @using WCPShared.Services.EntityFramework
 @inject StaticTemplateService StaticTemplateService
 @inject IDialogService DialogService
+@inject IWcpDbContext Context
 @attribute [Authorize(Roles = "Admin")]
 
 <PageTitle>Static Templates</PageTitle>
 
-<MudDataGrid T="StaticTemplateView" SelectOnRowClick="@_selectable" MultiSelection="@_selectable" Items="@StaticList" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter" Hideable="@_hidable" Striped="@_striped" Elevation="3"
-             RowClick="@RowClicked" RowContextMenuClick="RowRightClicked" SelectedItemsChanged="@SelectedItemsChanged" ColumnResizeMode="@(_resizable ? ResizeMode.Column : ResizeMode.None)" DragDropColumnReordering="_movable">
+<MudDataGrid T="StaticTemplate" SelectOnRowClick="@_selectable" MultiSelection="@_selectable" Items="@StaticList" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter" Hideable="@_hidable" Striped="@_striped" Elevation="3"
+    ColumnResizeMode="@(_resizable ? ResizeMode.Column : ResizeMode.None)" DragDropColumnReordering="_movable">
     <ToolBarContent>
         <MudStack Row="true" AlignItems="AlignItems.Center">
             <MudText Typo="Typo.h6">Static Templates</MudText>
@@ -46,11 +49,11 @@
     <Columns>
         @if (_selectable)
         {
-            <SelectColumn T="StaticTemplateView" />
+            <SelectColumn T="StaticTemplate" />
         }
         <PropertyColumn Property="x => x.Id" Title="Id">
             <CellTemplate>
-                <div class="flex justify-center rounded-full w-10 p-2 cursor-pointer bg-red-500 text-white">
+                <div @onclick="() => ToggleEditDialog(context.Item)" class="flex justify-center rounded-full w-10 p-2 cursor-pointer bg-red-500 text-white">
                     <MudText>@context.Item.Id</MudText>
                 </div>
             </CellTemplate>
@@ -61,7 +64,7 @@
         <TemplateColumn Title="Actions" StickyRight="@_stickyActions">
             <CellTemplate>
                 <MudMenu Icon="@Icons.Material.Filled.MoreHoriz" AriaLabel="Åben aktionsmenu" AnchorOrigin="Origin.BottomCenter">
-                    <MudMenuItem OnClick="@((e) => MockMenu(context.Item))">
+                    <MudMenuItem OnClick="(() => ToggleEditDialog(context.Item))">
                         <MudStack Row="true">
                             <MudIcon Icon="@Icons.Material.Filled.Edit"></MudIcon>
                             <MudText>Rediger</MudText>
@@ -78,7 +81,7 @@
         </TemplateColumn>
     </Columns>
     <PagerContent>
-        <MudDataGridPager T="StaticTemplateView" />
+        <MudDataGridPager T="StaticTemplate" />
     </PagerContent>
 </MudDataGrid>
 
@@ -93,11 +96,11 @@
     private bool _stickyActions = true;
     private bool _groupOrganization = false;
 
-    private IEnumerable<StaticTemplateView> StaticList = new List<StaticTemplateView>();
+    private IEnumerable<StaticTemplate> StaticList = new List<StaticTemplate>();
     private string? _searchString;
     private List<string> _events = new();
 
-    private Func<StaticTemplateView, bool> _quickFilter => x =>
+    private Func<StaticTemplate, bool> _quickFilter => x =>
     {
         if (string.IsNullOrWhiteSpace(_searchString))
             return true;
@@ -108,34 +111,14 @@
         return false;
     };
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        await FetchStatics();
+        FetchStatics();
     }
 
-    async Task RowClicked(DataGridRowClickEventArgs<StaticTemplateView> args)
+    private void FetchStatics()
     {
-        _events.Insert(0, $"Event = RowClick, Index = {args.RowIndex}, Data = {System.Text.Json.JsonSerializer.Serialize(args.Item)}");
-    }
-
-    void RowRightClicked(DataGridRowClickEventArgs<StaticTemplateView> args)
-    {
-        _events.Insert(0, $"Event = RowRightClick, Index = {args.RowIndex}, Data = {System.Text.Json.JsonSerializer.Serialize(args.Item)}");
-    }
-
-    void SelectedItemsChanged(HashSet<StaticTemplateView> items)
-    {
-        _events.Insert(0, $"Event = SelectedItemsChanged, Data = {System.Text.Json.JsonSerializer.Serialize(items)}");
-    }
-
-    private async Task FetchStatics()
-    {
-        StaticList = await StaticTemplateService.GetAllObjectsView();
-    }
-
-    private void MockMenu(StaticTemplateView template)
-    {
-        
+        StaticList = Context.StaticTemplates;
     }
 
     private async Task ToggleDeleteModal(int id)
@@ -152,7 +135,7 @@
         if (!result.Canceled)
         {
             await StaticTemplateService.DeleteObject(id);
-            await FetchStatics();
+            FetchStatics();
         }
     }
 
@@ -163,7 +146,22 @@
         var result = await dialog.Result;
 
         if (result is not null && !result.Canceled)
-            await FetchStatics();
+            FetchStatics();
+    }
+
+    private async Task ToggleEditDialog(StaticTemplate template)
+    {
+        var parameters = new DialogParameters<Dialoges.EditStaticDialog>
+        {
+            { x => x.Static, template }
+        };
+
+        var options = new DialogOptions { CloseOnEscapeKey = true, CloseButton = true };
+        var dialog = await DialogService.ShowAsync<Dialoges.EditStaticDialog>("Delete dialog", parameters, options);
+        var result = await dialog.Result;
+
+        if (result is not null && !result.Canceled)
+            FetchStatics();
     }
 
     private void ToggleOpenTableSettings() => _open = !_open;

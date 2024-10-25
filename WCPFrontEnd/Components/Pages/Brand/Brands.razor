@@ -56,7 +56,7 @@
         }
         <PropertyColumn Property="x => x.Id" Title="Id">
             <CellTemplate>
-                <div class="flex justify-center rounded-full w-10 p-2 cursor-pointer bg-red-500 text-white">
+                <div @onclick="() => ToggleEditDialog(context.Item)" class="flex justify-center rounded-full w-10 p-2 cursor-pointer bg-red-500 text-white">
                     <MudText>@context.Item.Id</MudText>
                 </div>
             </CellTemplate>
@@ -75,7 +75,7 @@
         <TemplateColumn Title="Actions" StickyRight="@_stickyActions">
             <CellTemplate>
                 <MudMenu Icon="@Icons.Material.Filled.MoreHoriz" AriaLabel="Åben aktionsmenu" AnchorOrigin="Origin.BottomCenter">
-                    <MudMenuItem>
+                    <MudMenuItem OnClick="() => ToggleEditDialog(context.Item)">
                         <MudStack Row="true">
                             <MudIcon Icon="@Icons.Material.Filled.Edit"></MudIcon>
                             <MudText>Rediger</MudText>
@@ -157,6 +157,21 @@
     {
         var options = new DialogOptions { CloseOnEscapeKey = true, CloseButton = true };
         var dialog = await DialogService.ShowAsync<Dialoges.AddBrandDialog>("Add dialog", options);
+        var result = await dialog.Result;
+
+        if (result is not null && !result.Canceled)
+            await FetchBrands();
+    }
+
+    private async Task ToggleEditDialog(Brand brand)
+    {
+        var parameters = new DialogParameters<Dialoges.EditBrandDialog>
+        {
+            { x => x.Brand, brand }
+        };
+
+        var options = new DialogOptions { CloseOnEscapeKey = true, CloseButton = true };
+        var dialog = await DialogService.ShowAsync<Dialoges.EditBrandDialog>("Delete dialog", parameters, options);
         var result = await dialog.Result;
 
         if (result is not null && !result.Canceled)

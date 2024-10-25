@@ -1,0 +1,58 @@
+﻿@using Microsoft.EntityFrameworkCore
+@using WCPAdminFrontEnd.Services
+@using WCPFrontEnd.Services
+@using WCPShared.Interfaces
+@using WCPShared.Interfaces.Auth
+@using WCPShared.Models.DTOs
+@using WCPShared.Models.Entities.AuthModels
+@using WCPShared.Models.Entities.UserModels
+@using WCPShared.Models.Views
+@using WCPShared.Models.Entities
+@using WCPShared.Services
+@using WCPShared.Services.EntityFramework
+@inject IWcpDbContext Context
+@inject BrandService BrandService
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            Rediger brand
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudForm @ref="_form" @bind-IsValid="@_success" @bind-Errors="@_errors">
+            <MudStack Row="true">
+                <MudTextField T="string" @bind-Value="Brand.Name" Label="Brandnavn" Required="true" Validation="@(new Func<string, string>(ValidationHelpers.NameValidation))" RequiredError="Dette felt er påkrævet" />
+                <MudTextField T="string" @bind-Value="Brand.URL" Label="URL" Required="true" Validation="@(new Func<string, string>(ValidationHelpers.URLValidation))" RequiredError="Dette felt er påkrævet" />
+            </MudStack>
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Annuller</MudButton>
+        <MudButton Color="@Color.Success" Variant="Variant.Filled" Disabled="@(!_success)" OnClick="Submit">Gem</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; }
+
+    [Parameter]
+    public Brand Brand { get; set; }
+
+    private MudForm _form;
+    private bool _success;
+    private string[] _errors = { };
+
+    private async Task Submit()
+    {
+        if (Brand.Validate())
+        {
+            await BrandService.UpdateObject(Brand.Id, Brand);
+        }
+
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}
