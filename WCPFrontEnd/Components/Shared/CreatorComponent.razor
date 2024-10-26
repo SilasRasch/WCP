@@ -10,19 +10,19 @@
         <MudStack Spacing="0">
             <MudText Class="font-semibold">@Creator.User.Name</MudText>
 
-            <MudStack Row="true" Spacing="1"> 
+            <MudStack Row="true" Spacing="1" AlignItems="AlignItems.Center"> 
                 @if (Creator.DateOfBirth is not null)
                 {
                     <MudText>@ProjectHelper.CalculateAge(Creator.DateOfBirth.Value) år</MudText>
                 }
-                @if (Creator.Gender is not null && Creator.Gender == "Kvinde")
+                @if (Creator.Gender is not null && Creator.Gender.ToLower() == "kvinde")
                 {
-                    <MudText> / </MudText>
+                    <MudText>/</MudText>
                     <MudIcon Icon="@Icons.Material.Filled.Female" Size="Size.Small"></MudIcon>
                 }
                 else if (Creator.Gender is not null)
                 {
-                    <MudText> / </MudText>
+                    <MudText>/</MudText>
                     <MudIcon Icon="@Icons.Material.Filled.Male" Size="Size.Small"></MudIcon>
                 }
             </MudStack>
@@ -43,19 +43,42 @@
     <MudCollapse Expanded="_expanded">
         <MudStack Row="true">
             <div>
+                @if (!String.IsNullOrEmpty(Creator.User.Name))
+                {
+                    <MudStack Row="true" Spacing="1">
+                        <MudIcon Icon="@Icons.Material.Filled.Person"></MudIcon>
+                        <MudText>@Creator.User.Name</MudText>
+                    </MudStack>
+                }
+                
+                @if (Creator.DateOfBirth is not null)
+                {
+                    <MudStack Row="true" Spacing="1">
+                        <MudIcon Icon="@Icons.Material.Filled.Cake"></MudIcon>
+                        <MudText>@Creator.DateOfBirth.Value.ToString("d") (@ProjectHelper.CalculateAge(Creator.DateOfBirth.Value) år)</MudText>
+                    </MudStack>
+                }
+
+                @if (!String.IsNullOrEmpty(Creator.Gender))
+                {
+                    <MudStack Row="true" Spacing="1">
+                        @if (Creator.Gender is not null && Creator.Gender.ToLower() == "kvinde")
+                        {
+                            <MudIcon Icon="@Icons.Material.Filled.Female"></MudIcon>
+                        }
+                        else if (Creator.Gender is not null)
+                        {
+                            <MudIcon Icon="@Icons.Material.Filled.Male"></MudIcon>
+                        }
+                        <MudText>@Creator.Gender</MudText>
+                    </MudStack>
+                }
+                
                 @if (!String.IsNullOrEmpty(Creator.User.Email))
                 {
                     <MudStack Row="true" Spacing="1">
                         <MudIcon Icon="@Icons.Material.Filled.Email"></MudIcon>
                         <MudText>@Creator.User.Email</MudText>
-                    </MudStack>
-                }
-
-                @if (Creator.DateOfBirth is not null)
-                {
-                    <MudStack Row="true" Spacing="1">
-                        <MudIcon Icon="@Icons.Material.Filled.Cake"></MudIcon>
-                        <MudText>@Creator.DateOfBirth.Value.ToString("d")</MudText>
                     </MudStack>
                 }
                 
