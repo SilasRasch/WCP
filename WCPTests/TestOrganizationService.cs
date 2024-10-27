@@ -3,6 +3,7 @@ using WCPShared.Interfaces;
 using WCPShared.Models;
 using WCPShared.Models.DTOs;
 using WCPShared.Models.Entities;
+using WCPShared.Models.Entities.UserModels;
 using WCPShared.Services.Converters;
 using WCPShared.Services.EntityFramework;
 
@@ -16,7 +17,7 @@ namespace WCPTests
     private LanguageService _languageService;
 
     [TestInitialize]
-    public void Init()
+    public async Task Init()
     {
         // Set up new DbContextOptions with an InMemory database.
         var options = new DbContextOptionsBuilder<TestDbContext>()
@@ -27,6 +28,11 @@ namespace WCPTests
         _viewConverter = new ViewConverter();
         _languageService = new LanguageService(context);
         _organizationService = new OrganizationService(context, _viewConverter, _languageService);
+
+        await _languageService.AddObject(new Language()
+        {
+            Name = "DAN",
+        });
     }
         
     [TestMethod]
@@ -35,7 +41,8 @@ namespace WCPTests
         var dto = new OrganizationDto()
         {
             Name = "First Org",
-            CVR = "12341234"
+            CVR = "12341234",
+            LanguageId = 1,
         };
 
         var resultDto = await _organizationService.AddObject(dto);
@@ -49,7 +56,8 @@ namespace WCPTests
         var result = await _organizationService.AddObject(new OrganizationDto()
         {
             Name = "First Org",
-            CVR = "12341234"
+            CVR = "12341234",
+            LanguageId = 1,
         });
 
         var orgs = await _organizationService.GetAllObjects();
@@ -69,7 +77,8 @@ namespace WCPTests
         Organization? addResult = await _organizationService.AddObject(new OrganizationDto()
         {
             Name = "First Org",
-            CVR = "12341234"
+            CVR = "12341234",
+            LanguageId = 1,
         });
 
         Assert.AreEqual(1, (await _organizationService.GetAllObjects()).Count);
@@ -97,7 +106,8 @@ namespace WCPTests
         var result = await _organizationService.AddObject(new OrganizationDto()
         {
             Name = "First Org",
-            CVR = "12341234"
+            CVR = "12341234",
+            LanguageId = 1,
         });
 
         Assert.IsNotNull(await _organizationService.GetObject(result.Id));

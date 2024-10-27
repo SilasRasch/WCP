@@ -74,14 +74,15 @@ namespace WCPTests
             _organizationService = new OrganizationService(context, _viewConverter, _languageService);
             _brandService = new BrandService(context, _organizationService, _viewConverter);
             _staticTemplateService = new StaticTemplateService(context, _viewConverter);
-            _userService = new UserService(context, _organizationService, _viewConverter);
+            _userService = new UserService(context, _organizationService, _languageService, _viewConverter);
             _creatorService = new CreatorService(context, _languageService, _userService, _viewConverter);
             _slackNotificationService = new SlackNotificationService(new SlackNet.SlackApiClient("mock"), _creatorService, _userService);
             _orderService = new OrderService(context, _brandService, _creatorService, _viewConverter, _slackNotificationService, _staticTemplateService);
 
-            _organization = await _organizationService.AddObject(new OrganizationDto() { Name = "Org", CVR = "12345678" });
+            await _languageService.AddObject(new Language { Name = "DAN" });
+            _organization = await _organizationService.AddObject(new OrganizationDto() { Name = "Org", CVR = "12345678", LanguageId = 1 });
             _brand = await _brandService.AddObject(new BrandDto() { Name = "Brand", URL = "brand.dk", OrganizationId = _organization!.Id });
-            _user = await _userService.AddObject(new RegisterDto() { Name = "Creator", Email = "email@email.com", OrganizationId = _organization!.Id, Phone = "12341234", Role = "Creator" });
+            _user = await _userService.AddObject(new RegisterDto() { Name = "Creator", Email = "email@email.com", OrganizationId = _organization!.Id, Phone = "12341234", Role = "Creator", LanguageId = 1 });
             _creator = await _creatorService.AddObject(new CreatorDto() { Address = "Adressevej 12, 4000 By", Gender = "Mand", SubType = "UGC", UserId = 1 });
         }
 

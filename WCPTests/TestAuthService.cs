@@ -57,13 +57,13 @@ namespace WCPTests
             _viewConverter = new ViewConverter();
             _organizationService = new OrganizationService(context, _viewConverter, _languageService);
             _brandService = new BrandService(context, _organizationService, _viewConverter);
-            _userService = new UserService(context, _organizationService, _viewConverter);
+            _userService = new UserService(context, _organizationService, _languageService, _viewConverter);
             _creatorService = new CreatorService(context, _languageService, _userService, _viewConverter);
             _jwtService = new JwtService(configuration, _userService, _emailService, _organizationService, _creatorService);
             _authService = new AuthService(configuration, _userService, _emailService, _organizationService, _creatorService, null!, _jwtService, _languageService);
 
-
-            _organization = await _organizationService.AddObject(new OrganizationDto() { Name = "Org", CVR = "12345678" });
+            await _languageService.AddObject(new Language { Name = "DAN" });
+            _organization = await _organizationService.AddObject(new OrganizationDto() { Name = "Org", CVR = "12345678", LanguageId = 1 });
         }
 
         #endregion
@@ -77,7 +77,8 @@ namespace WCPTests
                 Name = "Test Bruger",
                 OrganizationId = _organization!.Id,
                 Phone = "12345678",
-                Role = "Bruger"
+                Role = "Bruger",
+                LanguageId = 1
             };
             
             RegisterCreatorDto dto = new RegisterCreatorDto()
@@ -133,7 +134,8 @@ namespace WCPTests
                     Email = "info@creator.dk",
                     Name = "Test Creator",
                     Phone = "12345678",
-                    Role = "Creator"
+                    Role = "Creator",
+                    LanguageId = 1
                 },
                 Creator = new CreatorDto()
                 {
@@ -157,7 +159,8 @@ namespace WCPTests
                     Name = "Test Bruger",
                     OrganizationId = _organization!.Id,
                     Phone = "12345678",
-                    Role = "Bruger"
+                    Role = "Bruger",
+                    LanguageId = 1
                 }
             };
 
@@ -197,7 +200,8 @@ namespace WCPTests
                     Name = "Test Bruger",
                     OrganizationId = _organization!.Id,
                     Phone = "12345678",
-                    Role = "Bruger"
+                    Role = "Bruger",
+                    LanguageId = 1
                 }
             };
 

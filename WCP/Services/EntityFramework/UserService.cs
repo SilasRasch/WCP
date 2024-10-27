@@ -15,12 +15,14 @@ namespace WCPShared.Services.EntityFramework
         private readonly IWcpDbContext _context;
         private readonly OrganizationService _organizationService;
         private readonly ViewConverter _viewConverter;
+        private readonly LanguageService _languageService;
 
-        public UserService(IWcpDbContext context, OrganizationService organizationService, ViewConverter viewConverter) : base(context)
+        public UserService(IWcpDbContext context, OrganizationService organizationService, LanguageService languageService, ViewConverter viewConverter) : base(context)
         {
             _context = context;
             _organizationService = organizationService;
             _viewConverter = viewConverter;
+            _languageService = languageService;
         }
 
         public override async Task<User?> AddObject(User user)
@@ -63,11 +65,17 @@ namespace WCPShared.Services.EntityFramework
             if (organization is not null)
                 _context.Organizations.Attach(organization);
 
+            Language? language = await _languageService.GetObject(obj.LanguageId);
+
+            if (language is not null)
+                _context.Languages.Attach(language);
+
             var user = new User
             {
                 Email = obj.Email,
                 Name = obj.Name,
                 Phone = obj.Phone,
+                Language = language
             };
 
             await _context.Users.AddAsync(user);
