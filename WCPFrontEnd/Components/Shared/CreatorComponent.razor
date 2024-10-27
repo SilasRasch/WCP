@@ -1,4 +1,5 @@
 ﻿@using WCPAdminFrontEnd.Services
+@using WCPShared.Models.Entities
 @using WCPShared.Models.Entities.UserModels
 @using WCPShared.Models.Views
 
@@ -31,100 +32,114 @@
 
         <MudSpacer></MudSpacer>
 
-        @if (Addable)
-        {
-            <div class="flex justify-center items-center">
+        <MudStack Row="true" Spacing="0" Justify="Justify.Center">
+            @if (Addable)
+            {
                 <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Success" OnClick="() => AddCreator.InvokeAsync(Creator)"></MudIconButton>
-            </div>
-        }
+            }
+            @if (Participation is not null)
+            {
+                @if (Participation.HasDelivered)
+                {
+                    <MudIconButton Icon="@Icons.Material.Filled.CheckCircleOutline" Color="Color.Success"></MudIconButton>
+                }
+                else
+                {
+                    <MudIconButton Icon="@Icons.Material.Filled.Close" Color="Color.Error"></MudIconButton>
+                }
+                @if (Editable)
+                {
+                    <MudIconButton Icon="@Icons.Material.Filled.AttachMoney" Color="Color.Success" OnClick="ToggleSalaryInput"></MudIconButton>
+
+                    <MudPopover Open="@_showSalary" AnchorOrigin="Origin.CenterLeft" TransformOrigin="Origin.CenterCenter" Class="px-4 pt-4">
+                        <div class="d-flex flex-column">
+                            <MudNumericField Label="Lønning" @bind-Value="Participation.Salary" Min="0" />
+                            <MudButton OnClick="@ToggleSalaryInput" Class="ml-auto mr-n3 mb-1">Luk</MudButton>
+                        </div>
+                    </MudPopover>
+                }
+            }
+
+            @if (Editable)
+            {
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => RemoveCreator.InvokeAsync(Creator)"></MudIconButton>
+            }
+        </MudStack>
+        
     </MudStack>
 
     <MudDivider />
 
     <MudCollapse Expanded="_expanded">
-        <MudStack Row="true">
-            <div>
-                @if (!String.IsNullOrEmpty(Creator.User.Name))
-                {
-                    <MudStack Row="true" Spacing="1">
-                        <MudIcon Icon="@Icons.Material.Filled.Person"></MudIcon>
-                        <MudText>@Creator.User.Name</MudText>
-                    </MudStack>
-                }
-                
-                @if (Creator.DateOfBirth is not null)
-                {
-                    <MudStack Row="true" Spacing="1">
-                        <MudIcon Icon="@Icons.Material.Filled.Cake"></MudIcon>
-                        <MudText>@Creator.DateOfBirth.Value.ToString("d") (@ProjectHelper.CalculateAge(Creator.DateOfBirth.Value) år)</MudText>
-                    </MudStack>
-                }
+        @if (!String.IsNullOrEmpty(Creator.User.Name))
+        {
+            <MudStack Row="true" Spacing="1">
+                <MudIcon Icon="@Icons.Material.Filled.Person"></MudIcon>
+                <MudText>@Creator.User.Name</MudText>
+            </MudStack>
+        }
 
-                @if (!String.IsNullOrEmpty(Creator.Gender))
-                {
-                    <MudStack Row="true" Spacing="1">
-                        @if (Creator.Gender is not null && Creator.Gender.ToLower() == "kvinde")
-                        {
-                            <MudIcon Icon="@Icons.Material.Filled.Female"></MudIcon>
-                        }
-                        else if (Creator.Gender is not null)
-                        {
-                            <MudIcon Icon="@Icons.Material.Filled.Male"></MudIcon>
-                        }
-                        <MudText>@Creator.Gender</MudText>
-                    </MudStack>
-                }
-                
-                @if (!String.IsNullOrEmpty(Creator.User.Email))
-                {
-                    <MudStack Row="true" Spacing="1">
-                        <MudIcon Icon="@Icons.Material.Filled.Email"></MudIcon>
-                        <MudText>@Creator.User.Email</MudText>
-                    </MudStack>
-                }
-                
-                @if (!String.IsNullOrEmpty(Creator.Address))
-                {
-                    <MudStack Row="true" Spacing="1">
-                        <MudIcon Icon="@Icons.Material.Filled.House"></MudIcon>
-                        <MudText>@Creator.Address</MudText>
-                    </MudStack>
-                }
+        @if (Creator.DateOfBirth is not null)
+        {
+            <MudStack Row="true" Spacing="1">
+                <MudIcon Icon="@Icons.Material.Filled.Cake"></MudIcon>
+                <MudText>@Creator.DateOfBirth.Value.ToString("d") (@ProjectHelper.CalculateAge(Creator.DateOfBirth.Value) år)</MudText>
+            </MudStack>
+        }
 
-                @if (!String.IsNullOrEmpty(Creator.User.Phone))
+        @if (!String.IsNullOrEmpty(Creator.Gender))
+        {
+            <MudStack Row="true" Spacing="1">
+                @if (Creator.Gender is not null && Creator.Gender.ToLower() == "kvinde")
                 {
-                    <MudStack Row="true" Spacing="1">
-                        <MudIcon Icon="@Icons.Material.Filled.Phone"></MudIcon>
-                        <MudText>@Creator.User.Phone</MudText>
-                    </MudStack>
+                    <MudIcon Icon="@Icons.Material.Filled.Female"></MudIcon>
                 }
-
-                @if (Creator.Languages is not null)
+                else if (Creator.Gender is not null)
                 {
-                    <div class="flex gap-1 items-center">
-                        <MudIcon Icon="@Icons.Material.Filled.Language"></MudIcon>
-                        <MudStack Row="true" Spacing="1">
-                            @foreach (var lang in Creator.Languages)
-                            {
-                                <MudText Typo="Typo.h6">
-                                    @ProjectHelper.CountryStringToFlag(lang.Name)
-                                </MudText>
-                            }
-                        </MudStack>
-                    </div>
-                    
+                    <MudIcon Icon="@Icons.Material.Filled.Male"></MudIcon>
                 }
+                <MudText>@Creator.Gender</MudText>
+            </MudStack>
+        }
 
+        @if (!String.IsNullOrEmpty(Creator.User.Email))
+        {
+            <MudStack Row="true" Spacing="1">
+                <MudIcon Icon="@Icons.Material.Filled.Email"></MudIcon>
+                <MudText>@Creator.User.Email</MudText>
+            </MudStack>
+        }
+
+        @if (!String.IsNullOrEmpty(Creator.Address))
+        {
+            <MudStack Row="true" Spacing="1">
+                <MudIcon Icon="@Icons.Material.Filled.House"></MudIcon>
+                <MudText>@Creator.Address</MudText>
+            </MudStack>
+        }
+
+        @if (!String.IsNullOrEmpty(Creator.User.Phone))
+        {
+            <MudStack Row="true" Spacing="1">
+                <MudIcon Icon="@Icons.Material.Filled.Phone"></MudIcon>
+                <MudText>@Creator.User.Phone</MudText>
+            </MudStack>
+        }
+
+        @if (Creator.Languages is not null)
+        {
+            <div class="flex gap-1 items-center">
+                <MudIcon Icon="@Icons.Material.Filled.Language"></MudIcon>
+                <MudStack Row="true" Spacing="1">
+                    @foreach (var lang in Creator.Languages)
+                    {
+                        <MudText Typo="Typo.h6">
+                            @ProjectHelper.CountryStringToFlag(lang.Name)
+                        </MudText>
+                    }
+                </MudStack>
             </div>
-            <MudSpacer />
-
-            @if (Editable)
-            {
-                <div class="flex justify-center items-center">
-                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => RemoveCreator.InvokeAsync(Creator)"></MudIconButton>
-                </div>
-            }
-        </MudStack>
+        }
     </MudCollapse>
 </MudStack>
 
@@ -133,21 +148,27 @@
     public Creator Creator { get; set; }
 
     [Parameter]
+    public CreatorParticipation? Participation { get; set; }
+
+    [Parameter]
     public EventCallback<Creator> RemoveCreator { get; set; }
-    
+
     [Parameter]
     public EventCallback<Creator> AddCreator { get; set; }
 
     [Parameter]
     public bool Editable { get; set; }
-    
+
     [Parameter]
     public bool Addable { get; set; }
 
     bool _expanded = false;
+    bool _showSalary = false;
 
     private void OnExpandCollapseClick()
     {
         _expanded = !_expanded;
     }
+
+    private void ToggleSalaryInput() => _showSalary = !_showSalary;
 }

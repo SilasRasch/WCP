@@ -48,10 +48,6 @@ namespace WCPShared.Models
                 .WithMany(x => x.Orders);
 
             modelBuilder.Entity<Order>()
-                .HasMany(x => x.Creators)
-                .WithMany(x => x.Orders);
-
-            modelBuilder.Entity<Order>()
                 .HasOne(x => x.Videographer);
 
             modelBuilder.Entity<Order>()
@@ -76,16 +72,6 @@ namespace WCPShared.Models
                         (c1, c2) => c1!.SequenceEqual(c2!),
                         c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
                         c => c.ToList()));
-
-            modelBuilder.Entity<Order>()
-                .Property(x => x.CreatorDeliveryStatus)
-                .HasConversion(new ValueConverter<Dictionary<int, bool>, string>(
-                    v => JsonConvert.SerializeObject(v),
-                    v => JsonConvert.DeserializeObject<Dictionary<int, bool>>(v)!),
-                    new ValueComparer<Dictionary<int, bool>>(
-                        (c1, c2) => c1!.SequenceEqual(c2!),
-                        c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
-                        c => c.ToDictionary()));
         }
     }
 }

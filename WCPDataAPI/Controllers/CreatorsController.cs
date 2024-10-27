@@ -38,9 +38,9 @@ namespace WCPDataAPI.Controllers
             {
                 Order? order = await _orderService.GetObject(orderId.Value);
 
-                if (order is not null && order.Creators is not null)
+                if (order is not null && order.CreatorsParticipations is not null)
                 {
-                    creators = creators.Where(x => order.Creators.Any(c => c.Id == x.Id)).ToList();
+                    creators = creators.Where(x => order.CreatorsParticipations.Any(c => c.CreatorId == x.Id)).ToList();
                 }
             }
 

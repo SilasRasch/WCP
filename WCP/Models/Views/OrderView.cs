@@ -17,11 +17,11 @@ namespace WCPShared.Models.Views
         public CreatorView? Videographer { get; set; }
         public int? EditorId { get; set; }
         public CreatorView? Editor { get; set; }
-        public List<CreatorView> Creators { get; set; } = new List<CreatorView>();
-        public List<StaticTemplateView> StaticTemplates { get; set; } = new List<StaticTemplateView>();
+        public List<CreatorView> Creators { get; set; } = [];
+        public List<StaticTemplateView> StaticTemplates { get; set; } = [];
         public DateTime Created { get; set; }
         public DateTime Updated { get; set; }
-        public Dictionary<int, bool> CreatorDeliveryStatus { get; set; } = new Dictionary<int, bool>();
+        public Dictionary<int, bool> CreatorDeliveryStatus { get; set; } = [];
 
         // Drive-links
         public string Scripts { get; set; } = string.Empty;
@@ -59,8 +59,8 @@ namespace WCPShared.Models.Views
         public string? ExtraNotes { get; set; }
         public string? FocusPoints { get; set; }
         public string? RelevantFiles { get; set; }
-        public List<string> Ideas { get; set; } = new List<string>();
-        public List<string> Products { get; set; } = new List<string>();
+        public List<string> Ideas { get; set; } = [];
+        public List<string> Products { get; set; } = [];
 
         #endregion
 
@@ -102,7 +102,6 @@ namespace WCPShared.Models.Views
             Other = obj.Other;
             Created = obj.Created;
             Updated = obj.Updated;
-            CreatorDeliveryStatus = obj.CreatorDeliveryStatus;
         }
 
         public OrderDto ToDto()

@@ -38,10 +38,6 @@ namespace WCPShared.Models
                 .WithMany(x => x.Orders);
 
             modelBuilder.Entity<Order>()
-                .HasMany(x => x.Creators)
-                .WithMany(x => x.Orders);
-
-            modelBuilder.Entity<Order>()
                 .HasOne(x => x.Videographer);
 
             modelBuilder.Entity<Order>()

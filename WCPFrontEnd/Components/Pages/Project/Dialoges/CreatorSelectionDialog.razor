@@ -27,7 +27,7 @@
         <MudStack Class="mt-2" Spacing="1">
             @foreach (var participation in Project.CreatorsParticipations)
             {
-                <CreatorComponent Creator="participation.Creator" RemoveCreator="CallbackRemoveCreator" Editable="_editable"></CreatorComponent>
+                <CreatorComponent Creator="participation.Creator" Participation="participation" RemoveCreator="CallbackRemoveCreator" Editable="_editable"></CreatorComponent>
             }
 
             @if (_editable)
@@ -60,7 +60,7 @@
 
         @if (_editable)
         {
-            <MudButton OnClick="Submit" Color="Color.Success"><MudIcon Icon="@Icons.Material.Filled.Save" Class="mr-2" /> Bekræft</MudButton>
+            <MudButton OnClick="Submit" Color="Color.Success"><MudIcon Icon="@Icons.Material.Filled.Save" Class="mr-2" /> Gem</MudButton>
         }
         
     </DialogActions>

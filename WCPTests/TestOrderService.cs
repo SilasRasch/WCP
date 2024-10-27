@@ -94,7 +94,7 @@ namespace WCPTests
             Assert.IsNotNull(result);
             Assert.AreEqual(_orderDto.ProjectName, result.ProjectName);
             Assert.AreEqual(1, (await _orderService.GetAllObjects()).Count);
-            Assert.AreEqual(1, result.Creators.Count);
+            Assert.AreEqual(1, result.CreatorsParticipations.Count);
             Assert.AreEqual("Brand", result.Brand.Name);
         }
 
@@ -251,10 +251,10 @@ namespace WCPTests
         {
             var result = await _orderService.AddObject(_orderDto);
             Assert.IsNotNull(result);
-            Assert.IsTrue(result.CreatorDeliveryStatus.All(x => !x.Value));
+            Assert.IsTrue(result.CreatorsParticipations.All(x => !x.HasDelivered));
 
-            await _orderService.CreatorDelivery(result.Id, result.Creators.First().Id);
-            Assert.IsTrue(result.CreatorDeliveryStatus.First().Value);
+            await _orderService.CreatorDelivery(result.Id, result.CreatorsParticipations.First().CreatorId);
+            Assert.IsTrue(result.CreatorsParticipations.First().HasDelivered);
             Assert.AreEqual(4, result.Status);
         }
     }

@@ -18,7 +18,6 @@ namespace WCPShared.Models.Entities.UserModels
         public int UserId { get; set; }
         public User User { get; set; } = new User();
         public List<Language>? Languages { get; set; } = new List<Language>();
-        public List<Order> Orders { get; set; } = new List<Order>();
         public List<CreatorParticipation> Participations { get; set; } = new List<CreatorParticipation>();
         public string? Gender { get; set; } = string.Empty;
 

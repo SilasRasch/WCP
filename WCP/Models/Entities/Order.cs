@@ -24,9 +24,7 @@ namespace WCPShared.Models.Entities
         public List<StaticTemplate>? StaticTemplates { get; set; }
         public DateTime Created { get; set; }
         public DateTime Updated { get; set; }
-        public List<Creator> Creators { get; set; } = [];
         public List<CreatorParticipation> CreatorsParticipations { get; set; } = [];
-        public Dictionary<int, bool> CreatorDeliveryStatus { get; set; } = new Dictionary<int, bool>();
 
         // Drive-links
         public string Scripts { get; set; } = string.Empty;
@@ -64,8 +62,8 @@ namespace WCPShared.Models.Entities
         public string? ExtraNotes { get; set; }
         public string? FocusPoints { get; set; }
         public string? RelevantFiles { get; set; }
-        public List<string> Ideas { get; set; } = new List<string>();
-        public List<string> Products { get; set; } = new List<string>();
+        public List<string> Ideas { get; set; } = [];
+        public List<string> Products { get; set; } = [];
 
         #endregion
 
