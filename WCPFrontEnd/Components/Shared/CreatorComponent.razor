@@ -1,4 +1,5 @@
 ﻿@using WCPAdminFrontEnd.Services
+@using WCPShared.Models.Entities.UserModels
 @using WCPShared.Models.Views
 
 <MudStack Class="bg-gray-950 p-4 rounded-lg">
@@ -103,10 +104,10 @@
                     <div class="flex gap-1 items-center">
                         <MudIcon Icon="@Icons.Material.Filled.Language"></MudIcon>
                         <MudStack Row="true" Spacing="1">
-                            @foreach (string lang in Creator.Languages)
+                            @foreach (var lang in Creator.Languages)
                             {
                                 <MudText Typo="Typo.h6">
-                                    @ProjectHelper.CountryStringToFlag(lang)
+                                    @ProjectHelper.CountryStringToFlag(lang.Name)
                                 </MudText>
                             }
                         </MudStack>
@@ -129,13 +130,13 @@
 
 @code {
     [Parameter]
-    public CreatorView Creator { get; set; }
+    public Creator Creator { get; set; }
 
     [Parameter]
-    public EventCallback<CreatorView> RemoveCreator { get; set; }
+    public EventCallback<Creator> RemoveCreator { get; set; }
     
     [Parameter]
-    public EventCallback<CreatorView> AddCreator { get; set; }
+    public EventCallback<Creator> AddCreator { get; set; }
 
     [Parameter]
     public bool Editable { get; set; }

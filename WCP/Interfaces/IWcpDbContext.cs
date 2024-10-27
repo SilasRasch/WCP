@@ -14,6 +14,7 @@ namespace WCPShared.Interfaces
         DbSet<Organization> Organizations { get; set; }
         DbSet<Brand> Brands { get; set; }
         DbSet<Creator> Creators { get; set; }
+        DbSet<CreatorParticipation> CreatorParticipations { get; set; }
         DbSet<Order> Orders { get; set; }
         DbSet<Language> Languages { get; set; }
         DbSet<StaticTemplate> StaticTemplates { get; set; }

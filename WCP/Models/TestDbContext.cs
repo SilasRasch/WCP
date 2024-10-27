@@ -15,6 +15,7 @@ namespace WCPShared.Models
         public DbSet<Organization> Organizations { get; set; }
         public DbSet<Brand> Brands { get; set; }
         public DbSet<Creator> Creators { get; set; }
+        public DbSet<CreatorParticipation> CreatorParticipations { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<Language> Languages { get; set; }
         public DbSet<StaticTemplate> StaticTemplates { get; set; }
@@ -25,6 +26,19 @@ namespace WCPShared.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<CreatorParticipation>()
+                .HasKey(e => new { e.OrderId, e.CreatorId });
+
+            modelBuilder.Entity<CreatorParticipation>()
+                .HasOne(e => e.Creator)
+                .WithMany(e => e.Participations)
+                .HasForeignKey(e => e.CreatorId);
+
+            modelBuilder.Entity<CreatorParticipation>()
+                .HasOne(e => e.Order)
+                .WithMany(e => e.CreatorsParticipations)
+                .HasForeignKey(e => e.OrderId);
+
             modelBuilder.Entity<Creator>()
                 .HasMany(x => x.Languages)
                 .WithMany(x => x.Speakers);

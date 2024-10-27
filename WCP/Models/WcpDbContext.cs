@@ -18,6 +18,7 @@ namespace WCPShared.Models
         public DbSet<Order> Orders { get; set; }
         public DbSet<Language> Languages { get; set; }
         public DbSet<StaticTemplate> StaticTemplates { get; set; }
+        public DbSet<CreatorParticipation> CreatorParticipations { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         private readonly IConfiguration _configuration;
 

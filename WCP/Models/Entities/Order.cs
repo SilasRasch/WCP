@@ -21,10 +21,11 @@ namespace WCPShared.Models.Entities
         public Creator? Videographer { get; set; }
         public int? EditorId { get; set; }
         public Creator? Editor { get; set; }
-        public List<Creator> Creators { get; set; } = [];
         public List<StaticTemplate>? StaticTemplates { get; set; }
         public DateTime Created { get; set; }
         public DateTime Updated { get; set; }
+        public List<Creator> Creators { get; set; } = [];
+        public List<CreatorParticipation> CreatorsParticipations { get; set; } = [];
         public Dictionary<int, bool> CreatorDeliveryStatus { get; set; } = new Dictionary<int, bool>();
 
         // Drive-links

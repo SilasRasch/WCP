@@ -1,10 +1,11 @@
-﻿@using WCPAdminFrontEnd.Services
+﻿@using Microsoft.EntityFrameworkCore
+@using WCPAdminFrontEnd.Services
+@using WCPShared.Interfaces
+@using WCPShared.Models.Entities
 @using WCPShared.Models.Entities.UserModels
-@using WCPShared.Models.Views
 @using WCPShared.Services.EntityFramework
 @using WCPFrontEnd.Components.Shared
-@inject OrderService OrderService
-@inject CreatorService CreatorService
+@inject IWcpDbContext Context
 
 <MudDialog>
     <TitleContent>
@@ -24,15 +25,15 @@
         </MudStack>
 
         <MudStack Class="mt-2" Spacing="1">
-            @foreach (var creator in Project.Creators)
+            @foreach (var participation in Project.CreatorsParticipations)
             {
-                <CreatorComponent Creator="creator" RemoveCreator="CallbackRemoveCreator" Editable="_editable"></CreatorComponent>
+                <CreatorComponent Creator="participation.Creator" RemoveCreator="CallbackRemoveCreator" Editable="_editable"></CreatorComponent>
             }
 
             @if (_editable)
             {
                 <div class="flex justify-center bg-gray-950 rounded-lg p-2">
-                    <MudIconButton Icon="@Icons.Material.Filled.Add" OnClick="async () => await ToggleAdding()"></MudIconButton>
+                    <MudIconButton Icon="@Icons.Material.Filled.Add" OnClick="ToggleAdding"></MudIconButton>
                 </div>
             }
         </MudStack>
@@ -70,29 +71,45 @@
     private MudDialogInstance MudDialog { get; set; }
 
     [Parameter]
-    public OrderView Project { get; set; } = new();
+    public Order Project { get; set; } = new();
 
-    private IEnumerable<CreatorView> AllCreators { get; set; } = new List<CreatorView>();
+    private IEnumerable<Creator> AllCreators { get; set; } = new List<Creator>();
     private bool _editable = false;
     private bool _adding = false;
-    private DateTime? _deliveryDate;
     private string? _searchString;
 
-    private async void Submit()
+    protected override void OnInitialized()
     {
-        await OrderService.UpdateObject(Project.Id, Project.ToDto());
+        AllCreators = Context.Creators
+            .Include(x => x.Languages)
+            .Include(x => x.User)
+            .ThenInclude(x => x.Language)
+            .Where(x => x.User.IsActive && x.SubType == "UGC")
+            .ToList();
+    }
+
+    private async Task Submit()
+    {
+        await Context.SaveChangesAsync();
+
         MudDialog.Close(DialogResult.Ok(true));
     }
 
-    private async Task ToggleAdding()
+    private void ToggleAdding()
     {
-        if (_adding == false) AllCreators = (await CreatorService.GetObjectsViewBy(x => x.User.IsActive && x.SubType == "UGC"))
-            .Where(x => !Project.Creators.Any(c => c.Id == x.Id));
+        if (_adding == false)
+        {
+            AllCreators = AllCreators.Where(x => !Project.CreatorsParticipations.Any(c => c.CreatorId == x.Id));
+        }
+
         _adding = !_adding;
     }
 
-    private bool Filter(CreatorView creator)
+    private bool Filter(Creator creator)
     {
+        if (Project.CreatorsParticipations.Any(x => x.CreatorId == creator.Id))
+            return false;
+
         if (string.IsNullOrWhiteSpace(_searchString))
             return true;
 
@@ -102,9 +119,29 @@
         return false;
     }
 
+    private void CallbackRemoveCreator(Creator creator) 
+    {
+        // Get index of participation
+        int index = Project.CreatorsParticipations.FindIndex(x => x.CreatorId == creator.Id);
+
+        // Remove index
+        Project.CreatorsParticipations.RemoveAt(index);
+    }
+
+    private void CallbackAddCreator(Creator creator)
+    {
+        var participation = Context.CreatorParticipations.Add(new CreatorParticipation
+        {
+            Creator = creator,
+            CreatorId = creator.Id,
+            Order = Project,
+            OrderId = Project.Id,
+            HasDelivered = false,
+            Salary = 0
+        });
+    }
+
     private void Cancel() => MudDialog.Cancel();
     private void ToggleEditable() => _editable = !_editable;
-    private void CallbackRemoveCreator(CreatorView creator) => Project.Creators.Remove(creator);
-    private void CallbackAddCreator(CreatorView creator) => Project.Creators.Add(creator);
 }
 
