@@ -21,7 +21,6 @@ namespace WCPShared.Models.Views
         public List<StaticTemplateView> StaticTemplates { get; set; } = [];
         public DateTime Created { get; set; }
         public DateTime Updated { get; set; }
-        public Dictionary<int, bool> CreatorDeliveryStatus { get; set; } = [];
 
         // Drive-links
         public string Scripts { get; set; } = string.Empty;

@@ -40,7 +40,7 @@ namespace WCPDataAPI.Controllers
             // Get creator's projects
             else if (_userContextService.GetRoles().Contains("Creator"))
                 orders = await _orderService.GetObjectsViewBy(x => 
-                (x.CreatorsParticipations!.Any(x => x.Creator.UserId == _userContextService.GetId()) || x.EditorId == _userContextService.GetId() || x.VideographerId == _userContextService.GetId())); // 
+                (x.Participations!.Any(x => x.Creator.UserId == _userContextService.GetId()) || x.EditorId == _userContextService.GetId() || x.VideographerId == _userContextService.GetId())); // 
 
             if (_userContextService.GetRoles().Contains("Admin"))
                 orders = await _orderService.GetAllObjectsView();
@@ -115,7 +115,7 @@ namespace WCPDataAPI.Controllers
 
             bool isAdmin = _userContextService.GetRoles().Contains("Admin");
             bool isCreator = _userContextService.GetRoles().Contains("Creator");
-            bool creatorAllowed = existingOrder.CreatorsParticipations.Exists(x => x.CreatorId == creator) && callingUser.Id == creator;
+            bool creatorAllowed = existingOrder.Participations.Exists(x => x.CreatorId == creator) && callingUser.Id == creator;
 
             if (!isAdmin && (isCreator && !creatorAllowed))
                 return Unauthorized("Du har ikke tilladelse til at ændre denne ordre");
@@ -136,7 +136,7 @@ namespace WCPDataAPI.Controllers
             if (!order.Validate())
                 return BadRequest("Valideringsfejl, tjek venligst felterne igen...");
 
-            bool creatorNotAllowed = !existingOrder.CreatorsParticipations.Exists(x => x.Creator.UserId == _userContextService.GetId()) && existingOrder.Status == 3 && order.Status == 4;
+            bool creatorNotAllowed = !existingOrder.Participations.Exists(x => x.Creator.UserId == _userContextService.GetId()) && existingOrder.Status == 3 && order.Status == 4;
             bool isAdmin = _userContextService.GetRoles().Contains("Admin");
             bool isCreator = _userContextService.GetRoles().Contains("Creator");
             bool isUser = _userContextService.GetRoles().Contains("Bruger");

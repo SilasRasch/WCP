@@ -11,7 +11,7 @@ namespace WCPShared.Services.Converters
         {
             OrderView view = new OrderView(obj);
             view.Brand = Convert(obj.Brand);
-            view.Creators = obj.CreatorsParticipations.Select(x => Convert(x.Creator)).ToList();
+            view.Creators = obj.Participations.Select(x => Convert(x.Creator)).ToList();
 
             if (obj.Videographer is not null)
                 view.Videographer = Convert(obj.Videographer);

@@ -100,7 +100,7 @@ namespace WCPShared.Services
             // Creator notifications
 
             var allCreators = await _creatorService.GetAllObjectsView();
-            IEnumerable<CreatorView> creatorsWithUsers = from CreatorParticipation in newOrder.CreatorsParticipations
+            IEnumerable<CreatorView> creatorsWithUsers = from CreatorParticipation in newOrder.Participations
                                                   join CreatorView in allCreators
                                                   on CreatorParticipation.Creator.Id equals CreatorView.Id
                                                   select CreatorView;
@@ -122,7 +122,7 @@ namespace WCPShared.Services
             // Notify newly invited creators (only in planned ???)
             if (newOrder.Status == 2)
             {
-                var newCreators = creatorsWithUsers.ExceptBy(oldOrder.CreatorsParticipations.Select(x => x.CreatorId), x => x.Id);
+                var newCreators = creatorsWithUsers.ExceptBy(oldOrder.Participations.Select(x => x.CreatorId), x => x.Id);
                 if (newCreators.Any())
                     foreach (CreatorView creator in newCreators)
                         await SendMessageToUser(

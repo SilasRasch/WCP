@@ -62,7 +62,7 @@
         <TemplateColumn Title="Creators">
             <CellTemplate>
                 <MudAvatarGroup Max="1" Spacing="3" Class="cursor-pointer" @onclick="(() => OpenCreatorDialog(context.Item))">
-                    @foreach (var participation in context.Item.CreatorsParticipations)
+                    @foreach (var participation in context.Item.Participations)
                     {
                         <div class="flex flex-col justify-center items-center">
                             <MudAvatar Color="Color.Primary">
@@ -78,7 +78,7 @@
                         </div>
                     }
 
-                    @if (context.Item.CreatorsParticipations.Count == 0)
+                    @if (context.Item.Participations.Count == 0)
                     {
                         <MudText Class="p-2 cursor-pointer">-</MudText>
                     }
@@ -277,7 +277,7 @@
             .Include(x => x.Editor)
             .ThenInclude(x => x!.User)
             .Include(x => x.StaticTemplates)
-            .Include(x => x.CreatorsParticipations)
+            .Include(x => x.Participations)
             .ThenInclude(x => x.Creator)
             .ThenInclude(x => x.User)
             .ThenInclude(x => x.Language)

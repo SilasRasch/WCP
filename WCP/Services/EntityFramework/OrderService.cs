@@ -65,35 +65,6 @@ namespace WCPShared.Services.EntityFramework
                 if (brand is not null) existingOrder.Brand = brand;
             }
 
-            //// Update creators
-            //if (order.Creators is not null)
-            //{
-            //    var creators = (await _creatorService.GetAllObjects()).Where(x => order.Creators.Contains(x.Id)).ToList();
-            //    var newCreators = creators.Except(existingOrder.Creators);
-
-            //    existingOrder.Creators = creators;
-
-            //    if (existingOrder.CreatorDeliveryStatus is null)
-            //    {
-            //        existingOrder.CreatorDeliveryStatus = creators.ToDictionary(x => x.Id, x => false);
-            //    }
-            //    else
-            //    {
-            //        // Remove excess
-            //        foreach (var c in existingOrder.CreatorDeliveryStatus)
-            //        {
-            //            if (!creators.Any(x => x.Id == c.Key))
-            //                existingOrder.CreatorDeliveryStatus.Remove(c.Key);
-            //        }
-            //    }
-
-            //    // Add new creators to delivery system
-            //    foreach (Creator creator in newCreators)
-            //    {
-            //        existingOrder.CreatorDeliveryStatus.Add(creator.Id, false);
-            //    }
-            //}
-
             // Update videographer
             if (order.VideographerId != existingOrder.VideographerId)
             {
@@ -145,13 +116,13 @@ namespace WCPShared.Services.EntityFramework
             if (order is null)
                 return null;
 
-            CreatorParticipation? participation = order.CreatorsParticipations.SingleOrDefault(p => p.CreatorId == creatorId);
+            CreatorParticipation? participation = order.Participations.SingleOrDefault(p => p.CreatorId == creatorId);
 
             if (participation is not null)
                 participation.HasDelivered = true;
 
             // If all creators have delivered, send to editing
-            if (order.CreatorsParticipations.All(x => x.HasDelivered))
+            if (order.Participations.All(x => x.HasDelivered))
                 order.Status = 4;
 
             _context.Update(order);
@@ -182,7 +153,7 @@ namespace WCPShared.Services.EntityFramework
             foreach (Creator creator in creators)
             {
                 if (creator is not null)
-                    order.CreatorsParticipations.Add(new CreatorParticipation
+                    order.Participations.Add(new CreatorParticipation
                     {
                         Order = order,
                         Creator = creator,
@@ -213,11 +184,11 @@ namespace WCPShared.Services.EntityFramework
                 .Include(x => x.Brand)
                 .ThenInclude(b => b.Organization)
                 .ThenInclude(x => x.Language)
-                .Include(x => x.CreatorsParticipations)
+                .Include(x => x.Participations)
                 .ThenInclude(x => x.Creator)
                 .ThenInclude(x => x.User)
                 .ThenInclude(x => x.Language)
-                .Include(x => x.CreatorsParticipations)
+                .Include(x => x.Participations)
                 .ThenInclude(x => x.Creator)
                 .ThenInclude(x => x.Languages)
                 .Include(x => x.Videographer)
@@ -237,7 +208,7 @@ namespace WCPShared.Services.EntityFramework
                 .Include(x => x.Brand)
                 .ThenInclude(b => b.Organization)
                 .ThenInclude(x => x.Language)
-                .Include(x => x.CreatorsParticipations)
+                .Include(x => x.Participations)
                 .ThenInclude(x => x.Creator)
                 .ThenInclude(x => x.User)
                 .ThenInclude(x => x.Language)
@@ -257,7 +228,7 @@ namespace WCPShared.Services.EntityFramework
                 .Include(x => x.Brand)
                 .ThenInclude(b => b.Organization)
                 .ThenInclude(x => x.Language)
-                .Include(x => x.CreatorsParticipations)
+                .Include(x => x.Participations)
                 .ThenInclude(x => x.Creator)
                 .ThenInclude(x => x.User)
                 .ThenInclude(x => x.Language)

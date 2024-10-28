@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using WCPShared.Interfaces;
 using WCPShared.Models.Entities;
 using WCPShared.Models.Entities.UserModels;
+using WCPShared.Models.Enums;
 
 namespace WCPShared.Models
 {
@@ -36,7 +37,7 @@ namespace WCPShared.Models
 
             modelBuilder.Entity<CreatorParticipation>()
                 .HasOne(e => e.Order)
-                .WithMany(e => e.CreatorsParticipations)
+                .WithMany(e => e.Participations)
                 .HasForeignKey(e => e.OrderId);
 
             modelBuilder.Entity<Creator>()
@@ -52,6 +53,14 @@ namespace WCPShared.Models
 
             modelBuilder.Entity<Order>()
                 .HasOne(x => x.Editor);
+
+            modelBuilder.Entity<Order>()
+                .Property(x => x.ProjectTypeEnum)
+                .HasConversion<string>();
+            
+            modelBuilder.Entity<Order>()
+                .Property(x => x.StatusEnum)
+                .HasConversion<string>();
 
             modelBuilder.Entity<Order>()
                 .Property(x => x.Ideas)

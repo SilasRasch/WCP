@@ -25,7 +25,7 @@
         </MudStack>
 
         <MudStack Class="mt-2" Spacing="1">
-            @foreach (var participation in Project.CreatorsParticipations)
+            @foreach (var participation in Project.Participations)
             {
                 <CreatorComponent Creator="participation.Creator" Participation="participation" RemoveCreator="CallbackRemoveCreator" Editable="_editable"></CreatorComponent>
             }
@@ -99,7 +99,7 @@
     {
         if (_adding == false)
         {
-            AllCreators = AllCreators.Where(x => !Project.CreatorsParticipations.Any(c => c.CreatorId == x.Id));
+            AllCreators = AllCreators.Where(x => !Project.Participations.Any(c => c.CreatorId == x.Id));
         }
 
         _adding = !_adding;
@@ -107,7 +107,7 @@
 
     private bool Filter(Creator creator)
     {
-        if (Project.CreatorsParticipations.Any(x => x.CreatorId == creator.Id))
+        if (Project.Participations.Any(x => x.CreatorId == creator.Id))
             return false;
 
         if (string.IsNullOrWhiteSpace(_searchString))
@@ -122,10 +122,10 @@
     private void CallbackRemoveCreator(Creator creator) 
     {
         // Get index of participation
-        int index = Project.CreatorsParticipations.FindIndex(x => x.CreatorId == creator.Id);
+        int index = Project.Participations.FindIndex(x => x.CreatorId == creator.Id);
 
         // Remove index
-        Project.CreatorsParticipations.RemoveAt(index);
+        Project.Participations.RemoveAt(index);
     }
 
     private void CallbackAddCreator(Creator creator)

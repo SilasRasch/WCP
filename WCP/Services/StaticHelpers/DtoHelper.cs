@@ -38,7 +38,7 @@ namespace WCPShared.Services.StaticHelpers
                 Brand = obj.Brand,
                 Id = obj.Id,
                 Created = obj.Created,
-                CreatorsParticipations = new List<CreatorParticipation>(obj.CreatorsParticipations),
+                Participations = new List<CreatorParticipation>(obj.Participations),
                 Editor = obj.Editor,
                 EditorId = obj.EditorId,
                 StaticTemplates = obj.StaticTemplates,

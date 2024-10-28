@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using WCPShared.Services.StaticHelpers;
 using WCPShared.Models.Entities.UserModels;
 using WCPShared.Interfaces;
+using WCPShared.Models.Enums;
 
 namespace WCPShared.Models.Entities
 {
@@ -17,6 +18,7 @@ namespace WCPShared.Models.Entities
         public int DeliveryTimeTo { get; set; }
         public DateTime DeliveryDate { get; set; }
         public int Status { get; set; }
+        public ProjectStatus StatusEnum { get; set; }
         public int? VideographerId { get; set; }
         public Creator? Videographer { get; set; }
         public int? EditorId { get; set; }
@@ -24,7 +26,7 @@ namespace WCPShared.Models.Entities
         public List<StaticTemplate>? StaticTemplates { get; set; }
         public DateTime Created { get; set; }
         public DateTime Updated { get; set; }
-        public List<CreatorParticipation> CreatorsParticipations { get; set; } = [];
+        public List<CreatorParticipation> Participations { get; set; } = [];
 
         // Drive-links
         public string Scripts { get; set; } = string.Empty;
@@ -48,6 +50,7 @@ namespace WCPShared.Models.Entities
 
         public string ProjectName { get; set; } = string.Empty;
         public string ProjectType { get; set; } = string.Empty;
+        public ProjectType ProjectTypeEnum { get; set; }
         public int ContentCount { get; set; }
         public int? ContentLength { get; set; }
         public string Platforms { get; set; } = string.Empty;
