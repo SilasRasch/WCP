@@ -34,7 +34,7 @@ namespace WCPTests
         {
             string legal = "12345678";
             string illegalCharacter = "123a456b";
-            string illegalTooLong = "123456789";
+            string illegalTooLong = "12345678910";
             string illegalTooShort = "1234567";
 
             Assert.IsTrue(Validation.ValidateCVR(legal));
