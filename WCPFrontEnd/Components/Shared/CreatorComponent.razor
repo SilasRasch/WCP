@@ -3,7 +3,7 @@
 @using WCPShared.Models.Entities.UserModels
 @using WCPShared.Models.Views
 
-<MudStack Class="bg-gray-950 p-4 rounded-lg">
+<MudStack Class="mud-secondary p-4 rounded-lg">
     <MudStack Row="true" Spacing="2" @onclick="() => OnExpandCollapseClick()">
         @if (!String.IsNullOrEmpty(Creator.ImgURL))
         {
@@ -19,12 +19,18 @@
                 }
                 @if (Creator.Gender is not null && Creator.Gender.ToLower() == "kvinde")
                 {
-                    <MudText>/</MudText>
+                    @if (Creator.DateOfBirth is not null) 
+                    {
+                        <MudText>/</MudText>
+                    }
                     <MudIcon Icon="@Icons.Material.Filled.Female" Size="Size.Small"></MudIcon>
                 }
                 else if (Creator.Gender is not null)
                 {
-                    <MudText>/</MudText>
+                    @if (Creator.DateOfBirth is not null)
+                    {
+                        <MudText>/</MudText>
+                    }
                     <MudIcon Icon="@Icons.Material.Filled.Male" Size="Size.Small"></MudIcon>
                 }
 

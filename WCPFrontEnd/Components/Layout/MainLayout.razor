@@ -77,44 +77,46 @@
     }
 
     private readonly PaletteLight _lightPalette = new()
-        {
-            Primary = "#ED4C4D",
-            Black = "#110e2d",
-            AppbarText = "#424242",
-            AppbarBackground = "rgb(255, 237, 220)",
-            DrawerBackground = "rgb(255, 247, 230)",
-            GrayLight = "#e8e8e8",
-            GrayLighter = "#f9f9f9",
-        };
+    {
+        Primary = "#ED4C4D",
+        Secondary = "#ffeddc",
+        Black = "#110e2d",
+        AppbarText = "#424242",
+        AppbarBackground = "#ffeddc",
+        DrawerBackground = "rgb(255, 247, 230)",
+        GrayLight = "#e8e8e8",
+        GrayLighter = "#f9f9f9",
+    };
 
     private readonly PaletteDark _darkPalette = new()
-        {
-            Primary = "#ED4C4D",
-            Surface = "#2e2e2e",
-            Background = "#2E2E2E",
-            BackgroundGray = "#151521",
-            AppbarText = "#92929f",
-            AppbarBackground = "#1e1e1e",
-            DrawerBackground = "#1e1e1e",
-            ActionDefault = "#74718e",
-            ActionDisabled = "#9999994d",
-            ActionDisabledBackground = "#605f6d4d",
-            TextPrimary = "#b2b0bf",
-            TextSecondary = "#92929f",
-            TextDisabled = "#ffffff33",
-            DrawerIcon = "#92929f",
-            DrawerText = "#92929f",
-            GrayLight = "#2a2833",
-            GrayLighter = "#1e1e2d",
-            Info = "#4a86ff",
-            Success = "#3dcb6c",
-            Warning = "#ffb545",
-            Error = "#ff3f5f",
-            LinesDefault = "#33323e",
-            TableLines = "#33323e",
-            Divider = "#292838",
-            OverlayLight = "#1e1e2d80",
-        };
+    {
+        Primary = "#ED4C4D",
+        Secondary = "#1e1e1e",
+        Surface = "#2e2e2e",
+        Background = "#2E2E2E",
+        BackgroundGray = "#151521",
+        AppbarText = "#92929f",
+        AppbarBackground = "#1e1e1e",
+        DrawerBackground = "#1e1e1e",
+        ActionDefault = "#74718e",
+        ActionDisabled = "#9999994d",
+        ActionDisabledBackground = "#605f6d4d",
+        TextPrimary = "#b2b0bf",
+        TextSecondary = "#92929f",
+        TextDisabled = "#ffffff33",
+        DrawerIcon = "#92929f",
+        DrawerText = "#92929f",
+        GrayLight = "#2a2833",
+        GrayLighter = "#1e1e2d",
+        Info = "#4a86ff",
+        Success = "#3dcb6c",
+        Warning = "#ffb545",
+        Error = "#ff3f5f",
+        LinesDefault = "#33323e",
+        TableLines = "#33323e",
+        Divider = "#292838",
+        OverlayLight = "#1e1e2d80",
+    };
 
     public string DarkLightModeButtonIcon => _isDarkMode switch
     {
