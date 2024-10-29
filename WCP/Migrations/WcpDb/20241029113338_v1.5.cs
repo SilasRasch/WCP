@@ -125,7 +125,7 @@ namespace WCPShared.Migrations
                 column: "LanguageId",
                 principalTable: "Languages",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.NoAction);
         }
 
         /// <inheritdoc />
