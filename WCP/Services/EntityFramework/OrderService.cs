@@ -39,6 +39,7 @@ namespace WCPShared.Services.EntityFramework
                 return null!;
 
             existingOrder.Updated = DateTime.Now;
+
             _context.Update(obj);
             await _context.SaveChangesAsync();
             await _slackNetService.SendStatusNotifications(obj, existingOrder);
@@ -109,21 +110,23 @@ namespace WCPShared.Services.EntityFramework
             return existingOrder;
         }
 
-        public async Task<Order?> CreatorDelivery(int orderId, int creatorId)
+        public async Task<Order?> CreatorDelivery(Order order, int creatorId)
         {
-            Order? order = await GetObject(orderId);
-
-            if (order is null)
-                return null;
-
-            CreatorParticipation? participation = order.Participations.SingleOrDefault(p => p.CreatorId == creatorId);
+            CreatorParticipation? participation = order.Participations
+                .SingleOrDefault(p => p.CreatorId == creatorId);
 
             if (participation is not null)
                 participation.HasDelivered = true;
 
-            // If all creators have delivered, send to editing
-            if (order.Participations.All(x => x.HasDelivered))
-                order.Status = 4;
+            // If all scripters have delivered, send to planning
+            var scripters = order.Participations.Where(x => x.Creator.SubType == "Scripter");
+            if (scripters.All(x => x.HasDelivered) || scripters.Count() == 0)
+                order.Status = 3;
+
+            // If all UGC creators have delivered, send to editing
+            var ugcCreators = order.Participations.Where(x => x.Creator.SubType == "UGC");
+            if (ugcCreators.All(x => x.HasDelivered && ugcCreators.Count() > 0))
+                order.Status = 5;
 
             _context.Update(order);
             await _context.SaveChangesAsync();

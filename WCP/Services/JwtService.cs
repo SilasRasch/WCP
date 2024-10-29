@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -16,13 +17,15 @@ namespace WCPShared.Services
     {
         private readonly IConfiguration _configuration;
         private readonly IEmailService _emailService;
+        private readonly IWcpDbContext _context;
         private readonly UserService _userService;
         private readonly OrganizationService _organizationService;
         private readonly CreatorService _creatorService;
 
-        public JwtService(IConfiguration configuration, UserService userService, IEmailService emailService, OrganizationService organizationService, CreatorService creatorService)
+        public JwtService(IConfiguration configuration, IWcpDbContext context, UserService userService, IEmailService emailService, OrganizationService organizationService, CreatorService creatorService)
         {
             _configuration = configuration;
+            _context = context;
             _userService = userService;
             _emailService = emailService;
             _organizationService = organizationService;
@@ -67,7 +70,7 @@ namespace WCPShared.Services
 
         public async Task<string?> RefreshToken(int userId, string refreshToken)
         {
-            User? user = await _userService.GetObject(userId);
+            User? user = await _context.Users.Include(x => x.Organization).SingleOrDefaultAsync(x => x.Id == userId);
 
             if (user is null || user.RefreshToken != refreshToken || user.RefreshTokenExpiry < DateTime.Now)
                 return null;
@@ -77,7 +80,7 @@ namespace WCPShared.Services
 
         public async Task<string?> RefreshToken(string email, string refreshToken)
         {
-            User? user = await _userService.GetObjectBy(x => x.Email == email);
+            User? user = await _context.Users.Include(x => x.Organization).SingleOrDefaultAsync(x => x.Email == email);
 
             if (user is null || user.RefreshToken != refreshToken || user.RefreshTokenExpiry < DateTime.Now)
                 return null;

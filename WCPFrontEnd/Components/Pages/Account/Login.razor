@@ -1,20 +1,26 @@
 ﻿@page "/login"
 @attribute [ExcludeFromInteractiveRouting]
+@using Microsoft.EntityFrameworkCore
+@using WCPShared.Models.Entities
+@inject IWcpDbContext Context
 
 @using System.Security.Claims
 @using Microsoft.AspNetCore.Authentication
 @using Microsoft.AspNetCore.Authentication.Cookies
+@using WCPShared.Interfaces
 @using WCPShared.Models.Entities.AuthModels
+@using WCPShared.Models.Entities.UserModels
+@using WCPShared.Services
 @inject NavigationManager NavigationManager
 
 <div class="grid justify-center gap-2 pt-4 pb-4">
-    <EditForm Model="@Model" OnValidSubmit="Authenticate" FormName="LoginForm" class="border-2 border-gray-400 p-4 rounded-lg flex flex-column gap-2 bg-stone-900 text-white">
+    <EditForm Model="@Model" OnValidSubmit="Authenticate" FormName="LoginForm" class="p-8 rounded-md flex flex-column gap-2 bg-stone-900 text-white">
         <DataAnnotationsValidator />
         <div class="font-semibold">
             Login
         </div>
         <div class="grid">
-            <InputText @bind-Value="Model.Email" class="p-2 rounded-lg bg-gray-950" placeholder="Username" />
+            <InputText @bind-Value="Model.Email" class="p-2 rounded-lg bg-gray-950" placeholder="Email" />
             <ValidationMessage For="() => Model.Email" class="text-red-600" />
         </div>
         <div class="grid">
@@ -24,9 +30,8 @@
 
         @if (errorMessage is not null) 
         {
-            <span class="text-red-600">@errorMessage</span>
+            <span class="text-red-600 mt-2">@errorMessage</span>
         }
-        
 
         <hr />
 
@@ -42,23 +47,31 @@
     public UserDto Model { get; set; } = new();
     private string? errorMessage;
 
+    private MudForm _form;
+    private bool _success;
+    private string[] _errors = { };
+
     private async Task Authenticate()
     {
-        if (String.IsNullOrEmpty(Model.Email) || String.IsNullOrEmpty(Model.Password))
+        User? user = await Context.Users
+                .SingleOrDefaultAsync(x => x.Email == Model.Email);
+
+        if (user is null || !user.IsActive || !BCrypt.Net.BCrypt.Verify(Model.Password, user.PasswordHash)) 
         {
-            errorMessage = "Invalid username or password";
+            errorMessage = "Invalid email or password";
             return;
         }
 
-        var user = new
+        if (user.Role != "Admin") 
         {
-            Email = Model.Email,
-            Role = "Admin"
-        };
+            errorMessage = "Unauthorized";
+            return;
+        }
 
-        var claims = new List<Claim>
+        List<Claim> claims = new List<Claim>()
         {
-            new Claim(ClaimTypes.Name, user.Email),
+            new Claim(ClaimTypes.Email, user.Email),
+            new Claim(ClaimTypes.Name, user.Name),
             new Claim(ClaimTypes.Role, user.Role)
         };
 

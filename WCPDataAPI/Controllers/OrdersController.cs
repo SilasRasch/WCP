@@ -6,6 +6,8 @@ using WCPShared.Models.DTOs.RangeDTOs;
 using WCPShared.Models.Views;
 using WCPShared.Services.EntityFramework;
 using WCPShared.Models.Entities;
+using WCPShared.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace WCPDataAPI.Controllers
 {
@@ -18,13 +20,15 @@ namespace WCPDataAPI.Controllers
         private readonly OrderService _orderService;
         private readonly BrandService _brandService;
         private readonly CreatorService _creatorService;
+        private readonly IWcpDbContext _context;
 
-        public OrdersController(UserContextService userContextService, OrderService orderService, BrandService brandService, CreatorService creatorService)
+        public OrdersController(UserContextService userContextService, IWcpDbContext context, OrderService orderService, BrandService brandService, CreatorService creatorService)
         {
             _userContextService = userContextService;
             _orderService = orderService;
             _brandService = brandService;
             _creatorService = creatorService;
+            _context = context;
         }
 
         // GET: api/<OrdersController>
@@ -39,8 +43,14 @@ namespace WCPDataAPI.Controllers
 
             // Get creator's projects
             else if (_userContextService.GetRoles().Contains("Creator"))
-                orders = await _orderService.GetObjectsViewBy(x => 
-                (x.Participations!.Any(x => x.Creator.UserId == _userContextService.GetId()) || x.EditorId == _userContextService.GetId() || x.VideographerId == _userContextService.GetId())); // 
+            {
+                orders = await _orderService.GetObjectsViewBy(
+                    x => (x.Participations!.Any(x => x.Creator.UserId == _userContextService.GetId() && x.HasDelivered == false) 
+                    || x.EditorId == _userContextService.GetId() 
+                    || x.VideographerId == _userContextService.GetId())
+                );
+            }
+                
 
             if (_userContextService.GetRoles().Contains("Admin"))
                 orders = await _orderService.GetAllObjectsView();
@@ -106,12 +116,16 @@ namespace WCPDataAPI.Controllers
         [HttpPost("CreatorDelivery")]
         public async Task<IActionResult> CreatorDelivery([FromQuery] int order, [FromQuery] int creator)
         {
-            Order? existingOrder = await _orderService.GetObject(order);
+            Order? existingOrder = await _context.Orders
+                .Include(x => x.Participations)
+                .ThenInclude(x => x.Creator)
+                .AsSplitQuery()
+                .SingleOrDefaultAsync(x => x.Id == order);
+
             if (existingOrder is null) return NotFound("Order not found");
 
             var callingUser = await _creatorService.GetObjectViewBy(x => x.UserId == _userContextService.GetId());
             if (callingUser is null) return Unauthorized("You are not a creator");
-            
 
             bool isAdmin = _userContextService.GetRoles().Contains("Admin");
             bool isCreator = _userContextService.GetRoles().Contains("Creator");
@@ -120,7 +134,7 @@ namespace WCPDataAPI.Controllers
             if (!isAdmin && (isCreator && !creatorAllowed))
                 return Unauthorized("Du har ikke tilladelse til at ændre denne ordre");
 
-            await _orderService.CreatorDelivery(order, creator);
+            await _orderService.CreatorDelivery(existingOrder, creator);
             return NoContent();
         }
 
@@ -136,7 +150,7 @@ namespace WCPDataAPI.Controllers
             if (!order.Validate())
                 return BadRequest("Valideringsfejl, tjek venligst felterne igen...");
 
-            bool creatorNotAllowed = !existingOrder.Participations.Exists(x => x.Creator.UserId == _userContextService.GetId()) && existingOrder.Status == 3 && order.Status == 4;
+            bool creatorNotAllowed = !existingOrder.Participations.Exists(x => x.Creator.UserId == _userContextService.GetId()) && existingOrder.Status == 4 && order.Status == 5;
             bool isAdmin = _userContextService.GetRoles().Contains("Admin");
             bool isCreator = _userContextService.GetRoles().Contains("Creator");
             bool isUser = _userContextService.GetRoles().Contains("Bruger");

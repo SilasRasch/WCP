@@ -18,9 +18,6 @@ namespace WCPShared.Models.DTOs
             if (SubType.IsNullOrEmpty())
                 return false;
 
-            if (SubType == "UGC" && (string.IsNullOrWhiteSpace(Address) || string.IsNullOrWhiteSpace(Gender)))
-                return false;
-
             return true;
         }
     }

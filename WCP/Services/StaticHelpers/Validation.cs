@@ -25,7 +25,7 @@ namespace WCPShared.Services.StaticHelpers
 
         public static bool ValidateCVR(string CVR)
         {
-            if (!Regex.IsMatch(CVR, @"^\d{8}$"))
+            if (!Regex.IsMatch(CVR, @"^\d{8,10}$"))
                 return false;
             return true;
         }

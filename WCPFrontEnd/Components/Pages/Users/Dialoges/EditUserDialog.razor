@@ -117,7 +117,7 @@
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="Cancel">Annuller</MudButton>
-        <MudButton Color="@Color.Success" Variant="Variant.Filled" Disabled="@(!_success)" OnClick="Submit">Gem</MudButton>
+        <MudButton Color="@Color.Success" Variant="Variant.Filled" Disabled="@(!_success)" OnClick="async () => await Submit()">Gem</MudButton>
     </DialogActions>
 </MudDialog>
 
@@ -144,9 +144,9 @@
 
     protected override void OnInitialized()
     {
-        _languages = Context.Languages;
+        _languages = Context.Languages.ToList();
         _organizations = Context.Organizations
-            .Include(x => x.Language);
+            .Include(x => x.Language).ToList();
 
         if (_isCreator && Creator is not null && Creator.Languages is not null)
             _selectedLanguages = Creator.Languages.Select(x => x.Name);
@@ -160,13 +160,10 @@
     {
         if (User.Validate())
         {
-            await UserService.UpdateObject(User.Id, User);
-
             if (_isCreator && Creator is not null)
-            {
                 Creator.Languages = _languages.Where(x => _selectedLanguages.Contains(x.Name)).ToList();
-                await CreatorService.UpdateObject(Creator.Id, Creator);
-            }
+
+            await Context.SaveChangesAsync();
         }
 
         MudDialog.Close(DialogResult.Ok(true));

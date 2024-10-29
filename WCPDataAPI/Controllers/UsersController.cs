@@ -31,7 +31,7 @@ namespace WCPDataAPI.Controllers
         }
 
         // GET api/<UsersController>/5
-        [HttpGet("{id}"), Authorize(Roles = "Admin")]
+        [HttpGet("{id}")]
         public async Task<ActionResult<UserView>> Get(int id)
         {
             UserView? user = await _userService.GetObjectViewBy(x => x.Id == id);

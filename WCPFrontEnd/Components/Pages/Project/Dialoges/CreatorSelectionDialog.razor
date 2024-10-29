@@ -84,7 +84,7 @@
             .Include(x => x.Languages)
             .Include(x => x.User)
             .ThenInclude(x => x.Language)
-            .Where(x => x.User.IsActive && x.SubType == "UGC")
+            .Where(x => x.User.IsActive)
             .ToList();
     }
 

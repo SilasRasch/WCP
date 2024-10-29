@@ -10,11 +10,12 @@ namespace WCPAdminFrontEnd.Services
             {
                 case 0: return "Ubekræftet";
                 case 1: return "I kø";
-                case 2: return "Planlægning";
-                case 3: return "Creator magi";
-                case 4: return "I klipperummet";
-                case 5: return "Feedback";
-                case 6: return "Færdig";
+                case 2: return "Scripting";
+                case 3: return "Planlægning";
+                case 4: return "Creator magi";
+                case 5: return "I klipperummet";
+                case 6: return "Feedback";
+                case 7: return "Færdig";
                 case -1: return "Annulleret";
                 default: return "Ukendt";
             }
@@ -32,13 +33,15 @@ namespace WCPAdminFrontEnd.Services
                     break;
                 case 2: colorClass = "bg-yellow-600";
                     break;
-                case 3: colorClass = "bg-blue-600";
+                case 3: colorClass = "bg-yellow-600";
                     break;
                 case 4: colorClass = "bg-blue-600";
                     break;
-                case 5: colorClass = "bg-green-600";
+                case 5: colorClass = "bg-blue-600";
                     break;
-                case 6: colorClass = "bg-red-500";
+                case 6: colorClass = "bg-green-600";
+                    break;
+                case 7: colorClass = "bg-red-500";
                     break;
                 case -1:
                     colorClass = "bg-red-600";

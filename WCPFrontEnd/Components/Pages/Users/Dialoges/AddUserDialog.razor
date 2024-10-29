@@ -44,8 +44,18 @@
                         <MudSelectItem Value="@lang.Id">@ProjectHelper.CountryStringToFlag(lang.Name)</MudSelectItem>
                     }
                 </MudSelect>
+
+                @if (_isCreator && _selfRegister)
+                {
+                    <MudSelect @bind-Value="_creator.SubType" Label="Undertype" Required="_isCreator" RequiredError="Dette felt er påkrævet" AnchorOrigin="Origin.BottomCenter" Placeholder="Vælg en undertype">
+                        <MudSelectItem Value="@("UGC")">UGC</MudSelectItem>
+                        <MudSelectItem Value="@("Editor")">Editor</MudSelectItem>
+                        <MudSelectItem Value="@("Videographer")">Videograf</MudSelectItem>
+                        <MudSelectItem Value="@("Scripter")">Scripter</MudSelectItem>
+                    </MudSelect>
+                }
             </MudStack>
-            
+
 
             @if (_user.User.Role == "Bruger")
             {
@@ -100,8 +110,8 @@
                         <MudFileUpload Class="mt-2" T="IBrowserFile" FilesChanged="UploadFiles" MaximumFileCount="1" Accept="image/png, image/jpg, image/jpeg">
                             <ActivatorContent>
                                 <MudFab Color="Color.Primary"
-                                        StartIcon="@Icons.Material.Filled.Image"
-                                        Label="Upload profilbillede" />
+                                StartIcon="@Icons.Material.Filled.Image"
+                                Label="Upload profilbillede" />
                             </ActivatorContent>
                         </MudFileUpload>
 
@@ -111,8 +121,8 @@
                         }
                     </MudStack>
                 </div>
-                
-                
+
+
             }
         </MudForm>
     </DialogContent>
@@ -133,7 +143,7 @@
     private bool _selfRegister = false;
     private int _orgId;
 
-    private bool _isCreator => _user.User.Role == "Creator" && !_selfRegister;
+    private bool _isCreator => _user.User.Role == "Creator";
     private bool _isUser => _user.User.Role == "Bruger";
 
     private CreatorDto _creator = new();
@@ -157,10 +167,10 @@
     {
         if (_user.User.Validate())
         {
-            if (_user.User.Role == "Bruger")
+            if (_isUser)
                 _user.User.OrganizationId = _orgId;
 
-            if (_user.User.Role == "Creator" && !_selfRegister)
+            if (_isCreator)
             {
                 if (_profilePicture is not null)
                     _creator.ImgURL = await S3Service.UploadProfilePicture(_profilePicture);

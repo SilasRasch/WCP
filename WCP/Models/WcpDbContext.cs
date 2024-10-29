@@ -15,20 +15,30 @@ namespace WCPShared.Models
         public DbSet<Organization> Organizations { get; set; }
         public DbSet<Brand> Brands { get; set; }
         public DbSet<Creator> Creators { get; set; }
+        public DbSet<CreatorParticipation> CreatorParticipations { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<Language> Languages { get; set; }
         public DbSet<StaticTemplate> StaticTemplates { get; set; }
-        public DbSet<CreatorParticipation> CreatorParticipations { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
-        private readonly IConfiguration _configuration;
-
-        public WcpDbContext(DbContextOptions<WcpDbContext> options, IConfiguration config) : base(options)
+        public WcpDbContext(DbContextOptions<WcpDbContext> options) : base(options)
         {
-            _configuration = config;
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<CreatorParticipation>()
+                .HasKey(e => new { e.OrderId, e.CreatorId });
+
+            modelBuilder.Entity<CreatorParticipation>()
+                .HasOne(e => e.Creator)
+                .WithMany(e => e.Participations)
+                .HasForeignKey(e => e.CreatorId);
+
+            modelBuilder.Entity<CreatorParticipation>()
+                .HasOne(e => e.Order)
+                .WithMany(e => e.Participations)
+                .HasForeignKey(e => e.OrderId);
+
             modelBuilder.Entity<Creator>()
                 .HasMany(x => x.Languages)
                 .WithMany(x => x.Speakers);
@@ -42,6 +52,14 @@ namespace WCPShared.Models
 
             modelBuilder.Entity<Order>()
                 .HasOne(x => x.Editor);
+
+            //modelBuilder.Entity<Order>()
+            //    .Property(x => x.ProjectTypeEnum)
+            //    .HasConversion<string>();
+
+            //modelBuilder.Entity<Order>()
+            //    .Property(x => x.StatusEnum)
+            //    .HasConversion<string>();
 
             modelBuilder.Entity<Order>()
                 .Property(x => x.Ideas)

@@ -14,15 +14,20 @@ namespace WCPShared.Models.Entities
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         public double Price { get; set; }
+
+        // Legacy (should be removed when moving to v2.0)
         public int DeliveryTimeFrom { get; set; }
         public int DeliveryTimeTo { get; set; }
         public DateTime DeliveryDate { get; set; }
         public int Status { get; set; }
-        public ProjectStatus StatusEnum { get; set; }
+        //public ProjectStatus StatusEnum { get; set; }
+
+        // All creators should be in participations
         public int? VideographerId { get; set; }
         public Creator? Videographer { get; set; }
         public int? EditorId { get; set; }
         public Creator? Editor { get; set; }
+
         public List<StaticTemplate>? StaticTemplates { get; set; }
         public DateTime Created { get; set; }
         public DateTime Updated { get; set; }
@@ -50,7 +55,7 @@ namespace WCPShared.Models.Entities
 
         public string ProjectName { get; set; } = string.Empty;
         public string ProjectType { get; set; } = string.Empty;
-        public ProjectType ProjectTypeEnum { get; set; }
+        //public ProjectType ProjectTypeEnum { get; set; }
         public int ContentCount { get; set; }
         public int? ContentLength { get; set; }
         public string Platforms { get; set; } = string.Empty;

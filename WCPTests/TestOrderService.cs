@@ -254,9 +254,9 @@ namespace WCPTests
             Assert.IsNotNull(result);
             Assert.IsTrue(result.Participations.All(x => !x.HasDelivered));
 
-            await _orderService.CreatorDelivery(result.Id, result.Participations.First().CreatorId);
+            await _orderService.CreatorDelivery(result, result.Participations.First().CreatorId);
             Assert.IsTrue(result.Participations.First().HasDelivered);
-            Assert.AreEqual(4, result.Status);
+            Assert.AreEqual(5, result.Status);
         }
     }
 }

@@ -16,7 +16,7 @@ namespace WCPFrontEnd.Services
 
         public static string CvrValidation(string arg)
         {
-            return !Validation.ValidateCVR(arg) ? "CVR skal være 8 tal" : null!;
+            return !Validation.ValidateCVR(arg) ? "CVR skal være mindst 8 tal" : null!;
         }
 
         public static string PhoneValidation(string arg)

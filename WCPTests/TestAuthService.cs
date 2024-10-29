@@ -59,8 +59,8 @@ namespace WCPTests
             _brandService = new BrandService(context, _organizationService, _viewConverter);
             _userService = new UserService(context, _organizationService, _languageService, _viewConverter);
             _creatorService = new CreatorService(context, _languageService, _userService, _viewConverter);
-            _jwtService = new JwtService(configuration, _userService, _emailService, _organizationService, _creatorService);
-            _authService = new AuthService(configuration, _userService, _emailService, _organizationService, _creatorService, null!, _jwtService, _languageService);
+            _jwtService = new JwtService(configuration, context, _userService, _emailService, _organizationService, _creatorService);
+            _authService = new AuthService(configuration, context, _userService, _emailService, _organizationService, _creatorService, null!, _jwtService, _languageService);
 
             await _languageService.AddObject(new Language { Name = "DAN" });
             _organization = await _organizationService.AddObject(new OrganizationDto() { Name = "Org", CVR = "12345678", LanguageId = 1 });

@@ -53,14 +53,14 @@
 
     protected override void OnInitialized()
     {
-        _languages = Context.Languages;
+        _languages = Context.Languages.ToList();
     }
 
-    private async Task Submit()
+    private async void Submit()
     {
         if (Organization.Validate())
         {
-            await OrganizationService.UpdateObject(Organization.Id, Organization);
+            await Context.SaveChangesAsync();
         }
 
         MudDialog.Close(DialogResult.Ok(true));

@@ -29,7 +29,7 @@
 
             <MudStack Row="true" Spacing="2" Class="mt-2" Justify="Justify.Center" AlignItems="AlignItems.End">
                 <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center">
-                    <MudFileUpload Class="mt-2" Required="true" T="IBrowserFile" FilesChanged="(e) => pic1 = e" MaximumFileCount="1" Accept="image/png, image/jpg, image/jpeg">
+                    <MudFileUpload Class="mt-2" T="IBrowserFile" FilesChanged="(e) => pic1 = e" MaximumFileCount="1" Accept="image/png, image/jpg, image/jpeg">
                         <ActivatorContent>
                             <MudStack Spacing="0">
                                 <MudText>Template</MudText>
@@ -45,7 +45,7 @@
                 </MudStack>
                 
                 <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center">
-                    <MudFileUpload Class="mt-2" Required="true" T="IBrowserFile" FilesChanged="(e) => pic2 = e" MaximumFileCount="1" Accept="image/png, image/jpg, image/jpeg">
+                    <MudFileUpload Class="mt-2" T="IBrowserFile" FilesChanged="(e) => pic2 = e" MaximumFileCount="1" Accept="image/png, image/jpg, image/jpeg">
                         <ActivatorContent>
                             <MudImage Src="@Static.TemplateImgTwo" Class="max-w-32 cursor-pointer" ObjectFit="ObjectFit.Contain" />
                         </ActivatorContent>
@@ -58,7 +58,7 @@
                 </MudStack>
 
                 <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center">
-                    <MudFileUpload Class="mt-2" Required="true" T="IBrowserFile" FilesChanged="(e) => pic3 = e" MaximumFileCount="1" Accept="image/png, image/jpg, image/jpeg">
+                    <MudFileUpload Class="mt-2" T="IBrowserFile" FilesChanged="(e) => pic3 = e" MaximumFileCount="1" Accept="image/png, image/jpg, image/jpeg">
                         <ActivatorContent>
                             <MudStack Spacing="0">
                                 <MudText>Eksempel</MudText>

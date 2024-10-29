@@ -259,13 +259,8 @@ namespace WCPTests
             CreatorDto illegal = new CreatorDto()
             {
                 SubType = string.Empty,
-                Gender = "Mand"
             };
 
-            Assert.IsFalse(illegal.Validate());
-
-            illegal.SubType = "UGC";
-            illegal.Gender = string.Empty;
             Assert.IsFalse(illegal.Validate());
         }
     }

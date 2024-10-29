@@ -7,6 +7,8 @@ using WCPShared.Services.EntityFramework;
 using WCPShared.Models.Entities;
 using WCPShared.Models.Entities.AuthModels;
 using WCPShared.Models.Entities.UserModels;
+using Microsoft.EntityFrameworkCore;
+using WCPShared.Models.Views;
 
 namespace WCPShared.Services
 {
@@ -20,8 +22,9 @@ namespace WCPShared.Services
         private readonly CreatorService _creatorService;
         private readonly UserContextService _userContextService;
         private readonly IJwtService _jwtService;
+        private readonly IWcpDbContext _context;
 
-        public AuthService(IConfiguration configuration, UserService userService, IEmailService emailService, OrganizationService organizationService, CreatorService creatorService, UserContextService userContextService, IJwtService jwtService, LanguageService languageService)
+        public AuthService(IConfiguration configuration, IWcpDbContext context, UserService userService, IEmailService emailService, OrganizationService organizationService, CreatorService creatorService, UserContextService userContextService, IJwtService jwtService, LanguageService languageService)
         {
             _configuration = configuration;
             _userService = userService;
@@ -31,6 +34,7 @@ namespace WCPShared.Services
             _userContextService = userContextService;
             _jwtService = jwtService;
             _languageService = languageService;
+            _context = context;
         }
 
         public async Task<User?> Register(RegisterCreatorDto request, bool selfRegister = false)
@@ -77,7 +81,7 @@ namespace WCPShared.Services
                 request.Creator.UserId = user.Id;
                 Creator? creator = await _creatorService.AddObject(request.Creator);
 
-                if (creator is null || creator.Id is 0)
+                if (creator is null || creator.Id == 0)
                 {
                     await _userService.DeleteObject(user.Id);
                     throw new ArgumentException("Adding creator failed...");
@@ -93,7 +97,9 @@ namespace WCPShared.Services
 
         public async Task<AuthResponse?> Login(UserDto request)
         {
-            User? user = await _userService.GetObjectBy(x => x.Email == request.Email);
+            User? user = await _context.Users
+                .Include(x => x.Organization)
+                .SingleOrDefaultAsync(x => x.Email == request.Email);
 
             if (user is null) throw new NotFoundException("User not found");
             if (!user.IsActive) throw new ArgumentException("User deactivated");
@@ -209,26 +215,27 @@ namespace WCPShared.Services
         public async Task<dynamic> Authenticate()
         {
             string email = _userContextService.GetEmail();
-            User? user = await _userService.GetObjectBy(x => x.Email == email);
+            User? user = await _context.Users.Include(x => x.Organization).SingleOrDefaultAsync(x => x.Email == email);
 
             if (user is null) throw new NotFoundException("No user with the given email");
 
             var id = user.Id;
             var roles = _userContextService.GetRoles();
             var name = user.Name;
+            var phone = user.Phone;
             var notificationSetting = user.NotificationSetting;
 
             if (user.Role == "Bruger" && user.Organization is not null)
-                return new { id, orgId = user.Organization.Id, email, roles, name, notificationSetting };
+                return new { id, orgId = user.Organization.Id, email, roles, name, notificationSetting, phone };
 
             if (user.Role == "Creator")
             {
-                var creator = await _creatorService.GetObjectViewBy(x => x.UserId == _userContextService.GetId());
+                CreatorView? creator = await _creatorService.GetObjectViewBy(x => x.UserId == _userContextService.GetId());
                 if (creator is not null)
-                    return new { id, creatorId = creator.Id, email, roles, name, notificationSetting };
+                    return new { id, creatorId = creator.Id, subType = creator.SubType, email, roles, name, notificationSetting, phone };
             }
 
-            return new { id, email, roles, name, notificationSetting };
+            return new { id, email, roles, name, notificationSetting, phone };
         }
     }
 }
