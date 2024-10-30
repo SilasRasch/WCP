@@ -14,7 +14,7 @@
 <PageTitle>Organisationer</PageTitle>
 
 <MudDataGrid T="Organization" SelectOnRowClick="@_selectable" MultiSelection="@_selectable" Items="@OrganizationList" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter" Hideable="@_hidable" Striped="@_striped" Elevation="3"
-    ColumnResizeMode="@(_resizable ? ResizeMode.Column : ResizeMode.None)" DragDropColumnReordering="_movable">
+             ColumnResizeMode="@(_resizable ? ResizeMode.Column : ResizeMode.None)" FilterCaseSensitivity="DataGridFilterCaseSensitivity.Ignore" DragDropColumnReordering="_movable">
     <ToolBarContent>
         <MudStack Row="true" AlignItems="AlignItems.Center">
             <MudText Typo="Typo.h6">Organisationer</MudText>

@@ -70,8 +70,8 @@ namespace WCPShared.Models.Entities
         public string? ExtraNotes { get; set; }
         public string? FocusPoints { get; set; }
         public string? RelevantFiles { get; set; }
-        public List<string> Ideas { get; set; } = [];
-        public List<string> Products { get; set; } = [];
+        public List<Idea> Ideas { get; set; } = [];
+        public List<Product> Products { get; set; } = [];
 
         #endregion
 

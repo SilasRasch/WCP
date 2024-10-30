@@ -91,9 +91,9 @@ namespace WCPShared.Models.Views
             ExtraNotes = obj.ExtraNotes;
             FocusPoints = obj.FocusPoints;
             Format = obj.Format;
-            Ideas = obj.Ideas;
+            Ideas = obj.Ideas.Select(x => x.Text).ToList();
             Platforms = obj.Platforms;
-            Products = obj.Products;
+            Products = obj.Products.Select(x => x.Link).ToList();
             ProjectName = obj.ProjectName;
             ProjectType = obj.ProjectType;
             RelevantFiles = obj.RelevantFiles;

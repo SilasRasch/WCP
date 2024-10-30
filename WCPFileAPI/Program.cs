@@ -7,14 +7,14 @@ using WCPShared.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container
-builder.Services.AddDbContext<WCPShared.Interfaces.IWcpDbContext, WCPShared.Models.WcpDbContext>(options =>
-    options.UseSqlServer("Data Source=172.232.142.14;Initial Catalog=WCP;User ID=sa;Password=Microsoftlmao!;Connect Timeout=30;Encrypt=True;Trust Server Certificate=True;Application Intent=ReadWrite;Multi Subnet Failover=False"));
+//builder.Services.AddDbContext<WCPShared.Interfaces.IWcpDbContext, WCPShared.Models.WcpDbContext>(options =>
+//    options.UseSqlServer("Data Source=172.232.142.14;Initial Catalog=WCP;User ID=sa;Password=Microsoftlmao!;Connect Timeout=30;Encrypt=True;Trust Server Certificate=True;Application Intent=ReadWrite;Multi Subnet Failover=False"));
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.ConfigurePrometheus();
-//builder.Services.ConfigureDbContext(builder.Configuration);
+builder.Services.ConfigureDbContext(builder.Configuration);
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<UserContextService>();
 builder.Services.ConfigureSwagger();

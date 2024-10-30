@@ -67,9 +67,9 @@ namespace WCPShared.Services.StaticHelpers
             output.ExtraNotes = input.ExtraNotes;
             output.FocusPoints = input.FocusPoints;
             output.Format = input.Format;
-            output.Ideas = input.Ideas;
+            output.Ideas = input.Ideas.Select(x => new Idea { Text = x }).ToList();
+            output.Products = input.Products.Select(x => new Product { Link = x }).ToList();
             output.Platforms = input.Platforms;
-            output.Products = input.Products;
             output.ProjectName = input.ProjectName;
             output.ProjectType = input.ProjectType;
             output.RelevantFiles = input.RelevantFiles;
@@ -99,9 +99,9 @@ namespace WCPShared.Services.StaticHelpers
                 ExtraNotes = obj.ExtraNotes,
                 FocusPoints = obj.FocusPoints,
                 Format = obj.Format,
-                Ideas = obj.Ideas,
+                Ideas = obj.Ideas.Select(x => new Idea { Text = x }).ToList(),
                 Platforms = obj.Platforms,
-                Products = obj.Products,
+                Products = obj.Products.Select(x => new Product { Link = x}).ToList(),
                 ProjectName = obj.ProjectName,
                 ProjectType = obj.ProjectType,
                 RelevantFiles = obj.RelevantFiles,
