@@ -97,7 +97,7 @@
             <CellTemplate>
                 @if(context.Item.DeliveryDate != DateTime.MinValue) 
                 {
-                    <p>@context.Item.DeliveryDate.ToString("d") (@((context.Item.DeliveryDate - DateTime.Now).Days) dage)</p>
+                    <p>@context.Item.DeliveryDate.ToString("dd-MM-yyyy") (@((context.Item.DeliveryDate - DateTime.Now).Days) dage)</p>
                 }
                 else
                 {
@@ -105,9 +105,9 @@
                 }
             </CellTemplate>
         </PropertyColumn>
-        <PropertyColumn Property="x => x.DeliveryDate" Title="Oprettet">
+        <PropertyColumn Property="x => x.Created" Title="Oprettet">
             <CellTemplate>
-                @context.Item.Created.ToString("d")
+                @context.Item.Created.ToString("dd-MM-yyyy")
             </CellTemplate>
         </PropertyColumn>
         @*         <PropertyColumn Property="x => x.Updated" Title="Opdateret">

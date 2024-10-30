@@ -102,7 +102,7 @@
             <CellTemplate>
                 @if (context.Item.DateOfBirth is not null)
                 {
-                    <MudText>@context.Item.DateOfBirth.Value.ToString("d") (@ProjectHelper.CalculateAge(context.Item.DateOfBirth.Value) år)</MudText>
+                    <MudText>@context.Item.DateOfBirth.Value.ToString("dd-MM-yyyy") (@ProjectHelper.CalculateAge(context.Item.DateOfBirth.Value) år)</MudText>
                 }
             </CellTemplate>
         </PropertyColumn>

@@ -761,14 +761,6 @@ video {
   font-weight: 600;
 }
 
-.leading-none {
-  line-height: 1;
-}
-
-.leading-loose {
-  line-height: 2;
-}
-
 .text-red-600 {
   --tw-text-opacity: 1;
   color: rgb(220 38 38 / var(--tw-text-opacity));

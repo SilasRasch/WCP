@@ -65,7 +65,7 @@
             @if (_isCreator && Creator is not null)
             {
                 <MudStack Row="true">
-                    <MudDatePicker Label="Fødselsdag" @bind-Date="Creator.DateOfBirth" Required="_isCreator"></MudDatePicker>
+                    <MudDatePicker Label="Fødselsdag" @bind-Date="Creator.DateOfBirth" Required="_isCreator" DateFormat="dd.MM.yyyy"></MudDatePicker>
                     <MudSelect @bind-Value="Creator.Gender" Label="Køn" Required="_isCreator" RequiredError="Dette felt er påkrævet" AnchorOrigin="Origin.BottomCenter" Placeholder="Vælg et køn">
                         <MudSelectItem Value="@("Mand")">Mand</MudSelectItem>
                         <MudSelectItem Value="@("Kvinde")">Kvinde</MudSelectItem>

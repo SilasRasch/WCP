@@ -1,35 +1,108 @@
 ﻿@page "/"
+@using Microsoft.EntityFrameworkCore
+@using WCPAdminFrontEnd.Services
+@using WCPShared.Interfaces
+@using WCPShared.Models.Entities
+@inject IWcpDbContext Context
 
 <PageTitle>WebContent Platform</PageTitle>
 
 <AuthorizeView>
     <NotAuthorized>
-        <span>You are not logged in.</span>
+        <MudNavLink Href="/login" Match="NavLinkMatch.Prefix">Log ind</MudNavLink>
     </NotAuthorized>
     <Authorized>
-        <span>Hello, <b>@context.User.Identity!.Name</b>. Welcome to the WCP Administrator Platform.</span>
+        <MudStack>
+            <MudPaper Class="pa-4">
+                <MudText Typo="Typo.body1">Hej, <b>@context.User.Identity!.Name</b>!</MudText>
+            </MudPaper>
+
+
+            @if (data is not null)
+            {
+                <MudStack Spacing="0">
+                    <MudText Typo="Typo.h6">Nyeste projekter</MudText>
+                    <MudDataGrid Items="@projects.TakeLast(5).OrderByDescending(x => x.Created)">
+                        <Columns>
+                            <PropertyColumn Property="x => x.ProjectName" Title="Navn" />
+                            <PropertyColumn Context="prop" Property="x => x.Brand" Title="Brand">
+                                <CellTemplate>
+                                    <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
+                                        <MudText Typo="Typo.h6">@ProjectHelper.CountryStringToFlag(prop.Item.Brand.Organization.Language.Name) </MudText>
+                                        @prop.Item.Brand.Name (@prop.Item.Brand.Organization.Name)
+                                    </MudStack>
+                                </CellTemplate>
+                            </PropertyColumn>
+                            <PropertyColumn Property="x => x.ProjectType" Title="Type" />
+                            <PropertyColumn Context="prop" Property="x => x.Created" Title="Oprettet">
+                                <CellTemplate>
+                                    @prop.Item.Created
+                                </CellTemplate>
+                            </PropertyColumn>
+                            <PropertyColumn Context="prop" Property="x => x.Status" Title="Status" CellClass="cursor-pointer">
+                                <CellTemplate>
+                                    <div class="@ProjectHelper.GetStatusColor(prop.Item.Status)">
+                                        @ProjectHelper.GetStatusString(prop.Item.Status)
+                                    </div>
+                                </CellTemplate>
+                            </PropertyColumn>
+                        </Columns>
+                    </MudDataGrid>
+                </MudStack>
+            }
+
+            <MudStack Row="true" AlignItems="AlignItems.End">
+                @if (data is not null)
+                {
+                    <MudStack Spacing="0">
+                        <MudText Typo="Typo.h6">Fordeling af projekt-typer</MudText>
+                        <MudPaper Class="pa-4">
+                            <MudChart ChartType="ChartType.Donut" Width="300px" Height="300px" @bind-SelectedIndex="Index" InputData="@data" InputLabels="@labels">
+                                <CustomGraphics>
+                                    <text class="donut-inner-text" x="50%" y="45%" dominant-baseline="middle" text-anchor="middle" fill="black" font-family="Helvetica" font-size="2">Total</text>
+                                    <text class="donut-inner-text" x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" fill="black" font-family="Helvetica" font-size="5">@data.Sum().ToString()</text>
+                                </CustomGraphics>
+                            </MudChart>
+                        </MudPaper>
+                    </MudStack>
+
+                    <MudStack Spacing="0">
+                        <MudPaper Class="pa-4">
+                            <MudChart ChartOptions="@(new ChartOptions { ShowLegend = false })" ChartType="ChartType.Bar" ChartSeries="@Series" XAxisLabels="@XAxisLabels" Width="100%" Height="354px">
+
+                            </MudChart>
+                        </MudPaper>
+                    </MudStack>
+                }
+                else
+                {
+                    <MudPaper Class="pa-4">
+                        <MudSkeleton SkeletonType="SkeletonType.Circle" Width="300px" Height="300px" />
+                    </MudPaper>
+                }
+            </MudStack>
+        </MudStack>
+        
     </Authorized>
 </AuthorizeView>
 
-<br />
-<br />
+@code {
+    protected override void OnInitialized() 
+    {
+        projects = Context.Orders.Include(x => x.Brand).ThenInclude(x => x.Organization).ThenInclude(x => x.Language).AsSplitQuery().ToList();
+        int ugcCount = projects.Where(x => x.ProjectType == "UGC" || x.ProjectType == "User Generated Content").ToList().Count;
+        int staticCount = projects.Where(x => x.ProjectType == "Statics").ToList().Count;
+        int otherCount = projects.Where(x => x.ProjectType != "UGC" && x.ProjectType != "User Generated Content" && x.ProjectType != "Statics").ToList().Count;
 
-<MudText Typo="Typo.h5" GutterBottom="true">What's New in Blazor with the Release of .NET 8</MudText>
+        data = [ugcCount, staticCount, otherCount];
+        Series.Add(new ChartSeries() { Data = new double[] { ugcCount, staticCount, otherCount } });
+    }
+    private List<Order> projects = [];
 
-<MudAlert Severity="Severity.Normal">
-    You can find documentation and examples on our website here:
-    <MudLink Href="https://mudblazor.com" Target="_blank" Typo="Typo.body2" Color="Color.Primary">
-        <b>www.mudblazor.com</b>
-    </MudLink>
-</MudAlert>
-
-<MudText Typo="Typo.h6" GutterBottom="true">Prerendering</MudText>
-<MudText Typo="Typo.body2" GutterBottom="true">
-    If you're exploring the features of .NET 8 Blazor,<br /> you might be pleasantly surprised to learn that each page is prerendered on the server,<br /> regardless of the selected render mode.<br /><br />
-    This means that you'll need to inject all necessary services on the server,<br /> even when opting for the wasm (WebAssembly) render mode.<br /><br />
-    This prerendering functionality is crucial to ensuring that WebAssembly mode feels fast and responsive,<br /> especially when it comes to initial page load times.<br /><br />
-    For more information on how to detect prerendering and leverage the RenderContext, you can refer to the following link:
-    <MudLink Href="https://github.com/dotnet/aspnetcore/issues/51468#issuecomment-1783568121" Target="_blank" Typo="Typo.body2" Color="Color.Primary">
-        More details
-    </MudLink>
-</MudText>
+    private int Index = -1; //default value cannot be 0 -> first selectedindex is 0.
+    int dataSize = 4;
+    public double[] data;
+    public string[] labels = { "UGC", "Statics", "Andet" };
+    public List<ChartSeries> Series = new List<ChartSeries>();
+    public string[] XAxisLabels = { "UGC", "Statics", "Andet" };
+}

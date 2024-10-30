@@ -35,11 +35,12 @@
         <MudSelect @bind-Value="Project.Status" Label="Status" Placeholder="Vælg ny status" AnchorOrigin="Origin.BottomCenter" Disabled="!_editable">
             <MudSelectItem Value="0">Ubekræftet</MudSelectItem>
             <MudSelectItem Value="1">I kø</MudSelectItem>
-            <MudSelectItem Value="2">Planlægning</MudSelectItem>
-            <MudSelectItem Value="3">Creator magi</MudSelectItem>
-            <MudSelectItem Value="4">Klipperummet</MudSelectItem>
-            <MudSelectItem Value="5">Feedback</MudSelectItem>
-            <MudSelectItem Value="6">Færdig</MudSelectItem>
+            <MudSelectItem Value="2">Scripting</MudSelectItem>
+            <MudSelectItem Value="3">Planlægning</MudSelectItem>
+            <MudSelectItem Value="4">Creator magi</MudSelectItem>
+            <MudSelectItem Value="5">Klipperummet</MudSelectItem>
+            <MudSelectItem Value="6">Feedback</MudSelectItem>
+            <MudSelectItem Value="7">Færdig</MudSelectItem>
             <MudSelectItem Value="-1">Annulleret</MudSelectItem>
         </MudSelect>
 
@@ -140,7 +141,7 @@
         <MudText Typo="Typo.h6" Class="mt-2">Pris og leveringstid</MudText>
         <MudStack Row="true">
             <MudTextField @bind-Value="@Project.Price" Label="Pris" ReadOnly="!_editable" />
-            <MudDatePicker @bind-Date="_deliveryDate" Label="Leveringsdato" Placeholder="Estimeret leveringsdato" ReadOnly="!_editable"></MudDatePicker>
+            <MudDatePicker @bind-Date="_deliveryDate" Label="Leveringsdato" Placeholder="Estimeret leveringsdato" DateFormat="dd.MM.yyyy" ReadOnly="!_editable"></MudDatePicker>
         </MudStack>
 
     </DialogContent>
