@@ -63,23 +63,15 @@ namespace WCPShared.Models
 
             modelBuilder.Entity<Order>()
                 .Property(x => x.Ideas)
-                .HasConversion(new ValueConverter<List<string>, string>(
-                    v => JsonConvert.SerializeObject(v),
-                    v => JsonConvert.DeserializeObject<List<string>>(v)!),
-                    new ValueComparer<List<string>>(
-                        (c1, c2) => c1!.SequenceEqual(c2!),
-                        c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
-                        c => c.ToList()));
+                .HasConversion(new ValueConverter<List<Idea>, string>(
+                    v => JsonConvert.SerializeObject(v.Select(x => x.Text)),
+                    v => JsonConvert.DeserializeObject<List<string>>(v)!.Select(x => new Idea { Text = x }).ToList()));
 
             modelBuilder.Entity<Order>()
                 .Property(x => x.Products)
-                .HasConversion(new ValueConverter<List<string>, string>(
-                    v => JsonConvert.SerializeObject(v),
-                    v => JsonConvert.DeserializeObject<List<string>>(v)!),
-                    new ValueComparer<List<string>>(
-                        (c1, c2) => c1!.SequenceEqual(c2!),
-                        c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
-                        c => c.ToList()));
+                .HasConversion(new ValueConverter<List<Product>, string>(
+                    v => JsonConvert.SerializeObject(v.Select(x => x.Link)),
+                    v => JsonConvert.DeserializeObject<List<string>>(v)!.Select(x => new Product { Link = x }).ToList()));
         }
     }
 }

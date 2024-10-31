@@ -22,7 +22,7 @@
         </MudStack>
         <MudSpacer />
         <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
-                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+            AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
         <MudIconButton onclick="FetchCreators" Icon="@Icons.Material.Filled.Refresh" Class="hover:animate-spin-once"></MudIconButton>
         <MudIconButton Icon="@Icons.Material.Filled.Settings" OnClick="ToggleOpenTableSettings" Class="hover:animate-spin-once"></MudIconButton>
         <MudPopover Open="@_open" Fixed="true" Class="px-4 pt-4" AnchorOrigin="Origin.BottomRight">
@@ -192,7 +192,7 @@
         if (string.IsNullOrWhiteSpace(_searchString))
             return true;
 
-        if ($"{x.User.Name} {x.User.Email}".Contains(_searchString))
+        if ($"{x.User.Name}{x.Gender}{x.User.Email}{x.User.Id}{x.User.Phone}{x.SubType}".Contains(_searchString, StringComparison.OrdinalIgnoreCase))
             return true;
 
         return false;

@@ -2,6 +2,7 @@
 @using WCPShared.Models.Entities
 @using WCPShared.Models.Views
 @using WCPShared.Services.EntityFramework
+@using WCPShared.Services.StaticHelpers
 @inject OrderService OrderService
 
 <MudDialog>
@@ -55,6 +56,12 @@
     public int NewStatus { get; set; }
 
     private DateTime? _deliveryDate;
+    private Order ProjectCopy;
+
+    protected override void OnInitialized()
+    {
+        ProjectCopy = DtoHelper.CloneOrder(Project);
+    }
 
     private async void Submit()
     {
@@ -64,9 +71,8 @@
         {
             Project.DeliveryDate = _deliveryDate!.Value.AddHours(23).AddMinutes(59).AddSeconds(59);
         }
-        
 
-        await OrderService.UpdateObject(Project.Id, Project);
+        await OrderService.UpdateObject(Project, ProjectCopy);
         MudDialog.Close(DialogResult.Ok(true));
     }
 

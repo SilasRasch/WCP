@@ -31,6 +31,13 @@
             <MudTextField @bind-Value="@Project.Format" Label="Format" ReadOnly="!_editable" />
         </MudStack>
 
+        <MudSelect @bind-Value="Project.ProjectType" Label="Type" Placeholder="Vælg en type" AnchorOrigin="Origin.BottomCenter" Disabled="!_editable">
+            <MudSelectItem Value="@("UGC")">UGC</MudSelectItem>
+            <MudSelectItem Value="@("Statics")">Statics</MudSelectItem>
+            <MudSelectItem Value="@("Stills")">Stills</MudSelectItem>
+            <MudSelectItem Value="@("Edit")">Edit</MudSelectItem>
+        </MudSelect>
+
         <MudTextField @bind-Value="@Project.Platforms" Label="Tiltænkte platforme" ReadOnly="!_editable" />
         <MudSelect @bind-Value="Project.Status" Label="Status" Placeholder="Vælg ny status" AnchorOrigin="Origin.BottomCenter" Disabled="!_editable">
             <MudSelectItem Value="0">Ubekræftet</MudSelectItem>
@@ -75,7 +82,7 @@
                         <li>
                             <MudStack Spacing="0">
                                 <MudText Typo="Typo.caption">Produkt @(Project.Products.IndexOf(product) + 1)</MudText>
-                                <MudLink Class="my-1" Style="line-height: 1" Color="Color.Info" Underline="Underline.Always" Href="@product.Link">@product.Link</MudLink>
+                                <MudLink Target="_blank" Href="@product.Link" Class="my-1" Style="line-height: 1" Color="Color.Info" Underline="Underline.Always">@product.Link</MudLink>
                             </MudStack>
                             <MudDivider Class="mt-1" />
                         </li>
@@ -142,6 +149,7 @@
         <MudStack Row="true">
             <MudTextField @bind-Value="@Project.Price" Label="Pris" ReadOnly="!_editable" />
             <MudDatePicker @bind-Date="_deliveryDate" Label="Leveringsdato" Placeholder="Estimeret leveringsdato" DateFormat="dd.MM.yyyy" ReadOnly="!_editable"></MudDatePicker>
+            <MudDatePicker @bind-Date="_createdDate" Label="Oprettet" Placeholder="Dato for oprettelse" DateFormat="dd.MM.yyyy" ReadOnly="!_editable"></MudDatePicker>
         </MudStack>
 
     </DialogContent>
@@ -167,10 +175,12 @@
 
     private bool _editable = false;
     private DateTime? _deliveryDate = DateTime.Now;
+    private DateTime? _createdDate = DateTime.Now;
 
     protected override void OnInitialized()
     {
         _deliveryDate = Project.DeliveryDate;
+        _createdDate = Project.Created;
         Brands = Context.Brands
             .Include(x => x.Organization)
             .ThenInclude(x => x.Language)
@@ -181,6 +191,9 @@
     {
         if (_deliveryDate != DateTime.MinValue)
             Project.DeliveryDate = _deliveryDate!.Value.AddHours(23).AddMinutes(59).AddSeconds(59);
+
+        if (_createdDate != DateTime.MinValue)
+            Project.Created = _createdDate!.Value;
         
         await OrderService.UpdateObject(Project.Id, Project);
         MudDialog.Close(DialogResult.Ok(true));

@@ -112,7 +112,7 @@
         if (string.IsNullOrWhiteSpace(_searchString))
             return true;
 
-        if (x.Name.Contains(_searchString))
+        if ($"{x.Name}{x.CVR}".Contains(_searchString, StringComparison.OrdinalIgnoreCase))
             return true;
 
         return false;

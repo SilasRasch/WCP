@@ -87,29 +87,6 @@
             </MudStack>
         }
 
-        @if (Creator.DateOfBirth is not null)
-        {
-            <MudStack Row="true" Spacing="1">
-                <MudIcon Icon="@Icons.Material.Filled.Cake"></MudIcon>
-                <MudText>@Creator.DateOfBirth.Value.ToString("dd-MM-yyyy") (@ProjectHelper.CalculateAge(Creator.DateOfBirth.Value) år)</MudText>
-            </MudStack>
-        }
-
-        @if (!String.IsNullOrEmpty(Creator.Gender))
-        {
-            <MudStack Row="true" Spacing="1">
-                @if (Creator.Gender is not null && Creator.Gender.ToLower() == "kvinde")
-                {
-                    <MudIcon Icon="@Icons.Material.Filled.Female"></MudIcon>
-                }
-                else if (Creator.Gender is not null)
-                {
-                    <MudIcon Icon="@Icons.Material.Filled.Male"></MudIcon>
-                }
-                <MudText>@Creator.Gender</MudText>
-            </MudStack>
-        }
-
         @if (!String.IsNullOrEmpty(Creator.User.Email))
         {
             <MudStack Row="true" Spacing="1">
@@ -131,6 +108,29 @@
             <MudStack Row="true" Spacing="1">
                 <MudIcon Icon="@Icons.Material.Filled.Phone"></MudIcon>
                 <MudText>@Creator.User.Phone</MudText>
+            </MudStack>
+        }
+
+        @if (Creator.DateOfBirth is not null)
+        {
+            <MudStack Row="true" Spacing="1">
+                <MudIcon Icon="@Icons.Material.Filled.Cake"></MudIcon>
+                <MudText>@Creator.DateOfBirth.Value.ToString("dd-MM-yyyy") (@ProjectHelper.CalculateAge(Creator.DateOfBirth.Value) år)</MudText>
+            </MudStack>
+        }
+
+        @if (!String.IsNullOrEmpty(Creator.Gender))
+        {
+            <MudStack Row="true" Spacing="1">
+                @if (Creator.Gender is not null && Creator.Gender.ToLower() == "kvinde")
+                {
+                    <MudIcon Icon="@Icons.Material.Filled.Female"></MudIcon>
+                }
+                else if (Creator.Gender is not null)
+                {
+                    <MudIcon Icon="@Icons.Material.Filled.Male"></MudIcon>
+                }
+                <MudText>@Creator.Gender</MudText>
             </MudStack>
         }
 

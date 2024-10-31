@@ -113,7 +113,7 @@
         if (string.IsNullOrWhiteSpace(_searchString))
             return true;
 
-        if ($"{creator.User.Name} {creator.User.Email} {creator.Address} {creator.Gender} {creator.User.Phone}".Contains(_searchString))
+        if ($"{creator.User.Name} {creator.Id} {creator.User.Email} {creator.Gender} {creator.User.Phone} {creator.SubType}".Contains(_searchString, StringComparison.OrdinalIgnoreCase))
             return true;
 
         return false;

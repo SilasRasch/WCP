@@ -162,7 +162,7 @@
         </TemplateColumn>
     </Columns>
     <PagerContent>
-        <MudDataGridPager T="Order" />
+        <MudDataGridPager T="Order" PageSizeOptions="[100, 200, 300, 400, 500]" RowsPerPageString="Rækker per side:" />
     </PagerContent>
 </MudDataGrid>
 
@@ -181,7 +181,7 @@
     {
         new FilterDefinition<Order>()
         {
-            FilterFunction = x => x.Status != -1 && x.Status != 7
+            FilterFunction = x => x.Status != -1 && x.Status != 7 && x.Status != 4 && x.Status != 6
         }
     };
     private IEnumerable<Order> ProjectList = new List<Order>();
@@ -205,7 +205,7 @@
         if (x.Brand.Name.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
             return true;
 
-        if ($"{x.ProjectName} {x.ProjectType} {x.Brand.Name}".Contains(_searchString))
+        if ($"{x.ProjectType}{x.Id}{x.Brand.Organization.Name}{x.Name}{x.Email}{x.Phone}".Contains(_searchString, StringComparison.OrdinalIgnoreCase))
             return true;
 
         return false;
@@ -288,7 +288,9 @@
             .ThenInclude(x => x.Creator)
             .ThenInclude(x => x.User)
             .ThenInclude(x => x.Language)
-            .AsSplitQuery();
+            .AsSplitQuery()
+            .ToList()
+            .OrderBy(x => x.Status);
     }
 
     void ToggleOpenTableSettings()

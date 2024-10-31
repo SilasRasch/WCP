@@ -159,7 +159,7 @@
         if (string.IsNullOrWhiteSpace(_searchString))
             return true;
 
-        if ($"{x.Name} {x.Email}".Contains(_searchString))
+        if ($"{x.Name}{x.Email}{x.Id}{x.Phone}{x.Role}".Contains(_searchString, StringComparison.OrdinalIgnoreCase))
             return true;
 
         return false;

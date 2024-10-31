@@ -14,29 +14,33 @@
 @inject NavigationManager NavigationManager
 
 <div class="grid justify-center gap-2 pt-4 pb-4">
-    <EditForm Model="@Model" OnValidSubmit="Authenticate" FormName="LoginForm" class="p-8 rounded-md flex flex-column gap-2 mud-secondary">
-        <DataAnnotationsValidator />
-        <div class="font-semibold">
-            Login
-        </div>
-        <div class="grid">
-            <InputText @bind-Value="Model.Email" class="p-2 rounded-lg" placeholder="Email" />
-            <ValidationMessage For="() => Model.Email" class="text-red-600" />
-        </div>
-        <div class="grid">
-            <InputText type="password" @bind-Value="Model.Password" class="p-2 rounded-lg" placeholder="Password" />
-            <ValidationMessage For="() => Model.Password" class="text-red-600" />
-        </div>
 
-        @if (errorMessage is not null) 
-        {
-            <span class="text-red-600 mt-2">@errorMessage</span>
-        }
+    <MudPaper>
+        <EditForm Model="@Model" OnValidSubmit="Authenticate" FormName="LoginForm" class="p-8 rounded-md flex flex-column gap-2 mud-secondary">
+            <DataAnnotationsValidator />
+            <div class="font-semibold">
+                Login
+            </div>
+            <div class="grid">
+                <InputText @bind-Value="Model.Email" class="p-2 rounded-lg" placeholder="Email" />
+                <ValidationMessage For="() => Model.Email" class="text-red-600" />
+            </div>
+            <div class="grid">
+                <InputText type="password" @bind-Value="Model.Password" class="p-2 rounded-lg" placeholder="Password" />
+                <ValidationMessage For="() => Model.Password" class="text-red-600" />
+            </div>
 
-        <hr />
+            @if (errorMessage is not null)
+            {
+                <span class="text-red-600 mt-2">@errorMessage</span>
+            }
 
-        <button type="submit" class="rounded-lg p-2 bg-green-500 text-white hover:bg-green-600 duration-200">Login</button>
-    </EditForm>
+            <hr />
+
+            <button type="submit" class="rounded-lg p-2 bg-green-500 text-white hover:bg-green-600 duration-200">Login</button>
+        </EditForm>
+    </MudPaper>
+    
 </div>
 
 @code {

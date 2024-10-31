@@ -9,17 +9,38 @@
 
 <AuthorizeView>
     <NotAuthorized>
-        <MudNavLink Href="/login" Match="NavLinkMatch.Prefix">Log ind</MudNavLink>
     </NotAuthorized>
     <Authorized>
         <MudStack>
             <MudPaper Class="pa-4">
-                <MudText Typo="Typo.body1">Hej, <b>@context.User.Identity!.Name</b>!</MudText>
+                <MudText Typo="Typo.body1">Hej, <b>@context.User.Identity!.Name.Split(' ').First()</b>! 👋</MudText>
             </MudPaper>
 
 
             @if (data is not null)
             {
+                <MudStack Row>
+                    <MudPaper Class="pa-4" Width="25%">
+                        <MudText Typo="Typo.caption">Antal projekter i alt</MudText>
+                        <MudText Typo="Typo.h1">@projects.Count</MudText>
+                    </MudPaper>
+                    <MudPaper Class="pa-4" Width="25%">
+                        <MudText Typo="Typo.caption">Projekter denne måned</MudText>
+                        <MudText Typo="Typo.h1">@projects.Where(x => x.Created.Month == DateTime.Now.Month).Count()</MudText>
+                    </MudPaper>
+                    <MudPaper Class="pa-4" Width="25%">
+                        <MudText Typo="Typo.caption">Projekter sidste måned</MudText>
+                        <MudText Typo="Typo.h1">@projects.Where(x => x.Created.Month == DateTime.Now.AddMonths(-1).Month).Count()</MudText>
+                    </MudPaper>
+                    <MudPaper Class="pa-4" Width="25%">
+                        <MudText Typo="Typo.caption">Ventende projekter</MudText>
+                        <MudText Typo="Typo.h1">@projects.Where(x => x.Status == 0 || x.Status == 1 || x.Status == 5).Count()</MudText>
+                    </MudPaper>
+                    <MudPaper Class="pa-4" Width="25%">
+                        <MudText Typo="Typo.caption">Antal videoer i alt</MudText>
+                        <MudText Typo="Typo.h1">@projects.Sum(x => x.ContentCount)</MudText>
+                    </MudPaper>
+                </MudStack>
                 <MudStack Spacing="0">
                     <MudText Typo="Typo.h6">Nyeste projekter</MudText>
                     <MudDataGrid Items="@projects.TakeLast(5).OrderByDescending(x => x.Created)">
@@ -76,33 +97,58 @@
                 }
                 else
                 {
-                    <MudPaper Class="pa-4">
-                        <MudSkeleton SkeletonType="SkeletonType.Circle" Width="300px" Height="300px" />
-                    </MudPaper>
+                    <div class="flex flex-col gap-2 w-full">
+                        <MudPaper Width="100%" Class="pa-4">
+                            <MudStack Spacing="0">
+                                <MudSkeleton Width="100%" Height="64px" />
+                                <MudSkeleton Width="100%" Height="64px" />
+                                <MudSkeleton Width="100%" Height="64px" />
+                                <MudSkeleton Width="100%" Height="64px" />
+                                <MudSkeleton Width="100%" Height="64px" />
+                                <MudSkeleton Width="100%" Height="64px" />
+                            </MudStack>
+                        </MudPaper>
+                        
+                        <MudStack Row="true">
+                            <MudPaper Class="pa-4">
+                                <MudSkeleton SkeletonType="SkeletonType.Circle" Width="300px" Height="300px" />
+                            </MudPaper>
+                            <MudPaper Class="pa-4">
+                                <MudSkeleton Height="300px" Width="650px" />
+                            </MudPaper>
+                        </MudStack>
+                    </div>
                 }
             </MudStack>
         </MudStack>
-        
     </Authorized>
 </AuthorizeView>
 
 @code {
-    protected override void OnInitialized() 
+    protected override async Task OnInitializedAsync() 
     {
-        projects = Context.Orders.Include(x => x.Brand).ThenInclude(x => x.Organization).ThenInclude(x => x.Language).AsSplitQuery().ToList();
-        int ugcCount = projects.Where(x => x.ProjectType == "UGC" || x.ProjectType == "User Generated Content").ToList().Count;
-        int staticCount = projects.Where(x => x.ProjectType == "Statics").ToList().Count;
-        int otherCount = projects.Where(x => x.ProjectType != "UGC" && x.ProjectType != "User Generated Content" && x.ProjectType != "Statics").ToList().Count;
+        projects = await Context.Orders
+            .Include(x => x.Brand)
+            .ThenInclude(x => x.Organization)
+            .ThenInclude(x => x.Language)
+            .Where(x => x.Status != -1)
+            .AsSplitQuery()
+            .ToListAsync();
 
-        data = [ugcCount, staticCount, otherCount];
-        Series.Add(new ChartSeries() { Data = new double[] { ugcCount, staticCount, otherCount } });
+        int ugcCount = projects.Where(x => x.ProjectType == "UGC").ToList().Count;
+        int staticCount = projects.Where(x => x.ProjectType == "Statics").ToList().Count;
+        int editCount = projects.Where(x => x.ProjectType == "Edit").ToList().Count;
+        int otherCount = projects.Where(x => x.ProjectType != "UGC" && x.ProjectType != "Statics" && x.ProjectType != "Edit").ToList().Count;
+
+        data = [ugcCount, editCount, staticCount, otherCount];
+        Series.Add(new ChartSeries() { Data = data });
     }
     private List<Order> projects = [];
 
     private int Index = -1; //default value cannot be 0 -> first selectedindex is 0.
     int dataSize = 4;
     public double[] data;
-    public string[] labels = { "UGC", "Statics", "Andet" };
+    public string[] labels = { "UGC","Edit", "Statics", "Andet" };
     public List<ChartSeries> Series = new List<ChartSeries>();
-    public string[] XAxisLabels = { "UGC", "Statics", "Andet" };
+    public string[] XAxisLabels = { "UGC", "Edit", "Statics", "Andet" };
 }

@@ -38,12 +38,22 @@ namespace WCPShared.Services.EntityFramework
             if (existingOrder is null)
                 return null!;
 
-            existingOrder.Updated = DateTime.Now;
+            obj.Updated = DateTime.Now;
 
             _context.Update(obj);
             await _context.SaveChangesAsync();
             await _slackNetService.SendStatusNotifications(obj, existingOrder);
 
+            return obj;
+        }
+
+        public async Task<Order?> UpdateObject(Order obj, Order oldObj)
+        {
+            obj.Updated = DateTime.Now;
+
+            _context.Update(obj);
+            await _context.SaveChangesAsync();
+            await _slackNetService.SendStatusNotifications(obj, oldObj);
             return obj;
         }
 

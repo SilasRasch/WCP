@@ -63,7 +63,7 @@ namespace WCPShared.Services
 
         private async Task<User?> FetchUser(string userName)
         {
-            return (await _slackApiClient.Users.List()).Members.SingleOrDefault(x => x.RealName.ToLower() == userName.ToLower());
+            return (await _slackApiClient.Users.List()).Members.SingleOrDefault(x => x.RealName == userName);
         }
 
         public async Task SendStatusNotifications(Order newOrder, Order oldOrder)
@@ -111,7 +111,7 @@ namespace WCPShared.Services
                         creator.User.Name,
                         $"[{newOrder.ProjectName}] Projektet er nu godkendt og produkterne er på vej til dig! {InsertProjectLink(newOrder.Id)}");
 
-            // Notify creators when the project is moved from queued to planned
+            // Notify creators when the project is moved from scripting to planned
             if (newOrder.Status == 3 && oldOrder.Status == 2)
                 foreach (CreatorView creator in creatorsWithUsers)
                     await SendMessageToUser(
