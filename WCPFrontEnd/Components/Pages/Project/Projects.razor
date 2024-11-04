@@ -178,7 +178,7 @@
     {
         new FilterDefinition<Order>()
         {
-            FilterFunction = x => x.Status != ProjectStatus.Unconfirmed && x.Status != ProjectStatus.Finished && x.Status != ProjectStatus.CreatorFilming && x.Status != ProjectStatus.Feedback
+            FilterFunction = x => x.Status == ProjectStatus.Unconfirmed || x.Status == ProjectStatus.Queued || x.Status == ProjectStatus.Planned || x.Status == ProjectStatus.Scripting || x.Status == ProjectStatus.Editing
         }
     };
     private IEnumerable<Order> ProjectList = new List<Order>();
