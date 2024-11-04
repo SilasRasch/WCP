@@ -9,6 +9,7 @@ using WCPShared.Services;
 using WCPShared.Models.Entities;
 using WCPShared.Models.Entities.UserModels;
 using WCPShared.Models.Entities.AuthModels;
+using WCPShared.Models.Enums;
 
 namespace WCPTests
 {
@@ -31,6 +32,8 @@ namespace WCPTests
         private Brand _brand;
         private User _user;
         private Creator _creator;
+        private Creator _creator2;
+        private Creator _scripter;
 
         private OrderDto _orderDto = new OrderDto()
         {
@@ -48,7 +51,7 @@ namespace WCPTests
             Email = "info@webcontent.dk",
             Phone = "12345678",
             ProjectName = "Projekt 1",
-            ProjectType = "User Generated Content",
+            ProjectType = "UGC",
             ContentCount = 6,
             ContentLength = 30,
             Platforms = "TikTok, Instagram",
@@ -82,8 +85,12 @@ namespace WCPTests
             await _languageService.AddObject(new Language { Name = "DAN" });
             _organization = await _organizationService.AddObject(new OrganizationDto() { Name = "Org", CVR = "12345678", LanguageId = 1 });
             _brand = await _brandService.AddObject(new BrandDto() { Name = "Brand", URL = "brand.dk", OrganizationId = _organization!.Id });
-            _user = await _userService.AddObject(new RegisterDto() { Name = "Creator", Email = "email@email.com", OrganizationId = _organization!.Id, Phone = "12341234", Role = "Creator", LanguageId = 1 });
+            _user = await _userService.AddObject(new RegisterDto() { Name = "Creator", Email = "ugc@email.wcp", OrganizationId = _organization!.Id, Phone = "12341234", Role = "Creator", LanguageId = 1 });
+            await _userService.AddObject(new RegisterDto() { Name = "Scripter", Email = "scripter@email.wcp", OrganizationId = _organization!.Id, Phone = "12341234", Role = "Creator", LanguageId = 1 });
+            await _userService.AddObject(new RegisterDto() { Name = "UGC", Email = "ugc2@email.wcp", Phone = "12341234", Role = "Creator", LanguageId = 1 });
             _creator = await _creatorService.AddObject(new CreatorDto() { Address = "Adressevej 12, 4000 By", Gender = "Mand", SubType = "UGC", UserId = 1 });
+            _creator2 = await _creatorService.AddObject(new CreatorDto() { Address = "Adressevej 12, 4000 By", Gender = "Mand", SubType = "UGC", UserId = 3 });
+            _scripter = await _creatorService.AddObject(new CreatorDto() { Address = "Adressevej 12, 4000 By", Gender = "Mand", SubType = "Scripter", UserId = 2 });
         }
 
         #endregion
@@ -204,9 +211,7 @@ namespace WCPTests
             await _orderService.AddObject(_orderDto);
 
             var result = await _orderService.GetObjectsBy(x => x.ProjectName == _orderDto.ProjectName);
-            var zeroResult = await _orderService.GetObjectsBy(x => x.Status == 99);
 
-            Assert.AreEqual(0, zeroResult.Count);
             Assert.IsNotNull(result);
             Assert.AreEqual(1, result.Count);
 
@@ -254,9 +259,84 @@ namespace WCPTests
             Assert.IsNotNull(result);
             Assert.IsTrue(result.Participations.All(x => !x.HasDelivered));
 
+            result.Status = ProjectStatus.Scripting;
+            result.Participations.Add(new CreatorParticipation()
+            {
+                Creator = _scripter,
+                CreatorId = 2,
+                HasDelivered = false,
+                Order = result,
+                OrderId = result.Id,
+                Salary = 0,
+            });
+            await _orderService.UpdateObject(result.Id, result);
+
+            await _orderService.CreatorDelivery(result, result.Participations.Last().CreatorId);
+            Assert.IsTrue(result.Participations.Last().HasDelivered);
+            Assert.AreEqual(ProjectStatus.Planned, result.Status);
+
+            // Simulate customer confirming scripts
+            await _orderService.UpdateObject(result.Id, result);
+            result.Status = ProjectStatus.CreatorFilming;
+
             await _orderService.CreatorDelivery(result, result.Participations.First().CreatorId);
             Assert.IsTrue(result.Participations.First().HasDelivered);
-            Assert.AreEqual(5, result.Status);
+            Assert.AreEqual(ProjectStatus.Editing, result.Status);
+        }
+
+        [TestMethod]
+        public async Task TestCreatorDeliveryScripterOnly()
+        {
+            var result = await _orderService.AddObject(_orderDto);
+            Assert.IsNotNull(result);
+
+            result.Status = ProjectStatus.Scripting;
+            result.Participations.Clear();
+            result.Participations.Add(new CreatorParticipation()
+            {
+                Creator = _scripter,
+                CreatorId = 2,
+                HasDelivered = false,
+                Order = result,
+                OrderId = result.Id,
+                Salary = 0,
+            });
+            await _orderService.UpdateObject(result.Id, result);
+
+            Assert.IsTrue(result.Participations.All(x => !x.HasDelivered));
+
+            await _orderService.CreatorDelivery(result, result.Participations.First().CreatorId);
+            Assert.IsTrue(result.Participations.First().HasDelivered);
+            Assert.AreEqual(ProjectStatus.Planned, result.Status);
+        }
+
+        [TestMethod]
+        public async Task TestCreatorDeliveryMultipleUgc()
+        {
+            var result = await _orderService.AddObject(_orderDto);
+            Assert.IsNotNull(result);
+
+            result.Participations.Add(new CreatorParticipation()
+            {
+                Creator = _creator2,
+                CreatorId = 3,
+                HasDelivered = false,
+                Order = result,
+                OrderId = result.Id,
+                Salary = 0,
+            });
+            result.Status = ProjectStatus.CreatorFilming;
+            await _orderService.UpdateObject(result.Id, result);
+
+            Assert.IsTrue(result.Participations.All(x => !x.HasDelivered));
+
+            await _orderService.CreatorDelivery(result, result.Participations.First().CreatorId);
+            Assert.IsTrue(result.Participations.First().HasDelivered);
+            Assert.AreEqual(ProjectStatus.CreatorFilming, result.Status);
+
+            await _orderService.CreatorDelivery(result, result.Participations.Last().CreatorId);
+            Assert.IsTrue(result.Participations.Last().HasDelivered);
+            Assert.AreEqual(ProjectStatus.Editing, result.Status);
         }
     }
 }

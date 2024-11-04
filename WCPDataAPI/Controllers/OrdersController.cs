@@ -8,6 +8,7 @@ using WCPShared.Services.EntityFramework;
 using WCPShared.Models.Entities;
 using WCPShared.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using WCPShared.Models.Enums;
 
 namespace WCPDataAPI.Controllers
 {
@@ -150,7 +151,7 @@ namespace WCPDataAPI.Controllers
             if (!order.Validate())
                 return BadRequest("Valideringsfejl, tjek venligst felterne igen...");
 
-            bool creatorNotAllowed = !existingOrder.Participations.Exists(x => x.Creator.UserId == _userContextService.GetId()) && existingOrder.Status == 4 && order.Status == 5;
+            bool creatorNotAllowed = !existingOrder.Participations.Exists(x => x.Creator.UserId == _userContextService.GetId()) && existingOrder.Status == ProjectStatus.CreatorFilming && order.Status == (int)ProjectStatus.Editing;
             bool isAdmin = _userContextService.GetRoles().Contains("Admin");
             bool isCreator = _userContextService.GetRoles().Contains("Creator");
             bool isUser = _userContextService.GetRoles().Contains("Bruger");

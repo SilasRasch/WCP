@@ -39,10 +39,10 @@ namespace WCPShared.Services
                 new Claim(ClaimTypes.Email, user.Email),
                 new Claim(ClaimTypes.UserData, $"{user.Id}"),
                 new Claim(ClaimTypes.Name, user.Name),
-                new Claim(ClaimTypes.Role, user.Role)
+                new Claim(ClaimTypes.Role, user.Role.ToString())
             };
 
-            if (user.Role == "Bruger" && user.Organization is not null)
+            if (user.Role == Models.Enums.UserRole.Bruger && user.Organization is not null)
                 claims.Add(new Claim("OrganizationId", user.Organization!.Id.ToString()));
 
             if (user.Phone is not null)

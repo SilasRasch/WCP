@@ -1,5 +1,6 @@
 ﻿@using WCPAdminFrontEnd.Services
 @using WCPShared.Models.Entities
+@using WCPShared.Models.Enums
 @using WCPShared.Models.Views
 @using WCPShared.Services.EntityFramework
 @inject OrderService OrderService
@@ -16,15 +17,10 @@
             <MudTextField Value="@Project.ProjectName" Label="Projektnavn" ReadOnly="true" />
         </MudStack>
         <MudSelect @bind-Value="Project.Status" Label="Status" Placeholder="Vælg ny status" AnchorOrigin="Origin.BottomCenter">
-            <MudSelectItem Value="0">Ubekræftet</MudSelectItem>
-            <MudSelectItem Value="1">I kø</MudSelectItem>
-            <MudSelectItem Value="2">Scripting</MudSelectItem>
-            <MudSelectItem Value="3">Planlægning</MudSelectItem>
-            <MudSelectItem Value="4">Creator magi</MudSelectItem>
-            <MudSelectItem Value="5">Klipperummet</MudSelectItem>
-            <MudSelectItem Value="6">Feedback</MudSelectItem>
-            <MudSelectItem Value="7">Færdig</MudSelectItem>
-            <MudSelectItem Value="-1">Annulleret</MudSelectItem>
+            @foreach (ProjectStatus item in Enum.GetValues(typeof(ProjectStatus)))
+            {
+                <MudSelectItem Value="@item">@ProjectHelper.GetStatusString(item)</MudSelectItem>
+            }
         </MudSelect>
     </DialogContent>
     <DialogActions>

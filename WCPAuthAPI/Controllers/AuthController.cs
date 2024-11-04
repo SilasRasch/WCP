@@ -10,6 +10,7 @@ using WCPShared.Services.EntityFramework;
 using SendGrid.Helpers.Errors.Model;
 using WCPShared.Models.Entities.AuthModels;
 using WCPShared.Models.Entities.UserModels;
+using WCPShared.Models.Enums;
 
 namespace WCPAuthAPI.Controllers
 {
@@ -55,7 +56,7 @@ namespace WCPAuthAPI.Controllers
             {
                 User? user = await _authService.Register(request, selfRegister);
                 if (user is not null)
-                    return user.Role != "Bruger" ? Created($"auth/{user.Id}", user.Id) : Created($"auth/{user.Id}", new { id = user.Id, orgId = user.OrganizationId });
+                    return user.Role != UserRole.Bruger ? Created($"auth/{user.Id}", user.Id) : Created($"auth/{user.Id}", new { id = user.Id, orgId = user.OrganizationId });
                 return BadRequest("Something went wrong...");
 
             }

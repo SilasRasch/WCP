@@ -27,9 +27,8 @@ namespace WCPShared.Models.Views
             Address = obj.Address;
             Gender = obj.Gender;
             UserId = obj.UserId;
-            SubType = obj.SubType;
+            SubType = obj.SubType.ToString();
             DateOfBirth = obj.DateOfBirth;
-            Speciality = obj.Speciality;
             ImgURL = obj.ImgURL;
 
             if (obj.Languages is not null)

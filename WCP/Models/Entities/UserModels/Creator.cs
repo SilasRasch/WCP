@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.IdentityModel.Tokens;
 using WCPShared.Models.Entities;
 using WCPShared.Interfaces;
+using WCPShared.Models.Enums;
 
 namespace WCPShared.Models.Entities.UserModels
 {
@@ -12,9 +13,9 @@ namespace WCPShared.Models.Entities.UserModels
         public int Id { get; set; }
         public DateTime? DateOfBirth { get; set; }
         public string? Address { get; set; } = string.Empty;
-        public string? Speciality { get; set; } = string.Empty;
         public string? ImgURL { get; set; }
-        public string SubType { get; set; } = string.Empty;
+        [EnumDataType(typeof(CreatorSubType))]
+        public CreatorSubType SubType { get; set; }
         public int UserId { get; set; }
         public User User { get; set; } = new User();
         public List<Language>? Languages { get; set; } = new List<Language>();
@@ -23,12 +24,6 @@ namespace WCPShared.Models.Entities.UserModels
 
         public bool Validate()
         {
-            if (SubType.IsNullOrEmpty())
-                return false;
-
-            if (SubType == "UGC" && (string.IsNullOrWhiteSpace(Address) || string.IsNullOrWhiteSpace(Gender)))
-                return false;
-
             return true;
         }
 

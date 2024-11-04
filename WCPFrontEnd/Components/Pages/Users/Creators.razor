@@ -7,13 +7,14 @@
 @using WCPShared.Models.Entities.UserModels
 @using WCPShared.Services.EntityFramework
 @inject CreatorService CreatorService
+@inject UserService UserService
 @inject IWcpDbContext Context
 @inject IDialogService DialogService
 @attribute [Authorize(Roles = "Admin")]
 
 <PageTitle>Creators</PageTitle>
 
-<MudDataGrid T="Creator" SelectOnRowClick="@_selectable" MultiSelection="@_selectable" Items="@CreatorList" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter" Hideable="@_hidable" Striped="@_striped" Elevation="3"
+<MudDataGrid T="Creator" SelectOnRowClick="@_selectable" MultiSelection="@_selectable" Items="@CreatorList.Reverse()" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter" Hideable="@_hidable" Striped="@_striped" Elevation="3"
     ColumnResizeMode="@(_resizable ? ResizeMode.Column : ResizeMode.None)" DragDropColumnReordering="_movable" FilterCaseSensitivity="DataGridFilterCaseSensitivity.Ignore">
     <ToolBarContent>
         <MudStack Row="true" AlignItems="AlignItems.Center">
@@ -158,7 +159,7 @@
                             <MudText>@(context.Item.User.IsActive ? "Deaktivér" : "Aktivér")</MudText>
                         </MudStack>
                     </MudMenuItem>
-                    <MudMenuItem OnClick="() => ToggleDeleteModal(context.Item.Id)">
+                    <MudMenuItem OnClick="() => ToggleDeleteModal(context.Item.UserId)">
                         <MudStack Row="true">
                             <MudIcon Icon="@Icons.Material.Filled.Delete" Color="Color.Error"></MudIcon>
                             <MudText>Slet</MudText>
@@ -169,7 +170,7 @@
         </TemplateColumn>
     </Columns>
     <PagerContent>
-        <MudDataGridPager T="Creator" />
+        <MudDataGridPager T="Creator" PageSizeOptions="[100, 200, 300, 400, 500]" RowsPerPageString="Rækker per side:" />
     </PagerContent>
 </MudDataGrid>
 
@@ -192,7 +193,7 @@
         if (string.IsNullOrWhiteSpace(_searchString))
             return true;
 
-        if ($"{x.User.Name}{x.Gender}{x.User.Email}{x.User.Id}{x.User.Phone}{x.SubType}".Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+        if ($"{x.User.Name}{x.Gender}{x.User.Email}{x.User.Id}{x.User.Phone}{x.SubType.ToString()}".Contains(_searchString, StringComparison.OrdinalIgnoreCase))
             return true;
 
         return false;
@@ -232,7 +233,7 @@
 
         if (!result.Canceled)
         {
-            await CreatorService.DeleteObject(id);
+            await UserService.DeleteObject(id);
             await FetchCreators();
         }
     }

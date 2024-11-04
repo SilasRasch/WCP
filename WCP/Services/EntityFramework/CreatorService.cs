@@ -8,6 +8,7 @@ using WCPShared.Services.Converters;
 using System;
 using WCPShared.Interfaces;
 using WCPShared.Models.Entities.UserModels;
+using WCPShared.Models.Enums;
 
 namespace WCPShared.Services.EntityFramework
 {
@@ -35,10 +36,9 @@ namespace WCPShared.Services.EntityFramework
 
             oldCreator.DateOfBirth = obj.DateOfBirth;
             oldCreator.Address = obj.Address;
-            oldCreator.Speciality = obj.Speciality;
             oldCreator.ImgURL = obj.ImgURL;
             oldCreator.Gender = obj.Gender;
-            oldCreator.SubType = obj.SubType;
+            oldCreator.SubType = (CreatorSubType)Enum.Parse(typeof(CreatorSubType), obj.SubType);
 
             if (obj.Languages is not null)
             {
@@ -80,9 +80,8 @@ namespace WCPShared.Services.EntityFramework
                 Gender = obj.Gender,
                 DateOfBirth = obj.DateOfBirth,
                 ImgURL = obj.ImgURL,
-                SubType = obj.SubType,
+                SubType = (CreatorSubType)Enum.Parse(typeof(CreatorSubType), obj.SubType),
                 Languages = new List<Language>(),
-                Speciality = obj.Speciality,
                 UserId = obj.UserId.Value,
                 User = user
             };

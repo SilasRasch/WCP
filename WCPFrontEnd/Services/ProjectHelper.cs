@@ -1,4 +1,6 @@
 ﻿using MudBlazor;
+using WCPShared.Models.Entities.UserModels;
+using WCPShared.Models.Enums;
 
 namespace WCPAdminFrontEnd.Services
 {
@@ -19,6 +21,64 @@ namespace WCPAdminFrontEnd.Services
                 case -1: return "Annulleret";
                 default: return "Ukendt";
             }
+        }
+
+        public static string GetStatusString(ProjectStatus status)
+        {
+            switch (status)
+            {
+                case ProjectStatus.Unconfirmed: return "Ubekræftet";
+                case ProjectStatus.Queued: return "I kø";
+                case ProjectStatus.Scripting: return "Scripting";
+                case ProjectStatus.Planned: return "Planlægning";
+                case ProjectStatus.CreatorFilming: return "Creator magi";
+                case ProjectStatus.Editing: return "I klipperummet";
+                case ProjectStatus.Feedback: return "Feedback";
+                case ProjectStatus.Finished: return "Færdig";
+                case ProjectStatus.Cancelled: return "Annulleret";
+                default: return "Ukendt";
+            }
+        }
+
+        public static string GetStatusColor(ProjectStatus status)
+        {
+            string colorClass = string.Empty;
+
+            switch (status)
+            {
+                case ProjectStatus.Unconfirmed:
+                    colorClass = "bg-red-500";
+                    break;
+                case ProjectStatus.Queued:
+                    colorClass = "bg-red-500";
+                    break;
+                case ProjectStatus.Scripting:
+                    colorClass = "bg-yellow-600";
+                    break;
+                case ProjectStatus.Planned:
+                    colorClass = "bg-yellow-600";
+                    break;
+                case ProjectStatus.CreatorFilming:
+                    colorClass = "bg-blue-600";
+                    break;
+                case ProjectStatus.Editing:
+                    colorClass = "bg-blue-600";
+                    break;
+                case ProjectStatus.Feedback:
+                    colorClass = "bg-green-600";
+                    break;
+                case ProjectStatus.Finished:
+                    colorClass = "bg-red-500";
+                    break;
+                case ProjectStatus.Cancelled:
+                    colorClass = "bg-red-600";
+                    break;
+                default:
+                    colorClass = "bg-red-500";
+                    break;
+            }
+
+            return colorClass + " text-white p-2 rounded-lg";
         }
 
         public static string GetStatusColor(int status)
@@ -77,5 +137,7 @@ namespace WCPAdminFrontEnd.Services
 
             return "";
         }
+
+        public static string LanguageToStringFlag(Language lang) => lang is not null ? CountryStringToFlag(lang.Name) : "";
     }
 }

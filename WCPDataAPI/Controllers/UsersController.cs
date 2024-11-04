@@ -26,7 +26,7 @@ namespace WCPDataAPI.Controllers
         [HttpGet, Authorize(Roles = "Admin")]
         public async Task<ActionResult<IEnumerable<UserView>>> Get([FromQuery] string? role)
         {
-            if (role is not null) return Ok(await _userService.GetObjectsViewBy(x => x.Role.ToLower() == role.ToLower()));
+            if (role is not null) return Ok(await _userService.GetObjectsViewBy(x => x.Role.ToString().ToLower() == role.ToLower()));
             return Ok(await _userService.GetAllObjectsView());
         }
 

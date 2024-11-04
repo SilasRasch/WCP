@@ -9,6 +9,7 @@ using WCPShared.Models.Entities.AuthModels;
 using WCPShared.Models.Entities.UserModels;
 using Microsoft.EntityFrameworkCore;
 using WCPShared.Models.Views;
+using WCPShared.Models.Enums;
 
 namespace WCPShared.Services
 {
@@ -58,7 +59,7 @@ namespace WCPShared.Services
                 Name = request.User.Name,
                 PasswordHash = passwordHash,
                 Phone = request.User.Phone,
-                Role = request.User.Role,
+                Role = (UserRole)Enum.Parse(typeof(UserRole), request.User.Role),
                 IsActive = false,
                 VerificationToken = verificationToken,
                 OrganizationId = request.User.OrganizationId,
@@ -90,6 +91,42 @@ namespace WCPShared.Services
 
             if (user is not null)
                 try { await _emailService.SendRegistrationEmail(user, verificationToken, selfRegister); } 
+                catch { /* ignore */ }
+
+            return user;
+        }
+
+        public async Task<User?> Register(User user, Creator? creator = null, bool selfRegister = false)
+        {
+            if (!user.Validate())
+                throw new ArgumentException("Validation error");
+            
+            if (await _userService.GetObjectBy(x => x.Email == user.Email) is not null)
+                throw new ArgumentException("A user with that email already exists...");
+
+            string generatedPassword = GenerateRandomString(32);
+            string passwordHash = BCrypt.Net.BCrypt.HashPassword(generatedPassword);
+            string verificationToken = GenerateRandomString(64);
+
+            user = await _userService.AddObject(user);
+
+            if (creator is not null && user is not null && user.Id != 0 && user.Role == UserRole.Creator)
+            {
+                if (!creator.Validate())
+                    throw new ArgumentException("Validation error");
+
+                creator.User = user;
+                creator = await _creatorService.AddObject(creator);
+
+                if (creator is null || creator.Id == 0)
+                {
+                    await _userService.DeleteObject(user.Id);
+                    throw new ArgumentException("Adding creator failed...");
+                }
+            }
+
+            if (user is not null)
+                try { await _emailService.SendRegistrationEmail(user, verificationToken, selfRegister); }
                 catch { /* ignore */ }
 
             return user;
@@ -129,10 +166,10 @@ namespace WCPShared.Services
             if (user is null)
                 return false;
 
-            if (user.Role != "Admin")
+            if (user.Role != UserRole.Admin)
                 return false;
 
-            user.Role = "Admin";
+            user.Role = UserRole.Admin;
             await _userService.UpdateObject(id, user);
             return true;
         }
@@ -185,11 +222,14 @@ namespace WCPShared.Services
             var updateResult = await _userService.UpdateObject(user.Id, user);
             if (updateResult is null) throw new ArgumentException("Updating user failed...");
 
-            if (user.Role == "Creator" && request.Creator is not null)
+            if (user.Role == UserRole.Creator && request.Creator is not null)
             {
                 if (!request.Creator.Validate()) throw new ArgumentException("Creator validation failed");
+                var creator = await _creatorService.GetObjectBy(x => x.UserId == user.Id);
+                if (creator == null) throw new NotFoundException("Creator not found");
 
-                var result = await _creatorService.AddObject(request.Creator);
+                request.Creator.SubType = creator.SubType.ToString();
+                var result = await _creatorService.UpdateObject(creator.Id, request.Creator);
                 if (result is null) throw new ArgumentException("Something went wrong...");
             }
 
@@ -225,10 +265,10 @@ namespace WCPShared.Services
             var phone = user.Phone;
             var notificationSetting = user.NotificationSetting;
 
-            if (user.Role == "Bruger" && user.Organization is not null)
+            if (user.Role == UserRole.Bruger && user.Organization is not null)
                 return new { id, orgId = user.Organization.Id, email, roles, name, notificationSetting, phone };
 
-            if (user.Role == "Creator")
+            if (user.Role == UserRole.Creator)
             {
                 CreatorView? creator = await _creatorService.GetObjectViewBy(x => x.UserId == _userContextService.GetId());
                 if (creator is not null)

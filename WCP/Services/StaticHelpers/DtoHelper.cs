@@ -1,6 +1,7 @@
 ﻿using WCPShared.Models.DTOs;
 using WCPShared.Models.Entities;
 using WCPShared.Models.Entities.UserModels;
+using WCPShared.Models.Enums;
 
 namespace WCPShared.Services.StaticHelpers
 {
@@ -51,7 +52,7 @@ namespace WCPShared.Services.StaticHelpers
         public static Order MapProperties(OrderDto input, Order output)
         {
             output.Price = input.Price;
-            output.Status = input.Status;
+            output.Status = Enum.IsDefined(typeof(ProjectStatus), input.Status) ? (ProjectStatus)input.Status : output.Status;
             output.Content = input.Content;
             output.ContentCount = input.ContentCount;
             output.ContentLength = input.ContentLength;
@@ -71,7 +72,7 @@ namespace WCPShared.Services.StaticHelpers
             output.Products = input.Products.Select(x => new Product { Link = x }).ToList();
             output.Platforms = input.Platforms;
             output.ProjectName = input.ProjectName;
-            output.ProjectType = input.ProjectType;
+            output.ProjectType = (ProjectType)Enum.Parse(typeof(ProjectType), input.ProjectType);
             output.RelevantFiles = input.RelevantFiles;
             output.Scripts = input.Scripts;
             output.Other = input.Other;
@@ -84,7 +85,7 @@ namespace WCPShared.Services.StaticHelpers
             {
                 BrandId = obj.BrandId,
                 Price = obj.Price,
-                Status = obj.Status,
+                Status = Enum.IsDefined(typeof(ProjectStatus), obj.Status) ? (ProjectStatus)obj.Status : ProjectStatus.Unconfirmed,
                 Content = obj.Content,
                 ContentCount = obj.ContentCount,
                 ContentLength = obj.ContentLength,
@@ -103,7 +104,7 @@ namespace WCPShared.Services.StaticHelpers
                 Platforms = obj.Platforms,
                 Products = obj.Products.Select(x => new Product { Link = x}).ToList(),
                 ProjectName = obj.ProjectName,
-                ProjectType = obj.ProjectType,
+                ProjectType = (ProjectType)Enum.Parse(typeof(ProjectType), obj.ProjectType),
                 RelevantFiles = obj.RelevantFiles,
                 Scripts = obj.Scripts,
                 Other = obj.Other,

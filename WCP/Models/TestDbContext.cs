@@ -27,6 +27,22 @@ namespace WCPShared.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Order>()
+                .Property(e => e.Status)
+                .HasConversion<string>();
+
+            modelBuilder.Entity<Order>()
+                .Property(e => e.ProjectType)
+                .HasConversion<string>();
+
+            modelBuilder.Entity<User>()
+                .Property(e => e.Role)
+                .HasConversion<string>();
+
+            modelBuilder.Entity<Creator>()
+                .Property(e => e.SubType)
+                .HasConversion<string>();
+
             modelBuilder.Entity<CreatorParticipation>()
                 .HasKey(e => new { e.OrderId, e.CreatorId });
 

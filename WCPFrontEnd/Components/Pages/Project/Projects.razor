@@ -4,6 +4,7 @@
 @using WCPAdminFrontEnd.Services
 @using WCPShared.Interfaces
 @using WCPShared.Models.Entities
+@using WCPShared.Models.Enums
 @using WCPShared.Models.Views
 @using WCPShared.Services.EntityFramework
 @inject OrderService OrderService
@@ -20,7 +21,7 @@
         <MudSpacer />
         <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
         AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
-        <MudIconButton onclick="FetchProjects" Icon="@Icons.Material.Filled.Refresh" Class="hover:animate-spin-once"></MudIconButton>
+        <MudIconButton onclick="Refetch" Icon="@Icons.Material.Filled.Refresh" Class="hover:animate-spin-once"></MudIconButton>
         <MudIconButton Icon="@Icons.Material.Filled.Settings" OnClick="ToggleOpenTableSettings" Class="hover:animate-spin-once"></MudIconButton>
         <MudPopover Open="@_open" Fixed="true" Class="px-4 pt-4" AnchorOrigin="Origin.BottomRight">
             <div class="d-flex flex-column">
@@ -110,11 +111,7 @@
                 @context.Item.Created.ToString("dd-MM-yyyy")
             </CellTemplate>
         </PropertyColumn>
-        @*         <PropertyColumn Property="x => x.Updated" Title="Opdateret">
-            <CellTemplate>
-                @context.Item.Updated.ToString("d")
-            </CellTemplate>
-        </PropertyColumn> *@
+        <PropertyColumn Property="x => x.InternalNotes" Title="Note" />
         <TemplateColumn Title="Actions" StickyRight="@_stickyActions">
             <CellTemplate>
                 <MudMenu Icon="@Icons.Material.Filled.MoreHoriz" AriaLabel="Åben aktionsmenu" AnchorOrigin="Origin.BottomCenter">
@@ -133,9 +130,9 @@
                             </MudStack>
                         </MudMenuItem>
                     }
-                    @if (context.Item.Status <= 6 && context.Item.Status > 0)
+                    @if (context.Item.Status <= ProjectStatus.Feedback && context.Item.Status > ProjectStatus.Unconfirmed)
                     {
-                        <MudMenuItem OnClick="@((e) => OpenStatusDialog(context.Item, context.Item.Status + 1))">
+                        <MudMenuItem OnClick="@((e) => OpenStatusDialog(context.Item, (int)context.Item.Status + 1))">
                             <MudStack Row="true">
                                 <MudIcon Icon="@Icons.Material.Filled.KeyboardDoubleArrowRight"></MudIcon>
                                 <MudText>Ryk frem</MudText>
@@ -144,7 +141,7 @@
                     }
                     @if (context.Item.Status > 0)
                     {
-                        <MudMenuItem OnClick="@((e) => OpenStatusDialog(context.Item, context.Item.Status - 1))">
+                        <MudMenuItem OnClick="@((e) => OpenStatusDialog(context.Item, (int)context.Item.Status - 1))">
                             <MudStack Row="true">
                                 <MudIcon Icon="@Icons.Material.Filled.KeyboardDoubleArrowLeft"></MudIcon>
                                 <MudText>Ryk tilbage</MudText>
@@ -181,7 +178,7 @@
     {
         new FilterDefinition<Order>()
         {
-            FilterFunction = x => x.Status != -1 && x.Status != 7 && x.Status != 4 && x.Status != 6
+            FilterFunction = x => x.Status != ProjectStatus.Unconfirmed && x.Status != ProjectStatus.Finished && x.Status != ProjectStatus.CreatorFilming && x.Status != ProjectStatus.Feedback
         }
     };
     private IEnumerable<Order> ProjectList = new List<Order>();
@@ -205,7 +202,7 @@
         if (x.Brand.Name.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
             return true;
 
-        if ($"{x.ProjectType}{x.Id}{x.Brand.Organization.Name}{x.Name}{x.Email}{x.Phone}".Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+        if ($"{x.ProjectType.ToString()}{x.Id}{x.Brand.Organization.Name}{x.Name}{x.Email}{x.Phone}".Contains(_searchString, StringComparison.OrdinalIgnoreCase))
             return true;
 
         return false;
@@ -275,6 +272,7 @@
 
     private void FetchProjects()
     {
+        Context.ChangeTracker.Clear();
         ProjectList = Context.Orders
             .Include(x => x.Brand)
             .ThenInclude(b => b.Organization)
@@ -290,7 +288,13 @@
             .ThenInclude(x => x.Language)
             .AsSplitQuery()
             .ToList()
-            .OrderBy(x => x.Status);
+            .OrderBy(x => (int)x.Status);
+    }
+
+    private void Refetch() 
+    {
+        FetchProjects();
+        StateHasChanged();
     }
 
     void ToggleOpenTableSettings()

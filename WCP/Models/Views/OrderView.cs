@@ -75,7 +75,7 @@ namespace WCPShared.Models.Views
             VideographerId = obj.VideographerId;
             EditorId = obj.EditorId;
             Price = obj.Price;
-            Status = obj.Status;
+            Status = (int)obj.Status;
             Content = obj.Content;
             ContentCount = obj.ContentCount;
             ContentLength = obj.ContentLength;
@@ -95,7 +95,7 @@ namespace WCPShared.Models.Views
             Platforms = obj.Platforms;
             Products = obj.Products.Select(x => x.Link).ToList();
             ProjectName = obj.ProjectName;
-            ProjectType = obj.ProjectType;
+            ProjectType = obj.ProjectType.ToString();
             RelevantFiles = obj.RelevantFiles;
             Scripts = obj.Scripts;
             Other = obj.Other;

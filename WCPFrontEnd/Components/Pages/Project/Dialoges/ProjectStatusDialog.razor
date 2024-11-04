@@ -1,5 +1,6 @@
 ﻿@using WCPAdminFrontEnd.Services
 @using WCPShared.Models.Entities
+@using WCPShared.Models.Enums
 @using WCPShared.Models.Views
 @using WCPShared.Services.EntityFramework
 @using WCPShared.Services.StaticHelpers
@@ -18,7 +19,7 @@
         </MudStack>
 
         @* From unconfirmed to confirmed *@
-        @if (Project.Status == 0 && NewStatus == 1)
+        @if (Project.Status == ProjectStatus.Unconfirmed && NewStatus == (int)ProjectStatus.Queued)
         {
             <MudStack Row="true">
                 <MudTextField @bind-Value="Project.Price" Label="Pris" Placeholder="Pris eksl. moms" Immediate="true"></MudTextField>
@@ -30,7 +31,7 @@
         }
 
         @* From queued to planned *@
-        @if (Project.Status == 1 && NewStatus == 2)
+        @if (Project.Status == ProjectStatus.Queued && NewStatus == (int)ProjectStatus.Scripting)
         {
             <MudTextField @bind-Value="Project.Scripts" Label="Scripts" Placeholder="Link til script-mappe" Immediate="true"></MudTextField>
             <MudTextField @bind-Value="Project.Content" Label="Content" Placeholder="Link til content-mappe" Immediate="true"></MudTextField>
@@ -65,7 +66,7 @@
 
     private async void Submit()
     {
-        Project.Status = NewStatus;
+        Project.Status = Enum.IsDefined(typeof(ProjectStatus), NewStatus) ? (ProjectStatus)NewStatus : Project.Status;
 
         if (_deliveryDate is not null)
         {

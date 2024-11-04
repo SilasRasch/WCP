@@ -6,6 +6,7 @@
 @using WCPShared.Models.DTOs
 @using WCPShared.Models.Entities.AuthModels
 @using WCPShared.Models.Entities.UserModels
+@using WCPShared.Models.Enums
 @using WCPShared.Models.Views
 @using WCPShared.Models.Entities
 @using WCPShared.Services
@@ -29,9 +30,10 @@
 
             <MudStack Row="true">
                 <MudSelect @bind-Value="User.Role" Label="Rolle" Required="true" AnchorOrigin="Origin.BottomCenter" Placeholder="Vælg en rolle">
-                    <MudSelectItem Value="@("Bruger")">Bruger</MudSelectItem>
-                    <MudSelectItem Value="@("Creator")">Creator</MudSelectItem>
-                    <MudSelectItem Value="@("Admin")">Admin</MudSelectItem>
+                    @foreach (UserRole item in Enum.GetValues(typeof(UserRole)))
+                    {
+                        <MudSelectItem Value="@item">@item</MudSelectItem>
+                    }
                 </MudSelect>
 
                 <MudSelect @bind-Value="User.Language" Text="@ProjectHelper.CountryStringToFlag(User.Language.Name)" Label="Sprog" AnchorOrigin="Origin.BottomCenter">
@@ -65,28 +67,28 @@
             @if (_isCreator && Creator is not null)
             {
                 <MudStack Row="true">
-                    <MudDatePicker Label="Fødselsdag" @bind-Date="Creator.DateOfBirth" Required="_isCreator" DateFormat="dd.MM.yyyy"></MudDatePicker>
-                    <MudSelect @bind-Value="Creator.Gender" Label="Køn" Required="_isCreator" RequiredError="Dette felt er påkrævet" AnchorOrigin="Origin.BottomCenter" Placeholder="Vælg et køn">
+                    <MudDatePicker Label="Fødselsdag" @bind-Date="Creator.DateOfBirth" Required="Creator.SubType == CreatorSubType.UGC" DateFormat="dd.MM.yyyy"></MudDatePicker>
+                    <MudSelect @bind-Value="Creator.Gender" Label="Køn" Required="Creator.SubType == CreatorSubType.UGC" RequiredError="Dette felt er påkrævet" AnchorOrigin="Origin.BottomCenter" Placeholder="Vælg et køn">
                         <MudSelectItem Value="@("Mand")">Mand</MudSelectItem>
                         <MudSelectItem Value="@("Kvinde")">Kvinde</MudSelectItem>
                         <MudSelectItem Value="@("Andet")">Andet</MudSelectItem>
                     </MudSelect>
                 </MudStack>
 
-                <MudSelect @bind-SelectedValues="_selectedLanguages" MultiSelection="true" Label="Sprog" Required="_isCreator" RequiredError="Dette felt er påkrævet" AnchorOrigin="Origin.BottomCenter">
+                <MudSelect @bind-SelectedValues="_selectedLanguages" ToStringFunc="(e) => ProjectHelper.LanguageToStringFlag(e)" Delimiter=" " MultiSelection="true" Label="Sprog" Required="Creator.SubType == CreatorSubType.UGC" RequiredError="Dette felt er påkrævet" AnchorOrigin="Origin.BottomCenter">
                     @foreach (var lang in _languages)
                     {
-                        <MudSelectItem Value="@lang.Name">@ProjectHelper.CountryStringToFlag(lang.Name)</MudSelectItem>
+                        <MudSelectItem Value="@lang">@ProjectHelper.CountryStringToFlag(lang.Name)</MudSelectItem>
                     }
                 </MudSelect>
 
                 <MudStack Row="true">
-                    <MudTextField T="string" @bind-Value="Creator.Address" Label="Adresse" Required="_isCreator" RequiredError="Dette felt er påkrævet" />
+                    <MudTextField T="string" @bind-Value="Creator.Address" Label="Adresse" Required="Creator.SubType == CreatorSubType.UGC" RequiredError="Dette felt er påkrævet" />
                     <MudSelect @bind-Value="Creator.SubType" Label="Undertype" Required="_isCreator" RequiredError="Dette felt er påkrævet" AnchorOrigin="Origin.BottomCenter" Placeholder="Vælg en undertype">
-                        <MudSelectItem Value="@("UGC")">UGC</MudSelectItem>
-                        <MudSelectItem Value="@("Editor")">Editor</MudSelectItem>
-                        <MudSelectItem Value="@("Videographer")">Videograf</MudSelectItem>
-                        <MudSelectItem Value="@("Scripter")">Scripter</MudSelectItem>
+                        @foreach (CreatorSubType item in Enum.GetValues(typeof(CreatorSubType)))
+                        {
+                            <MudSelectItem Value="@item">@item</MudSelectItem>
+                        }
                     </MudSelect>
                 </MudStack>
 
@@ -112,7 +114,7 @@
                 </div> *@
             }
 
-            <MudTextField T="string" @bind-Value="User.Phone" Label="Telefon" Validation="@(new Func<string, string>(ValidationHelpers.PhoneValidation))" RequiredError="Dette felt er påkrævet" />
+            <MudTextField T="string" @bind-Value="User.Phone" Label="Telefon" Required="_isUser || (Creator is not null && _isCreator && Creator.SubType == CreatorSubType.UGC)" Validation="@(new Func<string, string>(ValidationHelpers.PhoneValidation))" RequiredError="Dette felt er påkrævet" />
         </MudForm>
     </DialogContent>
     <DialogActions>
@@ -134,10 +136,10 @@
     private MudForm _form;
     private bool _success;
     private string[] _errors = { };
-    private IEnumerable<string> _selectedLanguages { get; set; } = new HashSet<string>();
+    private IEnumerable<Language> _selectedLanguages { get; set; } = new HashSet<Language>();
 
-    private bool _isUser => User.Role == "Bruger";
-    private bool _isCreator => User.Role == "Creator";
+    private bool _isUser => User.Role == UserRole.Bruger;
+    private bool _isCreator => User.Role == UserRole.Creator;
 
     private IEnumerable<Organization> _organizations = new List<Organization>();
     private IEnumerable<Language> _languages = new List<Language>();
@@ -149,7 +151,7 @@
             .Include(x => x.Language).ToList();
 
         if (_isCreator && Creator is not null && Creator.Languages is not null)
-            _selectedLanguages = Creator.Languages.Select(x => x.Name);
+            _selectedLanguages = Creator.Languages;
     }
 
     IBrowserFile _profilePicture = null!;
@@ -161,7 +163,7 @@
         if (User.Validate())
         {
             if (_isCreator && Creator is not null)
-                Creator.Languages = _languages.Where(x => _selectedLanguages.Contains(x.Name)).ToList();
+                Creator.Languages = _selectedLanguages.ToList();
 
             await Context.SaveChangesAsync();
         }

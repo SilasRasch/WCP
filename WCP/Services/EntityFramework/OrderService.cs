@@ -8,6 +8,7 @@ using WCPShared.Services.Converters;
 using WCPShared.Interfaces;
 using WCPShared.Models.Entities;
 using WCPShared.Models.Entities.UserModels;
+using WCPShared.Models.Enums;
 
 namespace WCPShared.Services.EntityFramework
 {
@@ -56,7 +57,7 @@ namespace WCPShared.Services.EntityFramework
             await _slackNetService.SendStatusNotifications(obj, oldObj);
             return obj;
         }
-
+        
         public async Task<Order?> UpdateObject(int id, OrderDto order)
         {
             // Check if order exists
@@ -66,7 +67,7 @@ namespace WCPShared.Services.EntityFramework
 
             // Copy order for comparison when generating notifications
             Order copyOfExistingOrder = DtoHelper.CloneOrder(existingOrder);
-
+            
             existingOrder = DtoHelper.MapProperties(order, existingOrder);
 
             // Update brand
@@ -129,14 +130,15 @@ namespace WCPShared.Services.EntityFramework
                 participation.HasDelivered = true;
 
             // If all scripters have delivered, send to planning
-            var scripters = order.Participations.Where(x => x.Creator.SubType == "Scripter");
-            if (scripters.All(x => x.HasDelivered) || scripters.Count() == 0)
-                order.Status = 3;
+            var scripters = order.Participations.Where(x => x.Creator.SubType == CreatorSubType.Scripter);
+            if (scripters.All(x => x.HasDelivered) && order.Status == ProjectStatus.Scripting)
+                order.Status = ProjectStatus.Planned;
 
             // If all UGC creators have delivered, send to editing
-            var ugcCreators = order.Participations.Where(x => x.Creator.SubType == "UGC");
-            if (ugcCreators.All(x => x.HasDelivered && ugcCreators.Count() > 0))
-                order.Status = 5;
+            var ugcCreators = order.Participations.Where(x => x.Creator.SubType == CreatorSubType.UGC);
+            bool notEmpty = ugcCreators.Any();
+            if (ugcCreators.All(x => x.HasDelivered) && ugcCreators.Any() && order.Status == ProjectStatus.CreatorFilming)
+                order.Status = ProjectStatus.Editing;
 
             _context.Update(order);
             await _context.SaveChangesAsync();

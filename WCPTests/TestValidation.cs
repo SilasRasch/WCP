@@ -2,6 +2,7 @@ using WCPShared.Models.DTOs;
 using WCPShared.Models.Entities;
 using WCPShared.Models.Entities.AuthModels;
 using WCPShared.Models.Entities.UserModels;
+using WCPShared.Models.Enums;
 using WCPShared.Services.StaticHelpers;
 
 namespace WCPTests
@@ -120,7 +121,7 @@ namespace WCPTests
                 Phone = "22255123",
                 Name = "Mathias Hansen",
                 ProjectName = "My Project",
-                ProjectType = "User Generated Content",
+                ProjectType = ProjectType.UGC,
                 Platforms = "TikTok, Instagram",
                 Format = "4:5, 1:1"
             };
@@ -135,7 +136,7 @@ namespace WCPTests
                 Phone = "22255123",
                 Name = "Mathias Hansen",
                 ProjectName = "My Project",
-                ProjectType = "User Generated Content",
+                ProjectType = ProjectType.UGC,
                 Platforms = "TikTok, Instagram"
             };
 
@@ -179,7 +180,7 @@ namespace WCPTests
             User legal = new User()
             {
                 Email = "info@webcontent.dk",
-                Role = "Bruger",
+                Role = UserRole.Bruger,
                 Phone = "12341234",
                 Name = "Mathias Hansen"
             };
@@ -188,7 +189,7 @@ namespace WCPTests
 
             User illegal = new User()
             {
-                Email = "info@webcontent.dk",
+                Email = "info@webcontent", // Not an email
                 Phone = "12341234",
                 Name = "Mathias Hansen"
             };
@@ -224,24 +225,12 @@ namespace WCPTests
         {
             Creator legal = new Creator()
             {
-                SubType = "UGC",
+                SubType = CreatorSubType.UGC,
                 Address = "Kirkevej 43, 4000 Roskilde",
                 Gender = "Mand"
             };
 
             Assert.IsTrue(legal.Validate());
-
-            Creator illegal = new Creator()
-            {
-                SubType = string.Empty,
-                Gender = "Mand"
-            };
-
-            Assert.IsFalse(illegal.Validate());
-
-            illegal.SubType = "UGC";
-            illegal.Gender = string.Empty;
-            Assert.IsFalse(illegal.Validate());
         }
 
         [TestMethod]

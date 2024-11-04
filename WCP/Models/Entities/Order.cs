@@ -19,8 +19,11 @@ namespace WCPShared.Models.Entities
         public int DeliveryTimeFrom { get; set; }
         public int DeliveryTimeTo { get; set; }
         public DateTime DeliveryDate { get; set; }
-        public int Status { get; set; }
-        //public ProjectStatus StatusEnum { get; set; }
+        //public int Status { get; set; }
+
+        [EnumDataType(typeof(ProjectStatus))]
+        public ProjectStatus Status { get; set; }
+        public string InternalNotes { get; set; } = string.Empty;
 
         // All creators should be in participations
         public int? VideographerId { get; set; }
@@ -54,8 +57,8 @@ namespace WCPShared.Models.Entities
         #region Page two
 
         public string ProjectName { get; set; } = string.Empty;
-        public string ProjectType { get; set; } = string.Empty;
-        //public ProjectType ProjectTypeEnum { get; set; }
+        [EnumDataType(typeof(ProjectType))]
+        public ProjectType ProjectType { get; set; }
         public int ContentCount { get; set; }
         public int? ContentLength { get; set; }
         public string Platforms { get; set; } = string.Empty;
@@ -89,7 +92,7 @@ namespace WCPShared.Models.Entities
             if (!Brand.Validate())
                 return false;
 
-            if (string.IsNullOrWhiteSpace(ProjectName) || BrandId == 0 || string.IsNullOrWhiteSpace(ProjectType) || string.IsNullOrWhiteSpace(Platforms) || string.IsNullOrWhiteSpace(Format))
+            if (string.IsNullOrWhiteSpace(ProjectName) || BrandId == 0 || string.IsNullOrWhiteSpace(Platforms) || string.IsNullOrWhiteSpace(Format))
                 return false;
 
             return true;

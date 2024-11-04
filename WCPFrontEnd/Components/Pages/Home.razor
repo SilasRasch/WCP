@@ -3,6 +3,7 @@
 @using WCPAdminFrontEnd.Services
 @using WCPShared.Interfaces
 @using WCPShared.Models.Entities
+@using WCPShared.Models.Enums
 @inject IWcpDbContext Context
 
 <PageTitle>WebContent Platform</PageTitle>
@@ -34,33 +35,100 @@
                     </MudPaper>
                     <MudPaper Class="pa-4" Width="25%">
                         <MudText Typo="Typo.caption">Ventende projekter</MudText>
-                        <MudText Typo="Typo.h1">@projects.Where(x => x.Status == 0 || x.Status == 1 || x.Status == 5).Count()</MudText>
+                        <MudText Typo="Typo.h1">@projects.Where(x => x.Status == ProjectStatus.Unconfirmed || x.Status == ProjectStatus.Queued || x.Status == ProjectStatus.Editing).Count()</MudText>
                     </MudPaper>
                     <MudPaper Class="pa-4" Width="25%">
                         <MudText Typo="Typo.caption">Antal videoer i alt</MudText>
                         <MudText Typo="Typo.h1">@projects.Sum(x => x.ContentCount)</MudText>
                     </MudPaper>
                 </MudStack>
+                <MudStack Row StretchItems="StretchItems.All">
+                    <MudStack Spacing="0">
+                        <MudText Typo="Typo.h6">Creator deadlines i dag</MudText>
+                        <MudDataGrid Items="@projects.Where(x => x.DeliveryDate.Date == DateTime.Now.Date && x.Status != ProjectStatus.Cancelled && x.Status < ProjectStatus.Feedback)">
+                            <Columns>
+                                <PropertyColumn Property="x => x.ProjectName" Title="Navn" Sortable="false" />
+                                <PropertyColumn Context="prop" Property="x => x.Brand" Title="Brand" Sortable="false">
+                                    <CellTemplate>
+                                        <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
+                                            <MudText Typo="Typo.h6">@ProjectHelper.CountryStringToFlag(prop.Item.Brand.Organization.Language.Name) </MudText>
+                                            @prop.Item.Brand.Name (@prop.Item.Brand.Organization.Name.Trim())
+                                        </MudStack>
+                                    </CellTemplate>
+                                </PropertyColumn>
+                                <PropertyColumn Property="x => x.ProjectType" Title="Type" Sortable="false" />
+                                <PropertyColumn Context="prop" Property="x => x.DeliveryDate" Title="Deadline" Sortable="false">
+                                    <CellTemplate>
+                                        @prop.Item.DeliveryDate.ToString("d")
+                                    </CellTemplate>
+                                </PropertyColumn>
+                                <PropertyColumn Context="prop" Property="x => x.Status" Title="Status" Sortable="false">
+                                    <CellTemplate>
+                                        <div class="@ProjectHelper.GetStatusColor(prop.Item.Status)">
+                                            @ProjectHelper.GetStatusString(prop.Item.Status)
+                                        </div>
+                                    </CellTemplate>
+                                </PropertyColumn>
+                            </Columns>
+                            <NoRecordsContent>
+                                <MudText>Der er ingen projekter, der forfalder i dag... 🤑</MudText>
+                            </NoRecordsContent>
+                        </MudDataGrid>
+                    </MudStack>
+                    <MudStack Spacing="0">
+                        <MudText Typo="Typo.h6">Afleveringer i dag</MudText>
+                        <MudDataGrid Items="@projects.Where(x => x.DeliveryDate.AddDays(2).Date == DateTime.Now.Date && x.Status != ProjectStatus.Cancelled && x.Status < ProjectStatus.Feedback)">
+                            <Columns>
+                                <PropertyColumn Property="x => x.ProjectName" Title="Navn" Sortable="false" />
+                                <PropertyColumn Context="prop" Property="x => x.Brand" Title="Brand" Sortable="false">
+                                    <CellTemplate>
+                                        <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
+                                            <MudText Typo="Typo.h6">@ProjectHelper.CountryStringToFlag(prop.Item.Brand.Organization.Language.Name) </MudText>
+                                            @prop.Item.Brand.Name (@prop.Item.Brand.Organization.Name.Trim())
+                                        </MudStack>
+                                    </CellTemplate>
+                                </PropertyColumn>
+                                <PropertyColumn Property="x => x.ProjectType" Title="Type" Sortable="false" />
+                                <PropertyColumn Context="prop" Property="x => x.DeliveryDate" Title="Deadline" Sortable="false">
+                                    <CellTemplate>
+                                        @prop.Item.DeliveryDate.AddDays(2).ToString("d")
+                                    </CellTemplate>
+                                </PropertyColumn>
+                                <PropertyColumn Context="prop" Property="x => x.Status" Title="Status" Sortable="false">
+                                    <CellTemplate>
+                                        <div class="@ProjectHelper.GetStatusColor(prop.Item.Status)">
+                                            @ProjectHelper.GetStatusString(prop.Item.Status)
+                                        </div>
+                                    </CellTemplate>
+                                </PropertyColumn>
+                            </Columns>
+                            <NoRecordsContent>
+                                <MudText>Der er ingen projekter, der forfalder i dag... 💰</MudText>
+                            </NoRecordsContent>
+                        </MudDataGrid>
+                    </MudStack>
+                </MudStack>
+
                 <MudStack Spacing="0">
                     <MudText Typo="Typo.h6">Nyeste projekter</MudText>
-                    <MudDataGrid Items="@projects.TakeLast(5).OrderByDescending(x => x.Created)">
+                    <MudDataGrid Items="@projects.TakeLast(5).Reverse()">
                         <Columns>
-                            <PropertyColumn Property="x => x.ProjectName" Title="Navn" />
-                            <PropertyColumn Context="prop" Property="x => x.Brand" Title="Brand">
+                            <PropertyColumn Property="x => x.ProjectName" Title="Navn" Sortable="false" />
+                            <PropertyColumn Context="prop" Property="x => x.Brand" Title="Brand" Sortable="false">
                                 <CellTemplate>
                                     <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
                                         <MudText Typo="Typo.h6">@ProjectHelper.CountryStringToFlag(prop.Item.Brand.Organization.Language.Name) </MudText>
-                                        @prop.Item.Brand.Name (@prop.Item.Brand.Organization.Name)
+                                        @prop.Item.Brand.Name (@prop.Item.Brand.Organization.Name.Trim())
                                     </MudStack>
                                 </CellTemplate>
                             </PropertyColumn>
-                            <PropertyColumn Property="x => x.ProjectType" Title="Type" />
-                            <PropertyColumn Context="prop" Property="x => x.Created" Title="Oprettet">
+                            <PropertyColumn Property="x => x.ProjectType" Title="Type" Sortable="false" />
+                            <PropertyColumn Context="prop" Property="x => x.Created" Title="Oprettet" Sortable="false">
                                 <CellTemplate>
                                     @prop.Item.Created
                                 </CellTemplate>
                             </PropertyColumn>
-                            <PropertyColumn Context="prop" Property="x => x.Status" Title="Status" CellClass="cursor-pointer">
+                            <PropertyColumn Context="prop" Property="x => x.Status" Title="Status" Sortable="false">
                                 <CellTemplate>
                                     <div class="@ProjectHelper.GetStatusColor(prop.Item.Status)">
                                         @ProjectHelper.GetStatusString(prop.Item.Status)
@@ -131,16 +199,16 @@
             .Include(x => x.Brand)
             .ThenInclude(x => x.Organization)
             .ThenInclude(x => x.Language)
-            .Where(x => x.Status != -1)
+            .Where(x => x.Status != ProjectStatus.Cancelled)
             .AsSplitQuery()
             .ToListAsync();
 
-        int ugcCount = projects.Where(x => x.ProjectType == "UGC").ToList().Count;
-        int staticCount = projects.Where(x => x.ProjectType == "Statics").ToList().Count;
-        int editCount = projects.Where(x => x.ProjectType == "Edit").ToList().Count;
-        int otherCount = projects.Where(x => x.ProjectType != "UGC" && x.ProjectType != "Statics" && x.ProjectType != "Edit").ToList().Count;
+        int ugcCount = projects.Where(x => x.ProjectType == ProjectType.UGC).ToList().Count;
+        int staticCount = projects.Where(x => x.ProjectType == ProjectType.Statics).ToList().Count;
+        int editCount = projects.Where(x => x.ProjectType == ProjectType.Edit).ToList().Count;
+        int stillCount = projects.Where(x => x.ProjectType == ProjectType.Stills).ToList().Count;
 
-        data = [ugcCount, editCount, staticCount, otherCount];
+        data = [ugcCount, editCount, staticCount, stillCount];
         Series.Add(new ChartSeries() { Data = data });
     }
     private List<Order> projects = [];
@@ -148,7 +216,7 @@
     private int Index = -1; //default value cannot be 0 -> first selectedindex is 0.
     int dataSize = 4;
     public double[] data;
-    public string[] labels = { "UGC","Edit", "Statics", "Andet" };
+    public string[] labels = { "UGC", "Edit", "Statics", "Stills" };
     public List<ChartSeries> Series = new List<ChartSeries>();
-    public string[] XAxisLabels = { "UGC", "Edit", "Statics", "Andet" };
+    public string[] XAxisLabels = { "UGC", "Edit", "Statics", "Stills" };
 }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WCPShared.Models.Entities;
+using WCPShared.Models.Enums;
 
 namespace WCPShared.Interfaces
 {
@@ -13,7 +14,7 @@ namespace WCPShared.Interfaces
         string Email { get; set; }
         string Name { get; set; }
         string? Phone { get; set; }
-        string Role { get; set; }
+        UserRole Role { get; set; }
         bool IsActive { get; set; }
         Organization? Organization { get; set; }
     }

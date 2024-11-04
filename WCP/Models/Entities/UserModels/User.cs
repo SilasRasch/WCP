@@ -4,6 +4,7 @@ using WCPShared.Interfaces;
 using WCPShared.Services.StaticHelpers;
 using Microsoft.IdentityModel.Tokens;
 using WCPShared.Models.Entities;
+using WCPShared.Models.Enums;
 
 namespace WCPShared.Models.Entities.UserModels
 {
@@ -14,7 +15,8 @@ namespace WCPShared.Models.Entities.UserModels
         public string Email { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
         public string? Phone { get; set; } = string.Empty;
-        public string Role { get; set; } = string.Empty;
+        [EnumDataType(typeof(UserRole))]
+        public UserRole Role { get; set; }
         public bool IsActive { get; set; }
         public int? OrganizationId { get; set; }
         public Organization? Organization { get; set; }
@@ -26,13 +28,7 @@ namespace WCPShared.Models.Entities.UserModels
             if (!Validation.ValidateEmail(Email))
                 return false;
 
-            if (Role != "Bruger" && Role != "Creator" && Role != "Admin")
-                return false;
-
             if (!Phone.IsNullOrEmpty() && !Validation.ValidatePhone(Phone!))
-                return false;
-
-            if (!Validation.ValidateDisplayName(Name))
                 return false;
 
             return true;
