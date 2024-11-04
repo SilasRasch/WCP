@@ -1,0 +1,207 @@
+﻿@using Microsoft.EntityFrameworkCore
+@using WCPAdminFrontEnd.Services
+@using WCPShared.Interfaces
+@using WCPShared.Models.Entities
+@using WCPShared.Models.Enums
+@using WCPShared.Models.Views
+@using WCPShared.Services.EntityFramework
+@inject OrderService OrderService
+@inject IWcpDbContext Context
+
+<MudDialog >
+    <TitleContent>
+        <MudStack Row="true" AlignItems="AlignItems.Center">
+            <MudText Typo="Typo.h5">
+                @Project.ProjectName
+            </MudText>
+            <MudSpacer />
+            <MudIconButton OnClick="ToggleEditable" Icon="@Icons.Material.Filled.Edit"></MudIconButton>
+        </MudStack>
+    </TitleContent>
+    <DialogContent>
+        <MudTextField @bind-Value="@Project.InternalNotes" Label="Interne noter" ReadOnly="!_editable" AutoGrow />
+
+        <MudText Typo="Typo.h6" Class="mt-2">Projekt</MudText>
+
+        <MudStack Row="true">
+            <MudTextField Value="@Project.Id.ToString()" Label="Projekt ID" ReadOnly="true" />
+            <MudTextField @bind-Value="@Project.ProjectName" Label="Projektnavn" ReadOnly="!_editable" />
+        </MudStack>
+
+        <MudStack Row="true">
+            <MudTextField @bind-Value="@Project.ContentCount" Label="Mængde af indhold" ReadOnly="!_editable" />
+            <MudTextField @bind-Value="@Project.ContentLength" Label="Længde af indhold" ReadOnly="!_editable" />
+            <MudTextField @bind-Value="@Project.Format" Label="Format" ReadOnly="!_editable" />
+        </MudStack>
+
+        <MudSelect @bind-Value="Project.ProjectType" Label="Type" Placeholder="Vælg en type" AnchorOrigin="Origin.BottomCenter" Disabled="!_editable">
+            @foreach (ProjectType item in Enum.GetValues(typeof(ProjectType)))
+            {
+                <MudSelectItem Value="@item">@item</MudSelectItem>
+            }
+        </MudSelect>
+
+        <MudTextField @bind-Value="@Project.Platforms" Label="Tiltænkte platforme" ReadOnly="!_editable" />
+        <MudSelect @bind-Value="Project.Status" Label="Status" Placeholder="Vælg ny status" AnchorOrigin="Origin.BottomCenter" Disabled="!_editable">
+            @foreach (ProjectStatus item in Enum.GetValues(typeof(ProjectStatus)))
+            {
+                <MudSelectItem Value="@item">@ProjectHelper.GetStatusString(item)</MudSelectItem>
+            }
+        </MudSelect>
+
+        <MudText Typo="Typo.h6" Class="mt-2">Content</MudText>
+
+        <MudStack Row="true">
+            <MudTextField @bind-Value="@Project.ExtraHook" Label="Ekstra hook" ReadOnly="!_editable" />
+            <MudSpacer />
+            <MudSwitch @bind-Value="@Project.ExtraCreator" Color="Color.Primary" ReadOnly="!_editable">Ekstra creator</MudSwitch>
+        </MudStack>
+
+        <MudTextField @bind-Value="@Project.FocusPoints" Label="Fokuspunkter" AutoGrow ReadOnly="!_editable" />
+
+        @if (_editable)
+        {
+            @foreach (Product product in Project.Products)
+            {
+                <MudStack Row="true" Spacing="0" AlignItems="AlignItems.End">
+                    <MudTextField @bind-Value="product.Link" Label="@($"Produkt {Project.Products.IndexOf(product) + 1}")" AutoGrow ReadOnly="!_editable" />
+                    <MudIconButton OnClick="() => Project.Products.Remove(product)" Size="Size.Small" Color="Color.Error" Icon="@Icons.Material.Filled.Delete" />
+                </MudStack>   
+            }
+
+            <MudButton OnClick="() => Project.Products.Add(new Product())" Class="my-2" Size="Size.Small" Variant="Variant.Filled" Color="Color.Success">Tilføj produkt</MudButton>
+        }
+        else 
+        {
+            <MudStack Spacing="0">
+                <ul>
+                    @foreach (Product product in Project.Products)
+                    {
+                        <li>
+                            <MudStack Spacing="0">
+                                <MudText Typo="Typo.caption">Produkt @(Project.Products.IndexOf(product) + 1)</MudText>
+                                <MudLink Target="_blank" Href="@product.Link" Class="my-1" Style="line-height: 1" Color="Color.Info" Underline="Underline.Always">@product.Link</MudLink>
+                            </MudStack>
+                            <MudDivider Class="mt-1" />
+                        </li>
+                    }
+                </ul>
+            </MudStack>
+        }
+
+        @foreach (Idea idea in Project.Ideas)
+        {
+            <MudStack Row="true" Spacing="0" AlignItems="AlignItems.End">
+                <MudTextField @bind-Value="idea.Text" Label="@($"Idé {Project.Ideas.IndexOf(idea) + 1}")" AutoGrow ReadOnly="!_editable" />
+
+                @if (_editable) 
+                {
+                    <MudIconButton OnClick="() => Project.Ideas.Remove(idea)" Size="Size.Small" Color="Color.Error" Icon="@Icons.Material.Filled.Delete" />
+                }
+            </MudStack>
+        }
+
+        @if (_editable) 
+        {
+            <MudButton OnClick="() => Project.Ideas.Add(new Idea())" Class="my-2" Size="Size.Small" Variant="Variant.Filled" Color="Color.Success">Tilføj idé</MudButton>
+        }
+
+        <MudTextField @bind-Value="@Project.ExtraNotes" Label="Ekstra noter" AutoGrow ReadOnly="!_editable" />
+        <MudTextField @bind-Value="@Project.RelevantFiles" Label="Relevant filer" ReadOnly="!_editable" />
+
+        <MudText Typo="Typo.h6" Class="mt-2">Kontakt</MudText>
+
+        <MudStack Row="true">
+            <MudSelect @bind-Value="Project.Brand" Disabled="!_editable" Text="@($"{Project.Brand.Name} ({Project.Brand.Organization.Name})")" Label="Brand" Required="true" RequiredError="Dette felt er påkrævet" AnchorOrigin="Origin.BottomCenter" Placeholder="Vælg et brand">
+                @foreach (Brand brand in Brands)
+                {
+                    <MudSelectItem Value="@brand">
+                        <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
+                            <MudText Typo="Typo.h6">@ProjectHelper.CountryStringToFlag(brand.Organization.Language.Name) </MudText>
+                            @brand.Name (@brand.Organization.Name)
+                        </MudStack>
+                    </MudSelectItem>
+                }
+            </MudSelect>
+            <MudTextField Value="@Project.Brand.URL" Label="URL" ReadOnly="true" />
+        </MudStack>
+
+        <MudStack Row="true">
+            <MudTextField Value="@Project.Name" Label="Kontaktperson" ReadOnly="!_editable" />
+            <MudTextField Value="@Project.Phone" Label="Kontaktnummer" ReadOnly="!_editable" />
+            <MudTextField Value="@Project.Email" Label="Kontaktmail" ReadOnly="!_editable" />
+        </MudStack>
+
+
+        @if (Project.Status > ProjectStatus.Unconfirmed)
+        {
+            <MudText Typo="Typo.h6" Class="mt-2">Links</MudText>
+
+            <MudTextField @bind-Value="Project.Scripts" Label="Scripts" Placeholder="Link til script-mappe" Immediate="true" ReadOnly="!_editable"></MudTextField>
+            <MudTextField @bind-Value="Project.Content" Label="Content" Placeholder="Link til content-mappe" Immediate="true" ReadOnly="!_editable"></MudTextField>
+            <MudTextField @bind-Value="Project.Delivery" Label="Levering" Placeholder="Link til afleverings-mappe" Immediate="true" ReadOnly="!_editable"></MudTextField>
+            <MudTextField @bind-Value="Project.Other" Label="Andet" Placeholder="Link til mappe" Immediate="true" ReadOnly="!_editable"></MudTextField>
+        }
+
+        <MudText Typo="Typo.h6" Class="mt-2">Pris og leveringstid</MudText>
+        <MudStack Row="true">
+            <MudTextField @bind-Value="@Project.Price" Label="Pris" ReadOnly="!_editable" />
+            <MudDatePicker @bind-Date="_deliveryDate" Label="Leveringsdato" Placeholder="Estimeret leveringsdato" DateFormat="dd.MM.yyyy" ReadOnly="!_editable"></MudDatePicker>
+            <MudDatePicker @bind-Date="_createdDate" Label="Oprettet" Placeholder="Dato for oprettelse" DateFormat="dd.MM.yyyy" ReadOnly="!_editable"></MudDatePicker>
+        </MudStack>
+
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel" Color="Color.Error"><MudIcon Icon="@Icons.Material.Filled.Cancel" Class="mr-2" /> Luk</MudButton>
+
+        @if (_editable)
+        {
+            <MudButton OnClick="async () => await Submit()" Color="Color.Success"><MudIcon Icon="@Icons.Material.Filled.Save" Class="mr-2" /> Gem</MudButton>
+        }
+
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; }
+
+    [Parameter]
+    public Order Project { get; set; } = new();
+
+    private List<Brand> Brands = [];
+
+    private bool _editable = false;
+    private DateTime? _deliveryDate = DateTime.Now;
+    private DateTime? _createdDate = DateTime.Now;
+
+    protected override void OnInitialized()
+    {
+        _deliveryDate = Project.DeliveryDate;
+        _createdDate = Project.Created;
+        Brands = Context.Brands
+            .Include(x => x.Organization)
+            .ThenInclude(x => x.Language)
+            .ToList();
+    }
+
+    private async Task Submit()
+    {
+        if (_deliveryDate != DateTime.MinValue)
+            Project.DeliveryDate = _deliveryDate!.Value.AddHours(23).AddMinutes(59).AddSeconds(59);
+
+        if (_createdDate != DateTime.MinValue)
+            Project.Created = _createdDate!.Value;
+        
+        await OrderService.UpdateObject(Project.Id, Project);
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private void ToggleEditable()
+    {
+        _editable = !_editable;
+    }
+}
+

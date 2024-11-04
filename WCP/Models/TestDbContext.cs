@@ -2,9 +2,11 @@
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using WCPShared.Models.UserModels;
 using Newtonsoft.Json;
 using WCPShared.Interfaces;
+using WCPShared.Models.Entities;
+using WCPShared.Models.Entities.UserModels;
+using WCPShared.Models.Enums;
 
 namespace WCPShared.Models
 {
@@ -14,19 +16,46 @@ namespace WCPShared.Models
         public DbSet<Organization> Organizations { get; set; }
         public DbSet<Brand> Brands { get; set; }
         public DbSet<Creator> Creators { get; set; }
+        public DbSet<CreatorParticipation> CreatorParticipations { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<Language> Languages { get; set; }
         public DbSet<StaticTemplate> StaticTemplates { get; set; }
 
-        private readonly IConfiguration _configuration;
-
-        public TestDbContext(DbContextOptions<TestDbContext> options, IConfiguration config) : base(options)
+        public TestDbContext(DbContextOptions<TestDbContext> options) : base(options)
         {
-            _configuration = config;
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Order>()
+                .Property(e => e.Status)
+                .HasConversion<string>();
+
+            modelBuilder.Entity<Order>()
+                .Property(e => e.ProjectType)
+                .HasConversion<string>();
+
+            modelBuilder.Entity<User>()
+                .Property(e => e.Role)
+                .HasConversion<string>();
+
+            modelBuilder.Entity<Creator>()
+                .Property(e => e.SubType)
+                .HasConversion<string>();
+
+            modelBuilder.Entity<CreatorParticipation>()
+                .HasKey(e => new { e.OrderId, e.CreatorId });
+
+            modelBuilder.Entity<CreatorParticipation>()
+                .HasOne(e => e.Creator)
+                .WithMany(e => e.Participations)
+                .HasForeignKey(e => e.CreatorId);
+
+            modelBuilder.Entity<CreatorParticipation>()
+                .HasOne(e => e.Order)
+                .WithMany(e => e.Participations)
+                .HasForeignKey(e => e.OrderId);
+
             modelBuilder.Entity<Creator>()
                 .HasMany(x => x.Languages)
                 .WithMany(x => x.Speakers);
@@ -36,52 +65,30 @@ namespace WCPShared.Models
                 .WithMany(x => x.Orders);
 
             modelBuilder.Entity<Order>()
-                .HasMany(x => x.Creators)
-                .WithMany(x => x.Orders);
-
-            modelBuilder.Entity<Order>()
                 .HasOne(x => x.Videographer);
 
             modelBuilder.Entity<Order>()
                 .HasOne(x => x.Editor);
 
+            //modelBuilder.Entity<Order>()
+            //    .Property(x => x.ProjectTypeEnum)
+            //    .HasConversion<string>();
+
+            //modelBuilder.Entity<Order>()
+            //    .Property(x => x.StatusEnum)
+            //    .HasConversion<string>();
+
             modelBuilder.Entity<Order>()
                 .Property(x => x.Ideas)
-                .HasConversion(new ValueConverter<List<string>, string>(
-                    v => JsonConvert.SerializeObject(v),
-                    v => JsonConvert.DeserializeObject<List<string>>(v)),
-                    new ValueComparer<List<string>>(
-                        (c1, c2) => c1.SequenceEqual(c2),
-                        c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
-                        c => c.ToList()));
+                .HasConversion(new ValueConverter<List<Idea>, string>(
+                    v => JsonConvert.SerializeObject(v.Select(x => x.Text)),
+                    v => JsonConvert.DeserializeObject<List<string>>(v)!.Select(x => new Idea { Text = x }).ToList()));
 
             modelBuilder.Entity<Order>()
                 .Property(x => x.Products)
-                .HasConversion(new ValueConverter<List<string>, string>(
-                    v => JsonConvert.SerializeObject(v),
-                    v => JsonConvert.DeserializeObject<List<string>>(v)),
-                    new ValueComparer<List<string>>(
-                        (c1, c2) => c1.SequenceEqual(c2),
-                        c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
-                        c => c.ToList()));
-
-            //modelBuilder.Entity<Order>()
-            //    .OwnsMany(order => order.Products, ownedNavigationBuilder =>
-            //    {
-            //        ownedNavigationBuilder.ToJson();
-            //    });
-
-            //modelBuilder.Entity<Order>()
-            //    .OwnsMany(order => order.Ideas, ownedNavigationBuilder =>
-            //    {
-            //        ownedNavigationBuilder.ToJson();
-            //    });
-
-            //modelBuilder.Entity<Order>()
-            //    .OwnsOne(x => x.CreatorDeliveryStatus, ownedNavigationBuilder =>
-            //    {
-            //        ownedNavigationBuilder.ToJson();
-            //    });
+                .HasConversion(new ValueConverter<List<Product>, string>(
+                    v => JsonConvert.SerializeObject(v.Select(x => x.Link)),
+                    v => JsonConvert.DeserializeObject<List<string>>(v)!.Select(x => new Product { Link = x }).ToList()));
         }
     }
 }

@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using WCPShared.Interfaces.DataServices;
-using WCPShared.Models;
 using WCPShared.Models.DTOs;
+using WCPShared.Models.Entities;
 using WCPShared.Models.Views;
+using WCPShared.Services.EntityFramework;
 
 namespace WCPDataAPI.Controllers
 {
@@ -12,9 +12,9 @@ namespace WCPDataAPI.Controllers
     [ApiController]
     public class StaticTemplatesController : ControllerBase
     {
-        private readonly IStaticTemplateService _templateService;
+        private readonly StaticTemplateService _templateService;
 
-        public StaticTemplatesController(IStaticTemplateService templateService)
+        public StaticTemplatesController(StaticTemplateService templateService)
         {
             _templateService = templateService;
         }

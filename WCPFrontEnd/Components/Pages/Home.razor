@@ -1,0 +1,222 @@
+﻿@page "/"
+@using Microsoft.EntityFrameworkCore
+@using WCPAdminFrontEnd.Services
+@using WCPShared.Interfaces
+@using WCPShared.Models.Entities
+@using WCPShared.Models.Enums
+@inject IWcpDbContext Context
+
+<PageTitle>WebContent Platform</PageTitle>
+
+<AuthorizeView>
+    <NotAuthorized>
+    </NotAuthorized>
+    <Authorized>
+        <MudStack>
+            <MudPaper Class="pa-4">
+                <MudText Typo="Typo.body1">Hej, <b>@context.User.Identity!.Name.Split(' ').First()</b>! 👋</MudText>
+            </MudPaper>
+
+
+            @if (data is not null)
+            {
+                <MudStack Row>
+                    <MudPaper Class="pa-4" Width="25%">
+                        <MudText Typo="Typo.caption">Antal projekter i alt</MudText>
+                        <MudText Typo="Typo.h1">@projects.Count</MudText>
+                    </MudPaper>
+                    <MudPaper Class="pa-4" Width="25%">
+                        <MudText Typo="Typo.caption">Projekter denne måned</MudText>
+                        <MudText Typo="Typo.h1">@projects.Where(x => x.Created.Month == DateTime.Now.Month).Count()</MudText>
+                    </MudPaper>
+                    <MudPaper Class="pa-4" Width="25%">
+                        <MudText Typo="Typo.caption">Projekter sidste måned</MudText>
+                        <MudText Typo="Typo.h1">@projects.Where(x => x.Created.Month == DateTime.Now.AddMonths(-1).Month).Count()</MudText>
+                    </MudPaper>
+                    <MudPaper Class="pa-4" Width="25%">
+                        <MudText Typo="Typo.caption">Ventende projekter</MudText>
+                        <MudText Typo="Typo.h1">@projects.Where(x => x.Status == ProjectStatus.Unconfirmed || x.Status == ProjectStatus.Queued || x.Status == ProjectStatus.Editing).Count()</MudText>
+                    </MudPaper>
+                    <MudPaper Class="pa-4" Width="25%">
+                        <MudText Typo="Typo.caption">Antal videoer i alt</MudText>
+                        <MudText Typo="Typo.h1">@projects.Sum(x => x.ContentCount)</MudText>
+                    </MudPaper>
+                </MudStack>
+                <MudStack Row StretchItems="StretchItems.All">
+                    <MudStack Spacing="0">
+                        <MudText Typo="Typo.h6">Creator deadlines i dag</MudText>
+                        <MudDataGrid Items="@projects.Where(x => x.DeliveryDate.Date == DateTime.Now.Date && x.Status != ProjectStatus.Cancelled && x.Status < ProjectStatus.Feedback)">
+                            <Columns>
+                                <PropertyColumn Property="x => x.ProjectName" Title="Navn" Sortable="false" />
+                                <PropertyColumn Context="prop" Property="x => x.Brand" Title="Brand" Sortable="false">
+                                    <CellTemplate>
+                                        <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
+                                            <MudText Typo="Typo.h6">@ProjectHelper.CountryStringToFlag(prop.Item.Brand.Organization.Language.Name) </MudText>
+                                            @prop.Item.Brand.Name (@prop.Item.Brand.Organization.Name.Trim())
+                                        </MudStack>
+                                    </CellTemplate>
+                                </PropertyColumn>
+                                <PropertyColumn Property="x => x.ProjectType" Title="Type" Sortable="false" />
+                                <PropertyColumn Context="prop" Property="x => x.DeliveryDate" Title="Deadline" Sortable="false">
+                                    <CellTemplate>
+                                        @prop.Item.DeliveryDate.ToString("d")
+                                    </CellTemplate>
+                                </PropertyColumn>
+                                <PropertyColumn Context="prop" Property="x => x.Status" Title="Status" Sortable="false">
+                                    <CellTemplate>
+                                        <div class="@ProjectHelper.GetStatusColor(prop.Item.Status)">
+                                            @ProjectHelper.GetStatusString(prop.Item.Status)
+                                        </div>
+                                    </CellTemplate>
+                                </PropertyColumn>
+                            </Columns>
+                            <NoRecordsContent>
+                                <MudText>Der er ingen projekter, der forfalder i dag... 🤑</MudText>
+                            </NoRecordsContent>
+                        </MudDataGrid>
+                    </MudStack>
+                    <MudStack Spacing="0">
+                        <MudText Typo="Typo.h6">Afleveringer i dag</MudText>
+                        <MudDataGrid Items="@projects.Where(x => x.DeliveryDate.AddDays(2).Date == DateTime.Now.Date && x.Status != ProjectStatus.Cancelled && x.Status < ProjectStatus.Feedback)">
+                            <Columns>
+                                <PropertyColumn Property="x => x.ProjectName" Title="Navn" Sortable="false" />
+                                <PropertyColumn Context="prop" Property="x => x.Brand" Title="Brand" Sortable="false">
+                                    <CellTemplate>
+                                        <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
+                                            <MudText Typo="Typo.h6">@ProjectHelper.CountryStringToFlag(prop.Item.Brand.Organization.Language.Name) </MudText>
+                                            @prop.Item.Brand.Name (@prop.Item.Brand.Organization.Name.Trim())
+                                        </MudStack>
+                                    </CellTemplate>
+                                </PropertyColumn>
+                                <PropertyColumn Property="x => x.ProjectType" Title="Type" Sortable="false" />
+                                <PropertyColumn Context="prop" Property="x => x.DeliveryDate" Title="Deadline" Sortable="false">
+                                    <CellTemplate>
+                                        @prop.Item.DeliveryDate.AddDays(2).ToString("d")
+                                    </CellTemplate>
+                                </PropertyColumn>
+                                <PropertyColumn Context="prop" Property="x => x.Status" Title="Status" Sortable="false">
+                                    <CellTemplate>
+                                        <div class="@ProjectHelper.GetStatusColor(prop.Item.Status)">
+                                            @ProjectHelper.GetStatusString(prop.Item.Status)
+                                        </div>
+                                    </CellTemplate>
+                                </PropertyColumn>
+                            </Columns>
+                            <NoRecordsContent>
+                                <MudText>Der er ingen projekter, der forfalder i dag... 💰</MudText>
+                            </NoRecordsContent>
+                        </MudDataGrid>
+                    </MudStack>
+                </MudStack>
+
+                <MudStack Spacing="0">
+                    <MudText Typo="Typo.h6">Nyeste projekter</MudText>
+                    <MudDataGrid Items="@projects.TakeLast(5).Reverse()">
+                        <Columns>
+                            <PropertyColumn Property="x => x.ProjectName" Title="Navn" Sortable="false" />
+                            <PropertyColumn Context="prop" Property="x => x.Brand" Title="Brand" Sortable="false">
+                                <CellTemplate>
+                                    <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
+                                        <MudText Typo="Typo.h6">@ProjectHelper.CountryStringToFlag(prop.Item.Brand.Organization.Language.Name) </MudText>
+                                        @prop.Item.Brand.Name (@prop.Item.Brand.Organization.Name.Trim())
+                                    </MudStack>
+                                </CellTemplate>
+                            </PropertyColumn>
+                            <PropertyColumn Property="x => x.ProjectType" Title="Type" Sortable="false" />
+                            <PropertyColumn Context="prop" Property="x => x.Created" Title="Oprettet" Sortable="false">
+                                <CellTemplate>
+                                    @prop.Item.Created
+                                </CellTemplate>
+                            </PropertyColumn>
+                            <PropertyColumn Context="prop" Property="x => x.Status" Title="Status" Sortable="false">
+                                <CellTemplate>
+                                    <div class="@ProjectHelper.GetStatusColor(prop.Item.Status)">
+                                        @ProjectHelper.GetStatusString(prop.Item.Status)
+                                    </div>
+                                </CellTemplate>
+                            </PropertyColumn>
+                        </Columns>
+                    </MudDataGrid>
+                </MudStack>
+            }
+
+            <MudStack Row="true" AlignItems="AlignItems.End">
+                @if (data is not null)
+                {
+                    <MudStack Spacing="0">
+                        <MudText Typo="Typo.h6">Fordeling af projekt-typer</MudText>
+                        <MudPaper Class="pa-4">
+                            <MudChart ChartType="ChartType.Donut" Width="300px" Height="300px" @bind-SelectedIndex="Index" InputData="@data" InputLabels="@labels">
+                                <CustomGraphics>
+                                    <text class="donut-inner-text" x="50%" y="45%" dominant-baseline="middle" text-anchor="middle" fill="black" font-family="Helvetica" font-size="2">Total</text>
+                                    <text class="donut-inner-text" x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" fill="black" font-family="Helvetica" font-size="5">@data.Sum().ToString()</text>
+                                </CustomGraphics>
+                            </MudChart>
+                        </MudPaper>
+                    </MudStack>
+
+                    <MudStack Spacing="0">
+                        <MudPaper Class="pa-4">
+                            <MudChart ChartOptions="@(new ChartOptions { ShowLegend = false })" ChartType="ChartType.Bar" ChartSeries="@Series" XAxisLabels="@XAxisLabels" Width="100%" Height="354px">
+
+                            </MudChart>
+                        </MudPaper>
+                    </MudStack>
+                }
+                else
+                {
+                    <div class="flex flex-col gap-2 w-full">
+                        <MudPaper Width="100%" Class="pa-4">
+                            <MudStack Spacing="0">
+                                <MudSkeleton Width="100%" Height="64px" />
+                                <MudSkeleton Width="100%" Height="64px" />
+                                <MudSkeleton Width="100%" Height="64px" />
+                                <MudSkeleton Width="100%" Height="64px" />
+                                <MudSkeleton Width="100%" Height="64px" />
+                                <MudSkeleton Width="100%" Height="64px" />
+                            </MudStack>
+                        </MudPaper>
+                        
+                        <MudStack Row="true">
+                            <MudPaper Class="pa-4">
+                                <MudSkeleton SkeletonType="SkeletonType.Circle" Width="300px" Height="300px" />
+                            </MudPaper>
+                            <MudPaper Class="pa-4">
+                                <MudSkeleton Height="300px" Width="650px" />
+                            </MudPaper>
+                        </MudStack>
+                    </div>
+                }
+            </MudStack>
+        </MudStack>
+    </Authorized>
+</AuthorizeView>
+
+@code {
+    protected override async Task OnInitializedAsync() 
+    {
+        projects = await Context.Orders
+            .Include(x => x.Brand)
+            .ThenInclude(x => x.Organization)
+            .ThenInclude(x => x.Language)
+            .Where(x => x.Status != ProjectStatus.Cancelled)
+            .AsSplitQuery()
+            .ToListAsync();
+
+        int ugcCount = projects.Where(x => x.ProjectType == ProjectType.UGC).ToList().Count;
+        int staticCount = projects.Where(x => x.ProjectType == ProjectType.Statics).ToList().Count;
+        int editCount = projects.Where(x => x.ProjectType == ProjectType.Edit).ToList().Count;
+        int stillCount = projects.Where(x => x.ProjectType == ProjectType.Stills).ToList().Count;
+
+        data = [ugcCount, editCount, staticCount, stillCount];
+        Series.Add(new ChartSeries() { Data = data });
+    }
+    private List<Order> projects = [];
+
+    private int Index = -1; //default value cannot be 0 -> first selectedindex is 0.
+    int dataSize = 4;
+    public double[] data;
+    public string[] labels = { "UGC", "Edit", "Statics", "Stills" };
+    public List<ChartSeries> Series = new List<ChartSeries>();
+    public string[] XAxisLabels = { "UGC", "Edit", "Statics", "Stills" };
+}

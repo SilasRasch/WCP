@@ -1,63 +1,30 @@
 ﻿using WCPShared.Interfaces.DataServices;
 using WCPShared.Models;
 using Microsoft.EntityFrameworkCore;
-using WCPShared.Models.UserModels;
 using WCPShared.Models.DTOs;
 using WCPShared.Models.Views;
 using System.Linq.Expressions;
 using WCPShared.Services.Converters;
 using System;
 using WCPShared.Interfaces;
+using WCPShared.Models.Entities.UserModels;
+using WCPShared.Models.Enums;
 
 namespace WCPShared.Services.EntityFramework
 {
-    public class CreatorService : ICreatorService
+    public class CreatorService : GenericEFService<Creator>, IDtoExtensions<CreatorDto, Creator>, IObjectViewService<Creator, CreatorView>
     {
         private readonly IWcpDbContext _context;
-        private readonly IUserService _userService;
-        private readonly ILanguageService _languageService;
+        private readonly UserService _userService;
+        private readonly LanguageService _languageService;
         private readonly ViewConverter _viewConverter;
 
-        public CreatorService(IWcpDbContext context, ILanguageService languageService, IUserService userService, ViewConverter viewConverter)
+        public CreatorService(IWcpDbContext context, LanguageService languageService, UserService userService, ViewConverter viewConverter) : base(context)
         {
             _context = context;
             _languageService = languageService;
             _userService = userService;
             _viewConverter = viewConverter;
-        }
-
-        public async Task<Creator> AddObject(Creator obj)
-        {
-            if (obj.Languages is not null)
-                _context.Languages.AttachRange(obj.Languages);
-            if (obj.User is not null)
-                _context.Users.Attach(obj.User);
-
-            await _context.Creators.AddAsync(obj);
-            await _context.SaveChangesAsync();
-            return obj;
-        }
-
-        public async Task<Creator?> DeleteObject(int id)
-        {
-            Creator? obj = await GetObject(id);
-
-            if (obj is null)
-                return null!;
-
-            _context.Creators.Remove(obj);
-            await _context.SaveChangesAsync();
-            return obj;
-        }
-
-        public async Task<Creator?> GetObject(int id)
-        {
-            return await _context.Creators.Include(x => x.Languages).SingleOrDefaultAsync(x => x.Id == id);
-        }
-
-        public async Task<List<Creator>> GetAllObjects()
-        {
-            return await _context.Creators.Include(x => x.Languages).ToListAsync();
         }
 
         public async Task<Creator?> UpdateObject(int id, CreatorDto obj)
@@ -69,10 +36,9 @@ namespace WCPShared.Services.EntityFramework
 
             oldCreator.DateOfBirth = obj.DateOfBirth;
             oldCreator.Address = obj.Address;
-            oldCreator.Speciality = obj.Speciality;
             oldCreator.ImgURL = obj.ImgURL;
             oldCreator.Gender = obj.Gender;
-            oldCreator.SubType = obj.SubType;
+            oldCreator.SubType = (CreatorSubType)Enum.Parse(typeof(CreatorSubType), obj.SubType);
 
             if (obj.Languages is not null)
             {
@@ -100,21 +66,9 @@ namespace WCPShared.Services.EntityFramework
             return oldCreator;
         }
 
-        public async Task<Creator?> UpdateObject(int id, Creator obj)
-        {
-            Creator? oldCreator = await GetObject(id);
-
-            if (oldCreator is null)
-                return null!;
-
-            _context.Update(oldCreator);
-            await _context.SaveChangesAsync();
-            return oldCreator;
-        }
-
         public async Task<Creator?> AddObject(CreatorDto obj)
         {
-            if (obj.UserId is null) return null!;
+            if (obj.UserId is null || !obj.Validate()) return null!;
 
             var user = await _userService.GetObject(obj.UserId.Value);
             if (user is null)
@@ -126,9 +80,8 @@ namespace WCPShared.Services.EntityFramework
                 Gender = obj.Gender,
                 DateOfBirth = obj.DateOfBirth,
                 ImgURL = obj.ImgURL,
-                SubType = obj.SubType,
+                SubType = (CreatorSubType)Enum.Parse(typeof(CreatorSubType), obj.SubType),
                 Languages = new List<Language>(),
-                Speciality = obj.Speciality,
                 UserId = obj.UserId.Value,
                 User = user
             };
@@ -150,6 +103,7 @@ namespace WCPShared.Services.EntityFramework
                 .Where(predicate)
                 .Include(x => x.Languages)
                 .Include(x => x.User)
+                .ThenInclude(x => x.Language)
                 .Select(x => _viewConverter.Convert(x))
                 .ToListAsync();
         }
@@ -159,6 +113,7 @@ namespace WCPShared.Services.EntityFramework
             var creator = await _context.Creators
                 .Include(x => x.Languages)
                 .Include(x => x.User)
+                .ThenInclude(x => x.Language)
                 .SingleOrDefaultAsync(predicate);
 
             if (creator is not null)
@@ -171,6 +126,7 @@ namespace WCPShared.Services.EntityFramework
             return await _context.Creators
                 .Include(x => x.Languages)
                 .Include(x => x.User)
+                .ThenInclude(x => x.Language)
                 .Select(x => _viewConverter.Convert(x))
                 .ToListAsync();
         }

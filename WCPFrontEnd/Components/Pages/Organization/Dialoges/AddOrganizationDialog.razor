@@ -1,0 +1,103 @@
+﻿@using WCPAdminFrontEnd.Services
+@using WCPFrontEnd.Services
+@using WCPShared.Interfaces
+@using WCPShared.Models.DTOs
+@using WCPShared.Models.Entities.UserModels
+@using WCPShared.Models.Views
+@using WCPShared.Services.EntityFramework
+@using WCPShared.Services.StaticHelpers
+@inject OrganizationService OrganizationService
+@inject BrandService BrandService
+@inject LanguageService LanguageService
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            Opret ny organisation
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+
+        @if (_error is not null)
+        {
+            <MudText Color="Color.Error">@_error</MudText>
+        }
+       
+        <MudForm @ref="_orgForm" @bind-IsValid="@_orgSuccess" @bind-Errors="@_orgErrors">
+            <MudStack Row="true">
+                <MudTextField T="string" @bind-Value="_organization.Name" Label="Navn" Required="true" Validation="@(new Func<string, string>(ValidationHelpers.NameValidation))" RequiredError="Dette felt er påkrævet" />
+                <MudTextField T="string" @bind-Value="_organization.CVR" Label="CVR" Required="true" Validation="@(new Func<string, string>(ValidationHelpers.CvrValidation))" RequiredError="Dette felt er påkrævet" />
+            </MudStack>
+            <MudSelect @bind-Value="_organization.LanguageId" Label="Sprog" Required="true" RequiredError="Dette felt er påkrævet" AnchorOrigin="Origin.BottomCenter">
+                @foreach (var lang in Languages)
+                {
+                    <MudSelectItem Value="@lang.Id">@ProjectHelper.CountryStringToFlag(lang.Name)</MudSelectItem>
+                }
+            </MudSelect>
+        </MudForm>
+
+        <div class="flex justify-center w-full mt-2">
+            <MudSwitch Color="Color.Primary" @bind-Value="_createBrand" Label="Tilføj brand?"></MudSwitch>
+        </div>
+        
+
+        @if (_createBrand)
+        {
+            <MudForm @ref="_brandForm" @bind-IsValid="@_brandSuccess" @bind-Errors="@_brandErrors">
+                <MudStack Row="true">
+                    <MudTextField T="string" @bind-Value="_brand.Name" Label="Brandnavn" Required="true" Validation="@(new Func<string, string>(ValidationHelpers.NameValidation))" RequiredError="Dette felt er påkrævet" />
+                    <MudTextField T="string" @bind-Value="_brand.URL" Label="URL" Required="true" Validation="@(new Func<string, string>(ValidationHelpers.URLValidation))" RequiredError="Dette felt er påkrævet" />
+                </MudStack>
+            </MudForm>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Annuller</MudButton>
+        <MudButton Color="@Color.Success" Variant="Variant.Filled" Disabled="@((!_orgSuccess) || (_createBrand && !_brandSuccess))" OnClick="Submit">Opret</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; }
+
+    private MudForm _orgForm;
+    private bool _orgSuccess;
+    private string[] _orgErrors = { };
+
+    private MudForm _brandForm;
+    private bool _brandSuccess;
+    private string[] _brandErrors = { };
+
+    private OrganizationDto _organization = new();
+    private BrandDto _brand = new();
+    private string? _error;
+
+    private bool _createBrand = false;
+
+    private IEnumerable<Language> Languages = new List<Language>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Languages = await LanguageService.GetAllObjects();
+    }
+
+    private async Task Submit()
+    {
+        if (_organization.Validate())
+        {
+            var org = await OrganizationService.AddObject(_organization);
+
+            if (org is not null && _createBrand && _brand.Validate())
+            {
+                _brand.OrganizationId = org.Id;
+                await BrandService.AddObject(_brand);
+            }
+        }
+        
+
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}

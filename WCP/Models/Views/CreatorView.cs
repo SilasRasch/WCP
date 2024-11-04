@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WCPShared.Models.DTOs;
-using WCPShared.Models.UserModels;
+using WCPShared.Models.Entities.UserModels;
 
 namespace WCPShared.Models.Views
 {
@@ -19,7 +19,7 @@ namespace WCPShared.Models.Views
         public string SubType { get; set; } = string.Empty;
         public int? UserId { get; set; }
         public List<string>? Languages { get; set; } = new List<string>();
-        public string Gender { get; set; } = string.Empty;
+        public string? Gender { get; set; } = string.Empty;
 
         public CreatorView(Creator obj)
         {
@@ -27,11 +27,12 @@ namespace WCPShared.Models.Views
             Address = obj.Address;
             Gender = obj.Gender;
             UserId = obj.UserId;
-            SubType = obj.SubType;
-            Languages = obj.Languages.Select(x => x.Name).ToList();
+            SubType = obj.SubType.ToString();
             DateOfBirth = obj.DateOfBirth;
-            Speciality = obj.Speciality;
             ImgURL = obj.ImgURL;
+
+            if (obj.Languages is not null)
+                Languages = obj.Languages.Select(x => x.Name).ToList();
         }
     }
 }

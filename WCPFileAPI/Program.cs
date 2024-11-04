@@ -1,79 +1,32 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
-using Swashbuckle.AspNetCore.Filters;
-using System.Text;
 using System.Text.Json.Serialization;
 using WCPFileAPI.Services.S3;
-using WCPShared.Interfaces;
-using WCPShared.Models;
+using WCPShared.Extensions;
 using WCPShared.Services;
-using WCPShared.Services.StaticHelpers;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container
-
-//builder.Services.AddDbContext<IWcpDbContext, WcpDbContext>(options =>
+//builder.Services.AddDbContext<WCPShared.Interfaces.IWcpDbContext, WCPShared.Models.WcpDbContext>(options =>
 //    options.UseSqlServer("Data Source=172.232.142.14;Initial Catalog=WCP;User ID=sa;Password=Microsoftlmao!;Connect Timeout=30;Encrypt=True;Trust Server Certificate=True;Application Intent=ReadWrite;Multi Subnet Failover=False"));
-if (Secrets.IsProd)
-{
-    builder.Services.AddDbContext<IWcpDbContext, WcpDbContext>(
-        options => options.UseSqlServer(Secrets.GetConnectionString(builder.Configuration)));
-}
-else
-{
-    builder.Services.AddDbContext<IWcpDbContext, TestDbContext>(
-        options => options.UseSqlServer(Secrets.GetConnectionString(builder.Configuration)));
-}
 
-string allowAll = "dev";
-
-builder.Services.AddSwaggerGen(options =>
-{
-    options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme  // Makes it possible to authorize in Swagger using JWT-tokens -> not necessary for normal use (for development only)
-    {
-        In = ParameterLocation.Header,
-        Name = "Authorization",
-        Type = SecuritySchemeType.ApiKey
-    });
-
-    options.OperationFilter<SecurityRequirementsOperationFilter>();
-});
-
-// Authentication services
-builder.Services.AddAuthentication().AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuerSigningKey = true,
-        ValidateAudience = false,
-        ValidateIssuer = false,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(Secrets.GetJwtKey(builder.Configuration)))
-    };
-});
-
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy(allowAll, policy =>
-    {
-        policy.WithOrigins(Secrets.Origins).AllowAnyMethod().AllowAnyHeader().AllowCredentials().SetPreflightMaxAge(TimeSpan.FromSeconds(3600));
-    });
-});
-
-builder.Services.AddControllers();
-builder.Services.AddControllers().AddJsonOptions(x => x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
-
-builder.Services.AddHttpContextAccessor();
-
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Custom services
+builder.Services.ConfigurePrometheus();
+builder.Services.ConfigureDbContext(builder.Configuration);
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<UserContextService>();
+builder.Services.ConfigureSwagger();
+builder.Services.ConfigureJwtAuthentication(builder.Configuration);
+
+var corsPolicyName = "dev";
+builder.Services.ConfigureCors(corsPolicyName);
+
 builder.Services.AddScoped<IS3Client, S3Client>();
-builder.Services.AddSingleton<UserContextService>();
+
+builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(x => x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
 var app = builder.Build();
 
@@ -84,9 +37,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseCors(allowAll);
+app.UseCors(corsPolicyName);
 
 app.UseAuthorization();
+
+app.MapPrometheusScrapingEndpoint();
 
 app.MapControllers();
 

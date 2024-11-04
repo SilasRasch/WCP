@@ -2,14 +2,15 @@
 using Microsoft.AspNetCore.Mvc;
 using WCPAuthAPI.Models.DTOs;
 using WCPShared.Interfaces;
-using WCPShared.Models.UserModels;
 using WCPShared.Services.StaticHelpers;
 using WCPShared.Services;
 using System.Net;
-using WCPShared.Models.AuthModels;
 using WCPShared.Interfaces.Auth;
-using WCPShared.Interfaces.DataServices;
-using WCPShared.Models.DTOs;
+using WCPShared.Services.EntityFramework;
+using SendGrid.Helpers.Errors.Model;
+using WCPShared.Models.Entities.AuthModels;
+using WCPShared.Models.Entities.UserModels;
+using WCPShared.Models.Enums;
 
 namespace WCPAuthAPI.Controllers
 {
@@ -19,8 +20,9 @@ namespace WCPAuthAPI.Controllers
     {
         private readonly IJwtService _tokenService;
         private readonly IAuthService _authService;
-        private readonly IUserService _userService;
+        private readonly UserService _userService;
         private readonly IEmailService _emailService;
+        private readonly CreatorService _creatorService;
         private readonly UserContextService _userContextService;
         private readonly CookieOptions cookieOptions = new CookieOptions
         {
@@ -31,34 +33,18 @@ namespace WCPAuthAPI.Controllers
             SameSite = Secrets.IsProd ? SameSiteMode.Strict : SameSiteMode.None,
         };
 
-        public AuthController(IJwtService tokenService, IAuthService authService, IUserService userService, IEmailService emailService, UserContextService userContextService)
+        public AuthController(IJwtService tokenService, IAuthService authService, UserService userService, IEmailService emailService, CreatorService creatorService, UserContextService userContextService)
         {
             _tokenService = tokenService;
             _userService = userService;
             _emailService = emailService;
+            _creatorService = creatorService;
             _userContextService = userContextService;
             _authService = authService;
         }
 
-        //[HttpPost("Register"), Authorize(Roles = "Admin")]
-        //public async Task<ActionResult<int>> Register(RegisterDto request)
-        //{
-        //    if (!request.Validate())
-        //        return BadRequest("Valideringsfejl, tjek venligst felterne igen...");
-
-        //    try
-        //    {
-        //        User? user = await _authService.Register(request);
-        //        return user.Role != "Bruger" ? Created($"auth/{user.Id}", user.Id) : Created($"auth/{user.Id}", new { id = user.Id, orgId = user.OrganizationId });
-        //    }
-        //    catch (ArgumentException ex)
-        //    {
-        //        return BadRequest(ex.Message);
-        //    }
-        //}
-
         [HttpPost("Register"), Authorize(Roles = "Admin")]
-        public async Task<ActionResult<int>> Register(RegisterCreatorDto request)
+        public async Task<ActionResult<int>> Register(RegisterCreatorDto request, [FromQuery] bool selfRegister = false)
         {
             if (!request.User.Validate())
                 return BadRequest("Valideringsfejl på bruger, tjek venligst felterne igen...");
@@ -68,16 +54,11 @@ namespace WCPAuthAPI.Controllers
 
             try
             {
-                if (request.Creator is not null)
-                {
-                    User? user = await _authService.Register(request);
-                    return user.Role != "Bruger" ? Created($"auth/{user.Id}", user.Id) : Created($"auth/{user.Id}", new { id = user.Id, orgId = user.OrganizationId });
-                }
-                else
-                {
-                    User? user = await _authService.Register(request.User);
-                    return user.Role != "Bruger" ? Created($"auth/{user.Id}", user.Id) : Created($"auth/{user.Id}", new { id = user.Id, orgId = user.OrganizationId });
-                }
+                User? user = await _authService.Register(request, selfRegister);
+                if (user is not null)
+                    return user.Role != UserRole.Bruger ? Created($"auth/{user.Id}", user.Id) : Created($"auth/{user.Id}", new { id = user.Id, orgId = user.OrganizationId });
+                return BadRequest("Something went wrong...");
+
             }
             catch (ArgumentException ex)
             {
@@ -85,7 +66,41 @@ namespace WCPAuthAPI.Controllers
             }
         }
 
-        [HttpPost("Login"), AllowAnonymous] // Virk!
+        // POST /auth/verify
+        [HttpPost("Verify"), AllowAnonymous]
+        public async Task<IActionResult> Verify(VerifyUserDto request)
+        {
+            try
+            {
+                var response = await _authService.Verify(request);
+                return response is not null ? Ok() : BadRequest("Something went wrong...");
+            }
+            catch (Exception ex)
+            {
+                if (ex.GetType() == typeof(NotFoundException))
+                    return NotFound();
+                else return BadRequest(ex.Message);
+            }
+        }
+
+        // POST /auth/verify
+        [HttpPost("SelfRegister"), AllowAnonymous]
+        public async Task<IActionResult> SelfRegister(SelfRegisterDto request)
+        {
+            try
+            {
+                var response = await _authService.SelfRegister(request);
+                return response is not null ? NoContent() : BadRequest("Something went wrong...");
+            }
+            catch (Exception ex)
+            {
+                if (ex.GetType() == typeof(NotFoundException))
+                    return NotFound();
+                else return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("Login"), AllowAnonymous]
         public async Task<ActionResult<string?>> Login(UserDto request)
         {
             try
@@ -100,9 +115,25 @@ namespace WCPAuthAPI.Controllers
 
                 return Ok(auth.Token);
             }
-            catch (ArgumentException ex)
+            catch (Exception ex)
             {
                 return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("Authenticate"), Authorize]
+        public async Task<ActionResult<string>> Authenticate()
+        {
+            try
+            {
+                var response = await _authService.Authenticate();
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                if (ex.GetType() == typeof(NotFoundException))
+                    return NotFound();
+                else return BadRequest(ex.Message);
             }
         }
 
@@ -125,73 +156,10 @@ namespace WCPAuthAPI.Controllers
             return Ok(auth);
         }
 
-        [HttpGet("Authenticate"), Authorize]
-        public async Task<ActionResult<string>> Authenticate()
-        {
-            string email = _userContextService.GetEmail();
-            User? user = await _userService.GetUserByEmail(email);
-
-            if (user is null)
-                return BadRequest("No user with the given email");
-
-            var id = user.Id;
-            var roles = _userContextService.GetRoles();
-            var name = user.Name;
-            var phone = user.Phone;
-            var orgId = 0;
-
-            if (user.Organization is not null)
-                orgId = user.Organization.Id;
-
-            if (orgId == 0)
-                return Ok(new { id, email, roles, name, phone });
-
-            return Ok(new { id, orgId, email, roles, name, phone });
-        }
-
-        [HttpPost("AddAdmin"), Authorize(Roles = "Admin")]
-        public async Task<IActionResult> AddAdmin(int id)
-        {
-            return await _tokenService.AddAdmin(id) ? NoContent() : BadRequest("Der blev ikke fundet nogen bruger med det id. Eller brugeren er allerede admin...");
-        }
-
-        [HttpPost("Revoke"), Authorize]
-        public async Task<IActionResult> Revoke()
-        {
-            try
-            {
-                int id = _userContextService.GetId();
-                await _tokenService.RevokeSession(id);
-
-                return NoContent();
-            }
-            catch
-            {
-                return BadRequest("Session invalid");
-            }
-        }
-
-        // POST /auth/verify
-        [HttpPost("Verify"), AllowAnonymous]
-        public async Task<IActionResult> Verify(VerifyUserDTO request)
-        {
-            var user = await _userService.GetUserByVerificationToken(request.VerificationToken);
-
-            if (user == null) return BadRequest();
-
-            var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
-            user.PasswordHash = passwordHash;
-            user.IsActive = true;
-
-            await _userService.UpdateObject(user.Id, user);
-
-            return Ok();
-        }
-
         [HttpPut("Reset-password"), AllowAnonymous]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto request)
         {
-            User? user = await _userService.GetUserByResetToken(request.Token);
+            User? user = await _userService.GetObjectBy(x => x.PasswordResetToken == request.Token);
 
             if (user == null) return BadRequest("Forkert reset token, start venligst forfra");
             if (user.PasswordResetToken != request.Token) return BadRequest("Reset token mismatch...");
@@ -209,7 +177,7 @@ namespace WCPAuthAPI.Controllers
         [HttpPost("Forgot-password"), AllowAnonymous]
         public async Task<IActionResult> ForgotPassword(EmailOnly email)
         {
-            var user = await _userService.GetUserByEmail(email.Email);
+            var user = await _userService.GetObjectBy(x => x.Email == email.Email);
 
             if (user is null) return BadRequest();
 
@@ -230,7 +198,6 @@ namespace WCPAuthAPI.Controllers
             User? user = await _userService.GetObject(id);
 
             if (user == null) return BadRequest();
-            var myid = _userContextService.GetId();
             if (_userContextService.GetId() != id && !_userContextService.GetRoles().Contains("Admin"))
                 return Unauthorized("Adgang nægtet...");
 
@@ -240,5 +207,56 @@ namespace WCPAuthAPI.Controllers
 
             return Ok();
         }
+
+        [HttpPost("NotificationSettings"), Authorize]
+        public async Task<IActionResult> UpdateNotificationSettings([FromQuery] int userId, [FromQuery] string setting)
+        {
+            User? user = await _userService.GetObject(userId);
+            if (user == null) return BadRequest();
+
+            if (_userContextService.GetId() != userId && !_userContextService.GetRoles().Contains("Admin"))
+                return Unauthorized("Adgang nægtet...");
+            
+            setting = setting.ToLower();
+            if (setting != "slack" && setting != "email" && setting != "off")
+                return BadRequest("Setting not accepted");
+            
+            user.NotificationSetting = setting;
+            user.NotificationsOn = setting == "off" ? false : true;  
+
+            await _userService.UpdateObject(user.Id, user);
+            return Ok();
+        }
+
+        [HttpGet("UserToVerify/{verificationToken}"), AllowAnonymous]
+        public async Task<ActionResult<string>> GetUserToVerify(string verificationToken)
+        {
+            var user = await _userService.GetObjectBy(x => x.VerificationToken == verificationToken);
+            if (user == null) return NotFound("No user found with the given verification token...");
+
+            return Ok(new { email = user.Email, role = user.Role, id = user.Id });
+        }
+
+        [HttpPost("AddAdmin"), Authorize(Roles = "Admin")]
+        public async Task<IActionResult> AddAdmin(int id)
+        {
+            return await _authService.AddAdmin(id) ? NoContent() : BadRequest("Der blev ikke fundet nogen bruger med det id. Eller brugeren er allerede admin...");
+        }
+
+        [HttpPost("Revoke"), Authorize]
+        public async Task<IActionResult> Revoke()
+        {
+            try
+            {
+                int id = _userContextService.GetId();
+                await _tokenService.RevokeSession(id);
+                return NoContent();
+            }
+            catch
+            {
+                return BadRequest("Session invalid");
+            }
+        }
+
     }
 }

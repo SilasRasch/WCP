@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WCPShared.Interfaces;
+using WCPShared.Models.Entities;
+using WCPShared.Models.Entities.AuthModels;
 
 namespace WCPShared.Models.Views
 {
@@ -16,5 +18,6 @@ namespace WCPShared.Models.Views
         public string Role { get; set; } = string.Empty;
         public bool IsActive { get; set; }
         public OrganizationView? Organization { get; set; }
+        public string Language { get; set; } = string.Empty;
     }
 }

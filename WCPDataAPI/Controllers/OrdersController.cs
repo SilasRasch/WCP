@@ -1,12 +1,14 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using WCPShared.Services;
 using Microsoft.AspNetCore.Authorization;
-using WCPShared.Interfaces.DataServices;
-using WCPShared.Models;
 using WCPShared.Models.DTOs;
-using WCPShared.Models.UserModels;
 using WCPShared.Models.DTOs.RangeDTOs;
 using WCPShared.Models.Views;
+using WCPShared.Services.EntityFramework;
+using WCPShared.Models.Entities;
+using WCPShared.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using WCPShared.Models.Enums;
 
 namespace WCPDataAPI.Controllers
 {
@@ -16,24 +18,24 @@ namespace WCPDataAPI.Controllers
     public class OrdersController : ControllerBase
     {
         private readonly UserContextService _userContextService;
-        private readonly IOrderService _orderService;
-        private readonly IBrandService _brandService;
-        private readonly ICreatorService _creatorService;
+        private readonly OrderService _orderService;
+        private readonly BrandService _brandService;
+        private readonly CreatorService _creatorService;
+        private readonly IWcpDbContext _context;
 
-        public OrdersController(UserContextService userContextService, IOrderService orderService, IBrandService brandService, ICreatorService creatorService)
+        public OrdersController(UserContextService userContextService, IWcpDbContext context, OrderService orderService, BrandService brandService, CreatorService creatorService)
         {
             _userContextService = userContextService;
             _orderService = orderService;
             _brandService = brandService;
             _creatorService = creatorService;
+            _context = context;
         }
-
-        // TODO: Refactor Get endpoint to use claims/roles instead of query parameters... (for security)
 
         // GET: api/<OrdersController>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<OrderView>>> Get([FromQuery] int status, [FromQuery] int? statusTo = null, [FromQuery] int? userId = null, [FromQuery] int? orgId = null)
-        {   
+        {
             IEnumerable<OrderView> orders = new List<OrderView>();
 
             // Get user's projects
@@ -41,8 +43,15 @@ namespace WCPDataAPI.Controllers
                 orders = await _orderService.GetObjectsViewBy(x => x.Brand.OrganizationId == _userContextService.GetOrganizationId());
 
             // Get creator's projects
-            else if (_userContextService.GetRoles().Contains("Creator") || _userContextService.GetRoles().Contains("Editor"))
-                orders = await _orderService.GetObjectsViewBy(x => x.Creators!.Any(x => x.UserId == _userContextService.GetId()));
+            else if (_userContextService.GetRoles().Contains("Creator"))
+            {
+                orders = await _orderService.GetObjectsViewBy(
+                    x => (x.Participations!.Any(x => x.Creator.UserId == _userContextService.GetId() && x.HasDelivered == false) 
+                    || x.EditorId == _userContextService.GetId() 
+                    || x.VideographerId == _userContextService.GetId())
+                );
+            }
+                
 
             if (_userContextService.GetRoles().Contains("Admin"))
                 orders = await _orderService.GetAllObjectsView();
@@ -105,6 +114,31 @@ namespace WCPDataAPI.Controllers
             return Created();
         }
 
+        [HttpPost("CreatorDelivery")]
+        public async Task<IActionResult> CreatorDelivery([FromQuery] int order, [FromQuery] int creator)
+        {
+            Order? existingOrder = await _context.Orders
+                .Include(x => x.Participations)
+                .ThenInclude(x => x.Creator)
+                .AsSplitQuery()
+                .SingleOrDefaultAsync(x => x.Id == order);
+
+            if (existingOrder is null) return NotFound("Order not found");
+
+            var callingUser = await _creatorService.GetObjectViewBy(x => x.UserId == _userContextService.GetId());
+            if (callingUser is null) return Unauthorized("You are not a creator");
+
+            bool isAdmin = _userContextService.GetRoles().Contains("Admin");
+            bool isCreator = _userContextService.GetRoles().Contains("Creator");
+            bool creatorAllowed = existingOrder.Participations.Exists(x => x.CreatorId == creator) && callingUser.Id == creator;
+
+            if (!isAdmin && (isCreator && !creatorAllowed))
+                return Unauthorized("Du har ikke tilladelse til at ændre denne ordre");
+
+            await _orderService.CreatorDelivery(existingOrder, creator);
+            return NoContent();
+        }
+
         // PUT api/<OrdersController>/5
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(OrderDto order, int id)
@@ -117,7 +151,7 @@ namespace WCPDataAPI.Controllers
             if (!order.Validate())
                 return BadRequest("Valideringsfejl, tjek venligst felterne igen...");
 
-            bool creatorNotAllowed = !existingOrder.Creators.Exists(x => x.Id == _userContextService.GetId()) && existingOrder.Status == 3 && order.Status == 4;
+            bool creatorNotAllowed = !existingOrder.Participations.Exists(x => x.Creator.UserId == _userContextService.GetId()) && existingOrder.Status == ProjectStatus.CreatorFilming && order.Status == (int)ProjectStatus.Editing;
             bool isAdmin = _userContextService.GetRoles().Contains("Admin");
             bool isCreator = _userContextService.GetRoles().Contains("Creator");
             bool isUser = _userContextService.GetRoles().Contains("Bruger");

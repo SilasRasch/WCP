@@ -1,9 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using WCPShared.Interfaces.DataServices;
-using WCPShared.Models.UserModels;
+using WCPShared.Models.Entities.AuthModels;
+using WCPShared.Models.Entities.UserModels;
 using WCPShared.Models.Views;
 using WCPShared.Services;
+using WCPShared.Services.EntityFramework;
 
 namespace WCPDataAPI.Controllers
 {
@@ -12,10 +13,10 @@ namespace WCPDataAPI.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
-        private readonly IUserService _userService;
+        private readonly UserService _userService;
         private readonly UserContextService _userContextService;
 
-        public UsersController(IUserService userService, UserContextService userContextService)
+        public UsersController(UserService userService, UserContextService userContextService)
         {
             _userService = userService;
             _userContextService = userContextService;
@@ -25,12 +26,12 @@ namespace WCPDataAPI.Controllers
         [HttpGet, Authorize(Roles = "Admin")]
         public async Task<ActionResult<IEnumerable<UserView>>> Get([FromQuery] string? role)
         {
-            if (role is not null) return Ok(await _userService.GetObjectsViewBy(x => x.Role.ToLower() == role.ToLower()));
+            if (role is not null) return Ok(await _userService.GetObjectsViewBy(x => x.Role.ToString().ToLower() == role.ToLower()));
             return Ok(await _userService.GetAllObjectsView());
         }
 
         // GET api/<UsersController>/5
-        [HttpGet("{id}"), Authorize(Roles = "Admin")]
+        [HttpGet("{id}")]
         public async Task<ActionResult<UserView>> Get(int id)
         {
             UserView? user = await _userService.GetObjectViewBy(x => x.Id == id);

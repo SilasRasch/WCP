@@ -1,0 +1,89 @@
+﻿@page "/login"
+@attribute [ExcludeFromInteractiveRouting]
+@using Microsoft.EntityFrameworkCore
+@using WCPShared.Models.Entities
+@inject IWcpDbContext Context
+
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Authentication.Cookies
+@using WCPShared.Interfaces
+@using WCPShared.Models.Entities.AuthModels
+@using WCPShared.Models.Entities.UserModels
+@using WCPShared.Models.Enums
+@using WCPShared.Services
+@inject NavigationManager NavigationManager
+
+<div class="grid justify-center gap-2 pt-4 pb-4">
+
+    <MudPaper>
+        <EditForm Model="@Model" OnValidSubmit="Authenticate" FormName="LoginForm" class="p-8 rounded-md flex flex-column gap-2 mud-secondary">
+            <DataAnnotationsValidator />
+            <div class="font-semibold">
+                Login
+            </div>
+            <div class="grid">
+                <InputText @bind-Value="Model.Email" class="p-2 rounded-lg" placeholder="Email" />
+                <ValidationMessage For="() => Model.Email" class="text-red-600" />
+            </div>
+            <div class="grid">
+                <InputText type="password" @bind-Value="Model.Password" class="p-2 rounded-lg" placeholder="Password" />
+                <ValidationMessage For="() => Model.Password" class="text-red-600" />
+            </div>
+
+            @if (errorMessage is not null)
+            {
+                <span class="text-red-600 mt-2">@errorMessage</span>
+            }
+
+            <hr />
+
+            <button type="submit" class="rounded-lg p-2 bg-green-500 text-white hover:bg-green-600 duration-200">Login</button>
+        </EditForm>
+    </MudPaper>
+    
+</div>
+
+@code {
+    [CascadingParameter]
+    public HttpContext? HttpContext { get; set; }
+
+    [SupplyParameterFromForm]
+    public UserDto Model { get; set; } = new();
+    private string? errorMessage;
+
+    private MudForm _form;
+    private bool _success;
+    private string[] _errors = { };
+
+    private async Task Authenticate()
+    {
+        User? user = await Context.Users
+                .SingleOrDefaultAsync(x => x.Email == Model.Email);
+
+        if (user is null || !user.IsActive || !BCrypt.Net.BCrypt.Verify(Model.Password, user.PasswordHash)) 
+        {
+            errorMessage = "Invalid email or password";
+            return;
+        }
+
+        if (user.Role != UserRole.Admin) 
+        {
+            errorMessage = "Unauthorized";
+            return;
+        }
+
+        List<Claim> claims = new List<Claim>()
+        {
+            new Claim(ClaimTypes.Email, user.Email),
+            new Claim(ClaimTypes.Name, user.Name),
+            new Claim(ClaimTypes.Role, user.Role.ToString())
+        };
+
+        var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+        var principal = new ClaimsPrincipal(identity);
+        await HttpContext!.SignInAsync(principal);
+
+        NavigationManager.NavigateTo("/");
+    }
+}

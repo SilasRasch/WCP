@@ -1,0 +1,175 @@
+﻿@using Microsoft.EntityFrameworkCore
+@using WCPAdminFrontEnd.Services
+@using WCPFrontEnd.Services
+@using WCPShared.Interfaces
+@using WCPShared.Interfaces.Auth
+@using WCPShared.Models.DTOs
+@using WCPShared.Models.Entities.AuthModels
+@using WCPShared.Models.Entities.UserModels
+@using WCPShared.Models.Enums
+@using WCPShared.Models.Views
+@using WCPShared.Models.Entities
+@using WCPShared.Services
+@using WCPShared.Services.EntityFramework
+@inject UserService UserService
+@inject CreatorService CreatorService
+@inject IWcpDbContext Context
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            Rediger bruger
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudForm @ref="_form" @bind-IsValid="@_success" @bind-Errors="@_errors">
+            <MudStack Row="true">
+                <MudTextField T="string" @bind-Value="User.Name" Label="Navn" Validation="@(new Func<string, string>(ValidationHelpers.NameValidation))" RequiredError="Dette felt er påkrævet" />
+                <MudTextField T="string" @bind-Value="User.Email" Label="Email" Required="true" Validation="@(new Func<string, string>(ValidationHelpers.EmailValidation))" RequiredError="Dette felt er påkrævet" />
+            </MudStack>
+
+            <MudStack Row="true">
+                <MudSelect @bind-Value="User.Role" Label="Rolle" Required="true" AnchorOrigin="Origin.BottomCenter" Placeholder="Vælg en rolle">
+                    @foreach (UserRole item in Enum.GetValues(typeof(UserRole)))
+                    {
+                        <MudSelectItem Value="@item">@item</MudSelectItem>
+                    }
+                </MudSelect>
+
+                <MudSelect @bind-Value="User.Language" Text="@ProjectHelper.CountryStringToFlag(User.Language.Name)" Label="Sprog" AnchorOrigin="Origin.BottomCenter">
+                    @foreach (var lang in _languages)
+                    {
+                        <MudSelectItem Value="@lang">@ProjectHelper.CountryStringToFlag(lang.Name)</MudSelectItem>
+                    }
+                </MudSelect>
+            </MudStack>
+
+            <MudSelect @bind-Value="User.IsActive" Label="Aktivitet" Required="true" AnchorOrigin="Origin.BottomCenter" Placeholder="Brugerens aktivitet">
+                <MudSelectItem Value="true">Aktiv</MudSelectItem>
+                <MudSelectItem Value="false">Inaktiv</MudSelectItem>
+            </MudSelect>
+
+            @if (_isUser && User.Organization is not null)
+            {
+                <MudSelect @bind-Value="User.Organization" Text="@User.Organization.Name" Label="Organisation" Required="_isUser" RequiredError="Dette felt er påkrævet" AnchorOrigin="Origin.BottomCenter" Placeholder="Vælg organisation">
+                    @foreach (var org in _organizations)
+                    {
+                        <MudSelectItem Value="@org">
+                            <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
+                                <MudText Typo="Typo.h6">@ProjectHelper.CountryStringToFlag(org.Language.Name) </MudText>
+                                @org.Name
+                            </MudStack>
+                        </MudSelectItem>
+                    }
+                </MudSelect>
+            }
+
+            @if (_isCreator && Creator is not null)
+            {
+                <MudStack Row="true">
+                    <MudDatePicker Label="Fødselsdag" @bind-Date="Creator.DateOfBirth" Required="Creator.SubType == CreatorSubType.UGC" DateFormat="dd.MM.yyyy"></MudDatePicker>
+                    <MudSelect @bind-Value="Creator.Gender" Label="Køn" Required="Creator.SubType == CreatorSubType.UGC" RequiredError="Dette felt er påkrævet" AnchorOrigin="Origin.BottomCenter" Placeholder="Vælg et køn">
+                        <MudSelectItem Value="@("Mand")">Mand</MudSelectItem>
+                        <MudSelectItem Value="@("Kvinde")">Kvinde</MudSelectItem>
+                        <MudSelectItem Value="@("Andet")">Andet</MudSelectItem>
+                    </MudSelect>
+                </MudStack>
+
+                <MudSelect @bind-SelectedValues="_selectedLanguages" ToStringFunc="(e) => ProjectHelper.LanguageToStringFlag(e)" Delimiter=" " MultiSelection="true" Label="Sprog" Required="Creator.SubType == CreatorSubType.UGC" RequiredError="Dette felt er påkrævet" AnchorOrigin="Origin.BottomCenter">
+                    @foreach (var lang in _languages)
+                    {
+                        <MudSelectItem Value="@lang">@ProjectHelper.CountryStringToFlag(lang.Name)</MudSelectItem>
+                    }
+                </MudSelect>
+
+                <MudStack Row="true">
+                    <MudTextField T="string" @bind-Value="Creator.Address" Label="Adresse" Required="Creator.SubType == CreatorSubType.UGC" RequiredError="Dette felt er påkrævet" />
+                    <MudSelect @bind-Value="Creator.SubType" Label="Undertype" Required="_isCreator" RequiredError="Dette felt er påkrævet" AnchorOrigin="Origin.BottomCenter" Placeholder="Vælg en undertype">
+                        @foreach (CreatorSubType item in Enum.GetValues(typeof(CreatorSubType)))
+                        {
+                            <MudSelectItem Value="@item">@item</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudStack>
+
+                @* <div class="flex justify-center items-center w-full gap-2">
+                    @if (!String.IsNullOrEmpty(Creator.ImgURL))
+                    {
+                        <MudImage Src="@Creator.ImgURL" Class="max-h-12 rounded-full" />
+                    }
+                    <MudStack AlignItems="AlignItems.Center">
+                        <MudFileUpload Class="mt-2" T="IBrowserFile" FilesChanged="UploadFiles" MaximumFileCount="1" Accept="image/png, image/jpg, image/jpeg">
+                            <ActivatorContent>
+                                <MudFab Color="Color.Primary"
+                                        StartIcon="@Icons.Material.Filled.Image"
+                                        Label="Upload profilbillede" />
+                            </ActivatorContent>
+                        </MudFileUpload>
+
+                        @if (_profilePicture is not null)
+                        {
+                            <MudText Class="cursor-pointer hover:text-red-500 duration-200" @onclick="RemoveFile">@_profilePicture.Name</MudText>
+                        }
+                    </MudStack>
+                </div> *@
+            }
+
+            <MudTextField T="string" @bind-Value="User.Phone" Label="Telefon" Required="_isUser || (Creator is not null && _isCreator && Creator.SubType == CreatorSubType.UGC)" Validation="@(new Func<string, string>(ValidationHelpers.PhoneValidation))" RequiredError="Dette felt er påkrævet" />
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Annuller</MudButton>
+        <MudButton Color="@Color.Success" Variant="Variant.Filled" Disabled="@(!_success)" OnClick="async () => await Submit()">Gem</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; }
+
+    [Parameter]
+    public User User { get; set; }
+
+    [Parameter]
+    public Creator? Creator { get; set; }
+
+    private MudForm _form;
+    private bool _success;
+    private string[] _errors = { };
+    private IEnumerable<Language> _selectedLanguages { get; set; } = new HashSet<Language>();
+
+    private bool _isUser => User.Role == UserRole.Bruger;
+    private bool _isCreator => User.Role == UserRole.Creator;
+
+    private IEnumerable<Organization> _organizations = new List<Organization>();
+    private IEnumerable<Language> _languages = new List<Language>();
+
+    protected override void OnInitialized()
+    {
+        _languages = Context.Languages.ToList();
+        _organizations = Context.Organizations
+            .Include(x => x.Language).ToList();
+
+        if (_isCreator && Creator is not null && Creator.Languages is not null)
+            _selectedLanguages = Creator.Languages;
+    }
+
+    IBrowserFile _profilePicture = null!;
+    private void UploadFiles(IBrowserFile file) => _profilePicture = file;
+    private void RemoveFile() => _profilePicture = null!;
+
+    private async Task Submit()
+    {
+        if (User.Validate())
+        {
+            if (_isCreator && Creator is not null)
+                Creator.Languages = _selectedLanguages.ToList();
+
+            await Context.SaveChangesAsync();
+        }
+
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}

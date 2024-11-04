@@ -1,0 +1,68 @@
+﻿@using WCPAdminFrontEnd.Services
+@using WCPFrontEnd.Services
+@using WCPShared.Interfaces
+@using WCPShared.Models.DTOs
+@using WCPShared.Models.Entities.UserModels
+@using WCPShared.Models.Views
+@using WCPShared.Services.EntityFramework
+@using WCPShared.Services.StaticHelpers
+@inject OrganizationService OrganizationService
+@inject BrandService BrandService
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            Opret nyt brand
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudForm @ref="_brandForm" @bind-IsValid="@_brandSuccess" @bind-Errors="@_brandErrors">
+            <MudSelect @bind-Value="_brand.OrganizationId" Label="Organisation" Required="true" RequiredError="Dette felt er påkrævet" AnchorOrigin="Origin.BottomCenter" Placeholder="Vælg organisation">
+                @foreach (var org in _organizations)
+                {
+                    <MudSelectItem Value="@org.Id">
+                        <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
+                            <MudText Typo="Typo.h6">@ProjectHelper.CountryStringToFlag(org.Language) </MudText> 
+                            @org.Name
+                        </MudStack>
+                    </MudSelectItem>
+                }
+            </MudSelect>
+            <MudStack Row="true">
+                <MudTextField T="string" @bind-Value="_brand.Name" Label="Brandnavn" Required="true" Validation="@(new Func<string, string>(ValidationHelpers.NameValidation))" RequiredError="Dette felt er påkrævet" />
+                <MudTextField T="string" @bind-Value="_brand.URL" Label="URL" Required="true" Validation="@(new Func<string, string>(ValidationHelpers.URLValidation))" RequiredError="Dette felt er påkrævet" />
+            </MudStack>
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Annuller</MudButton>
+        <MudButton Color="@Color.Success" Variant="Variant.Filled" Disabled="@(!_brandSuccess)" OnClick="Submit">Opret</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; }
+
+    private MudForm _brandForm;
+    private bool _brandSuccess;
+    private string[] _brandErrors = { };
+    private BrandDto _brand = new();
+
+    private IEnumerable<OrganizationView> _organizations = new List<OrganizationView>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _organizations = await OrganizationService.GetAllObjectsView();
+    }
+
+    private async Task Submit()
+    {
+        if (_brand.Validate())
+            await BrandService.AddObject(_brand);
+
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}

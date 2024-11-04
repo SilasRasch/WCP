@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using WCPShared.Models.UserModels;
+﻿using Microsoft.IdentityModel.Tokens;
 
 namespace WCPShared.Models.DTOs
 {
@@ -20,7 +15,7 @@ namespace WCPShared.Models.DTOs
 
         public bool Validate()
         {
-            if (SubType == "UGC" && (string.IsNullOrWhiteSpace(Address) || string.IsNullOrWhiteSpace(Gender)))
+            if (SubType.IsNullOrEmpty())
                 return false;
 
             return true;

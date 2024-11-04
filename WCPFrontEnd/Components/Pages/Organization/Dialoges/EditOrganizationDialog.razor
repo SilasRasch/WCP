@@ -1,0 +1,70 @@
+﻿@using Microsoft.EntityFrameworkCore
+@using WCPAdminFrontEnd.Services
+@using WCPFrontEnd.Services
+@using WCPShared.Interfaces
+@using WCPShared.Interfaces.Auth
+@using WCPShared.Models.DTOs
+@using WCPShared.Models.Entities.AuthModels
+@using WCPShared.Models.Entities.UserModels
+@using WCPShared.Models.Views
+@using WCPShared.Models.Entities
+@using WCPShared.Services
+@using WCPShared.Services.EntityFramework
+@inject IWcpDbContext Context
+@inject OrganizationService OrganizationService
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            Rediger organisation
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudForm @ref="_form" @bind-IsValid="@_success" @bind-Errors="@_errors">
+            <MudTextField T="string" @bind-Value="Organization.Name" Label="Navn" Validation="@(new Func<string, string>(ValidationHelpers.NameValidation))" RequiredError="Dette felt er påkrævet" />
+            <MudTextField T="string" @bind-Value="Organization.CVR" Label="CVR" Validation="@(new Func<string, string>(ValidationHelpers.CvrValidation))" RequiredError="Dette felt er påkrævet" />
+
+            <MudSelect @bind-Value="Organization.Language" Text="@ProjectHelper.CountryStringToFlag(Organization.Language.Name)" Label="Sprog" AnchorOrigin="Origin.BottomCenter">
+                @foreach (var lang in _languages)
+                {
+                    <MudSelectItem Value="@lang">@ProjectHelper.CountryStringToFlag(lang.Name)</MudSelectItem>
+                }
+            </MudSelect>
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Annuller</MudButton>
+        <MudButton Color="@Color.Success" Variant="Variant.Filled" Disabled="@(!_success)" OnClick="Submit">Gem</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; }
+
+    [Parameter]
+    public Organization Organization { get; set; }
+
+    private MudForm _form;
+    private bool _success;
+    private string[] _errors = { };
+
+    private IEnumerable<Language> _languages = new List<Language>();
+
+    protected override void OnInitialized()
+    {
+        _languages = Context.Languages.ToList();
+    }
+
+    private async void Submit()
+    {
+        if (Organization.Validate())
+        {
+            await Context.SaveChangesAsync();
+        }
+
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}

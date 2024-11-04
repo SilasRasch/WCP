@@ -1,8 +1,8 @@
 ﻿using Amazon.S3.Model;
 using Amazon.S3;
 using Microsoft.Extensions.Options;
-using WCPShared.Models;
 using WCPShared.Services.StaticHelpers;
+using WCPShared.Models.Entities;
 
 namespace WCPFileAPI.Services.S3
 {

@@ -3,67 +3,24 @@ using System;
 using System.Linq.Expressions;
 using WCPShared.Interfaces;
 using WCPShared.Interfaces.DataServices;
-using WCPShared.Models;
 using WCPShared.Models.DTOs;
+using WCPShared.Models.Entities;
 using WCPShared.Models.Views;
 using WCPShared.Services.Converters;
 
 namespace WCPShared.Services.EntityFramework
 {
-    public class BrandService : IBrandService
+    public class BrandService : GenericEFService<Brand>, IDtoExtensions<BrandDto, Brand>, IObjectViewService<Brand, BrandView>
     {
         private readonly IWcpDbContext _context;
-        private readonly IOrganizationService _organizationService;
+        private readonly OrganizationService _organizationService;
         private readonly ViewConverter _viewConverter;
 
-        public BrandService(IWcpDbContext context, IOrganizationService organizationService, ViewConverter viewConverter)
+        public BrandService(IWcpDbContext context, OrganizationService organizationService, ViewConverter viewConverter) : base(context)
         {
             _context = context;
             _organizationService = organizationService;
             _viewConverter = viewConverter;
-        }
-
-        public async Task<Brand> AddObject(Brand brand)
-        {
-            _context.Organizations.Attach(brand.Organization);
-            await _context.Brands.AddAsync(brand);
-            await _context.SaveChangesAsync();
-            return brand;
-        }
-
-        public async Task<Brand?> DeleteObject(int id)
-        {
-            Brand? brand = await GetObject(id);
-
-            if (brand is null)
-                return null!;
-
-            _context.Brands.Remove(brand);
-            await _context.SaveChangesAsync();
-            return brand;
-        }
-
-        public async Task<Brand?> GetObject(int id)
-        {
-            return await _context.Brands.Include(x => x.Organization).SingleOrDefaultAsync(x => x.Id == id);
-        }
-
-        public async Task<List<Brand>> GetAllObjects()
-        {
-            return await _context.Brands.Include(x => x.Organization).ToListAsync();
-        }
-
-        public async Task<Brand?> UpdateObject(int id, Brand brand)
-        {
-            Brand? oldBrand = await GetObject(id);
-
-            if (oldBrand is null || id != brand.Id)
-                return null!;
-
-            //_context.ChangeTracker.Clear();
-            _context.Update(brand);
-            await _context.SaveChangesAsync();
-            return brand;
         }
 
         public async Task<Brand?> UpdateObject(int id, BrandDto brand)
@@ -117,6 +74,7 @@ namespace WCPShared.Services.EntityFramework
             return await _context.Brands
                 .Where(predicate)
                 .Include(x => x.Organization)
+                .ThenInclude(x => x.Language)
                 .Select(x => _viewConverter.Convert(x))
                 .ToListAsync();
         }
@@ -125,6 +83,7 @@ namespace WCPShared.Services.EntityFramework
         {
             var brand = await _context.Brands
                 .Include(x => x.Organization)
+                .ThenInclude(x => x.Language)
                 .SingleOrDefaultAsync(predicate);
 
             if (brand is not null)
@@ -136,6 +95,7 @@ namespace WCPShared.Services.EntityFramework
         {
             return await _context.Brands
                 .Include(x => x.Organization)
+                .ThenInclude(x => x.Language)
                 .Select(x => _viewConverter.Convert(x))
                 .ToListAsync();
         }

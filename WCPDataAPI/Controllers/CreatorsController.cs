@@ -1,15 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WCPShared.Services;
-using WCPShared.Models.UserModels;
-using WCPShared.Interfaces.DataServices;
-using WCPShared.Models;
 using WCPShared.Models.DTOs;
-using WCPShared.Services.StaticHelpers;
-using MongoDB.Driver;
-using EllipticCurve.Utils;
-using WCPShared.Models.DTOs.RangeDTOs;
 using WCPShared.Models.Views;
+using WCPShared.Services.EntityFramework;
+using WCPShared.Models.Entities;
+using WCPShared.Models.Entities.UserModels;
 
 namespace WCPDataAPI.Controllers
 {
@@ -19,12 +15,12 @@ namespace WCPDataAPI.Controllers
     public class CreatorsController : ControllerBase
     {
         private readonly UserContextService _userContextService;
-        private readonly ICreatorService _creatorService;
-        private readonly IOrderService _orderService;
-        private readonly IUserService _userService;
-        private readonly ILanguageService _languageService;
+        private readonly CreatorService _creatorService;
+        private readonly OrderService _orderService;
+        private readonly UserService _userService;
+        private readonly LanguageService _languageService;
 
-        public CreatorsController(UserContextService userContextService, ICreatorService creatorService, IOrderService orderService, IUserService userService, ILanguageService languageService)
+        public CreatorsController(UserContextService userContextService, CreatorService creatorService, OrderService orderService, UserService userService, LanguageService languageService)
         {
             _orderService = orderService;
             _userContextService = userContextService;
@@ -42,9 +38,9 @@ namespace WCPDataAPI.Controllers
             {
                 Order? order = await _orderService.GetObject(orderId.Value);
 
-                if (order is not null && order.Creators is not null)
+                if (order is not null && order.Participations is not null)
                 {
-                    creators = creators.Where(x => order.Creators.Any(c => c.Id == x.Id)).ToList();
+                    creators = creators.Where(x => order.Participations.Any(c => c.CreatorId == x.Id)).ToList();
                 }
             }
 

@@ -1,6 +1,6 @@
 ﻿using WCPShared.Interfaces.DataServices;
-using WCPShared.Models;
-using WCPShared.Models.UserModels;
+using WCPShared.Models.Entities;
+using WCPShared.Models.Entities.UserModels;
 using WCPShared.Models.Views;
 
 namespace WCPShared.Services.Converters
@@ -11,7 +11,7 @@ namespace WCPShared.Services.Converters
         {
             OrderView view = new OrderView(obj);
             view.Brand = Convert(obj.Brand);
-            view.Creators = obj.Creators.Select(x => Convert(x)).ToList();
+            view.Creators = obj.Participations.Select(x => Convert(x.Creator)).ToList();
 
             if (obj.Videographer is not null)
                 view.Videographer = Convert(obj.Videographer);
@@ -19,13 +19,15 @@ namespace WCPShared.Services.Converters
             if (obj.Editor is not null)
                 view.Editor = Convert(obj.Editor);
 
-            view.StaticTemplates = obj.StaticTemplates.Select(x => Convert(x)).ToList();
+            if (obj.StaticTemplates is not null)
+                view.StaticTemplates = obj.StaticTemplates.Select(x => Convert(x)).ToList();
+
             return view;
         }
 
         public OrganizationView Convert(Organization obj)
         {
-            if (obj is null) return null;
+            if (obj is null) return null!;
             return new OrganizationView(obj);
         }
 
@@ -53,7 +55,8 @@ namespace WCPShared.Services.Converters
                 IsActive = obj.IsActive,
                 Organization = Convert(obj.Organization!),
                 Phone = obj.Phone,
-                Role = obj.Role
+                Role = obj.Role.ToString(),
+                Language = obj.Language.Name
             };
         }
 

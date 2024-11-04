@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using WCPShared.Models;
+using WCPShared.Models.Entities;
 
 namespace WCPShared.Services.StaticHelpers
 {
@@ -122,5 +122,7 @@ namespace WCPShared.Services.StaticHelpers
             "http://172.232.142.14:8181",
             "http://172.232.142.14"
         ];
+
+        public static Uri OtlpEndpoint => new Uri("http://localhost:4317"); 
     }
 }

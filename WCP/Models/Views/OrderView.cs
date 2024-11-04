@@ -1,12 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using WCPShared.Models.UserModels;
-using WCPShared.Services.StaticHelpers;
+﻿using WCPShared.Models.DTOs;
+using WCPShared.Models.Entities;
 
 namespace WCPShared.Models.Views
 {
@@ -16,6 +9,7 @@ namespace WCPShared.Models.Views
 
         public int Id { get; set; }
         public double Price { get; set; }
+        public DateTime DeliveryDate { get; set; }
         public int DeliveryTimeFrom { get; set; }
         public int DeliveryTimeTo { get; set; }
         public int Status { get; set; }
@@ -23,9 +17,10 @@ namespace WCPShared.Models.Views
         public CreatorView? Videographer { get; set; }
         public int? EditorId { get; set; }
         public CreatorView? Editor { get; set; }
-        public List<CreatorView> Creators { get; set; } = new List<CreatorView>();
-        public List<StaticTemplateView> StaticTemplates { get; set; } = new List<StaticTemplateView>();
-        //public Dictionary<int, bool> CreatorDeliveryStatus { get; set; } = new Dictionary<int, bool>();
+        public List<CreatorView> Creators { get; set; } = [];
+        public List<StaticTemplateView> StaticTemplates { get; set; } = [];
+        public DateTime Created { get; set; }
+        public DateTime Updated { get; set; }
 
         // Drive-links
         public string Scripts { get; set; } = string.Empty;
@@ -63,10 +58,15 @@ namespace WCPShared.Models.Views
         public string? ExtraNotes { get; set; }
         public string? FocusPoints { get; set; }
         public string? RelevantFiles { get; set; }
-        public List<string> Ideas { get; set; } = new List<string>();
-        public List<string> Products { get; set; } = new List<string>();
+        public List<string> Ideas { get; set; } = [];
+        public List<string> Products { get; set; } = [];
 
         #endregion
+
+
+        public OrderView()
+        {
+        }
 
         public OrderView(Order obj)
         {
@@ -75,11 +75,12 @@ namespace WCPShared.Models.Views
             VideographerId = obj.VideographerId;
             EditorId = obj.EditorId;
             Price = obj.Price;
-            Status = obj.Status;
+            Status = (int)obj.Status;
             Content = obj.Content;
             ContentCount = obj.ContentCount;
             ContentLength = obj.ContentLength;
             Delivery = obj.Delivery;
+            DeliveryDate = obj.DeliveryDate;
             DeliveryTimeFrom = obj.DeliveryTimeFrom;
             DeliveryTimeTo = obj.DeliveryTimeTo;
             Email = obj.Email;
@@ -90,15 +91,53 @@ namespace WCPShared.Models.Views
             ExtraNotes = obj.ExtraNotes;
             FocusPoints = obj.FocusPoints;
             Format = obj.Format;
-            Ideas = obj.Ideas;
+            Ideas = obj.Ideas.Select(x => x.Text).ToList();
             Platforms = obj.Platforms;
-            Products = obj.Products;
+            Products = obj.Products.Select(x => x.Link).ToList();
             ProjectName = obj.ProjectName;
-            ProjectType = obj.ProjectType;
+            ProjectType = obj.ProjectType.ToString();
             RelevantFiles = obj.RelevantFiles;
             Scripts = obj.Scripts;
             Other = obj.Other;
-            
+            Created = obj.Created;
+            Updated = obj.Updated;
+        }
+
+        public OrderDto ToDto()
+        {
+            return new OrderDto()
+            {
+                BrandId = BrandId,
+                VideographerId = VideographerId,
+                EditorId = EditorId,
+                Price = Price,
+                Status = Status,
+                Content = Content,
+                ContentCount = ContentCount,
+                ContentLength = ContentLength,
+                Delivery = Delivery,
+                DeliveryDate = DeliveryDate,
+                DeliveryTimeFrom = DeliveryTimeFrom,
+                DeliveryTimeTo = DeliveryTimeTo,
+                Email = Email,
+                Name = Name,
+                Phone = Phone,
+                ExtraCreator = ExtraCreator,
+                ExtraHook = ExtraHook,
+                ExtraNotes = ExtraNotes,
+                FocusPoints = FocusPoints,
+                Format = Format,
+                Ideas = Ideas,
+                Platforms = Platforms,
+                Products = Products,
+                ProjectName = ProjectName,
+                ProjectType = ProjectType,
+                RelevantFiles = RelevantFiles,
+                Scripts = Scripts,
+                Other = Other,
+                Creators = new List<int>(Creators.Select(x => x.Id)),
+                StaticTemplates = new List<int>(StaticTemplates.Select(x => x.Id)),
+            };
         }
     }
 }

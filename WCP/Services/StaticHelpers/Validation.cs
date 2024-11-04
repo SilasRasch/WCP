@@ -1,5 +1,4 @@
-﻿using Amazon.Runtime.Internal.Endpoints.StandardLibrary;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -26,7 +25,7 @@ namespace WCPShared.Services.StaticHelpers
 
         public static bool ValidateCVR(string CVR)
         {
-            if (!Regex.IsMatch(CVR, @"^\d{8}$"))
+            if (!Regex.IsMatch(CVR, @"^\d{8,10}$"))
                 return false;
             return true;
         }
