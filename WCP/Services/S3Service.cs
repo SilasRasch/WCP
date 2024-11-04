@@ -29,7 +29,7 @@ namespace WCPShared.Services
             if (file.Size > 1024 * 1024 * 10) // 10 Mb
                 throw new ArgumentException("File size above limit");
 
-            var stream = file.OpenReadStream();
+            var stream = file.OpenReadStream(maxAllowedSize: 1024 * 1024 * 10);
 
             var fileExtension = Path.GetExtension(file.Name);
             var fileName = $"profile-pics/{Guid.NewGuid()}{fileExtension.ToLower()}";
@@ -50,7 +50,7 @@ namespace WCPShared.Services
             if (file.Size > 1024 * 1024 * 10) // 10 Mb
                 throw new ArgumentException("File size above limit");
 
-            var stream = file.OpenReadStream();
+            var stream = file.OpenReadStream(maxAllowedSize: 1024 * 1024);
 
             var fileExtension = Path.GetExtension(file.Name);
             var fileName = $"statics/{Guid.NewGuid()}{fileExtension.ToLower()}";

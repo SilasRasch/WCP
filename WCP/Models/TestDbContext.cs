@@ -70,14 +70,6 @@ namespace WCPShared.Models
             modelBuilder.Entity<Order>()
                 .HasOne(x => x.Editor);
 
-            //modelBuilder.Entity<Order>()
-            //    .Property(x => x.ProjectTypeEnum)
-            //    .HasConversion<string>();
-
-            //modelBuilder.Entity<Order>()
-            //    .Property(x => x.StatusEnum)
-            //    .HasConversion<string>();
-
             modelBuilder.Entity<Order>()
                 .Property(x => x.Ideas)
                 .HasConversion(new ValueConverter<List<Idea>, string>(
