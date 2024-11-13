@@ -10,6 +10,7 @@ using WCPShared.Models.Entities.UserModels;
 using Microsoft.EntityFrameworkCore;
 using WCPShared.Models.Views;
 using WCPShared.Models.Enums;
+using WCPShared.Migrations.TestDb;
 
 namespace WCPShared.Services
 {
@@ -107,6 +108,11 @@ namespace WCPShared.Services
             string generatedPassword = GenerateRandomString(32);
             string passwordHash = BCrypt.Net.BCrypt.HashPassword(generatedPassword);
             string verificationToken = GenerateRandomString(64);
+
+            user.PasswordHash = passwordHash;
+            user.VerificationToken = verificationToken;
+            user.NotificationsOn = true;
+            user.NotificationSetting = "slack";
 
             user = await _userService.AddObject(user);
 
