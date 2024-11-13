@@ -1,0 +1,108 @@
+﻿@page "/register-creator"
+@using WCPFrontEnd.Components.Shared
+@using WCPFrontEnd.Services
+@using WCPShared.Interfaces
+@using WCPShared.Models.Entities.UserModels
+@using WCPShared.Models.Entities
+@using Stripe
+@using WCPShared.Services
+@inject IWcpDbContext Context
+@inject IJSRuntime jsRuntime
+@inject StripeService StripeService
+
+<PageTitle>Kunderegistrering</PageTitle>
+
+<div class="w-full grid justify-center">
+    <MudPaper Class="pa-4">
+        <MudText Class="text-center" Typo="Typo.h4">Bliv registreret som kunde</MudText>
+        <MudStepper @bind-ActiveIndex=_index>
+            <ChildContent>
+                <MudStep Title="Brugerinformation" Completed="UserCompleted">
+                    <MudText Typo="Typo.body2">Vi skal bruge lidt information til <em>din</em> bruger</MudText>
+                    <MudDivider Class="mb-2" />
+
+                    <MudTextField @bind-Value="User.Name" Label="Fulde navn" Placeholder="Dit fulde navn" Validation="@(new Func<string, string>(ValidationHelpers.NameValidation))" Required RequiredError="Dette felt er påkrævet" />
+                    <MudTextField @bind-Value="User.Email" Label="E-mail" Placeholder="Din e-mail" Validation="@(new Func<string, string>(ValidationHelpers.EmailValidation))" Required RequiredError="Dette felt er påkrævet" />
+                    <MudTextField @bind-Value="User.Phone" Label="Telefon" Placeholder="Dit telefonnummer" Validation="@(new Func<string, string>(ValidationHelpers.PhoneValidation))" Required RequiredError="Dette felt er påkrævet" />
+                    <MudTextField @bind-Value="Creator.Address" Placeholder="Virksomhedens navn" Label="Adresse" Required RequiredError="Dette felt er påkrævet" />
+                </MudStep>
+                <MudStep Title="Din organisation">
+                    <MudText Typo="Typo.body2">Vi skal bruge lidt information til din creatorprofil</MudText>
+                    <MudDivider Class="mb-2" />
+
+                    <MudDatePicker Label="Fødselsdag" @bind-Date="Creator.DateOfBirth" Required DateFormat="dd.MM.yyyy"></MudDatePicker>
+                    <MudSelect @bind-Value="Creator.Gender" Label="Køn" Required RequiredError="Dette felt er påkrævet" AnchorOrigin="Origin.BottomCenter" Placeholder="Vælg et køn">
+                        <MudSelectItem Value="@("Mand")">Mand</MudSelectItem>
+                        <MudSelectItem Value="@("Kvinde")">Kvinde</MudSelectItem>
+                        <MudSelectItem Value="@("Andet")">Andet</MudSelectItem>
+                    </MudSelect>
+                    <MultiLanguageSelector @bind-Value="selectedLanguages" />
+                </MudStep>
+                <MudStep Title="Dit brand" @bind-Completed="_completed">
+                    <MudText Typo="Typo.body2">Vi skal bruge lidt information om dit første brand</MudText>
+                    <MudDivider Class="mb-2" />
+
+                    @if (!ValidateModels) 
+                    {
+                        <MudText Class="mt-2" Color="Color.Error">* Tjek venligst at du har udfyldt alle felter</MudText>
+                    }
+                </MudStep>
+            </ChildContent>
+            <CompletedContent>
+                Du vil nu blive viderstillet til vores Stripe onboarding...
+            </CompletedContent>
+            <ActionContent Context="stepper">
+                @if (!_completed) 
+                {
+                    <MudIconButton OnClick="@(() => stepper.PreviousStepAsync())" Icon="@Icons.Material.Filled.ArrowBack" Color="Color.Primary" Disabled="@(_index <= 0)" />
+                    <MudSpacer />
+                    @if (stepper.Steps[_index].Skippable == true)
+                    {
+                        <MudIconButton OnClick="@(() => stepper.SkipCurrentStepAsync())" Icon="@stepper.SkipButtonIcon" Color="Color.Primary" />
+                    }
+
+                    @if (stepper.Steps[_index] == stepper.Steps.Last())
+                    {
+                        <MudButton OnClick="() => CompleteRegistration(stepper)" StartIcon="@Icons.Material.Filled.Done" Color="Color.Primary" Disabled="@(!ValidateModels)">Registrér</MudButton>
+                    }
+                    else
+                    {
+                        <MudIconButton OnClick="@(() => stepper.NextStepAsync())" Icon="@Icons.Material.Filled.ArrowForward" Color="Color.Primary" />
+                    }
+                }   
+            </ActionContent>
+        </MudStepper>
+    </MudPaper>
+</div>
+
+@code {
+    private IEnumerable<Language> selectedLanguages = new HashSet<Language>();
+    private User User { get; set; } = new User();
+    private Creator Creator { get; set; } = new Creator();
+
+    private bool ValidateModels => UserCompleted && Creator.Validate();
+    private bool UserCompleted => ValidationHelpers.NameValidation(User.Name) is null && 
+        ValidationHelpers.EmailValidation(User.Email) is null && 
+        ValidationHelpers.PhoneValidation(User.Phone) is null;
+
+    private int _index;
+    private bool _completed;
+
+    private async Task CompleteRegistration(MudStepper stepper) 
+    {
+        if (_completed) 
+        {
+            Account account = StripeService.CreateAccount(User.Email);
+            AccountLink accountLink = StripeService.CreateAccountLink(account.Id);
+
+            await jsRuntime.InvokeVoidAsync("open", accountLink.Url);
+
+            Creator.StripeAccountId = account.Id;
+            Creator.Languages = selectedLanguages.ToList();
+            Creator.User = User;
+            await Context.Creators.AddAsync(Creator);
+        }
+
+        await stepper.NextStepAsync();
+    }
+}

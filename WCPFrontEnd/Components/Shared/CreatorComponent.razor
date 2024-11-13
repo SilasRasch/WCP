@@ -5,21 +5,21 @@
 
 <MudStack Class="mud-secondary p-4 rounded-lg">
     <MudStack Row="true" Spacing="2" @onclick="() => OnExpandCollapseClick()">
-        @if (!String.IsNullOrEmpty(Creator.ImgURL))
+        @if (Creator.ImgURL is not null && !string.IsNullOrEmpty(Creator.ImgURL))
         {
-            <MudImage Src="@Creator.ImgURL" Class="max-h-12 rounded-full" Alt="Creator profile pic"></MudImage>
+            <MudImage Src="@Creator.ImgURL" Class="max-h-12 max-w-12 rounded-full" Alt="Creator profile pic"></MudImage>
         }
         <MudStack Spacing="0">
             <MudText Class="font-semibold">@Creator.User.Name</MudText>
 
-            <MudStack Row="true" Spacing="1" AlignItems="AlignItems.Center"> 
-                @if (Creator.DateOfBirth is not null)
+            <MudStack Row="true" Spacing="1" AlignItems="AlignItems.Center">
+                @if (Creator.DateOfBirth is not null && Creator.DateOfBirth.HasValue)
                 {
                     <MudText>@ProjectHelper.CalculateAge(Creator.DateOfBirth.Value) år</MudText>
                 }
                 @if (Creator.Gender is not null && Creator.Gender.ToLower() == "kvinde")
                 {
-                    @if (Creator.DateOfBirth is not null) 
+                    @if (Creator.DateOfBirth is not null && Creator.DateOfBirth.HasValue)
                     {
                         <MudText>/</MudText>
                     }
@@ -27,7 +27,7 @@
                 }
                 else if (Creator.Gender is not null)
                 {
-                    @if (Creator.DateOfBirth is not null)
+                    @if (Creator.DateOfBirth is not null && Creator.DateOfBirth.HasValue)
                     {
                         <MudText>/</MudText>
                     }
@@ -70,16 +70,16 @@
 
             @if (Editable)
             {
-                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => RemoveCreator.InvokeAsync(Creator)"></MudIconButton>
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => RemoveCreator.InvokeAsync(Participation)"></MudIconButton>
             }
         </MudStack>
-        
+
     </MudStack>
 
     <MudDivider />
 
     <MudCollapse Expanded="_expanded">
-        @if (!String.IsNullOrEmpty(Creator.User.Name))
+        @if (!string.IsNullOrEmpty(Creator.User.Name))
         {
             <MudStack Row="true" Spacing="1">
                 <MudIcon Icon="@Icons.Material.Filled.Person"></MudIcon>
@@ -87,7 +87,7 @@
             </MudStack>
         }
 
-        @if (!String.IsNullOrEmpty(Creator.User.Email))
+        @if (!string.IsNullOrEmpty(Creator.User.Email))
         {
             <MudStack Row="true" Spacing="1">
                 <MudIcon Icon="@Icons.Material.Filled.Email"></MudIcon>
@@ -95,7 +95,7 @@
             </MudStack>
         }
 
-        @if (!String.IsNullOrEmpty(Creator.Address))
+        @if (!string.IsNullOrEmpty(Creator.Address))
         {
             <MudStack Row="true" Spacing="1">
                 <MudIcon Icon="@Icons.Material.Filled.House"></MudIcon>
@@ -103,7 +103,7 @@
             </MudStack>
         }
 
-        @if (!String.IsNullOrEmpty(Creator.User.Phone))
+        @if (!string.IsNullOrEmpty(Creator.User.Phone))
         {
             <MudStack Row="true" Spacing="1">
                 <MudIcon Icon="@Icons.Material.Filled.Phone"></MudIcon>
@@ -111,15 +111,15 @@
             </MudStack>
         }
 
-        @if (Creator.DateOfBirth is not null)
+        @if (dateOfBirth != DateTime.MaxValue)
         {
             <MudStack Row="true" Spacing="1">
                 <MudIcon Icon="@Icons.Material.Filled.Cake"></MudIcon>
-                <MudText>@Creator.DateOfBirth.Value.ToString("dd-MM-yyyy") (@ProjectHelper.CalculateAge(Creator.DateOfBirth.Value) år)</MudText>
+                <MudText>@dateOfBirth.ToString("dd-MM-yyyy") (@ProjectHelper.CalculateAge(dateOfBirth) år)</MudText>
             </MudStack>
         }
 
-        @if (!String.IsNullOrEmpty(Creator.Gender))
+        @if (!string.IsNullOrEmpty(Creator.Gender))
         {
             <MudStack Row="true" Spacing="1">
                 @if (Creator.Gender is not null && Creator.Gender.ToLower() == "kvinde")
@@ -142,7 +142,7 @@
                     @foreach (var lang in Creator.Languages)
                     {
                         <MudText Typo="Typo.h6">
-                            @ProjectHelper.CountryStringToFlag(lang.Name)
+                            @ProjectHelper.CountryStringToFlag(lang.IsoLanguageCode)
                         </MudText>
                     }
                 </MudStack>
@@ -159,7 +159,7 @@
     public CreatorParticipation? Participation { get; set; }
 
     [Parameter]
-    public EventCallback<Creator> RemoveCreator { get; set; }
+    public EventCallback<CreatorParticipation> RemoveCreator { get; set; }
 
     [Parameter]
     public EventCallback<Creator> AddCreator { get; set; }
@@ -169,6 +169,17 @@
 
     [Parameter]
     public bool Addable { get; set; }
+
+    private DateTime dateOfBirth = DateTime.MinValue;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        // Everything will break if this datetime is nullable :(
+        if (Creator.DateOfBirth is not null && Creator.DateOfBirth.HasValue)
+            dateOfBirth = Creator.DateOfBirth.Value;
+    }
 
     bool _expanded = false;
     bool _showSalary = false;

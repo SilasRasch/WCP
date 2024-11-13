@@ -1,4 +1,5 @@
 ﻿using MudBlazor;
+using System.Diagnostics.Metrics;
 using WCPShared.Models.Entities.UserModels;
 using WCPShared.Models.Enums;
 
@@ -113,8 +114,6 @@ namespace WCPAdminFrontEnd.Services
             return colorClass + " text-white p-2 rounded-lg";
         }
 
-
-
         public static int CalculateAge(DateTime birthday)
         {
             var now = DateTime.Now;
@@ -135,9 +134,53 @@ namespace WCPAdminFrontEnd.Services
             if (country == "SWE") return "🇸🇪";
             if (country == "NOR") return "🇳🇴";
 
-            return "";
+            throw new ArgumentException("Country does not correspond to any existing country flag");
         }
 
-        public static string LanguageToStringFlag(Language lang) => lang is not null ? CountryStringToFlag(lang.Name) : "";
+        public static string LanguageToStringFlag(Language lang) => lang is not null ? CountryStringToFlag(lang.IsoLanguageCode) : "";
+
+        public static string ArrayToStringFunc(int[] array)
+        {
+            // Check for null or empty array
+            if (array == null || array.Length == 0)
+                return string.Empty;
+
+            if (array.Length == 2)
+                if (array[0] == 0 && array[1] == 0)
+                    return string.Empty;
+
+            // Check for a single element in the array
+            if (array.Length == 1)
+                return $"{array[0]}+";
+
+            // Check for two elements in the array
+            if (array.Length == 2)
+                return $"{array[0]}-{array[1]}";
+
+            // If the array has more than two elements, return an error message
+            return "Invalid input";
+        }
+
+        public static string LongArrayToStringFunc(long[] array)
+        {
+            // Check for null or empty array
+            if (array == null || array.Length == 0)
+                return string.Empty;
+
+            if (array.Length == 2)
+                if (array[0] == 0 && array[1] == 0)
+                    return string.Empty;
+
+            // Check for a single element in the array
+            if (array.Length == 1)
+                return $"{array[0]}+";
+
+            // Check for two elements in the array
+            if (array.Length == 2)
+                return $"{array[0]}-{array[1]}";
+
+            // If the array has more than two elements, return an error message
+            return "Invalid input";
+        }
     }
 }

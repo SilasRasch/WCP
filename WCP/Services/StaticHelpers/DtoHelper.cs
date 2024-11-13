@@ -1,5 +1,7 @@
-﻿using WCPShared.Models.DTOs;
+﻿using Newtonsoft.Json;
+using WCPShared.Models.DTOs;
 using WCPShared.Models.Entities;
+using WCPShared.Models.Entities.ProjectModels;
 using WCPShared.Models.Entities.UserModels;
 using WCPShared.Models.Enums;
 
@@ -49,6 +51,12 @@ namespace WCPShared.Services.StaticHelpers
             };
         }
 
+        public static T DeepCopy<T>(this T self)
+        {
+            var serialized = JsonConvert.SerializeObject(self);
+            return JsonConvert.DeserializeObject<T>(serialized)!;
+        }
+
         public static Order MapProperties(OrderDto input, Order output)
         {
             output.Price = input.Price;
@@ -69,7 +77,7 @@ namespace WCPShared.Services.StaticHelpers
             output.FocusPoints = input.FocusPoints;
             output.Format = input.Format;
             output.Ideas = input.Ideas.Select(x => new Idea { Text = x }).ToList();
-            output.Products = input.Products.Select(x => new Product { Link = x }).ToList();
+            //output.Products = input.Products.Select(x => new Product { Link = x }).ToList();
             output.Platforms = input.Platforms;
             output.ProjectName = input.ProjectName;
             output.ProjectType = (ProjectType)Enum.Parse(typeof(ProjectType), input.ProjectType);
@@ -102,7 +110,7 @@ namespace WCPShared.Services.StaticHelpers
                 Format = obj.Format,
                 Ideas = obj.Ideas.Select(x => new Idea { Text = x }).ToList(),
                 Platforms = obj.Platforms,
-                Products = obj.Products.Select(x => new Product { Link = x}).ToList(),
+                //Products = obj.Products.Select(x => new Product { Link = x}).ToList(),
                 ProjectName = obj.ProjectName,
                 ProjectType = (ProjectType)Enum.Parse(typeof(ProjectType), obj.ProjectType),
                 RelevantFiles = obj.RelevantFiles,

@@ -1,0 +1,99 @@
+﻿@using WCPAdminFrontEnd.Services
+@using WCPFrontEnd.Components.Shared
+@using WCPShared.Models.Entities.ProjectModels
+
+<MudText Class="text-center" Typo="Typo.h6">Creator</MudText>
+<MudStack Spacing="4" Class="mt-4">
+    <MudStack Spacing="8" Row>
+        <LanguageSelector Label="Sprog" @bind-Value="Project.CreatorLanguage" />
+        <MudSelect Label="Køn" @bind-Value="Project.CreatorGender" AnchorOrigin="Origin.BottomCenter">
+            <MudSelectItem Value="@("Male")">Mand</MudSelectItem>
+            <MudSelectItem Value="@("Female")">Kvinde</MudSelectItem>
+            <MudSelectItem Value="@("None")">Ikke vigtigt</MudSelectItem>
+            <MudSelectItem Value="@("Other")">Andet</MudSelectItem>
+        </MudSelect>
+    </MudStack>
+    <MudStack Spacing="8" Row>
+        <MudSelect Label="Alder" @bind-Value="Project.CreatorAge" ToStringFunc="ProjectHelper.ArrayToStringFunc" AnchorOrigin="Origin.BottomCenter">
+            <MudSelectItem Value="@(new int[] { 18, 24 })">18-24</MudSelectItem>
+            <MudSelectItem Value="@(new int[] { 25, 30 })">25-30</MudSelectItem>
+            <MudSelectItem Value="@(new int[] { 31, 40 })" >31-40</MudSelectItem>
+            <MudSelectItem Value="@(new int[] { 40 })">40+</MudSelectItem>
+        </MudSelect>
+        <MudSelect Label="Budget" @bind-Value="Project.CreatorBudget" ToStringFunc="ProjectHelper.LongArrayToStringFunc" AnchorOrigin="Origin.BottomCenter">
+            <MudSelectItem Value="@(new long[] { 150, 250 })">150-250</MudSelectItem>
+            <MudSelectItem Value="@(new long[] { 250, 350 })">250-350</MudSelectItem>
+            <MudSelectItem Value="@(new long[] { 350, 500 })">350-500</MudSelectItem>
+            <MudSelectItem Value="@(new long[] { 500, 700 })">500-700</MudSelectItem>
+            <MudSelectItem Value="@(new long[] { 700 })">700+</MudSelectItem>
+        </MudSelect>
+    </MudStack>
+    <MudStack Spacing="8" Row>
+        <MudStack Spacing="0" AlignItems="AlignItems.Center" Class="w-full h-full">
+            <MudSlider T="int" ValueLabel Size="Size.Medium" @bind-Value="Project.CreatorCount" Min="1" Max="Project.Amount" Color="Color.Primary">
+                <ValueLabelContent>
+                    @context.Value.ToString()
+                </ValueLabelContent>
+                <ChildContent>
+                    <MudText Typo="Typo.caption">Antal creators</MudText>
+                </ChildContent>
+            </MudSlider>
+            <MudText Class="opacity-75">@Project.CreatorCount creators</MudText>
+        </MudStack>
+        <MudStack Spacing="0" AlignItems="AlignItems.Center" Class="w-full h-full">
+            <MudSlider T="int" ValueLabel Size="Size.Medium" @bind-Value="Project.CreativesPerCreator" Min="1" Max="@(Project.Amount / Project.CreatorCount)" Color="Color.Primary">
+                <ValueLabelContent>
+                    @context.Value.ToString()
+                </ValueLabelContent>
+                <ChildContent>
+                    <MudText Typo="Typo.caption">Kreativer per creator</MudText>
+                </ChildContent>
+            </MudSlider>
+            <MudText Class="opacity-75">@Project.CreativesPerCreator per creator</MudText>
+        </MudStack>
+    </MudStack>
+</MudStack>
+<MudSelect T="string" MultiSelection @bind-SelectedValues="Tags" Label="Kategori" AnchorOrigin="Origin.BottomCenter">
+    <MudSelectItem Value="@("Beauty")">Beauty</MudSelectItem>
+    <MudSelectItem Value="@("Fashion")">Fashion</MudSelectItem>
+    <MudSelectItem Value="@("Home")">Home</MudSelectItem>
+    <MudSelectItem Value="@("Lifestyle")">Lifestyle</MudSelectItem>
+    <MudSelectItem Value="@("Technology")">Technology</MudSelectItem>
+</MudSelect>
+
+@code {
+    [Parameter]
+    public CreatorProject Project 
+    { 
+        get { return _project; }
+        set {
+            if (_project == value) return;
+
+            _project = value;
+            ProjectChanged.InvokeAsync(value);
+        }
+    }
+
+    [Parameter]
+    public EventCallback<CreatorProject> ProjectChanged { get; set; }
+
+    private CreatorProject _project;
+
+    [Parameter]
+    public IEnumerable<string> Tags
+    {
+        get { return _tags; }
+        set
+        {
+            if (_tags == value) return;
+
+            _tags = value;
+            TagsChanged.InvokeAsync(value);
+        }
+    }
+
+    [Parameter]
+    public EventCallback<IEnumerable<string>> TagsChanged { get; set; }
+
+    private IEnumerable<string> _tags;
+}

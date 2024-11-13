@@ -1,0 +1,49 @@
+﻿@using Microsoft.EntityFrameworkCore
+@using WCPAdminFrontEnd.Services
+@using WCPShared.Interfaces
+@using WCPShared.Models.Entities.UserModels
+@inject IWcpDbContext Context
+
+<MudSelect @bind-SelectedValues="Value" ToStringFunc="(e) => ProjectHelper.LanguageToStringFlag(e)" Delimiter=" " MultiSelection="true" 
+    Label="@Label" Placeholder="@Placeholder" Required="@Required" RequiredError="Dette felt er påkrævet" AnchorOrigin="Origin.BottomCenter">
+    @foreach (var lang in Languages)
+    {
+        <MudSelectItem Value="@lang">@ProjectHelper.CountryStringToFlag(lang.IsoLanguageCode)</MudSelectItem>
+    }
+</MudSelect>
+
+@code {
+    [Parameter]
+    public IEnumerable<Language> Value
+    {
+        get => _value;
+        set
+        {
+            if (_value == value) return;
+
+            _value = value;
+            ValueChanged.InvokeAsync(value);
+        }
+    }
+
+    [Parameter]
+    public string Placeholder { get; set; } = string.Empty;
+
+    [Parameter]
+    public bool Required { get; set; } = false;
+
+    [Parameter]
+    public string Label { get; set; } = "Sprog";
+
+    [Parameter]
+    public EventCallback<IEnumerable<Language>> ValueChanged { get; set; }
+
+    private IEnumerable<Language> _value;
+
+    public IEnumerable<Language> Languages { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Languages = await Context.Languages.ToListAsync();
+    }
+}

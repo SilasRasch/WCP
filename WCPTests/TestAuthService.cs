@@ -111,6 +111,7 @@ namespace WCPTests
                     Address = "Adressevej 3, 4000 By",
                     Gender = "Mand",
                     SubType = "UGC",
+                    ImgURL = ""
                 }
             };
 

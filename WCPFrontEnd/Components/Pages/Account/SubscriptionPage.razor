@@ -1,0 +1,119 @@
+﻿@page "/subscription"
+@using Microsoft.EntityFrameworkCore
+@using System.Security.Claims
+@using WCPFrontEnd.Components.Shared
+@using WCPFrontEnd.Services
+@using WCPShared.Interfaces
+@using WCPShared.Models.Entities
+@using WCPShared.Models.Entities.UserModels
+@using WCPShared.Models.Enums
+@using WCPShared.Services
+@attribute [Authorize(Roles = "Bruger")]
+@inject StripeService StripeService
+@inject IJSRuntime jsRuntime
+@inject IWcpDbContext Context
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<AuthorizeView Policy="IsNotSubscribed">
+    <Authorized>
+        <MudPaper Class="pa-4">
+            <MudText Typo="Typo.h6">Tilpas dit abonnement</MudText>
+
+            <SubscriptionPicker @bind-Value="Subscription" />
+
+            @if (string.IsNullOrEmpty(CheckoutUrl))
+            {
+                <MudStack AlignItems="AlignItems.Center">
+                    <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Checkout">Køb abonnement</MudButton>
+                    <MudText Typo="Typo.caption">Tryk <u><a href="https://webcontent.dk/priser" target="_blank">her</a></u> for at se vores priser</MudText>
+                </MudStack>
+            }
+            else
+            {
+                <MudStack AlignItems="AlignItems.Center" Spacing="0">
+                    <MudText>Du vil nu blive viderstillet til vores Stripe onboarding...</MudText>
+                    <MudText>Hvis ikke kan du trykke <a href="@CheckoutUrl" target="_blank"><u>her</u></a> for at gå til siden manuelt</MudText>
+                </MudStack>
+            }
+        </MudPaper>
+    </Authorized>
+    <NotAuthorized>
+        <MudPaper Class="pa-4">
+            <MudText Typo="Typo.h6">Dit abonnement</MudText>
+
+            <MudPaper Class="pa-4 mud-secondary">
+                @if (Customer is not null && Customer.Organization is not null && Customer.Organization.Subscription is not null) 
+                {
+                    <MudStack Spacing="0">
+                        <MudText><strong>@Customer.Organization.Subscription.Type</strong></MudText>
+                    </MudStack>
+
+                    <MudStack Row>
+                        <MudStack Spacing="0" AlignItems="AlignItems.Center">
+                            <MudText>Antal videoer</MudText>
+                            <MudStack Row AlignItems="AlignItems.Center">
+                                <MudIcon Size="Size.Large" Icon="@Icons.Material.Filled.PlayArrow" />
+                                <MudText Typo="Typo.h6">@Customer.Organization.Subscription.NumberOfVideos</MudText>
+                            </MudStack>
+                        </MudStack>
+
+                        <MudStack Spacing="0" AlignItems="AlignItems.Center">
+                            <MudText>Antal brands</MudText>
+                            <MudStack Row AlignItems="AlignItems.Center">
+                                <MudIcon Size="Size.Large" Icon="@Icons.Material.Filled.BusinessCenter" />
+                                <MudText Typo="Typo.h6">@Customer.Organization.Subscription.NumberOfBrands</MudText>
+                            </MudStack>
+                        </MudStack>
+
+                        <MudStack Spacing="0" AlignItems="AlignItems.Center">
+                            <MudText>Antal brugere</MudText>
+                            <MudStack Row AlignItems="AlignItems.Center">
+                                <MudIcon Size="Size.Large" Icon="@Icons.Material.Filled.People" />
+                                <MudText Typo="Typo.h6">@Customer.Organization.Subscription.NumberOfUsers</MudText>
+                            </MudStack>
+                        </MudStack>
+                    </MudStack>
+                }
+                else 
+                {
+                    <MudText>Det ser ikke ud til at vi kan finde dit abonnement...</MudText>
+                }                
+
+            </MudPaper>
+        </MudPaper>
+    </NotAuthorized>
+</AuthorizeView>
+
+
+@code {
+    private Subscription Subscription { get; set; }
+    private string CheckoutUrl = string.Empty;
+
+    private User? Customer;
+
+    protected override async Task OnInitializedAsync()
+    {
+        base.OnInitialized();
+
+        Subscription = StripeService.GetSubscriptionInfo(SubscriptionType.Medium);
+
+        // Get customer
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var email = authState.User.FindFirst(c => c.Type == ClaimTypes.Email)?.Value;
+        Customer = await Context.Users.Include(x => x.Organization)
+            .ThenInclude(x => x.Subscription)
+            .SingleOrDefaultAsync(x => x.Email == email);
+    }
+
+    private async Task Checkout() 
+    {
+        Customer.Organization.Subscription = Subscription;
+        await Context.SaveChangesAsync();
+        
+        var lineItems = StripeService.GenerateLineItems(Subscription);
+        var checkout = StripeService.StartCheckoutSession(lineItems, "subscription", customerEmail: Customer.Email);
+        CheckoutUrl = checkout.Url;
+
+        await jsRuntime.InvokeVoidAsync("open", CheckoutUrl);
+    }
+}

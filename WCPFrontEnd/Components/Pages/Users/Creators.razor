@@ -116,21 +116,10 @@
                         @foreach (Language lang in context.Item.Languages)
                         {
                             <MudText Typo="Typo.h5">
-                                @ProjectHelper.CountryStringToFlag(lang.Name)
+                                @ProjectHelper.CountryStringToFlag(lang.IsoLanguageCode)
                             </MudText>
                         }
                     </div>
-                }
-            </CellTemplate>
-        </PropertyColumn>
-
-        <PropertyColumn Property="x => x.User.Language" Title="Land">
-            <CellTemplate>
-                @if (context.Item.User.Language is not null)
-                {
-                    <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
-                        <MudText Typo="Typo.h5">@ProjectHelper.CountryStringToFlag(context.Item.User.Language.Name) </MudText>
-                    </MudStack>
                 }
             </CellTemplate>
         </PropertyColumn>
@@ -208,7 +197,6 @@
     {
         CreatorList = await Context.Creators
             .Include(x => x.User)
-            .ThenInclude(x => x.Language)
             .Include(x => x.Languages)
             .ToListAsync();
     }

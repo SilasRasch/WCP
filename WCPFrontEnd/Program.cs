@@ -5,12 +5,18 @@ using WCPShared.Extensions;
 using WCPShared.Interfaces;
 using WCPShared.Models;
 using WCPShared.Services;
+using Stripe;
+using WCPShared.Services.StaticHelpers;
+using WCPShared.Models.Enums;
+using WCPFrontEnd.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+builder.Services.AddControllers();
 
 builder.Services.AddMudServices();
 
@@ -19,6 +25,9 @@ builder.Services.AddDataServices(builder.Configuration);
 builder.Services.AddAuthenticationServices();
 builder.Services.AddScoped<IS3Client, S3Client>();
 builder.Services.AddScoped<S3Service>();
+StripeConfiguration.ApiKey = Secrets.GetStripeApiKey(builder.Configuration);
+builder.Services.AddScoped<StripeService>();
+builder.Services.AddScoped<ProjectService>();
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
@@ -28,7 +37,9 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.Cookie.MaxAge = TimeSpan.FromHours(8);
         options.AccessDeniedPath = "/access-denied";
     });
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorizationBuilder()
+    .AddPolicy("IsNotSubscribed", policy => policy.RequireClaim("IsNotSubscribed").RequireRole(UserRole.Bruger.ToString()))
+    .AddPolicy("IsNotStripeConnected", policy => policy.RequireClaim("IsNotStripeConnected").RequireRole(UserRole.Creator.ToString()));
 builder.Services.AddCascadingAuthenticationState();
 
 var app = builder.Build();
@@ -49,6 +60,7 @@ app.UseAntiforgery();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapControllers();
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();

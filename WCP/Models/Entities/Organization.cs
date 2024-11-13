@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Globalization;
 using WCPShared.Interfaces;
 using WCPShared.Models.Entities.UserModels;
 using WCPShared.Services.StaticHelpers;
@@ -14,8 +15,11 @@ namespace WCPShared.Models.Entities
         public string CVR { get; set; } = string.Empty;
         public int LanguageId { get; set; }
         public Language Language { get; set; }
+        public Subscription Subscription { get; set; }
         public List<Brand> Brands { get; set; } = new List<Brand>();
-
+        public string StripeAccountId { get; set; } = string.Empty;
+        public bool IsActive { get; set; }
+        
         public bool Validate()
         {
             if (CVR is not null && !Validation.ValidateCVR(CVR))
@@ -24,7 +28,7 @@ namespace WCPShared.Models.Entities
             if (!Validation.ValidateDisplayName(Name))
                 return false;
 
-            if (LanguageId == default)
+            if (Language is null)
                 return false;
 
             return true;

@@ -20,8 +20,9 @@ namespace WCPShared.Services.EntityFramework
         private readonly ViewConverter _viewConverter;
         private readonly StaticTemplateService _templateService;
         private readonly SlackNotificationService _slackNetService;
+        private readonly StripeService _stripeService;
 
-        public OrderService(IWcpDbContext context, BrandService brandService, CreatorService creatorService, ViewConverter viewConverter, SlackNotificationService slackNetService, StaticTemplateService staticTemplateService)
+        public OrderService(IWcpDbContext context, BrandService brandService, CreatorService creatorService, ViewConverter viewConverter, SlackNotificationService slackNetService, StaticTemplateService staticTemplateService, StripeService stripeService)
             : base(context)
         {
             _context = context;
@@ -30,6 +31,7 @@ namespace WCPShared.Services.EntityFramework
             _viewConverter = viewConverter;
             _slackNetService = slackNetService;
             _templateService = staticTemplateService;
+            _stripeService = stripeService;
         }
 
         public override async Task<Order?> UpdateObject(int id, Order obj)
@@ -43,7 +45,7 @@ namespace WCPShared.Services.EntityFramework
 
             _context.Update(obj);
             await _context.SaveChangesAsync();
-            await _slackNetService.SendStatusNotifications(obj, existingOrder);
+            //await _slackNetService.SendStatusNotifications(obj, existingOrder);
 
             return obj;
         }
@@ -54,10 +56,11 @@ namespace WCPShared.Services.EntityFramework
 
             _context.Update(obj);
             await _context.SaveChangesAsync();
-            await _slackNetService.SendStatusNotifications(obj, oldObj);
+            PayCreators(obj, oldObj);
+            //await _slackNetService.SendStatusNotifications(obj, oldObj);
             return obj;
         }
-        
+
         public async Task<Order?> UpdateObject(int id, OrderDto order)
         {
             // Check if order exists
@@ -116,7 +119,7 @@ namespace WCPShared.Services.EntityFramework
             // Save updates
             _context.Update(existingOrder);
             await _context.SaveChangesAsync();
-            await _slackNetService.SendStatusNotifications(existingOrder, copyOfExistingOrder);
+            //await _slackNetService.SendStatusNotifications(existingOrder, copyOfExistingOrder);
 
             return existingOrder;
         }
@@ -170,7 +173,8 @@ namespace WCPShared.Services.EntityFramework
                 if (creator is not null)
                     order.Participations.Add(new CreatorParticipation
                     {
-                        Order = order,
+                        //Order = order,
+                        Project = null,
                         Creator = creator,
                         CreatorId = creator.Id,
                         HasDelivered = false,
@@ -195,63 +199,69 @@ namespace WCPShared.Services.EntityFramework
 
         public async Task<List<OrderView>> GetAllObjectsView()
         {
-            return await _context.Orders
-                .Include(x => x.Brand)
-                .ThenInclude(b => b.Organization)
-                .ThenInclude(x => x.Language)
-                .Include(x => x.Participations)
-                .ThenInclude(x => x.Creator)
-                .ThenInclude(x => x.User)
-                .ThenInclude(x => x.Language)
-                .Include(x => x.Participations)
-                .ThenInclude(x => x.Creator)
-                .ThenInclude(x => x.Languages)
-                .Include(x => x.StaticTemplates)
-                .Select(x => _viewConverter.Convert(x))
-                .AsSplitQuery()
-                .ToListAsync();
+            throw new NotImplementedException();
+            //return await _context.Orders
+            //    .Include(x => x.Brand)
+            //    .ThenInclude(b => b.Organization)
+            //    .ThenInclude(x => x.Language)
+            //    .Include(x => x.Participations)
+            //    .ThenInclude(x => x.Creator)
+            //    .ThenInclude(x => x.Languages)
+            //    .Include(x => x.StaticTemplates)
+            //    .Select(x => _viewConverter.Convert(x))
+            //    .AsSplitQuery()
+            //    .ToListAsync();
         }
 
         public async Task<List<OrderView>> GetObjectsViewBy(Expression<Func<Order, bool>> predicate)
         {
-            return await _context.Orders
-                .Where(predicate)
-                .Include(x => x.Brand)
-                .ThenInclude(b => b.Organization)
-                .ThenInclude(x => x.Language)
-                .Include(x => x.Participations)
-                .ThenInclude(x => x.Creator)
-                .ThenInclude(x => x.User)
-                .ThenInclude(x => x.Language)
-                .Include(x => x.Participations)
-                .ThenInclude(x => x.Creator)
-                .ThenInclude(x => x.Languages)
-                .Include(x => x.StaticTemplates)
-                .Select(x => _viewConverter.Convert(x))
-                .AsSplitQuery()
-                .ToListAsync();
+            //return await _context.Orders
+            //    .Where(predicate)
+            //    .Include(x => x.Brand)
+            //    .ThenInclude(b => b.Organization)
+            //    .ThenInclude(x => x.Language)
+            //    .Include(x => x.Participations)
+            //    .ThenInclude(x => x.Creator)
+            //    .ThenInclude(x => x.Languages)
+            //    .Include(x => x.StaticTemplates)
+            //    .Select(x => _viewConverter.Convert(x))
+            //    .AsSplitQuery()
+            //    .ToListAsync();
+            throw new NotImplementedException();
         }
 
         public async Task<OrderView?> GetObjectViewBy(Expression<Func<Order, bool>> predicate)
         {
-            var order = await _context.Orders
-                .Include(x => x.Brand)
-                .ThenInclude(b => b.Organization)
-                .ThenInclude(x => x.Language)
-                .Include(x => x.Participations)
-                .ThenInclude(x => x.Creator)
-                .ThenInclude(x => x.User)
-                .ThenInclude(x => x.Language)
-                .Include(x => x.Participations)
-                .ThenInclude(x => x.Creator)
-                .ThenInclude(x => x.Languages)
-                .Include(x => x.StaticTemplates)
-                .AsSplitQuery()
-                .SingleOrDefaultAsync(predicate);
+            throw new NotImplementedException();
+            //var order = await _context.Orders
+            //    .Include(x => x.Brand)
+            //    .ThenInclude(b => b.Organization)
+            //    .ThenInclude(x => x.Language)
+            //    .Include(x => x.Participations)
+            //    .ThenInclude(x => x.Creator)
+            //    .ThenInclude(x => x.Languages)
+            //    .Include(x => x.StaticTemplates)
+            //    .AsSplitQuery()
+            //    .SingleOrDefaultAsync(predicate);
 
-            if (order is not null)
-                return _viewConverter.Convert(order);
+            //if (order is not null)
+            //    return _viewConverter.Convert(order);
             return null;
+        }
+
+        private void PayCreators(Order order, Order oldOrder)
+        {
+            if (order.Status == ProjectStatus.Finished && oldOrder.Status == ProjectStatus.Feedback)
+            {
+                foreach (CreatorParticipation participation in order.Participations)
+                {
+                    if (participation.Creator.StripeAccountId is not null)
+                    {
+                        _stripeService.Transfer(participation.Salary, participation.Creator.StripeAccountId, $"Projektløn ({order.Id})", participation.Creator.User.Language.Currency);
+                        //await _transactionService.AddToBalance(participation.Creator.BalanceId, (decimal) participation.Salary, $"Projektløn ({order.Id})", TransactionType.IncomingTransfer);
+                    }
+                }
+            }
         }
     }
 }

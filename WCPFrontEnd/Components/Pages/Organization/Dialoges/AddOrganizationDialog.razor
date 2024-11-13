@@ -31,7 +31,7 @@
             <MudSelect @bind-Value="_organization.LanguageId" Label="Sprog" Required="true" RequiredError="Dette felt er påkrævet" AnchorOrigin="Origin.BottomCenter">
                 @foreach (var lang in Languages)
                 {
-                    <MudSelectItem Value="@lang.Id">@ProjectHelper.CountryStringToFlag(lang.Name)</MudSelectItem>
+                    <MudSelectItem Value="@lang.Id">@ProjectHelper.CountryStringToFlag(lang.IsoLanguageCode)</MudSelectItem>
                 }
             </MudSelect>
         </MudForm>

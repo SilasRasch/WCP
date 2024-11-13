@@ -24,10 +24,10 @@
             <MudTextField T="string" @bind-Value="Organization.Name" Label="Navn" Validation="@(new Func<string, string>(ValidationHelpers.NameValidation))" RequiredError="Dette felt er påkrævet" />
             <MudTextField T="string" @bind-Value="Organization.CVR" Label="CVR" Validation="@(new Func<string, string>(ValidationHelpers.CvrValidation))" RequiredError="Dette felt er påkrævet" />
 
-            <MudSelect @bind-Value="Organization.Language" Text="@ProjectHelper.CountryStringToFlag(Organization.Language.Name)" Label="Sprog" AnchorOrigin="Origin.BottomCenter">
+            <MudSelect @bind-Value="Organization.Language" Text="@ProjectHelper.CountryStringToFlag(Organization.Language.IsoLanguageCode)" Label="Sprog" AnchorOrigin="Origin.BottomCenter">
                 @foreach (var lang in _languages)
                 {
-                    <MudSelectItem Value="@lang">@ProjectHelper.CountryStringToFlag(lang.Name)</MudSelectItem>
+                    <MudSelectItem Value="@lang">@ProjectHelper.CountryStringToFlag(lang.IsoLanguageCode)</MudSelectItem>
                 }
             </MudSelect>
         </MudForm>

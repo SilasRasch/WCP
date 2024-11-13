@@ -40,13 +40,6 @@
                     }
                 </MudSelect>
 
-                <MudSelect @bind-Value="_user.Language" Label="Sprog" Required="!_selfRegister" RequiredError="Dette felt er påkrævet" AnchorOrigin="Origin.BottomCenter">
-                    @foreach (var lang in _languages)
-                    {
-                    <MudSelectItem Value="@lang">@ProjectHelper.CountryStringToFlag(lang.Name)</MudSelectItem>
-                    }
-                </MudSelect>
-
                 @if (_isCreator && _selfRegister)
                 {
                 <MudSelect @bind-Value="_creator.SubType" Label="Undertype" Required="_isCreator" RequiredError="Dette felt er påkrævet" AnchorOrigin="Origin.BottomCenter" Placeholder="Vælg en undertype">
@@ -93,7 +86,7 @@
             <MudSelect @bind-SelectedValues="_selectedLanguages" ToStringFunc="(e) => ProjectHelper.LanguageToStringFlag(e)" Delimiter=" " MultiSelection="true" Label="Sprog" Required="_creator.SubType == CreatorSubType.UGC" RequiredError="Dette felt er påkrævet" AnchorOrigin="Origin.BottomCenter">
                 @foreach (var lang in _languages)
                 {
-                    <MudSelectItem Value="@lang">@ProjectHelper.CountryStringToFlag(lang.Name)</MudSelectItem>
+                        <MudSelectItem Value="@lang">@ProjectHelper.CountryStringToFlag(lang.IsoLanguageCode)</MudSelectItem>
                 }
             </MudSelect>
 

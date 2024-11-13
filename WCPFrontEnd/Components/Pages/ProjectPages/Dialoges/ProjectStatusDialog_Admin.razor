@@ -1,9 +1,11 @@
 ﻿@using WCPAdminFrontEnd.Services
+@using WCPFrontEnd.Services
 @using WCPShared.Models.Entities
+@using WCPShared.Models.Entities.ProjectModels
 @using WCPShared.Models.Enums
 @using WCPShared.Models.Views
 @using WCPShared.Services.EntityFramework
-@inject OrderService OrderService
+@inject ProjectService ProjectService
 
 <MudDialog>
     <TitleContent>
@@ -14,7 +16,7 @@
     <DialogContent>
         <MudStack Row="true">
             <MudTextField Value="@Project.Id.ToString()" Label="Projekt ID" ReadOnly="true" />
-            <MudTextField Value="@Project.ProjectName" Label="Projektnavn" ReadOnly="true" />
+            <MudTextField Value="@Project.Name" Label="Projektnavn" ReadOnly="true" />
         </MudStack>
         <MudSelect @bind-Value="Project.Status" Label="Status" Placeholder="Vælg ny status" AnchorOrigin="Origin.BottomCenter">
             @foreach (ProjectStatus item in Enum.GetValues(typeof(ProjectStatus)))
@@ -34,11 +36,11 @@
     private MudDialogInstance MudDialog { get; set; }
 
     [Parameter]
-    public Order Project { get; set; } = new();
+    public Project Project { get; set; }
 
     private async void Submit()
     {
-        await OrderService.UpdateObject(Project.Id, Project);
+        await ProjectService.UpdateObject(Project.Id, Project);
         MudDialog.Close(DialogResult.Ok(true));
     }
 

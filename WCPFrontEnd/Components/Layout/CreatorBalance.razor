@@ -1,0 +1,11 @@
+﻿@using Stripe
+@using WCPAdminFrontEnd.Services
+@using WCPShared.Interfaces
+@using WCPShared.Models.Entities.UserModels
+
+<MudNavLink Style="max-width: fit-content" IconColor="Color.Success" Href="/payout" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AttachMoney">@(Balance.Amount / 100) @Balance.Currency.ToUpper()</MudNavLink>
+
+@code {
+    [Parameter]
+    public BalanceAmount Balance { get; set;  }
+}

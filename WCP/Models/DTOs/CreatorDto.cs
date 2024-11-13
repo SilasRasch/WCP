@@ -6,7 +6,6 @@ namespace WCPShared.Models.DTOs
     {
         public DateTime? DateOfBirth { get; set; }
         public string? Address { get; set; } = string.Empty;
-        public string? Speciality { get; set; } = string.Empty;
         public string? ImgURL { get; set; }
         public string SubType { get; set; } = string.Empty;
         public int? UserId { get; set; }

@@ -3,6 +3,7 @@
 @using WCPShared.Interfaces
 @using WCPShared.Models.Entities
 @using WCPShared.Models.Entities.UserModels
+@using WCPShared.Models.Entities.ProjectModels
 @using WCPShared.Services.EntityFramework
 @using WCPFrontEnd.Components.Shared
 @inject IWcpDbContext Context
@@ -11,23 +12,26 @@
     <TitleContent>
         <MudStack Row="true">
             <MudText Typo="Typo.h6">
-                @Project.ProjectName - Creators
+                @Project.Name - Creators
             </MudText>
             <MudSpacer />
             <MudIconButton OnClick="ToggleEditable" Icon="@Icons.Material.Filled.Edit"></MudIconButton>
         </MudStack>
-        
+
     </TitleContent>
     <DialogContent>
         <MudStack Row="true">
             <MudTextField Value="@Project.Id.ToString()" Label="Projekt ID" ReadOnly="true" />
-            <MudTextField Value="@Project.ProjectName" Label="Projektnavn" ReadOnly="true" />
+            <MudTextField Value="@Project.Name" Label="Projektnavn" ReadOnly="true" />
         </MudStack>
 
         <MudStack Class="mt-2" Spacing="1">
             @foreach (var participation in Project.Participations)
             {
-                <CreatorComponent Creator="participation.Creator" Participation="participation" RemoveCreator="CallbackRemoveCreator" Editable="_editable"></CreatorComponent>
+                if (participation is not null && participation.Creator is not null) 
+                {
+                    <CreatorComponent Creator="participation.Creator" Participation="participation" RemoveCreator="CallbackRemoveCreator" Editable="_editable"></CreatorComponent>
+                }
             }
 
             @if (_editable)
@@ -43,9 +47,9 @@
             <MudStack Row="true" Class="mt-2">
                 <MudText Typo="Typo.h6">Creator-katalog</MudText>
                 <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
-                    AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
             </MudStack>
-            
+
             <MudStack Spacing="1" Class="mt-1">
                 @foreach (var creator in AllCreators.Where(x => Filter(x)))
                 {
@@ -53,7 +57,7 @@
                 }
             </MudStack>
         }
-        
+
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="Cancel" Color="Color.Error"><MudIcon Icon="@Icons.Material.Filled.Cancel" Class="mr-2" /> Annuller</MudButton>
@@ -62,7 +66,7 @@
         {
             <MudButton OnClick="Submit" Color="Color.Success"><MudIcon Icon="@Icons.Material.Filled.Save" Class="mr-2" /> Gem</MudButton>
         }
-        
+
     </DialogActions>
 </MudDialog>
 
@@ -71,7 +75,7 @@
     private MudDialogInstance MudDialog { get; set; }
 
     [Parameter]
-    public Order Project { get; set; } = new();
+    public CreatorProject Project { get; set; }
 
     private IEnumerable<Creator> AllCreators { get; set; } = new List<Creator>();
     private bool _editable = false;
@@ -83,7 +87,6 @@
         AllCreators = Context.Creators
             .Include(x => x.Languages)
             .Include(x => x.User)
-            .ThenInclude(x => x.Language)
             .Where(x => x.User.IsActive)
             .ToList();
     }
@@ -91,7 +94,6 @@
     private async Task Submit()
     {
         await Context.SaveChangesAsync();
-
         MudDialog.Close(DialogResult.Ok(true));
     }
 
@@ -119,26 +121,24 @@
         return false;
     }
 
-    private void CallbackRemoveCreator(Creator creator) 
+    private void CallbackRemoveCreator(CreatorParticipation participation) 
     {
-        // Get index of participation
-        int index = Project.Participations.FindIndex(x => x.CreatorId == creator.Id);
-
-        // Remove index
-        Project.Participations.RemoveAt(index);
+        Project.Participations.Remove(participation);
+        StateHasChanged();
     }
 
     private void CallbackAddCreator(Creator creator)
     {
-        var participation = Context.CreatorParticipations.Add(new CreatorParticipation
+        Project.Participations.Add(new CreatorParticipation
         {
             Creator = creator,
+            Project = null,
             CreatorId = creator.Id,
-            Order = Project,
-            OrderId = Project.Id,
+            ProjectId = Project.Id,
             HasDelivered = false,
             Salary = 0
         });
+        StateHasChanged();
     }
 
     private void Cancel() => MudDialog.Cancel();

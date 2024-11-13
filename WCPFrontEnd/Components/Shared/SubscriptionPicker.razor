@@ -1,0 +1,42 @@
+@using Microsoft.EntityFrameworkCore
+@using WCPAdminFrontEnd.Services
+@using WCPShared.Interfaces
+@using WCPShared.Models.Entities
+@using WCPShared.Models.Entities.UserModels
+@using WCPShared.Models.Enums
+@inject IWcpDbContext Context
+
+<MudSelect @bind-Value="Value.Type" Label="Abonnement" Required="true" RequiredError="Dette felt er påkrævet" AnchorOrigin="Origin.BottomCenter">
+    <MudSelectItem Value="SubscriptionType.Small">Lille</MudSelectItem>
+    <MudSelectItem Value="SubscriptionType.Medium">Mellem</MudSelectItem>
+    <MudSelectItem Value="SubscriptionType.Large">Stor</MudSelectItem>
+</MudSelect>
+
+<MudSlider @bind-Value="Value.NumberOfVideos" Step="3" TickMarks Min="3" Max="9">Antal videoer/md: @Value.NumberOfVideos</MudSlider>
+<MudSlider @bind-Value="Value.NumberOfBrands" Step="1" TickMarks Min="1" Max="10">Antal brands: @Value.NumberOfBrands</MudSlider>
+<MudSlider @bind-Value="Value.NumberOfUsers" Step="1" TickMarks Min="1" Max="10">Antal brugere: @Value.NumberOfUsers</MudSlider>
+
+@code {
+    [Parameter]
+    public Subscription Value
+    {
+        get => _value;
+        set
+        {
+        if (_value == value) return;
+
+        _value = value;
+        ValueChanged.InvokeAsync(value);
+        }
+    }
+
+    [Parameter]
+    public EventCallback<Subscription> ValueChanged { get; set; }
+
+    private Subscription _value;
+
+    protected override async Task OnInitializedAsync()
+    {
+        
+    }
+}

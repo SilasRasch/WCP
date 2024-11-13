@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using WCPShared.Services.StaticHelpers;
 using WCPShared.Interfaces;
+using WCPShared.Models.Entities.ProjectModels;
 
 namespace WCPShared.Models.Entities
 {
@@ -13,7 +14,8 @@ namespace WCPShared.Models.Entities
         public string URL { get; set; } = string.Empty;
         public int OrganizationId { get; set; }
         public Organization Organization { get; set; } = new();
-        public List<Order> Orders { get; set; } = new();
+        public List<Product> Products { get; set; } = [];
+        public List<Project> Projects { get; set; } = [];
 
         public bool Validate()
         {

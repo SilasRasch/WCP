@@ -42,13 +42,23 @@ namespace WCPShared.Extensions
         {
             if (Secrets.IsProd)
             {
-                services.AddDbContext<IWcpDbContext, WcpDbContext>(
-                    options => options.UseSqlServer(Secrets.GetConnectionString(config)));
+                services.AddDbContextFactory<WcpDbContext>(options =>
+                    options.UseSqlServer(Secrets.GetConnectionString(config)));
+
+                services.AddDbContext<IWcpDbContext, WcpDbContext>(options =>
+                    options.UseSqlServer(Secrets.GetConnectionString(config)));
+
+                services.AddSingleton<IWcpDbContextFactory, WcpDbContextFactory>();
             }
             else
             {
-                services.AddDbContext<IWcpDbContext, TestDbContext>(
-                    options => options.UseSqlServer(Secrets.GetConnectionString(config)));
+                services.AddDbContextFactory<TestDbContext>(options =>
+                    options.UseSqlServer(Secrets.GetConnectionString(config)));
+
+                services.AddDbContext<IWcpDbContext, TestDbContext>(options =>
+                    options.UseSqlServer(Secrets.GetConnectionString(config)));
+
+                services.AddSingleton<IWcpDbContextFactory, TestDbContextFactory>();
             }
 
             return services;

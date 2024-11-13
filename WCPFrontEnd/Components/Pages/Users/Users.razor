@@ -85,19 +85,8 @@
                 @if (context.Item.Organization is not null)
                 {
                     <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
-                        <MudText Typo="Typo.h6">@ProjectHelper.CountryStringToFlag(context.Item.Organization.Language.Name) </MudText>
+                        <MudText Typo="Typo.h6">@ProjectHelper.CountryStringToFlag(context.Item.Organization.Language.IsoLanguageCode) </MudText>
                         <MudText>@context.Item.Organization.Name</MudText>
-                    </MudStack>
-                }
-            </CellTemplate>
-        </PropertyColumn>
-
-        <PropertyColumn Property="x => x.Language" Title="Sprog/Land">
-            <CellTemplate>
-                @if (context.Item.Language is not null)
-                {
-                    <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
-                        <MudText Typo="Typo.h6">@ProjectHelper.CountryStringToFlag(context.Item.Language.Name) </MudText>
                     </MudStack>
                 }
             </CellTemplate>
@@ -173,7 +162,6 @@
     private async Task FetchUsers()
     {
         UserList = await Context.Users
-            .Include(x => x.Language)
             .Include(x => x.Organization)
             .ThenInclude(x => x.Language)
             .ToListAsync();

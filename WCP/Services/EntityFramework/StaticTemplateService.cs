@@ -24,7 +24,7 @@ namespace WCPShared.Services.EntityFramework
         public async Task<List<StaticTemplateView>> GetAllObjectsView()
         {
             return await _context.StaticTemplates
-                .Include(x => x.Orders)
+                .Include(x => x.Projects)
                 .Select(x => _viewConverter.Convert(x))
                 .ToListAsync();
         }
@@ -32,7 +32,7 @@ namespace WCPShared.Services.EntityFramework
         public async Task<List<StaticTemplateView>> GetObjectsViewBy(Expression<Func<StaticTemplate, bool>> predicate)
         {
             return await _context.StaticTemplates
-                .Include(x => x.Orders)
+                .Include(x => x.Projects)
                 .Where(predicate)
                 .Select(x => _viewConverter.Convert(x))
                 .ToListAsync();
@@ -41,7 +41,7 @@ namespace WCPShared.Services.EntityFramework
         public async Task<StaticTemplateView?> GetObjectViewBy(Expression<Func<StaticTemplate, bool>> predicate)
         {
             var template = await _context.StaticTemplates
-                .Include(x => x.Orders)
+                .Include(x => x.Projects)
                 .SingleOrDefaultAsync(predicate);
 
             if (template is not null)

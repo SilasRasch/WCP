@@ -1,29 +1,47 @@
-﻿@inherits LayoutComponentBase
+﻿@using System.Security.Claims
+@using Microsoft.EntityFrameworkCore
+@using Stripe
+@using WCPAdminFrontEnd.Services
+@using WCPFrontEnd.Services
+@using WCPShared.Interfaces
+@using WCPShared.Models.Entities.UserModels
+@using WCPShared.Models.Enums
+@using WCPShared.Services
+@inherits LayoutComponentBase
 @inject NavigationManager Navigation
+@inject IJSRuntime jsRuntime
+@inject StripeService StripeService
+@inject IWcpDbContextFactory ContextFactory
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <MudThemeProvider @ref="_mudThemeProvider" Theme="@_theme" IsDarkMode="_isDarkMode" />
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
 
-<MudLayout>
+<MudLayout Class="mud-background">
     <MudAppBar Elevation="1">
         <a href="/" class="mt-2">
             <MudImage Src="https://wcp.dk/assets/webcontent-B3eGu9V2.png" Class="max-h-[64px]" Alt="WebContent logo" />
         </a>
         <MudSpacer />
-        <AuthorizeView>
-            <Authorized>
-                <MudIconButton Icon="@(DarkLightModeButtonIcon)" Color="Color.Warning" OnClick="@DarkModeToggle" />
-                <MudNavLink Style="max-width: fit-content" Href="/logout" Match="NavLinkMatch.Prefix" IconColor="Color.Error" Icon="@Icons.Material.Filled.Logout">Log ud</MudNavLink>
-            </Authorized>
-            <NotAuthorized>
-                <MudNavLink Style="max-width: fit-content" Href="/login" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Login">Log ind</MudNavLink>
-            </NotAuthorized>
-        </AuthorizeView>
-
-
-
+        <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
+            <AuthorizeView Roles="Creator">
+                @if (Balance is not null) 
+                {
+                    <CreatorBalance Balance="Balance" />
+                }
+            </AuthorizeView>
+            <AuthorizeView>
+                <Authorized>
+                    <MudIconButton Icon="@(DarkLightModeButtonIcon)" Color="Color.Warning" OnClick="@DarkModeToggle" />
+                    <MudNavLink Style="max-width: fit-content" Href="/logout" Match="NavLinkMatch.Prefix" IconColor="Color.Error" Icon="@Icons.Material.Filled.Logout">Log ud</MudNavLink>
+                </Authorized>
+                <NotAuthorized>
+                    <MudNavLink Style="max-width: fit-content" Href="/login" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Login">Log ind</MudNavLink>
+                </NotAuthorized>
+            </AuthorizeView>
+        </MudStack>
     </MudAppBar>
     <MudDrawerContainer Class="mud-height-full">
         <AuthorizeView>
@@ -35,6 +53,29 @@
         </AuthorizeView>
 
         <MudMainContent Class="mud-height-full mt-16 pa-4">
+            <AuthorizeView Roles="Bruger">
+                <Authorized>
+                    <AuthorizeView Context="subscribed" Policy="IsNotSubscribed">
+                        <Authorized>
+                            <MudPaper Class="pa-2 mb-2 mud-error">
+                                <MudText Class="text-white" Typo="Typo.body1">🛑 Det ser ikke ud til at du har et abonnement hos os... Klik <a class="text-white" href="/subscription"><u class="cursor-pointer">her</u></a> for at købe adgang! 🔓</MudText>
+                            </MudPaper>
+                        </Authorized>
+                    </AuthorizeView>
+                </Authorized>
+            </AuthorizeView>
+
+            <AuthorizeView Roles="Creator">
+                <Authorized>
+                    <AuthorizeView Context="connected" Policy="IsNotStripeConnected">
+                        <Authorized>
+                            <MudPaper Class="pa-2 mb-2 mud-error">
+                                <MudText Class="text-white" Typo="Typo.body1">🛑 Det ser ikke ud til at du er onboardet på vores <em>nye</em> betalingsplatform... Klik <u class="cursor-pointer" @onclick="GoToOnboarding">her</u> for kunne blive betalt! 💲</MudText>
+                            </MudPaper>
+                        </Authorized>
+                    </AuthorizeView>
+                </Authorized>
+            </AuthorizeView>
             @Body
         </MudMainContent>
     </MudDrawerContainer>
@@ -52,10 +93,11 @@
     private bool _isDarkMode = false;
     private MudTheme? _theme = null;
     private MudThemeProvider? _mudThemeProvider;
+    private BalanceAmount Balance;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        base.OnInitialized();
+        await base.OnInitializedAsync();
 
         _theme = new()
         {
@@ -63,17 +105,26 @@
             PaletteDark = _darkPalette,
             LayoutProperties = new LayoutProperties()
         };
+
+        await GetBalance();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
-        {
-            _isDarkMode = await _mudThemeProvider!.GetSystemPreference();
-            StateHasChanged();
-        }
+        // if (firstRender)
+        // {
+        //     _isDarkMode = await _mudThemeProvider!.GetSystemPreference();
+        //     StateHasChanged();
+        // }
     }
-    
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+
+        await GetBalance();
+    }
+
     private void DrawerToggle()
     {
         _drawerOpen = !_drawerOpen;
@@ -87,6 +138,7 @@
     private readonly PaletteLight _lightPalette = new()
     {
         Primary = "#ED4C4D",
+        Background = "#f9f9f9",
         Secondary = "#ffeddc",
         Black = "#110e2d",
         AppbarText = "#424242",
@@ -101,7 +153,7 @@
         Primary = "#ED4C4D",
         Secondary = "#1e1e1e",
         Surface = "#2e2e2e",
-        Background = "#2E2E2E",
+        Background = "#3c3c3c",
         BackgroundGray = "#151521",
         AppbarText = "#92929f",
         AppbarBackground = "#1e1e1e",
@@ -109,7 +161,7 @@
         ActionDefault = "#74718e",
         ActionDisabled = "#9999994d",
         ActionDisabledBackground = "#605f6d4d",
-        TextPrimary = "#b2b0bf",
+        TextPrimary = "#e6e6e6",
         TextSecondary = "#92929f",
         TextDisabled = "#ffffff33",
         DrawerIcon = "#92929f",
@@ -131,6 +183,68 @@
         true => Icons.Material.Rounded.LightMode,
         false => Icons.Material.Outlined.DarkMode,
     };
+
+    private async Task GetBalance()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var creatorId = authState.User.FindFirst(c => c.Type == "CreatorId")?.Value;
+        var stripeAccountId = authState.User.FindFirst(c => c.Type == "StripeAccountId")?.Value;
+        var role = authState.User.FindFirst(c => c.Type == ClaimTypes.Role)?.Value;
+
+        if (creatorId is not null && role is not null && role == UserRole.Creator.ToString())
+        {
+            using (IWcpDbContext context = ContextFactory.CreateDbContext()) 
+            {
+                var creator = context.Creators
+                    .Include(x => x.User)
+                    .ThenInclude(x => x.Language)
+                    .SingleOrDefault(x => x.Id == Convert.ToInt16(creatorId));
+
+                if (stripeAccountId is not null && creator is not null) 
+                {
+                    var balances = await StripeService.GetBalance(stripeAccountId);
+
+                    // Try and get preferred currency
+                    Balance = balances.Available.SingleOrDefault(x => x.Currency == creator.User.Language.Currency)!;
+
+                    // Then get any
+                    if (Balance is null) Balance = balances.Available.FirstOrDefault();
+                        
+                    // Display zero
+                    if (Balance is null) Balance = new BalanceAmount { Amount = 0, Currency = creator.User.Language.Currency };
+                        
+                }
+            }
+        }
+    }
+
+    private async Task GoToOnboarding() 
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var creatorId = authState.User.FindFirst(c => c.Type == "CreatorId")?.Value;
+
+        if (!string.IsNullOrEmpty(creatorId)) 
+        {
+            using (IWcpDbContext context = ContextFactory.CreateDbContext())
+            {
+                Creator? creator = await context.Creators
+                    .Include(x => x.User)
+                    .SingleOrDefaultAsync(x => x.Id == Convert.ToInt32(creatorId));
+
+                if (creator is not null) 
+                {
+                    if (string.IsNullOrEmpty(creator.StripeAccountId))
+                    {
+                        creator.StripeAccountId = StripeService.CreateAccount(creator.User.Email).Id;
+                        await context.SaveChangesAsync();
+                    }
+
+                    var accountLink = StripeService.CreateAccountLink(creator.StripeAccountId);
+                    await jsRuntime.InvokeVoidAsync("open", accountLink.Url);
+                }
+            }
+        }
+    }
 }
 
 

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using SlackNet;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,6 +23,28 @@ namespace WCPShared.Services.StaticHelpers
                     return true;
                 else return false;
             }
+        }
+
+        public static string GetStripeApiKey(IConfiguration config)
+        {
+            var env = Environment.GetEnvironmentVariable("STRIPE_API_KEY")!;
+            var appsetting = config.GetSection("StripeApiKey").Value!;
+
+            if (env != null)
+                return env;
+
+            return appsetting;
+        }
+
+        public static string GetStripeWebhookKey(IConfiguration config)
+        {
+            var env = Environment.GetEnvironmentVariable("STRIPE_WH_KEY")!;
+            var appsetting = config.GetSection("StripeWhKey").Value!;
+
+            if (env != null)
+                return env;
+
+            return appsetting;
         }
 
         public static string GetConnectionString(IConfiguration config)

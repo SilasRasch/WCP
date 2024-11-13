@@ -4,20 +4,27 @@ using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using Microsoft.EntityFrameworkCore.Metadata;
 using System.Diagnostics.CodeAnalysis;
 using WCPShared.Models.Entities;
+using WCPShared.Models.Entities.ProjectModels;
 using WCPShared.Models.Entities.UserModels;
 
 namespace WCPShared.Interfaces
 {
-    public interface IWcpDbContext
+    public interface IWcpDbContext : IDisposable
     {
         DbSet<User> Users { get; set; }
         DbSet<Organization> Organizations { get; set; }
         DbSet<Brand> Brands { get; set; }
         DbSet<Creator> Creators { get; set; }
         DbSet<CreatorParticipation> CreatorParticipations { get; set; }
-        DbSet<Order> Orders { get; set; }
         DbSet<Language> Languages { get; set; }
         DbSet<StaticTemplate> StaticTemplates { get; set; }
+        DbSet<Subscription> Subscriptions { get; set; }
+
+        DbSet<Project> Projects { get; set; }
+        DbSet<UgcProject> UgcProjects { get; set; }
+        DbSet<StaticProject> StaticProjects { get; set; }
+        DbSet<PhotoProject> PhotoProjects { get; set; }
+        DbSet<Product> Products { get; set; }
 
         // Abstractions
         ChangeTracker ChangeTracker { get; }

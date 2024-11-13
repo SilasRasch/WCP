@@ -1,0 +1,194 @@
+﻿@page "/register"
+@using Microsoft.AspNetCore.WebUtilities
+@using Stripe.Checkout
+@using WCPFrontEnd.Components.Shared
+@using WCPFrontEnd.Services
+@using WCPShared.Interfaces
+@using WCPShared.Interfaces.Auth
+@using WCPShared.Models.Entities.UserModels
+@using WCPShared.Models.Entities
+@using Stripe
+@using WCPShared.Models.Enums
+@using WCPShared.Services
+@inject IWcpDbContext Context
+@inject IJSRuntime jsRuntime
+@inject IAuthService AuthService
+@inject StripeService StripeService
+@inject NavigationManager NavManager
+
+<PageTitle>Kunderegistrering</PageTitle>
+
+<div class="w-full grid justify-center">
+    <MudPaper Class="pa-4">
+        <MudText Class="text-center" Typo="Typo.h4">Bliv registreret som kunde</MudText>
+        <MudStepper @bind-ActiveIndex="_index">
+            <ChildContent>
+                <MudStep Title="Abonnement">
+                    <MudText Typo="Typo.body2">Lad os lige tjekke at dine abonnementsinformationer er korrekte</MudText>
+                    <MudDivider Class="mb-2" />
+
+                    <SubscriptionPicker @bind-Value="Subscription" />
+                </MudStep>
+                <MudStep Title="Brugerinformation" Completed="UserCompleted">
+                    <MudText Typo="Typo.body2">Vi skal bruge lidt information til <em>din</em> bruger</MudText>
+                    <MudDivider Class="mb-2" />
+
+                    <MudTextField @bind-Value="User.Name" Label="Fulde navn" Placeholder="Dit fulde navn" Validation="@(new Func<string, string>(ValidationHelpers.NameValidation))" Required RequiredError="Dette felt er påkrævet" />
+                    <MudTextField @bind-Value="User.Email" Label="E-mail" Placeholder="Din e-mail" Validation="@(new Func<string, string>(ValidationHelpers.EmailValidation))" Required RequiredError="Dette felt er påkrævet" />
+                    <MudTextField @bind-Value="User.Phone" Label="Telefon" Placeholder="Dit telefonnummer" Validation="@(new Func<string, string>(ValidationHelpers.PhoneValidation))" Required RequiredError="Dette felt er påkrævet" />
+
+                    <MudStack Row>
+                        <MudTextField @bind-Value="Password" InputType="InputType.Password" Label="Kodeord" Required RequiredError="Dette felt er påkrævet" />
+                        <MudTextField @bind-Value="ConfirmPassword" InputType="InputType.Password" Label="Gentag kodeord" Required RequiredError="Dette felt er påkrævet" />
+                    </MudStack>
+                </MudStep>
+                <MudStep Title="Din organisation"Completed="OrganizationCompleted">
+                    <MudText Typo="Typo.body2">Vi skal bruge lidt information om din virksomhed</MudText>
+                    <MudDivider Class="mb-2" />
+
+                    <MudTextField @bind-Value="Organization.Name" Placeholder="Virksomhedens navn" Label="Navn" Required Validation="@(new Func<string, string>(ValidationHelpers.NameValidation))" RequiredError="Dette felt er påkrævet" />
+                    <MudTextField @bind-Value="Organization.CVR" Placeholder="Virksomhedens CVR" Label="CVR" Required Validation="@(new Func<string, string>(ValidationHelpers.CvrValidation))" RequiredError="Dette felt er påkrævet" />
+                    <LanguageSelector @bind-Value="Organization.Language" Label="Land" Placeholder="Hvor opererer din virksomhed fra?" />
+                </MudStep>
+                <MudStep Title="Dit brand" @bind-Completed="_completed">
+                    <MudText Typo="Typo.body2">Vi skal bruge lidt information om dit første brand</MudText>
+                    <MudDivider Class="mb-2" />
+
+                    <MudTextField @bind-Value="Brand.Name" Label="Brandnavn" Placeholder="Brandets navn" Validation="@(new Func<string, string>(ValidationHelpers.NameValidation))" Required RequiredError="Dette felt er påkrævet" />
+                    <MudTextField @bind-Value="Brand.URL" Label="Brand URL" Placeholder="Brandets URL" Validation="@(new Func<string, string>(ValidationHelpers.URLValidation))" Required RequiredError="Dette felt er påkrævet" />
+
+                    @if (!ValidateModels) 
+                    {
+                        <MudText Class="mt-2" Color="Color.Error">* Tjek venligst at du har udfyldt alle felter</MudText>
+                    }
+                </MudStep>
+            </ChildContent>
+            <CompletedContent>
+                <MudStack>
+                    <MudText>Du vil nu blive viderstillet til vores Stripe onboarding...</MudText>
+                    <MudText>Hvis ikke kan du trykke <a href="@CheckoutUrl" target="_blank"><u>her</u></a> for at gå til siden manuelt</MudText>
+
+                    @if (User.Id != default) 
+                    {
+                        <MudText> Din bruger er oprettet, men dit abonnement vil først blive aktiveret når du har betalt 🌞</MudText>
+                    }
+
+                    @if (!string.IsNullOrEmpty(Error))
+                    {
+                        <MudText>@Error</MudText>
+                    }
+
+                </MudStack>
+
+
+            </CompletedContent>
+            <ActionContent Context="stepper">
+                @if (!_completed) 
+                {
+                    <MudIconButton OnClick="@(() => stepper.PreviousStepAsync())" Icon="@Icons.Material.Filled.ArrowBack" Color="Color.Primary" Disabled="@(_index <= 0)" />
+                    <MudSpacer />
+                    @if (stepper.Steps[_index].Skippable == true)
+                    {
+                        <MudIconButton OnClick="@(() => stepper.SkipCurrentStepAsync())" Icon="@stepper.SkipButtonIcon" Color="Color.Primary" />
+                    }
+
+                    @if (stepper.Steps[_index] == stepper.Steps.Last())
+                    {
+                        <MudButton OnClick="() => CompleteRegistration(stepper)" StartIcon="@Icons.Material.Filled.Done" Color="Color.Primary" Disabled="@(!ValidateModels)">Registrér</MudButton>
+                    }
+                    else
+                    {
+                        <MudIconButton OnClick="@(() => stepper.NextStepAsync())" Icon="@Icons.Material.Filled.ArrowForward" Color="Color.Primary" />
+                    }
+                }   
+            </ActionContent>
+        </MudStepper>
+    </MudPaper>
+</div>
+
+@code {
+    private User User { get; set; } = new User();
+    private Organization Organization { get; set; } = new Organization();
+    private Brand Brand { get; set; } = new Brand();
+
+    private WCPShared.Models.Entities.Subscription Subscription { get; set; } = new WCPShared.Models.Entities.Subscription() 
+    {
+        NumberOfBrands = 1,
+        NumberOfUsers = 1,
+        NumberOfVideos = 3,
+        Type = SubscriptionType.Medium
+    };
+
+    private string Password;
+    private string ConfirmPassword;
+
+    private bool ValidateModels => UserCompleted && Organization.Validate() && Brand.Validate();
+    private bool UserCompleted => ValidationHelpers.NameValidation(User.Name) is null && 
+        ValidationHelpers.EmailValidation(User.Email) is null && 
+        ValidationHelpers.PhoneValidation(User.Phone) is null;
+
+    private bool OrganizationCompleted => ValidationHelpers.NameValidation(Organization.Name) is null &&
+        ValidationHelpers.CvrValidation(Organization.CVR) is null &&
+        Organization.Language is not null;
+
+    private int _index;
+    private bool _completed;
+    private string Error = string.Empty;
+    private string CheckoutUrl = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        var uri = NavManager.ToAbsoluteUri(NavManager.Uri);
+        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("videos", out var videoCount))
+            Subscription.NumberOfVideos = Convert.ToInt32(videoCount);
+
+        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("brands", out var brandCount))
+            Subscription.NumberOfBrands = Convert.ToInt32(brandCount);
+
+        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("users", out var userCount))
+            Subscription.NumberOfUsers = Convert.ToInt32(userCount);
+
+        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("type", out var type))
+            Subscription.Type = (SubscriptionType) Enum.Parse(typeof(SubscriptionType), type);
+    }
+
+    private async Task CompleteRegistration(MudStepper stepper) 
+    {
+        await stepper.NextStepAsync();
+
+        Customer customer = StripeService.CreateCustomer(User);
+
+        var lineItems = StripeService.GenerateLineItems(Subscription);
+        var checkout = StripeService.StartCheckoutSession(lineItems, "subscription", customerId: customer.Id);
+        CheckoutUrl = checkout.Url;
+        await jsRuntime.InvokeVoidAsync("open", CheckoutUrl);
+
+        // Save user to database while user checks out
+        Subscription.Created = DateTime.Now;
+        Organization.Subscription = Subscription;
+        Organization.StripeAccountId = customer.Id;
+        Organization.IsActive = false; // Will activate when checkout is complete
+        await Context.Organizations.AddAsync(Organization);
+        await Context.SaveChangesAsync();
+
+        if (Organization.Id != default) 
+        {
+            Brand.Organization = Organization;
+            await Context.Brands.AddAsync(Brand);
+            await Context.SaveChangesAsync();
+        }
+
+        try
+        {
+            if (Organization.Id != default && Brand.Id != default) 
+            {
+                User.Organization = Organization;
+                await AuthService.RegisterCustomer(User, Password);
+            }
+        }
+        catch (Exception ex)
+        {
+            Error = ex.Message;
+        }
+    }
+}

@@ -1,12 +1,29 @@
 ﻿<MudNavMenu>
     <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Hjem</MudNavLink>
-    <MudNavLink Href="projects" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Assignment">Projekter</MudNavLink>
-    <MudNavGroup Icon="@Icons.Material.Filled.People" Title="Brugerelateret" Expanded="true" HideExpandIcon="true">
-        <MudNavLink Href="users" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Person">Brugere</MudNavLink>
-        <MudNavLink Href="creators" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.VideoCameraFront">Creators</MudNavLink>
-    </MudNavGroup>
     
-    <MudNavLink Href="organizations" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Business">Organisationer</MudNavLink>
-    <MudNavLink Href="brands" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.BusinessCenter">Brands</MudNavLink>
-    <MudNavLink Href="statics" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Draw">Statics</MudNavLink>
+    <AuthorizeView Policy="IsNotSubscribed">
+        <MudNavLink Href="subscription" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AttachMoney">Køb adgang</MudNavLink>
+    </AuthorizeView>
+    
+    <AuthorizeView Roles="Bruger">
+        <MudNavLink Href="new-project" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Add">Opret nyt projekt</MudNavLink>
+    </AuthorizeView>
+
+    <AuthorizeView Roles="Admin,Bruger,Creator">
+        <MudNavLink Href="projects" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Assignment">Projekter</MudNavLink>
+    </AuthorizeView>
+
+    <AuthorizeView Roles="Bruger,Admin">
+        <MudNavLink Href="brands" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.BusinessCenter">Brands</MudNavLink>
+    </AuthorizeView>
+
+    <AuthorizeView Roles="Admin">
+        <MudNavGroup Icon="@Icons.Material.Filled.People" Title="Brugerelateret" Expanded="true" HideExpandIcon="true">
+            <MudNavLink Href="users" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Person">Brugere</MudNavLink>
+            <MudNavLink Href="creators" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.VideoCameraFront">Creators</MudNavLink>
+        </MudNavGroup>
+
+        <MudNavLink Href="organizations" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Business">Organisationer</MudNavLink>
+        <MudNavLink Href="statics" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Draw">Statics</MudNavLink>
+    </AuthorizeView>
 </MudNavMenu>

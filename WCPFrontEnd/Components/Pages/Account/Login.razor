@@ -3,6 +3,7 @@
 @using Microsoft.EntityFrameworkCore
 @using WCPShared.Models.Entities
 @inject IWcpDbContext Context
+@inject StripeService StripeService
 
 @using System.Security.Claims
 @using Microsoft.AspNetCore.Authentication
@@ -41,7 +42,7 @@
             <button type="submit" class="rounded-lg p-2 bg-green-500 text-white hover:bg-green-600 duration-200">Login</button>
         </EditForm>
     </MudPaper>
-    
+
 </div>
 
 @code {
@@ -59,17 +60,18 @@
     private async Task Authenticate()
     {
         User? user = await Context.Users
-                .SingleOrDefaultAsync(x => x.Email == Model.Email);
+            .Include(x => x.Organization)
+            .SingleOrDefaultAsync(x => x.Email == Model.Email);
 
-        if (user is null || !user.IsActive || !BCrypt.Net.BCrypt.Verify(Model.Password, user.PasswordHash)) 
+        if (user is null || !BCrypt.Net.BCrypt.Verify(Model.Password, user.PasswordHash)) 
         {
             errorMessage = "Invalid email or password";
             return;
         }
 
-        if (user.Role != UserRole.Admin) 
+        if (!user.IsActive)
         {
-            errorMessage = "Unauthorized";
+            errorMessage = "User deactivated";
             return;
         }
 
@@ -77,8 +79,25 @@
         {
             new Claim(ClaimTypes.Email, user.Email),
             new Claim(ClaimTypes.Name, user.Name),
-            new Claim(ClaimTypes.Role, user.Role.ToString())
+            new Claim(ClaimTypes.Role, user.Role.ToString()),
         };
+
+        if (user.Role == UserRole.Bruger && (user.Organization is null || !user.Organization.IsActive || string.IsNullOrEmpty(user.Organization.StripeAccountId)))
+            claims.Add(new Claim("IsNotSubscribed", string.Empty));
+        else if (user.Role == UserRole.Bruger && (user.Organization is not null && user.Organization.IsActive && !string.IsNullOrEmpty(user.Organization.StripeAccountId)))
+            claims.Add(new Claim("StripeAccountId", user.Organization.StripeAccountId));
+
+        if (user.Role == UserRole.Creator) 
+        {
+            Creator? creator = await Context.Creators.SingleOrDefaultAsync(x => x.UserId == user.Id);
+            if (creator is null || string.IsNullOrEmpty(creator.StripeAccountId))
+                claims.Add(new Claim("IsNotStripeConnected", string.Empty));
+            else if (creator is not null && !string.IsNullOrEmpty(creator.StripeAccountId))
+                claims.Add(new Claim("StripeAccountId", creator.StripeAccountId));
+
+            claims.Add(new Claim("SubType", creator!.SubType.ToString()));
+            claims.Add(new Claim("CreatorId", creator!.Id.ToString()));
+        }
 
         var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
         var principal = new ClaimsPrincipal(identity);

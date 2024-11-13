@@ -1,16 +1,20 @@
 ﻿@page "/brands"
 @using System.Net.Http.Json
 @using Microsoft.EntityFrameworkCore
+@using System.Security.Claims
 @using WCPAdminFrontEnd.Services
 @using WCPFrontEnd.Components.Shared
 @using WCPShared.Interfaces
+@using WCPShared.Models.Entities.UserModels
+@using WCPShared.Models.Enums
 @using WCPShared.Models.Views
 @using WCPShared.Models.Entities
 @using WCPShared.Services.EntityFramework
 @inject BrandService BrandService
 @inject IWcpDbContext Context
 @inject IDialogService DialogService
-@attribute [Authorize(Roles = "Admin")]
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@attribute [Authorize(Roles = "Admin, Bruger")]
 
 <PageTitle>Brands</PageTitle>
 
@@ -63,15 +67,16 @@
         </PropertyColumn>
         <PropertyColumn Property="x => x.Name" Title="Navn" />
         <PropertyColumn Property="x => x.URL" Title="URL" />
+
         <PropertyColumn Property="x => x.Organization.Name" Title="Organisation" Grouping="_groupOrganization">
             <CellTemplate>
                 <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
-                    <MudText Typo="Typo.h6">@ProjectHelper.CountryStringToFlag(context.Item.Organization.Language.Name) </MudText>
+                    <MudText Typo="Typo.h6">@ProjectHelper.CountryStringToFlag(context.Item.Organization.Language.IsoLanguageCode) </MudText>
                     @context.Item.Organization.Name
                 </MudStack>
             </CellTemplate>
         </PropertyColumn>
-        
+
         <TemplateColumn Title="Actions" StickyRight="@_stickyActions">
             <CellTemplate>
                 <MudMenu Icon="@Icons.Material.Filled.MoreHoriz" AriaLabel="Åben aktionsmenu" AnchorOrigin="Origin.BottomCenter">
@@ -107,6 +112,8 @@
     private bool _stickyActions = true;
     private bool _groupOrganization = false;
 
+    private User? User;
+
     private IEnumerable<Brand> BrandList;
 
     private string? _searchString;
@@ -125,14 +132,31 @@
 
     protected override async Task OnInitializedAsync()
     {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var email = authState.User.FindFirst(c => c.Type == ClaimTypes.Email)?.Value;
+        User = await Context.Users.Include(x => x.Organization).SingleOrDefaultAsync(x => x.Email == email);
+
         await FetchBrands();
     }
 
     private async Task FetchBrands()
     {
-        BrandList = Context.Brands
+        if (User is not null && User.Role == UserRole.Admin) 
+        {
+            BrandList = await Context.Brands
             .Include(x => x.Organization)
-            .ThenInclude(x => x.Language);
+            .ThenInclude(x => x.Language)
+            .ToListAsync();
+        }
+
+        if (User is not null && User.Role == UserRole.Bruger)
+        {
+            BrandList = await Context.Brands
+            .Include(x => x.Organization)
+            .ThenInclude(x => x.Language)
+            .Where(x => x.OrganizationId == User.OrganizationId)
+            .ToListAsync();
+        }
     }
 
     private async Task ToggleDeleteModal(int id)
@@ -155,8 +179,13 @@
 
     private async Task ToggleAddDialog()
     {
+        var parameters = new DialogParameters<Dialoges.AddBrandDialog>
+        {
+            { x => x.OrganizationId, User.OrganizationId != default ? User.OrganizationId : null }
+        };
+        
         var options = new DialogOptions { CloseOnEscapeKey = true, CloseButton = true };
-        var dialog = await DialogService.ShowAsync<Dialoges.AddBrandDialog>("Add dialog", options);
+        var dialog = await DialogService.ShowAsync<Dialoges.AddBrandDialog>("Add dialog", parameters, options);
         var result = await dialog.Result;
 
         if (result is not null && !result.Canceled)

@@ -31,6 +31,13 @@ namespace WCPShared.Models.Entities.UserModels
             if (!Phone.IsNullOrEmpty() && !Validation.ValidatePhone(Phone!))
                 return false;
 
+            if (Role == UserRole.Bruger || Role == UserRole.Creator)
+                if (String.IsNullOrEmpty(Name) || String.IsNullOrEmpty(Phone))
+                    return false;
+
+            if (Role == UserRole.Bruger && Organization is null)
+                return false;
+
             return true;
         }
     }

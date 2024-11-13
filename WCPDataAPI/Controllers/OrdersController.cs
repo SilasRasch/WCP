@@ -117,26 +117,27 @@ namespace WCPDataAPI.Controllers
         [HttpPost("CreatorDelivery")]
         public async Task<IActionResult> CreatorDelivery([FromQuery] int order, [FromQuery] int creator)
         {
-            Order? existingOrder = await _context.Orders
-                .Include(x => x.Participations)
-                .ThenInclude(x => x.Creator)
-                .AsSplitQuery()
-                .SingleOrDefaultAsync(x => x.Id == order);
+            return NotFound();
+            //Order? existingOrder = await _context.Orders
+            //    .Include(x => x.Participations)
+            //    .ThenInclude(x => x.Creator)
+            //    .AsSplitQuery()
+            //    .SingleOrDefaultAsync(x => x.Id == order);
 
-            if (existingOrder is null) return NotFound("Order not found");
+            //if (existingOrder is null) return NotFound("Order not found");
 
-            var callingUser = await _creatorService.GetObjectViewBy(x => x.UserId == _userContextService.GetId());
-            if (callingUser is null) return Unauthorized("You are not a creator");
+            //var callingUser = await _creatorService.GetObjectViewBy(x => x.UserId == _userContextService.GetId());
+            //if (callingUser is null) return Unauthorized("You are not a creator");
 
-            bool isAdmin = _userContextService.GetRoles().Contains("Admin");
-            bool isCreator = _userContextService.GetRoles().Contains("Creator");
-            bool creatorAllowed = existingOrder.Participations.Exists(x => x.CreatorId == creator) && callingUser.Id == creator;
+            //bool isAdmin = _userContextService.GetRoles().Contains("Admin");
+            //bool isCreator = _userContextService.GetRoles().Contains("Creator");
+            //bool creatorAllowed = existingOrder.Participations.Exists(x => x.CreatorId == creator) && callingUser.Id == creator;
 
-            if (!isAdmin && (isCreator && !creatorAllowed))
-                return Unauthorized("Du har ikke tilladelse til at ændre denne ordre");
+            //if (!isAdmin && (isCreator && !creatorAllowed))
+            //    return Unauthorized("Du har ikke tilladelse til at ændre denne ordre");
 
-            await _orderService.CreatorDelivery(existingOrder, creator);
-            return NoContent();
+            //await _orderService.CreatorDelivery(existingOrder, creator);
+            //return NoContent();
         }
 
         // PUT api/<OrdersController>/5
