@@ -16,5 +16,6 @@ namespace WCPShared.Interfaces.Auth
         Task<dynamic> Authenticate();
         Task<bool> AddAdmin(int id);
         Task<User> RegisterCustomer(User user, string password);
+        Task<User?> RegisterCreator(User user, Creator creator, string password);
     }
 }

@@ -90,13 +90,23 @@
         if (user.Role == UserRole.Creator) 
         {
             Creator? creator = await Context.Creators.SingleOrDefaultAsync(x => x.UserId == user.Id);
-            if (creator is null || string.IsNullOrEmpty(creator.StripeAccountId))
-                claims.Add(new Claim("IsNotStripeConnected", string.Empty));
-            else if (creator is not null && !string.IsNullOrEmpty(creator.StripeAccountId))
-                claims.Add(new Claim("StripeAccountId", creator.StripeAccountId));
+            if (creator is not null) 
+            {
+                if (string.IsNullOrEmpty(creator.StripeAccountId))
+                    claims.Add(new Claim("IsNotStripeConnected", string.Empty));
+                else {
+                    claims.Add(new Claim("StripeAccountId", creator.StripeAccountId));
 
-            claims.Add(new Claim("SubType", creator!.SubType.ToString()));
-            claims.Add(new Claim("CreatorId", creator!.Id.ToString()));
+                    // Display onboarding incomplete
+                    if (!await StripeService.CheckOnboardingStatus(creator.StripeAccountId)) 
+                    {
+                        claims.Add(new Claim("OnboardingIncomplete", string.Empty));
+                    }
+                }
+
+                claims.Add(new Claim("SubType", creator.SubType.ToString()));
+                claims.Add(new Claim("CreatorId", creator.Id.ToString()));
+            }
         }
 
         var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);

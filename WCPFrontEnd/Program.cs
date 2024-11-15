@@ -39,7 +39,8 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     });
 builder.Services.AddAuthorizationBuilder()
     .AddPolicy("IsNotSubscribed", policy => policy.RequireClaim("IsNotSubscribed").RequireRole(UserRole.Bruger.ToString()))
-    .AddPolicy("IsNotStripeConnected", policy => policy.RequireClaim("IsNotStripeConnected").RequireRole(UserRole.Creator.ToString()));
+    .AddPolicy("IsNotStripeConnected", policy => policy.RequireClaim("IsNotStripeConnected").RequireRole(UserRole.Creator.ToString()))
+    .AddPolicy("OnboardingIncomplete", policy => policy.RequireClaim("OnboardingIncomplete").RequireRole(UserRole.Creator.ToString()));
 builder.Services.AddCascadingAuthenticationState();
 
 var app = builder.Build();

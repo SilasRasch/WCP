@@ -5,10 +5,10 @@
 @inject IWcpDbContext Context
 
 <MudSelect @bind-SelectedValues="Value" ToStringFunc="(e) => ProjectHelper.LanguageToStringFlag(e)" Delimiter=" " MultiSelection="true" 
-    Label="@Label" Placeholder="@Placeholder" Required="@Required" RequiredError="Dette felt er påkrævet" AnchorOrigin="Origin.BottomCenter">
+Label="@Label" Placeholder="@Placeholder" Required="@Required" RequiredError="Dette felt er påkrævet" AnchorOrigin="Origin.BottomCenter">
     @foreach (var lang in Languages)
     {
-        <MudSelectItem Value="@lang">@ProjectHelper.CountryStringToFlag(lang.IsoLanguageCode)</MudSelectItem>
+        <MudSelectItem Value="@lang">@ProjectHelper.CountryStringToFlag(lang.IsoLanguageCode) @lang.Name</MudSelectItem>
     }
 </MudSelect>
 
@@ -40,7 +40,7 @@
 
     private IEnumerable<Language> _value;
 
-    public IEnumerable<Language> Languages { get; set; }
+    public IEnumerable<Language> Languages { get; set; } = [];
 
     protected override async Task OnInitializedAsync()
     {

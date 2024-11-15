@@ -257,6 +257,15 @@
         }
     }
 
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        Project.Formats = String.Join(", ", Formats);
+    }
+
+    [Parameter]
+    public List<string> Formats { get; set; }
+
     private bool CreatorSectionExpanded = true;
     private bool ProductSectionExpanded = true;
     private bool ProjectSectionExpanded = true;

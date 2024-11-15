@@ -2,7 +2,7 @@
 @using WCPAdminFrontEnd.Services
 @using WCPShared.Interfaces
 @using WCPShared.Models.Entities.UserModels
-@inject IWcpDbContextFactory ContextFactory
+@inject IWcpDbContext Context
 
 <MudSelect @bind-Value="Value" Text="@ProjectHelper.LanguageToStringFlag(Value)" Label="@Label"
 Required="@Required" Placeholder="@Placeholder" RequiredError="Dette felt er påkrævet" AnchorOrigin="Origin.BottomCenter">
@@ -10,7 +10,7 @@ Required="@Required" Placeholder="@Placeholder" RequiredError="Dette felt er på
     {
         foreach (var lang in Languages)
         {
-            <MudSelectItem Value="@lang">@ProjectHelper.CountryStringToFlag(lang.IsoLanguageCode)</MudSelectItem>
+            <MudSelectItem Value="@lang">@ProjectHelper.CountryStringToFlag(lang.IsoLanguageCode) @(Country ? lang.IsoCountryCode : lang.Name) </MudSelectItem>
         }
     }
 </MudSelect>
@@ -41,15 +41,15 @@ Required="@Required" Placeholder="@Placeholder" RequiredError="Dette felt er på
     [Parameter]
     public EventCallback<Language> ValueChanged { get; set; }
 
+    [Parameter]
+    public bool Country { get; set; } = false;
+
     private Language _value;
 
     public IEnumerable<Language> Languages { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        using (IWcpDbContext context = ContextFactory.CreateDbContext()) 
-        {
-            Languages = await context.Languages.ToListAsync();
-        }
+        Languages = await Context.Languages.ToListAsync();
     }
 }

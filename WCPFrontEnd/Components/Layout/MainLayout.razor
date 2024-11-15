@@ -74,6 +74,13 @@
                             </MudPaper>
                         </Authorized>
                     </AuthorizeView>
+                    <AuthorizeView Context="connected" Policy="OnboardingIncomplete">
+                        <Authorized>
+                            <MudPaper Class="pa-2 mb-2 mud-error">
+                                <MudText Class="text-white" Typo="Typo.body1">🛑 Det ser ud til at vi mangler nogle informationer om dig for at kunne lave udbetalinger... Klik <u class="cursor-pointer" @onclick="GoToOnboarding">her</u> for kunne blive betalt! 💲</MudText>
+                            </MudPaper>
+                        </Authorized>
+                    </AuthorizeView>
                 </Authorized>
             </AuthorizeView>
             @Body
@@ -198,6 +205,7 @@
                 var creator = context.Creators
                     .Include(x => x.User)
                     .ThenInclude(x => x.Language)
+                    .AsNoTracking()
                     .SingleOrDefault(x => x.Id == Convert.ToInt16(creatorId));
 
                 if (stripeAccountId is not null && creator is not null) 
@@ -235,7 +243,7 @@
                 {
                     if (string.IsNullOrEmpty(creator.StripeAccountId))
                     {
-                        creator.StripeAccountId = StripeService.CreateAccount(creator.User.Email).Id;
+                        creator.StripeAccountId = StripeService.CreateAccount(creator.User.Email, creator.StripeAccountType, creator.User.Language.IsoCountryCode).Id;
                         await context.SaveChangesAsync();
                     }
 

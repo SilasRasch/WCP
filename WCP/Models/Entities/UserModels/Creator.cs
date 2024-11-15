@@ -11,7 +11,7 @@ namespace WCPShared.Models.Entities.UserModels
         public int Id { get; set; }
         public DateTime? DateOfBirth { get; set; }
         public string Address { get; set; } = string.Empty;
-        public string ImgURL { get; set; }
+        public string ImgURL { get; set; } = string.Empty;
         [EnumDataType(typeof(CreatorSubType))]
         public CreatorSubType SubType { get; set; }
         public int UserId { get; set; }
@@ -20,7 +20,9 @@ namespace WCPShared.Models.Entities.UserModels
         public List<CreatorParticipation> Participations { get; set; } = new List<CreatorParticipation>();
         public string Gender { get; set; } = string.Empty;
         public string StripeAccountId { get; set; } = string.Empty;
-        public int PriceEstimate { get; set; }
+        public long[] PriceEstimate { get; set; } = [];
+        public string StripeAccountType { get; set; } = string.Empty;
+        public IEnumerable<string> Tags { get; set; } = [];
 
         public bool Validate()
         {

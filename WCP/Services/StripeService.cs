@@ -104,14 +104,14 @@ namespace WCPShared.Services
         //    return lineItems;
         //}
 
-        public Account CreateAccount(string email)
+        public Account CreateAccount(string email, string type, string country)
         {
             // Start stripe onboarding creators
             var accountOptions = new AccountCreateOptions
             {
-                Type = "standard", // or "standard"
-                Country = "DK", // Adjust as needed
-                BusinessType = "individual", // Use "individual" to avoid company info
+                Type = "express", // or "standard"
+                Country = country, // Adjust as needed
+                BusinessType = type, // Use "individual" to avoid company info
                 Email = email,
                 Capabilities = new AccountCapabilitiesOptions
                 {
@@ -324,6 +324,18 @@ namespace WCPShared.Services
 
             var transferService = new TransferService();
             return await transferService.ListAsync(transferOptions);
+        }
+
+        public async Task<bool> CheckOnboardingStatus(string accountId)
+        {
+            var service = new AccountService();
+            var account = await service.GetAsync(accountId);
+            var requirements = account.Requirements;
+
+            if (requirements != null && requirements.CurrentlyDue.Count > 0)
+                 return false;
+
+            return true;
         }
     }
 }

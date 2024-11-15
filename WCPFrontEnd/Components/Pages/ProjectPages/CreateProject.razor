@@ -3,173 +3,191 @@
 @using WCPAdminFrontEnd.Services
 @using WCPFrontEnd.Components.Pages.ProjectPages.ProjectSteps
 @using WCPFrontEnd.Components.Shared
+@using WCPFrontEnd.Services
 @using WCPShared.Interfaces
 @using WCPShared.Models.Entities.ProjectModels
 @using WCPShared.Models.Entities
 @using WCPShared.Models.Enums
 @inject IWcpDbContext Context
+@inject ProjectService ProjectService
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
 
 <MudStack Class="w-full h-full" AlignItems="AlignItems.Center">
     <MudPaper Class="pa-4" MinHeight="86vh" MaxWidth="72rem">
-        <MudStepper @bind-ActiveIndex="_index">
-            <ChildContent>
-                <MudStep Title="Grundinformation">
-                    <MudText Class="text-center" Typo="Typo.h6">Grundinformation</MudText>
-                    <MudStack Spacing="4">
-                        <MudSelect @bind-Value="Project.Brand" ToStringFunc="BrandToStringFunc" Clearable Label="Brand" Required="true" RequiredError="Dette felt er påkrævet" AnchorOrigin="Origin.BottomCenter" Placeholder="Vælg et brand">
-                            @foreach (Brand brand in Brands)
-                            {
-                                <MudSelectItem Value="@brand">
-                                    <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
-                                        <MudText Typo="Typo.h6">@ProjectHelper.CountryStringToFlag(brand.Organization.Language.IsoLanguageCode) </MudText>
-                                        @brand.Name (@brand.Organization.Name.Trim())
-                                    </MudStack>
-                                </MudSelectItem>
-                            }
-                        </MudSelect>
+        <MudForm @ref="form" @bind-IsValid="_success" @bind-Errors="_errors">
+            <MudStepper @bind-ActiveIndex="_index">
+                <ChildContent>
+                    <MudStep Title="Grundinformation">
+                        <MudText Class="text-center" Typo="Typo.h6">Grundinformation</MudText>
+                        <MudStack Spacing="4">
+                            <MudSelect @bind-Value="Project.Brand" ToStringFunc="BrandToStringFunc" Clearable Label="Brand" Required="true" RequiredError="Dette felt er påkrævet" AnchorOrigin="Origin.BottomCenter" Placeholder="Vælg et brand">
+                                @foreach (Brand brand in Brands)
+                                {
+                                    <MudSelectItem Value="@brand">
+                                        <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
+                                            <MudText Typo="Typo.h6">@ProjectHelper.CountryStringToFlag(brand.Organization.Language.IsoLanguageCode) </MudText>
+                                            @brand.Name (@brand.Organization.Name.Trim())
+                                        </MudStack>
+                                    </MudSelectItem>
+                                }
+                            </MudSelect>
 
-                        <MudTextField @bind-Value="@Project.Name" Label="Projektnavn" Placeholder="Noget deskriptivt" Required RequiredError="Dette felt er påkrævet" />
+                            <MudTextField @bind-Value="@Project.Name" Label="Projektnavn" Placeholder="Noget deskriptivt" Required RequiredError="Dette felt er påkrævet" />
 
-                        <MudStack Spacing="1" Justify="Justify.FlexStart">
-                            <MudText>Projekttype*</MudText>
-                            <MudStack Row Justify="Justify.SpaceEvenly" Spacing="8">
-                                <MudButton OnClick="() => ChangeProjectType(ProjectType.UGC)" Variant="Variant.Filled" Class="@(Project is UgcProject ? "w-[200px] h-[200px] mud-secondary brightness-90" : "w-[200px] h-[200px] mud-secondary")">
-                                    <MudStack Class="w-full h-full mud-text-primary" Spacing="0" Justify="Justify.Center" AlignItems="AlignItems.Center">
-                                        <MudIcon Size="Size.Large" Icon="@Icons.Material.Filled.OndemandVideo" />
-                                        <MudText Typo="Typo.h6">UGC</MudText>
-                                    </MudStack>
-                                </MudButton>
-                                <MudButton OnClick="() => ChangeProjectType(ProjectType.Statics)" Variant="Variant.Filled" Class="@(Project is StaticProject ? "w-[200px] h-[200px] mud-secondary brightness-90" : "w-[200px] h-[200px] mud-secondary")">
-                                    <MudStack Class="w-full h-full mud-text-primary" Spacing="0" Justify="Justify.Center" AlignItems="AlignItems.Center">
-                                        <MudIcon Size="Size.Large" Icon="@Icons.Material.Filled.PhotoAlbum" />
-                                        <MudText Typo="Typo.h6">Statics</MudText>
-                                    </MudStack>
-                                </MudButton>
-                                <MudButton OnClick="() => ChangeProjectType(ProjectType.Photos)" Variant="Variant.Filled" Class="@(Project is PhotoProject ? "w-[200px] h-[200px] mud-secondary brightness-90" : "w-[200px] h-[200px] mud-secondary")">
-                                    <MudStack Class="w-full h-full mud-text-primary" Spacing="0" Justify="Justify.Center" AlignItems="AlignItems.Center">
-                                        <MudIcon Size="Size.Large" Icon="@Icons.Material.Filled.Photo" />
-                                        <MudText Typo="Typo.h6">Fotos</MudText>
-                                    </MudStack>
-                                </MudButton>
+                            <MudStack Spacing="1" Justify="Justify.FlexStart">
+                                <MudText>Projekttype*</MudText>
+                                <MudStack Row Justify="Justify.SpaceEvenly" Spacing="8">
+                                    <MudButton OnClick="() => ChangeProjectType(ProjectType.UGC)" Variant="Variant.Filled" Class="@(Project is UgcProject ? "w-[200px] h-[200px] mud-secondary brightness-90" : "w-[200px] h-[200px] mud-secondary")">
+                                        <MudStack Class="w-full h-full mud-text-primary" Spacing="0" Justify="Justify.Center" AlignItems="AlignItems.Center">
+                                            <MudIcon Size="Size.Large" Icon="@Icons.Material.Filled.OndemandVideo" />
+                                            <MudText Typo="Typo.h6">UGC</MudText>
+                                        </MudStack>
+                                    </MudButton>
+                                    <MudButton OnClick="() => ChangeProjectType(ProjectType.Statics)" Variant="Variant.Filled" Class="@(Project is StaticProject ? "w-[200px] h-[200px] mud-secondary brightness-90" : "w-[200px] h-[200px] mud-secondary")">
+                                        <MudStack Class="w-full h-full mud-text-primary" Spacing="0" Justify="Justify.Center" AlignItems="AlignItems.Center">
+                                            <MudIcon Size="Size.Large" Icon="@Icons.Material.Filled.PhotoAlbum" />
+                                            <MudText Typo="Typo.h6">Statics</MudText>
+                                        </MudStack>
+                                    </MudButton>
+                                    <MudButton OnClick="() => ChangeProjectType(ProjectType.Photos)" Variant="Variant.Filled" Class="@(Project is PhotoProject ? "w-[200px] h-[200px] mud-secondary brightness-90" : "w-[200px] h-[200px] mud-secondary")">
+                                        <MudStack Class="w-full h-full mud-text-primary" Spacing="0" Justify="Justify.Center" AlignItems="AlignItems.Center">
+                                            <MudIcon Size="Size.Large" Icon="@Icons.Material.Filled.Photo" />
+                                            <MudText Typo="Typo.h6">Fotos</MudText>
+                                        </MudStack>
+                                    </MudButton>
+                                </MudStack>
                             </MudStack>
                         </MudStack>
-                    </MudStack>
-
-                    @* Type is: @(Project is not null ? Project.GetType().ToString() : "") *@
-                </MudStep>
-
-                <MudStep Title="Projekt">
-                    <MudText Class="text-center" Typo="Typo.h6">Projekt</MudText>
-                    <MudStack Row Spacing="8" AlignItems="AlignItems.Center" Justify="Justify.Center" Class="mt-4">
-                        <MudSelect T="string" MultiSelection @bind-Text="Project.Platforms" Label="Tiltænkte platforme" Placeholder="Alle tiltænkte platforme" AnchorOrigin="Origin.BottomCenter">
-                            <MudSelectItem Value="@("TikTok")">TikTok</MudSelectItem>
-                            <MudSelectItem Value="@("Instagram")">Instagram</MudSelectItem>
-                            <MudSelectItem Value="@("Facebook")">Facebook</MudSelectItem>
-                            <MudSelectItem Value="@("YouTube")">YouTube</MudSelectItem>
-                            <MudSelectItem Value="@("Snapchat")">Snapchat</MudSelectItem>
-                        </MudSelect>
-                    </MudStack>
-
-                    <MudStack Spacing="0" AlignItems="AlignItems.Center" Class="w-full h-full">
-                        <MudSlider T="int" ValueLabel Size="Size.Medium" @bind-Value="Project.Amount" Min="1" Max="16" Color="Color.Primary">
-                            <ValueLabelContent>
-                                @(context.Value > 0 ? $"{context.Value} stk" : "Nej")
-                            </ValueLabelContent>
-                            <ChildContent>
-                                <MudText Typo="Typo.caption">Mængde</MudText>
-                            </ChildContent>
-                        </MudSlider>
-                        <MudText Class="opacity-75">@(Project.Amount > 0 ? $"{Project.Amount} stk" : "Nej")</MudText>
-                    </MudStack>
-
-                    @if (Project is UgcProject ugcProject)
-                    {
-                        <MudStack Spacing="8" Row AlignItems="AlignItems.End" Justify="Justify.Center">
-                            <MudStack Spacing="0" AlignItems="AlignItems.Center" Class="w-full h-full">
-                                <MudSlider T="int" ValueLabel Size="Size.Medium" @bind-Value="ugcProject.LengthInSeconds" Min="15" Max="90" Step="5" Color="Color.Primary">
-                                    <ValueLabelContent>
-                                        @context.Value sek
-                                    </ValueLabelContent>
-                                    <ChildContent>
-                                        <MudText Typo="Typo.caption">Længde</MudText>
-                                    </ChildContent>
-                                </MudSlider>
-                                <MudText Class="opacity-75">@ugcProject.LengthInSeconds sekunder</MudText>
-                            </MudStack>
-                            <MudStack Spacing="0" AlignItems="AlignItems.Center" Class="w-full h-full">
-                                <MudSlider T="int" ValueLabel Size="Size.Medium" @bind-Value="ugcProject.ExtraHooks" Min="0" Max="ugcProject.Amount" Color="Color.Primary">
-                                    <ValueLabelContent>
-                                        @(context.Value > 0 ? $"{context.Value} stk" : "Nej")
-                                    </ValueLabelContent>
-                                    <ChildContent>
-                                        <MudText Typo="Typo.caption">Ekstra hooks</MudText>
-                                    </ChildContent>
-                                </MudSlider>
-                                <MudText Class="opacity-75">@(ugcProject.ExtraHooks > 0 ? $"{ugcProject.ExtraHooks} stk" : "Nej")</MudText>
-                            </MudStack>
-                        </MudStack>
-                    }
-
-                    <MudSpacer />
-                    <MudStack Justify="Justify.FlexStart" Class="mt-2">
-                        <MudText>Formater*</MudText>
-                        <MudStack Row>
-                            <MudPaper Height="256px" Width="144px" Class="mud-secondary">
-                                <MudStack Class="h-full w-full" AlignItems="AlignItems.Center" Justify="Justify.Center">
-                                    <MudText Typo="Typo.h6">9:16</MudText>
-                                </MudStack>
-                            </MudPaper>
-                            <MudPaper Height="180px" Width="144px" Class="mud-secondary">
-                                <MudStack Class="h-full w-full" AlignItems="AlignItems.Center" Justify="Justify.Center">
-                                    <MudText Typo="Typo.h6">4:5</MudText>
-                                </MudStack>
-                            </MudPaper>
-                            <MudPaper Height="144px" Width="144px" Class="mud-secondary">
-                                <MudStack Class="h-full w-full" AlignItems="AlignItems.Center" Justify="Justify.Center">
-                                    <MudText Typo="Typo.h6">1:1</MudText>
-                                </MudStack>
-                            </MudPaper>
-
-                            @if (Project is UgcProject ugcProject)
-                            {
-                                <MudPaper Height="144px" Width="216px" Class="mud-secondary">
-                                    <MudStack Class="h-full w-full" AlignItems="AlignItems.Center" Justify="Justify.Center">
-                                        <MudText Typo="Typo.h6">Uden captions</MudText>
-                                    </MudStack>
-                                </MudPaper>
-                            }
-                        </MudStack>
-                    </MudStack>
-                </MudStep>
-
-                @foreach (var stepComponent in GetStepComponents())
-                {
-                    <MudStep Title="@stepComponent.Label">
-                        <ChildContent>
-                            @stepComponent.Component
-                        </ChildContent>
                     </MudStep>
-                }
 
-            </ChildContent>
+                    <MudStep Title="Projekt">
+                        <MudText Class="text-center" Typo="Typo.h6">Projekt</MudText>
+                        <MudStack Row Spacing="8" AlignItems="AlignItems.Center" Justify="Justify.Center" Class="mt-4">
+                            <MudSelect T="string" MultiSelection @bind-Text="Project.Platforms" Label="Tiltænkte platforme" Placeholder="Alle tiltænkte platforme" AnchorOrigin="Origin.BottomCenter">
+                                <MudSelectItem Value="@("TikTok")">TikTok</MudSelectItem>
+                                <MudSelectItem Value="@("Instagram")">Instagram</MudSelectItem>
+                                <MudSelectItem Value="@("Facebook")">Facebook</MudSelectItem>
+                                <MudSelectItem Value="@("YouTube")">YouTube</MudSelectItem>
+                                <MudSelectItem Value="@("Snapchat")">Snapchat</MudSelectItem>
+                            </MudSelect>
+                        </MudStack>
 
-            <ActionContent Context="stepper">
-                @if (!_completed)
-                {
-                    <MudIconButton OnClick="@(() => stepper.PreviousStepAsync())" Icon="@Icons.Material.Filled.ArrowBack" Color="Color.Primary" Disabled="@(_index <= 0)" />
-                    <MudSpacer />
+                        <MudStack Spacing="0" AlignItems="AlignItems.Center" Class="w-full h-full">
+                            <MudSlider T="int" ValueLabel Size="Size.Medium" @bind-Value="Project.Amount" Min="1" Max="16" Color="Color.Primary">
+                                <ValueLabelContent>
+                                    @(context.Value > 0 ? $"{context.Value} stk" : "Nej")
+                                </ValueLabelContent>
+                                <ChildContent>
+                                    <MudText Typo="Typo.caption">Mængde</MudText>
+                                </ChildContent>
+                            </MudSlider>
+                            <MudText Class="opacity-75">@(Project.Amount > 0 ? $"{Project.Amount} stk" : "Nej")</MudText>
+                        </MudStack>
 
-                    @if (stepper.Steps[_index] == stepper.Steps.Last())
+                        @if (Project is UgcProject ugcProject)
+                        {
+                            <MudStack Spacing="8" Row AlignItems="AlignItems.End" Justify="Justify.Center">
+                                <MudStack Spacing="0" AlignItems="AlignItems.Center" Class="w-full h-full">
+                                    <MudSlider T="int" ValueLabel Size="Size.Medium" @bind-Value="ugcProject.LengthInSeconds" Min="15" Max="90" Step="5" Color="Color.Primary">
+                                        <ValueLabelContent>
+                                            @context.Value sek
+                                        </ValueLabelContent>
+                                        <ChildContent>
+                                            <MudText Typo="Typo.caption">Længde</MudText>
+                                        </ChildContent>
+                                    </MudSlider>
+                                    <MudText Class="opacity-75">@ugcProject.LengthInSeconds sekunder</MudText>
+                                </MudStack>
+                                <MudStack Spacing="0" AlignItems="AlignItems.Center" Class="w-full h-full">
+                                    <MudSlider T="int" ValueLabel Size="Size.Medium" @bind-Value="ugcProject.ExtraHooks" Min="0" Max="100" Color="Color.Primary">
+                                        <ValueLabelContent>
+                                            @(context.Value > 0 ? $"{context.Value} stk" : "Nej")
+                                        </ValueLabelContent>
+                                        <ChildContent>
+                                            <MudText Typo="Typo.caption">Ekstra hooks</MudText>
+                                        </ChildContent>
+                                    </MudSlider>
+                                    <MudText Class="opacity-75">@(ugcProject.ExtraHooks > 0 ? $"{ugcProject.ExtraHooks} stk" : "Nej")</MudText>
+                                </MudStack>
+                            </MudStack>
+                        }
+
+                        <MudSpacer />
+                        <MudStack Justify="Justify.FlexStart" Class="mt-2">
+                            <MudText>Formater*</MudText>
+                            <MudStack Row>
+                                <MudPaper Elevation="0">
+                                    <MudButton OnClick="@(() => ToggleFormat("16:9"))" Variant="Variant.Filled" Color="Color.Secondary"
+                                    Class="@(Formats.Contains("16:9") ? "w-[144px] h-[256px] mud-secondary brightness-90" : "w-[144px] h-[256px] mud-secondary")">
+                                        <MudStack Class="h-full w-full mud-text-primary" AlignItems="AlignItems.Center" Justify="Justify.Center">
+                                            <MudText Typo="Typo.h6">16:9</MudText>
+                                        </MudStack>
+                                    </MudButton>
+                                </MudPaper>
+
+                                <MudPaper Elevation="0">
+                                    <MudButton OnClick="@(() => ToggleFormat("4:5"))" Variant="Variant.Filled" Color="Color.Secondary"
+                                    Class="@(Formats.Contains("4:5") ? "w-[144px] h-[180px] mud-secondary brightness-90" : "w-[144px] h-[180px] mud-secondary")">
+                                        <MudStack Class="h-full w-full mud-text-primary" AlignItems="AlignItems.Center" Justify="Justify.Center">
+                                            <MudText Typo="Typo.h6">4:5</MudText>
+                                        </MudStack>
+                                    </MudButton>
+                                </MudPaper>
+
+                                <MudPaper Elevation="0">
+                                    <MudButton OnClick="@(() => ToggleFormat("1:1"))" Variant="Variant.Filled" Color="Color.Secondary"
+                                    Class="@(Formats.Contains("1:1") ? "w-[144px] h-[144px] mud-secondary brightness-90" : "w-[144px] h-[144px] mud-secondary")">
+                                        <MudStack Class="h-full w-full mud-text-primary" AlignItems="AlignItems.Center" Justify="Justify.Center">
+                                            <MudText Typo="Typo.h6">1:1</MudText>
+                                        </MudStack>
+                                    </MudButton>
+                                </MudPaper>
+
+                                @if (Project is UgcProject ugcProject)
+                                {
+                                    <MudPaper Elevation="0">
+                                        <MudButton OnClick="@(() => ToggleFormat("Uden captions"))" Variant="Variant.Filled" Color="Color.Secondary"
+                                        Class="@(Formats.Contains("Uden captions") ? "w-[216px] h-[144px] mud-secondary brightness-90" : "w-[216px] h-[144px] mud-secondary")">
+                                            <MudStack Class="h-full w-full mud-text-primary" AlignItems="AlignItems.Center" Justify="Justify.Center">
+                                                <MudText Typo="Typo.h6">Uden captions</MudText>
+                                            </MudStack>
+                                        </MudButton>
+                                    </MudPaper>
+                                }
+                            </MudStack>
+                        </MudStack>
+                    </MudStep>
+
+                    @foreach (var stepComponent in GetStepComponents())
                     {
-                        <MudButton StartIcon="@Icons.Material.Filled.Done" Color="Color.Primary">Send</MudButton>
+                        <MudStep Title="@stepComponent.Label">
+                            <ChildContent>
+                                @stepComponent.Component
+                            </ChildContent>
+                        </MudStep>
                     }
-                    else
+
+                </ChildContent>
+
+                <ActionContent Context="stepper">
+                    @if (!_completed)
                     {
-                        <MudIconButton OnClick="@(() => stepper.NextStepAsync())" Icon="@Icons.Material.Filled.ArrowForward" Color="Color.Primary" />
+                        <MudIconButton OnClick="@(() => stepper.PreviousStepAsync())" Icon="@Icons.Material.Filled.ArrowBack" Color="Color.Primary" Disabled="@(_index <= 0)" />
+                        <MudSpacer />
+
+                        @if (stepper.Steps[_index] == stepper.Steps.Last())
+                        {
+                            <MudButton Disabled="@(!_success)" OnClick="SendProject" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Done" Color="Color.Primary">Send</MudButton>
+                        }
+                        else
+                        {
+                            <MudIconButton OnClick="@(() => stepper.NextStepAsync())" Icon="@Icons.Material.Filled.ArrowForward" Color="Color.Primary" />
+                        }
                     }
-                }
-            </ActionContent>
-        </MudStepper>
+                </ActionContent>
+            </MudStepper>
+        </MudForm>
     </MudPaper>
 </MudStack>
 
@@ -187,6 +205,18 @@
     private IEnumerable<Brand> Brands = [];
     private IEnumerable<string> _tags = new HashSet<string>();
 
+    private List<string> Formats = [];
+
+    private MudForm form;
+    private bool _success;
+    private string[] _errors = {};
+
+    private void ToggleFormat(string format) 
+    {
+        if (!Formats.Contains(format)) Formats.Add(format);
+        else Formats.Remove(format);
+    }
+
     private List<StepComponent> GetStepComponents()
     {
         var steps = new List<StepComponent>();
@@ -199,7 +229,7 @@
             });
 
         steps.Add(new StepComponent { Label = "Produkt", Component = @<ProjectProductStep @bind-Project="Project" /> });
-        steps.Add(new StepComponent { Label = "Overblik", Component = @<ProjectOverviewStep @bind-Project="Project" @bind-Tags="_tags" /> });
+        steps.Add(new StepComponent { Label = "Overblik", Component = @<ProjectOverviewStep @bind-Project="Project" @bind-Tags="_tags" Formats="Formats" /> });
         return steps;
     }
 
@@ -230,4 +260,20 @@
 
     private string BrandToStringFunc(Brand brand) => brand is not null && 
         brand.Organization is not null && !string.IsNullOrEmpty(brand.Organization.Name) ? $"{brand.Name} ({brand.Organization.Name})" : "";
+
+    private async Task SendProject() 
+    {
+        if (Project is CreatorProject creatorProject) 
+        {
+            creatorProject.Tags = _tags.ToList();
+            creatorProject.Formats = String.Join(", ", Formats);
+        }
+
+        if (Project.Product is not null) Context.Products.Attach(Project.Product);
+
+        await ProjectService.AddObject(Project);
+        Snackbar.Configuration.PositionClass = Defaults.Classes.Position.BottomLeft;
+        Snackbar.Add("Nyt projekt tilføjet: " + Project.Name);
+        Navigation.NavigateTo("/projects");
+    }
 }

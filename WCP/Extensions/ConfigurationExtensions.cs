@@ -53,10 +53,16 @@ namespace WCPShared.Extensions
             else
             {
                 services.AddDbContextFactory<TestDbContext>(options =>
-                    options.UseSqlServer(Secrets.GetConnectionString(config)));
+                {
+                    options.EnableSensitiveDataLogging();
+                    options.UseSqlServer(Secrets.GetConnectionString(config));
+                });
 
                 services.AddDbContext<IWcpDbContext, TestDbContext>(options =>
-                    options.UseSqlServer(Secrets.GetConnectionString(config)));
+                {
+                    options.EnableSensitiveDataLogging();
+                    options.UseSqlServer(Secrets.GetConnectionString(config));
+                });
 
                 services.AddSingleton<IWcpDbContextFactory, TestDbContextFactory>();
             }

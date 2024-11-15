@@ -1,23 +1,22 @@
-﻿@using WCPFrontEnd.Components.Shared
+﻿@using Microsoft.EntityFrameworkCore
+@using WCPFrontEnd.Components.Pages.ProductRelated
+@using WCPFrontEnd.Components.Shared
+@using WCPShared.Interfaces
+@using WCPShared.Models.Entities
 @using WCPShared.Models.Entities.ProjectModels
+@inject IWcpDbContextFactory ContextFactory
+@inject IDialogService DialogService
 
 <MudText Class="text-center" Typo="Typo.h6">Produkt</MudText>
 <MudStack Spacing="4" Class="mt-4">
 
-    <MudTextField Label="Produktlink" @bind-Value="Project.Product.Link" />
-    <MudTextField Label="Billedelink" @bind-Value="Project.Product.ImgUrl" />
-
-    <MudStack Spacing="8" Row>
-        <MudTextField Label="Pains" AutoGrow @bind-Value="Project.Product.Link" />
-        <MudTextField Label="Features" AutoGrow @bind-Value="Project.Product.Link" />
-    </MudStack>
-
-    <MudStack Spacing="8" Row>
-        <MudTextField Label="Fokuspunkter" AutoGrow @bind-Value="Project.Product.FocusPoints" />
-        <MudTextField Label="Beskrivelse" AutoGrow @bind-Value="Project.Product.Description" />
-    </MudStack>
-
-    <MudTextField Label="Brugsanvisinger" AutoGrow @bind-Value="Project.Product.HowToUse" />
+    <MudSelect @ref="productSelect" Required ValueChanged="@(EventCallback.Factory.Create<Product>(this, ProductSelectChanged))" Label="Produkt" Value="Project.Product" Clearable Text="@ProductToString(Project.Product)" ToStringFunc="ProductToString" AnchorOrigin="Origin.BottomCenter">
+        @foreach (Product product in Products) 
+        {
+            <MudSelectItem Value="@product" Class="p-2 cursor-pointer text-primary">@product.Name</MudSelectItem>
+        }
+        <MudSelectItem Value="@((Product)null)" Class="p-2 cursor-pointer text-primary">Opret nyt produkt</MudSelectItem>
+    </MudSelect>
 
     @if (Project is CreatorProject creatorProject) 
     {
@@ -26,19 +25,17 @@
 
             <MudStack>
                 <MudButton @onclick="() => creatorProject.CreatorKeepsProduct = !creatorProject.CreatorKeepsProduct" Color="@(creatorProject.CreatorKeepsProduct ? Color.Success : Color.Primary)"
-                    Variant="Variant.Filled" Class="text-white rounded-lg" Spacing="0" Row Justify="Justify.FlexStart" AlignItems="AlignItems.Center">
+                Variant="Variant.Filled" Class="text-white rounded-lg" Spacing="0" Row Justify="Justify.FlexStart" AlignItems="AlignItems.Center">
                     <MudText>@(creatorProject.CreatorKeepsProduct ? "Ja - giv en anslået værdi" : "Nej - husk at sende returlabel med")</MudText>
                 </MudButton>
 
-                @if (creatorProject.CreatorKeepsProduct) 
+                @if (Project.Product is not null && creatorProject.CreatorKeepsProduct) 
                 {
                     <MudTextField Label="Anslået værdi" @bind-Value="creatorProject.Product.Value" Required RequiredError="Dette felt er påkrævet" />
                 }
             </MudStack>
-            
         </MudStack>
     }
-    
 </MudStack> 
 
 @code {
@@ -58,4 +55,58 @@
     [Parameter]
     public EventCallback<Project> ProjectChanged { get; set; }
     private Project _project;
+
+    private MudSelect<Product> productSelect;
+
+    private IEnumerable<Product> Products = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        if (Project.Brand is not null) 
+        {
+            using (IWcpDbContext context = ContextFactory.CreateDbContext())
+            {
+                Products = await context.Products.Where(x => x.BrandId == Project.Brand.Id).AsNoTracking().ToListAsync();
+            }
+        }
+    }
+
+    private string ProductToString(Product product) => product is not null ? product.Name : string.Empty;
+
+    private async Task ProductSelectChanged(Product product) 
+    {
+        if (product is null)
+        {
+            await OpenAddProductDialog();
+        }
+        else
+        {
+            Project.Product = product;
+        }
+    }
+
+    private async Task OpenAddProductDialog()
+    {
+        await productSelect.CloseMenu();
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+
+        var parameters = new DialogParameters<WCPFrontEnd.Components.Pages.ProductRelated.Dialoges.AddProductDialog>
+        {
+            { x => x.Brand, Project.Brand }
+        };
+
+        var dialog = await DialogService.ShowAsync<WCPFrontEnd.Components.Pages.ProductRelated.Dialoges.AddProductDialog>("Add product dialog", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled && result.Data is Product addedProduct)
+        {
+            Project.Product = addedProduct;
+            using (IWcpDbContext context = ContextFactory.CreateDbContext())
+            {
+                Products = await context.Products.Where(x => x.BrandId == Project.Brand.Id).AsNoTracking().ToListAsync();
+            }
+        }
+    }
 }

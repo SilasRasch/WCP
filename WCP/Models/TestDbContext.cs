@@ -95,6 +95,18 @@ namespace WCPShared.Models
                 .HasConversion(new ValueConverter<List<string>, string>(
                     v => JsonConvert.SerializeObject(v),
                     v => JsonConvert.DeserializeObject<List<string>>(v)!));
+
+            modelBuilder.Entity<Creator>()
+                .Property(x => x.PriceEstimate)
+                .HasConversion(new ValueConverter<long[], string>(
+                    v => JsonConvert.SerializeObject(v),
+                    v => JsonConvert.DeserializeObject<long[]>(v)!));
+
+            modelBuilder.Entity<Creator>()
+                .Property(x => x.Tags)
+                .HasConversion(new ValueConverter<IEnumerable<string>, string>(
+                    v => JsonConvert.SerializeObject(v),
+                    v => JsonConvert.DeserializeObject<IEnumerable<string>>(v)!));
         }
     }
 }

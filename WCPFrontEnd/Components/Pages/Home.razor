@@ -299,7 +299,7 @@
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var email = authState.User.FindFirst(c => c.Type == ClaimTypes.Email)?.Value;
-        User = await Context.Users.Include(x => x.Organization).SingleOrDefaultAsync(x => x.Email == email);
+        User = await Context.Users.Include(x => x.Organization).AsNoTracking().SingleOrDefaultAsync(x => x.Email == email);
 
         if (User is not null) 
         {
@@ -309,6 +309,7 @@
                 .ThenInclude(x => x.Language)
                 .Where(x => x.Status != ProjectStatus.Cancelled)
                 .AsSplitQuery()
+                .AsNoTracking()
                 .ToListAsync();
 
             if (User.Role == UserRole.Bruger)
@@ -320,9 +321,9 @@
                         creatorProject.Participations.Any(x => x.Creator.UserId == User.Id))
                         .ToList();
 
-            ugcCount = Context.UgcProjects.Count();
-            staticCount = Context.StaticProjects.Count();
-            photoCount = Context.PhotoProjects.Count();
+            ugcCount = Context.UgcProjects.AsNoTracking().Count();
+            staticCount = Context.StaticProjects.AsNoTracking().Count();
+            photoCount = Context.PhotoProjects.AsNoTracking().Count();
 
             data = [ugcCount, staticCount, photoCount];
             Series.Add(new ChartSeries() { Data = data });
