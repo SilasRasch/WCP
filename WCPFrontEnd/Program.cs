@@ -9,12 +9,20 @@ using Stripe;
 using WCPShared.Services.StaticHelpers;
 using WCPShared.Models.Enums;
 using WCPFrontEnd.Services;
+using Microsoft.AspNetCore.ResponseCompression;
+using WCPFrontEnd.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+builder.Services.AddSignalR();
+builder.Services.AddResponseCompression(options =>
+{
+    options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[] { "application/octet-stream" });
+});
 
 builder.Services.AddControllers();
 
@@ -65,5 +73,7 @@ app.MapControllers();
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
+
+app.MapHub<ChatHub>("/chathub");
 
 app.Run();

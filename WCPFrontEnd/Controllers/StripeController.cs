@@ -74,7 +74,7 @@ namespace WCPFrontEnd.Controllers
                 }
                 else if (stripeEvent.Type == EventTypes.CustomerSubscriptionDeleted)
                 {
-                    var subscription = stripeEvent.Data.Object as Subscription;
+                    var subscription = stripeEvent.Data.Object as Stripe.Subscription;
                     Console.WriteLine("A subcription was cancelled for {0}.", subscription.CustomerId);
                     // Then define and call a method to handle the successful payment intent.
 
@@ -84,9 +84,23 @@ namespace WCPFrontEnd.Controllers
                     {
                         org.IsActive = false;
                         await _context.SaveChangesAsync();
-                        Console.WriteLine("A new subscription was successful for {0}.", subscription.Customer.Email);
+                        Console.WriteLine("A subscription was deleted for {0}.", subscription.Customer.Email);
                     }
 
+                }
+                else if (stripeEvent.Type == EventTypes.InvoicePaymentFailed)
+                {
+                    var invoice = stripeEvent.Data.Object as Invoice;
+                    
+                    var org = await _context.Organizations.Include(x => x.Subscription)
+                        .SingleOrDefaultAsync(x => x.StripeAccountId == invoice.CustomerId);
+
+                    if (org is not null && !string.IsNullOrEmpty(invoice.SubscriptionId))
+                    {
+                        org.IsActive = false;
+                        await _context.SaveChangesAsync();
+                        Console.WriteLine("A payment failed for {0}.", org.Name);
+                    }
                 }
                 else
                 {
