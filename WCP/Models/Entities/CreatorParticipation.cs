@@ -12,5 +12,7 @@ namespace WCPShared.Models.Entities
         public float Salary { get; set; } = 0;
         public string Currency { get; set; } = string.Empty;
         public bool HasDelivered { get; set; } = false;
+        public int ShipmentId { get; set; }
+        public bool HasBeenPaid { get; set; } = false;
     }
 }

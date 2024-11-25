@@ -321,7 +321,7 @@
 
         var dialog = await DialogService.ShowAsync<Dialoges.EditProjectDialog>("Edit dialog", parameters, options);
         var result = await dialog.Result;
-        FetchProjects();
+        await FetchProjects();
     }
 
     private async Task OpenStatusDialog(Project project, ProjectStatus newStatus)
@@ -336,7 +336,7 @@
 
         var dialog = await DialogService.ShowAsync<Dialoges.ProjectStatusDialog>("Status dialog", parameters, options);
         var result = await dialog.Result;
-        FetchProjects();
+        await FetchProjects();
     }
 
     private async Task OpenStatusDialogAdmin(Project project)
@@ -352,7 +352,7 @@
 
             var dialog = await DialogService.ShowAsync<Dialoges.ProjectStatusDialog_Admin>("Status admin dialog", parameters, options);
             var result = await dialog.Result;
-            FetchProjects();
+            await FetchProjects();
         }
     }
 
@@ -369,7 +369,7 @@
 
             var dialog = await DialogService.ShowAsync<Dialoges.CreatorSelectionDialog>("Creator dialog", parameters, options);
             var result = await dialog.Result;
-            FetchProjects();
+            await FetchProjects();
         }
 
 
@@ -399,9 +399,9 @@
         }
     }
 
-    private void Refetch() 
+    private async Task Refetch() 
     {
-        FetchProjects();
+        await FetchProjects();
         StateHasChanged();
     }
 

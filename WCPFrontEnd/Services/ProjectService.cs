@@ -1,15 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Stripe.Climate;
 using System.Linq.Expressions;
 using WCPShared.Interfaces;
-using WCPShared.Models.DTOs;
 using WCPShared.Models.Entities;
 using WCPShared.Models.Entities.ProjectModels;
-using WCPShared.Models.Entities.UserModels;
 using WCPShared.Models.Enums;
 using WCPShared.Services;
 using WCPShared.Services.EntityFramework;
-using WCPShared.Services.StaticHelpers;
 
 namespace WCPFrontEnd.Services
 {
@@ -18,13 +14,15 @@ namespace WCPFrontEnd.Services
         private readonly IWcpDbContext _context;
         private readonly StripeService _stripeService;
         private readonly SlackNotificationService _slackNotificationService;
+        private readonly ShippingService _shippingService;
 
-        public ProjectService(IWcpDbContext context, StripeService stripeService, SlackNotificationService slackNotificationService)
+        public ProjectService(IWcpDbContext context, StripeService stripeService, SlackNotificationService slackNotificationService, ShippingService shippingService)
             : base(context)
         {
             _context = context;
             _stripeService = stripeService;
             _slackNotificationService = slackNotificationService;
+            _shippingService = shippingService;
         }
 
         public override async Task<Project?> AddObject(Project obj)
@@ -42,15 +40,16 @@ namespace WCPFrontEnd.Services
         {
             obj.Updated = DateTime.Now;
 
-            _context.Update(obj);
-            await _context.SaveChangesAsync();
-
             if (obj is CreatorProject creatorProject && oldObj is CreatorProject oldCreatorProject)
             {
                 PayCreators(creatorProject, oldCreatorProject);
+                await CreateShippingLabels(creatorProject, oldCreatorProject);
             }
 
-            await _slackNotificationService.SendStatusNotifications(obj, oldObj);
+            _context.Update(obj);
+            await _context.SaveChangesAsync();
+
+            await _slackNotificationService.SendStatusNotifications(obj, oldObj);;
             return obj;
         }
 
@@ -71,8 +70,28 @@ namespace WCPFrontEnd.Services
                 {
                     if (participation.Creator.StripeAccountId is not null)
                     {
-                        _stripeService.Transfer(participation.Salary, participation.Creator.StripeAccountId, $"Projektløn ({project.Id})", participation.Creator.User.Language.Currency);
+                        var res = _stripeService.Transfer(participation.Salary, participation.Creator.StripeAccountId, $"Projektløn ({project.Id})", participation.Creator.User.Language.Currency);
+                        
+                        if (res is not null)
+                        {
+                            participation.HasBeenPaid = true;
+                            _context.SaveChangesAsync();
+                        }
                     }
+                }
+            }
+        }
+
+        private async Task CreateShippingLabels(CreatorProject project, CreatorProject oldProject)
+        {
+            if (project.Status == ProjectStatus.CreatorFilming && oldProject.Status == ProjectStatus.Planned)
+            {
+                foreach (CreatorParticipation participation in project.Participations)
+                {
+                    var res = await _shippingService.CreateShipment($"{participation.Project.Id}");
+                    participation.ShipmentId = res.Id;
+                    await _context.SaveChangesAsync();
+                    await _shippingService.SendShippingEmail(participation, res.Labels.First().Base64);
                 }
             }
         }

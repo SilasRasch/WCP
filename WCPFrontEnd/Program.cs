@@ -11,6 +11,10 @@ using WCPShared.Models.Enums;
 using WCPFrontEnd.Services;
 using Microsoft.AspNetCore.ResponseCompression;
 using WCPFrontEnd.Hubs;
+using SlackNet;
+using System.Net.Http.Headers;
+using System.Net.Http;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,10 +22,18 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-builder.Services.AddSignalR();
-builder.Services.AddResponseCompression(options =>
+// For chat
+//builder.Services.AddSignalR();
+//builder.Services.AddResponseCompression(options =>
+//{
+//    options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[] { "application/octet-stream" });
+//});
+
+builder.Services.AddHttpClient<ShippingService>(client =>
 {
-    options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[] { "application/octet-stream" });
+    client.BaseAddress = new Uri("https://app.shipmondo.com/api/public/v3/");
+    string credentials = Convert.ToBase64String(Encoding.UTF8.GetBytes($"a30c7730-f37c-4b50-9894-d35193b6d0d6:{Secrets.GetShipmondoPassword(builder.Configuration)}"));
+    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", credentials);
 });
 
 builder.Services.AddControllers();
@@ -36,6 +48,7 @@ builder.Services.AddScoped<S3Service>();
 StripeConfiguration.ApiKey = Secrets.GetStripeApiKey(builder.Configuration);
 builder.Services.AddScoped<StripeService>();
 builder.Services.AddScoped<ProjectService>();
+//builder.Services.AddScoped<ShippingService>();
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>

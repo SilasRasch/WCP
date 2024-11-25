@@ -99,9 +99,10 @@
 
     protected override async Task OnInitializedAsync()
     {
-        ProjectCopy = DtoHelper.DeepCopy(Project);
+        // ProjectCopy = DtoHelper.DeepCopy(Project);
+        ProjectCopy = DtoHelper.CopyEntity(Project);
 
-        if (CustomerHasToPay) 
+        if (CustomerHasToPay)
         {
             AuthenticationState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
             StripeAccountId = AuthenticationState.User.FindFirst(c => c.Type == "StripeAccountId")?.Value;

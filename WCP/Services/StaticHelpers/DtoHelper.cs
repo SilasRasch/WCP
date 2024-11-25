@@ -57,6 +57,30 @@ namespace WCPShared.Services.StaticHelpers
             return JsonConvert.DeserializeObject<T>(serialized)!;
         }
 
+        public static T CopyEntity<T>(T originalEntity) where T : class
+        {
+            // Get the runtime type of the entity
+            Type entityType = originalEntity.GetType();
+
+            // Ensure it's not abstract (safety check, optional)
+            if (entityType.IsAbstract)
+                throw new InvalidOperationException("Cannot instantiate abstract types.");
+
+            // Create a new instance of the same type
+            var copiedEntity = Activator.CreateInstance(entityType);
+
+            // Copy properties
+            foreach (var property in entityType.GetProperties())
+            {
+                if (property.CanWrite && property.Name != "Id") // Skip primary key or other fields
+                {
+                    property.SetValue(copiedEntity, property.GetValue(originalEntity));
+                }
+            }
+
+            return (T)copiedEntity;
+        }
+
         public static Order MapProperties(OrderDto input, Order output)
         {
             output.Price = input.Price;

@@ -92,6 +92,17 @@ namespace WCPShared.Services.StaticHelpers
             return appsetting;
         }
 
+        public static string GetShipmondoPassword(IConfiguration config)
+        {
+            var env = Environment.GetEnvironmentVariable("SHIPMONDO_PSWD")!;
+            var appsetting = config.GetSection("ShipmondoPassword").Value!;
+
+            if (env != null)
+                return env;
+
+            return appsetting;
+        }
+
         public static IEnumerable<string> GetAudiences()
         {
             List<string> audiences = new List<string>(Origins);
