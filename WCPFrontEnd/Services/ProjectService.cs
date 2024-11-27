@@ -40,14 +40,14 @@ namespace WCPFrontEnd.Services
         {
             obj.Updated = DateTime.Now;
 
+            _context.Update(obj);
+            await _context.SaveChangesAsync();
+
             if (obj is CreatorProject creatorProject && oldObj is CreatorProject oldCreatorProject)
             {
                 PayCreators(creatorProject, oldCreatorProject);
                 await CreateShippingLabels(creatorProject, oldCreatorProject);
             }
-
-            _context.Update(obj);
-            await _context.SaveChangesAsync();
 
             await _slackNotificationService.SendStatusNotifications(obj, oldObj);;
             return obj;

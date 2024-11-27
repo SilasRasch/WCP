@@ -39,7 +39,7 @@ namespace WCPShared.Services
             if (fileExtension.ToLower() == ".jpg")
                 fileExtension = ".jpeg";
 
-            return await _client.UploadImage(fileName, stream, $"image/{fileExtension.Substring(1)}");
+            return await _client.UploadFile(fileName, stream, file.ContentType);
         }
 
         public async Task<string> UploadStaticTemplateImage(IBrowserFile file)
@@ -60,7 +60,7 @@ namespace WCPShared.Services
             if (fileExtension.ToLower() == ".jpg")
                 fileExtension = ".jpeg";
 
-            return await _client.UploadImage(fileName, stream, $"image/{fileExtension.Substring(1)}");
+            return await _client.UploadFile(fileName, stream, file.ContentType);
         }
 
         public async Task<string> UploadCreatorContent(IBrowserFile file, Project project, int video, string subFolder) // Subfolder = Visuals/Voiceover
@@ -78,7 +78,7 @@ namespace WCPShared.Services
             var fileExtension = Path.GetExtension(file.Name);
             var fileName = $"{project.Brand.Name}/{project.Id}/Content/{video}/{subFolder}/{file.Name}";
 
-            return await _client.UploadFile(fileName, stream, $"video/{fileExtension.Substring(1)}");
+            return await _client.UploadFile(fileName, stream, file.ContentType);
         }
 
         public async Task<string> UploadFinalContent(IBrowserFile file, Project project, string format, int video) // Subfolder = Visuals/Voiceover
@@ -96,7 +96,7 @@ namespace WCPShared.Services
             var fileExtension = Path.GetExtension(file.Name);
             var fileName = $"{project.Brand.Name}/{project.Id}/Content/{format}/{video}.{fileExtension}";
 
-            return await _client.UploadFile(fileName, stream, $"video/{fileExtension.Substring(1)}");
+            return await _client.UploadFile(fileName, stream, file.ContentType);
         }
 
         public async Task<string> UploadScript(IBrowserFile file, Project project)
@@ -114,7 +114,7 @@ namespace WCPShared.Services
             var fileExtension = Path.GetExtension(file.Name);
             var fileName = $"{project.Brand.Name}/{project.Id}/Scripts/{file.Name}";
 
-            return await _client.UploadFile(fileName, stream, $"application/msword");
+            return await _client.UploadFile(fileName, stream, file.ContentType);
         }
     }
 }

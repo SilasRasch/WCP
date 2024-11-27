@@ -2,6 +2,7 @@
 using System.Text;
 using WCPShared.Interfaces;
 using WCPShared.Models.Entities;
+using WCPShared.Services.StaticHelpers;
 
 namespace WCPFrontEnd.Services
 {
@@ -43,7 +44,7 @@ namespace WCPFrontEnd.Services
         {
             var shipmentPayload = new
             {
-                test_mode = true,
+                test_mode = !Secrets.IsProd,
                 own_agreement = false,
                 label_format = "a4_pdf",
                 product_code = "GLSDK_SD",

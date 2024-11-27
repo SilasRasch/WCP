@@ -6,6 +6,7 @@ using WCPShared.Models.Entities;
 using WCPShared.Interfaces;
 using Microsoft.Extensions.Configuration;
 using SendGrid;
+using Amazon.S3.Transfer;
 
 namespace WCPShared.Models
 {
@@ -16,11 +17,6 @@ namespace WCPShared.Models
         public S3Client(IConfiguration configuration)
         {
             _settings = Secrets.GetS3Settings(configuration);
-        }
-
-        public async Task<string> UploadImage(string fileName, Stream fileStream, string? fileType = "image/jpg")
-        {
-            return await UploadFile(fileName, fileStream, fileType);
         }
 
         public async Task<string> UploadFile(string fileName, Stream fileStream, string mimeType)
