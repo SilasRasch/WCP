@@ -66,12 +66,7 @@ namespace WCPShared.Services.EntityFramework
         public async Task<Order?> UpdateObject(int id, OrderDto order)
         {
             // Check if order exists
-            Order? existingOrder = await _context.Orders
-                .Include(o => o.Participations)
-                .ThenInclude(x => x.Creator)
-                .ThenInclude(x => x.User)
-                .AsSplitQuery()
-                .SingleOrDefaultAsync(o => o.Id == id);
+            Order? existingOrder = await GetObject(id);
 
             if (existingOrder is null)
                 return null;
