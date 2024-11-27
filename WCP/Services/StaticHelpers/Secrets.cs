@@ -58,10 +58,23 @@ namespace WCPShared.Services.StaticHelpers
             return appsetting;
         }
 
+        
+
         public static string GetJwtKey(IConfiguration config)
         {
             var env = Environment.GetEnvironmentVariable("JWT_KEY")!;
             var appsetting = config.GetSection("Jwt:GeneratedToken").Value!;
+
+            if (env != null)
+                return env;
+
+            return appsetting;
+        }
+
+        public static string GetShipmondoPassword(IConfiguration config)
+        {
+            var env = Environment.GetEnvironmentVariable("SHIPMONDO_PSWD")!;
+            var appsetting = config.GetSection("ShipmondoPassword").Value!;
 
             if (env != null)
                 return env;

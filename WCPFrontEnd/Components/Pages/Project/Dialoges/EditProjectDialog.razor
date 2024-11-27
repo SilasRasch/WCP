@@ -5,6 +5,7 @@
 @using WCPShared.Models.Enums
 @using WCPShared.Models.Views
 @using WCPShared.Services.EntityFramework
+@using WCPShared.Services.StaticHelpers
 @inject OrderService OrderService
 @inject IWcpDbContext Context
 
@@ -175,8 +176,11 @@
     private DateTime? _deliveryDate = DateTime.Now;
     private DateTime? _createdDate = DateTime.Now;
 
+    private Order ProjectCopy;
+
     protected override void OnInitialized()
     {
+        ProjectCopy = DtoHelper.CloneOrder(Project);
         _deliveryDate = Project.DeliveryDate;
         _createdDate = Project.Created;
         Brands = Context.Brands
@@ -193,7 +197,7 @@
         if (_createdDate != DateTime.MinValue)
             Project.Created = _createdDate!.Value;
         
-        await OrderService.UpdateObject(Project.Id, Project);
+        await OrderService.UpdateObject(Project, ProjectCopy);
         MudDialog.Close(DialogResult.Ok(true));
     }
 

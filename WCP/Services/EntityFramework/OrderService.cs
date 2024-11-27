@@ -9,6 +9,7 @@ using WCPShared.Interfaces;
 using WCPShared.Models.Entities;
 using WCPShared.Models.Entities.UserModels;
 using WCPShared.Models.Enums;
+using SendGrid.Helpers.Mail;
 
 namespace WCPShared.Services.EntityFramework
 {
@@ -20,8 +21,9 @@ namespace WCPShared.Services.EntityFramework
         private readonly ViewConverter _viewConverter;
         private readonly StaticTemplateService _templateService;
         private readonly SlackNotificationService _slackNetService;
+        private readonly ShippingService _shippingService;
 
-        public OrderService(IWcpDbContext context, BrandService brandService, CreatorService creatorService, ViewConverter viewConverter, SlackNotificationService slackNetService, StaticTemplateService staticTemplateService)
+        public OrderService(IWcpDbContext context, BrandService brandService, CreatorService creatorService, ViewConverter viewConverter, SlackNotificationService slackNetService, StaticTemplateService staticTemplateService, ShippingService shippingService)
             : base(context)
         {
             _context = context;
@@ -30,6 +32,7 @@ namespace WCPShared.Services.EntityFramework
             _viewConverter = viewConverter;
             _slackNetService = slackNetService;
             _templateService = staticTemplateService;
+            _shippingService = shippingService;
         }
 
         public override async Task<Order?> UpdateObject(int id, Order obj)
@@ -40,7 +43,7 @@ namespace WCPShared.Services.EntityFramework
                 return null!;
 
             obj.Updated = DateTime.Now;
-
+            
             _context.Update(obj);
             await _context.SaveChangesAsync();
             await _slackNetService.SendStatusNotifications(obj, existingOrder);
@@ -54,14 +57,22 @@ namespace WCPShared.Services.EntityFramework
 
             _context.Update(obj);
             await _context.SaveChangesAsync();
+
             await _slackNetService.SendStatusNotifications(obj, oldObj);
+            await CreateShippingLabels(obj, oldObj);
             return obj;
         }
         
         public async Task<Order?> UpdateObject(int id, OrderDto order)
         {
             // Check if order exists
-            Order? existingOrder = await GetObject(id);
+            Order? existingOrder = await _context.Orders
+                .Include(o => o.Participations)
+                .ThenInclude(x => x.Creator)
+                .ThenInclude(x => x.User)
+                .AsSplitQuery()
+                .SingleOrDefaultAsync(o => o.Id == id);
+
             if (existingOrder is null)
                 return null;
 
@@ -252,6 +263,23 @@ namespace WCPShared.Services.EntityFramework
             if (order is not null)
                 return _viewConverter.Convert(order);
             return null;
+        }
+
+        private async Task CreateShippingLabels(Order project, Order oldProject)
+        {
+            if (project.BrandId == 8 || project.BrandId == 26) // Kun Webshopskolen
+            {
+                if (project.Status == ProjectStatus.CreatorFilming && oldProject.Status == ProjectStatus.Planned)
+                {
+                    foreach (CreatorParticipation participation in project.Participations)
+                    {
+                        var res = await _shippingService.CreateShipment($"{participation.OrderId}");
+                        //participation.ShipmentId = res.Id;
+                        //await _context.SaveChangesAsync();
+                        await _shippingService.SendShippingEmail(participation, res.Labels.First().Base64);
+                    }
+                }
+            }
         }
     }
 }

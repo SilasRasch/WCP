@@ -1,16 +1,27 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.Extensions.Configuration;
 using MudBlazor.Services;
+using System.Net.Http.Headers;
+using System.Text;
 using WCPFrontEnd.Components;
 using WCPShared.Extensions;
 using WCPShared.Interfaces;
 using WCPShared.Models;
 using WCPShared.Services;
+using WCPShared.Services.StaticHelpers;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+builder.Services.AddHttpClient<ShippingService>(client =>
+{
+    client.BaseAddress = new Uri("https://app.shipmondo.com/api/public/v3/");
+    string credentials = Convert.ToBase64String(Encoding.UTF8.GetBytes($"a30c7730-f37c-4b50-9894-d35193b6d0d6:{Secrets.GetShipmondoPassword(builder.Configuration)}"));
+    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", credentials);
+});
 
 builder.Services.AddMudServices();
 

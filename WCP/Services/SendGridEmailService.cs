@@ -128,5 +128,27 @@ namespace WCPShared.Services
 
             return response.StatusCode;
         }
+
+        public async Task<HttpStatusCode> SendShippingEmail(CreatorParticipation participation, string Base64Pdf)
+        {
+            var apiKey = Secrets.GetSendGridAPI(_configuration);
+            var client = new SendGridClient(apiKey);
+            var from = new EmailAddress("info@webcontent.dk", "WebContent Platform");
+            var to = new EmailAddress(participation.Creator.User.Email, participation.Creator.User.Name);
+
+            var plainTextContent = "Please find the label in the attachments.";
+            var htmlContent = "<strong>Please find the label in the attachments.</strong>";
+
+            var msg = MailHelper.CreateSingleEmail(from, to, $"Return label - Project {participation.OrderId}", plainTextContent, htmlContent);
+
+            msg.AddAttachment("shipping_label.pdf", Base64Pdf);
+
+            var response = await client.SendEmailAsync(msg);
+
+            if (response.StatusCode != HttpStatusCode.OK && response.StatusCode != HttpStatusCode.Created && response.StatusCode != HttpStatusCode.Accepted)
+                throw new ArgumentException($"Send Grid mail was not sent... {response.StatusCode} : {await response.Body.ReadAsStringAsync()}");
+
+            return response.StatusCode;
+        }
     }
 }
