@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using WCPShared.Interfaces;
 using WCPShared.Models;
+using WCPShared.Models.Entities.ProjectModels;
 
 namespace WCPShared.Services
 {
@@ -60,6 +61,60 @@ namespace WCPShared.Services
                 fileExtension = ".jpeg";
 
             return await _client.UploadImage(fileName, stream, $"image/{fileExtension.Substring(1)}");
+        }
+
+        public async Task<string> UploadCreatorContent(IBrowserFile file, Project project, int video, string subFolder) // Subfolder = Visuals/Voiceover
+        {
+            string regexFileExtension = @"(mp4|mov|avi|wmv)";
+            if (!Regex.IsMatch(Path.GetExtension(file.Name).ToLower(), regexFileExtension) || !file.ContentType.ToLower().Contains("video"))
+                throw new ArgumentException("File-type not accepted");
+
+            var maxFileSize = 1024 * 1024 * 1024; // 1 TB
+            if (file.Size > maxFileSize) 
+                throw new ArgumentException("File size above limit");
+
+            var stream = file.OpenReadStream(maxAllowedSize: maxFileSize);
+
+            var fileExtension = Path.GetExtension(file.Name);
+            var fileName = $"{project.Brand.Name}/{project.Id}/Content/{video}/{subFolder}/{file.Name}";
+
+            return await _client.UploadFile(fileName, stream, $"video/{fileExtension.Substring(1)}");
+        }
+
+        public async Task<string> UploadFinalContent(IBrowserFile file, Project project, string format, int video) // Subfolder = Visuals/Voiceover
+        {
+            string regexFileExtension = @"(mp4|mov|avi|wmv)";
+            if (!Regex.IsMatch(Path.GetExtension(file.Name).ToLower(), regexFileExtension) || !file.ContentType.ToLower().Contains("video"))
+                throw new ArgumentException("File-type not accepted");
+
+            var maxFileSize = 1024 * 1024 * 1024; // 1 TB
+            if (file.Size > maxFileSize)
+                throw new ArgumentException("File size above limit");
+
+            var stream = file.OpenReadStream(maxAllowedSize: maxFileSize);
+
+            var fileExtension = Path.GetExtension(file.Name);
+            var fileName = $"{project.Brand.Name}/{project.Id}/Content/{format}/{video}.{fileExtension}";
+
+            return await _client.UploadFile(fileName, stream, $"video/{fileExtension.Substring(1)}");
+        }
+
+        public async Task<string> UploadScript(IBrowserFile file, Project project)
+        {
+            string regexFileExtension = @"(docx)";
+            if (!Regex.IsMatch(Path.GetExtension(file.Name).ToLower(), regexFileExtension) || !file.ContentType.ToLower().Contains("application/msword"))
+                throw new ArgumentException("File-type not accepted");
+
+            var maxFileSize = 1024 * 1024 * 64; // 64 mb
+            if (file.Size > maxFileSize)
+                throw new ArgumentException("File size above limit");
+
+            var stream = file.OpenReadStream(maxAllowedSize: maxFileSize);
+
+            var fileExtension = Path.GetExtension(file.Name);
+            var fileName = $"{project.Brand.Name}/{project.Id}/Scripts/{file.Name}";
+
+            return await _client.UploadFile(fileName, stream, $"application/msword");
         }
     }
 }

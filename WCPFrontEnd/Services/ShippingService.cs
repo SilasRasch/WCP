@@ -24,13 +24,13 @@ namespace WCPFrontEnd.Services
 
         private dynamic DefaultReceiver = new
         {
-            name = "Lene Hansen",
-            address1 = "Skibhusvej 52",
-            zipcode = "5000",
-            city = "Odense C",
+            name = "Sille Hejselbak",
+            address1 = "Florsgade 3, 1th",
+            zipcode = "2200",
+            city = "Nørrebro",
             country_code = "DK",
-            email = "lene@email.dk",
-            mobile = "12345678"
+            email = "emilkanaris@yahoo.dk",
+            mobile = "40220080"
         };
 
         public ShippingService(HttpClient httpClient, IEmailService emailService, IConfiguration config)

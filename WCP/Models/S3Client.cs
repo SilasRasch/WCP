@@ -5,6 +5,7 @@ using WCPShared.Services.StaticHelpers;
 using WCPShared.Models.Entities;
 using WCPShared.Interfaces;
 using Microsoft.Extensions.Configuration;
+using SendGrid;
 
 namespace WCPShared.Models
 {
@@ -19,12 +20,17 @@ namespace WCPShared.Models
 
         public async Task<string> UploadImage(string fileName, Stream fileStream, string? fileType = "image/jpg")
         {
+            return await UploadFile(fileName, fileStream, fileType);
+        }
+
+        public async Task<string> UploadFile(string fileName, Stream fileStream, string mimeType)
+        {
             using var client = _client;
             var request = new PutObjectRequest
             {
                 BucketName = _settings.Bucket,
                 Key = $"{_settings.Root}/{fileName}",
-                ContentType = fileType,
+                ContentType = mimeType,
                 InputStream = fileStream,
                 CannedACL = S3CannedACL.PublicRead,
             };
