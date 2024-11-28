@@ -268,10 +268,13 @@ namespace WCPShared.Services.EntityFramework
                 {
                     foreach (CreatorParticipation participation in project.Participations)
                     {
-                        var res = await _shippingService.CreateShipment($"{participation.OrderId}");
-                        //participation.ShipmentId = res.Id;
-                        //await _context.SaveChangesAsync();
-                        await _shippingService.SendShippingEmail(participation, res.Labels.First().Base64);
+                        if (participation.Creator.SubType == CreatorSubType.UGC)
+                        {
+                            var res = await _shippingService.CreateShipment($"{participation.OrderId}");
+                            //participation.ShipmentId = res.Id;
+                            //await _context.SaveChangesAsync();
+                            await _shippingService.SendShippingEmail(participation, res.Labels.First().Base64);
+                        }
                     }
                 }
             }
