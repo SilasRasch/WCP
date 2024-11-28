@@ -136,12 +136,12 @@ namespace WCPShared.Services
             var from = new EmailAddress("info@webcontent.dk", "WebContent Platform");
             var to = new EmailAddress(participation.Creator.User.Email, participation.Creator.User.Name);
 
-            var plainTextContent = "Please find the label in the attachments.";
-            var htmlContent = "<strong>Please find the label in the attachments.</strong>";
+            var plainTextContent = $"Efter content er godkendt, bedes du sende produktet retur med vedhæftede label";
+            var htmlContent = $"<strong>{plainTextContent}</strong>";
 
-            var msg = MailHelper.CreateSingleEmail(from, to, $"Return label - Project {participation.OrderId}", plainTextContent, htmlContent);
+            var msg = MailHelper.CreateSingleEmail(from, to, $"Returlabel - Projekt {participation.Order.ProjectName} #{participation.OrderId}", plainTextContent, htmlContent);
 
-            msg.AddAttachment("shipping_label.pdf", Base64Pdf);
+            msg.AddAttachment("returlabel.pdf", Base64Pdf);
 
             var response = await client.SendEmailAsync(msg);
 
