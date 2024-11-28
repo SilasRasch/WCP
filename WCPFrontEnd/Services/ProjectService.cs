@@ -84,14 +84,20 @@ namespace WCPFrontEnd.Services
 
         private async Task CreateShippingLabels(CreatorProject project, CreatorProject oldProject)
         {
-            if (project.Status == ProjectStatus.CreatorFilming && oldProject.Status == ProjectStatus.Planned)
+            if (project.Brand.Organization.Name.ToLower() == "webshopskolen")
             {
-                foreach (CreatorParticipation participation in project.Participations)
+                if (project.Status == ProjectStatus.CreatorFilming && oldProject.Status == ProjectStatus.Planned)
                 {
-                    var res = await _shippingService.CreateShipment($"{participation.Project.Id}");
-                    participation.ShipmentId = res.Id;
-                    await _context.SaveChangesAsync();
-                    await _shippingService.SendShippingEmail(participation, res.Labels.First().Base64);
+                    foreach (CreatorParticipation participation in project.Participations)
+                    {
+                        if (participation.Creator.SubType == CreatorSubType.UGC)
+                        {
+                            var res = await _shippingService.CreateShipment($"{participation.Project.Id}");
+                            participation.ShipmentId = res.Id;
+                            await _context.SaveChangesAsync();
+                            await _shippingService.SendShippingEmail(participation, res.Labels.First().Base64);
+                        }
+                    }
                 }
             }
         }

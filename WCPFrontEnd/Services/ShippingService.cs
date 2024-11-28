@@ -47,10 +47,9 @@ namespace WCPFrontEnd.Services
                 test_mode = !Secrets.IsProd,
                 own_agreement = false,
                 label_format = "a4_pdf",
-                product_code = "GLSDK_SD",
+                product_code = "GLSDK_HD",
                 service_codes = "EMAIL_NT,SMS_NT",
                 reference = reference,
-                automatic_select_service_point = true,
                 sender = DefaultSender,
                 receiver = DefaultReceiver,
                 parcels = new[]
