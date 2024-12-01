@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using WCPShared.Models.Entities.UserModels;
+﻿using WCPShared.Models.Entities.UserModels;
 using WCPShared.Models.Enums;
 
 namespace WCPShared.Models.Entities.ProjectModels
@@ -20,6 +14,10 @@ namespace WCPShared.Models.Entities.ProjectModels
         public int CreativesPerCreator { get; set; } = 1;
         public bool CreatorKeepsProduct { get; set; }
         public List<string> Tags { get; set; } = [];
+
+        public List<string> CreatorVideos { get; set; }
+        public List<string> CreatorVoiceovers { get; set; }
+        public List<string> Scripts { get; set; }
 
         public List<CreatorParticipation> Participations { get; set; } = [];
 

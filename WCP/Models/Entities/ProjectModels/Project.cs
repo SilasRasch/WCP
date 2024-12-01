@@ -25,6 +25,10 @@ namespace WCPShared.Models.Entities.ProjectModels
         public DateTime Deadline { get; set; }
         public string InternalNotes { get; set; } = string.Empty;
 
+        // File storage 
+        public List<string> FinalContent { get; set; }
+        public List<string> OtherFiles { get; set; }
+
         #endregion
 
         #region Project

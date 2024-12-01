@@ -96,6 +96,36 @@ namespace WCPShared.Models
                     v => JsonConvert.SerializeObject(v),
                     v => JsonConvert.DeserializeObject<List<string>>(v)!));
 
+            modelBuilder.Entity<CreatorProject>()
+                .Property(x => x.CreatorVideos)
+                .HasConversion(new ValueConverter<List<string>, string>(
+                    v => JsonConvert.SerializeObject(v),
+                    v => JsonConvert.DeserializeObject<List<string>>(v)!));
+
+            modelBuilder.Entity<CreatorProject>()
+                .Property(x => x.CreatorVoiceovers)
+                .HasConversion(new ValueConverter<List<string>, string>(
+                    v => JsonConvert.SerializeObject(v),
+                    v => JsonConvert.DeserializeObject<List<string>>(v)!));
+
+            modelBuilder.Entity<CreatorProject>()
+                .Property(x => x.Scripts)
+                .HasConversion(new ValueConverter<List<string>, string>(
+                    v => JsonConvert.SerializeObject(v),
+                    v => JsonConvert.DeserializeObject<List<string>>(v)!));
+
+            modelBuilder.Entity<Project>()
+                .Property(x => x.FinalContent)
+                .HasConversion(new ValueConverter<List<string>, string>(
+                    v => JsonConvert.SerializeObject(v),
+                    v => JsonConvert.DeserializeObject<List<string>>(v)!));
+
+            modelBuilder.Entity<CreatorProject>()
+                .Property(x => x.OtherFiles)
+                .HasConversion(new ValueConverter<List<string>, string>(
+                    v => JsonConvert.SerializeObject(v),
+                    v => JsonConvert.DeserializeObject<List<string>>(v)!));
+
             modelBuilder.Entity<Creator>()
                 .Property(x => x.PriceEstimate)
                 .HasConversion(new ValueConverter<long[], string>(

@@ -21,9 +21,13 @@ namespace WCPShared.Services
             _client = client;
         }
 
+        private readonly string videoExtensions = @"(mp4|mov|avi|wmv|mkv|flv)";
+        private readonly string audioExtensions = @"(mp3|wav|wma|aac|oga|webm|m4a|aiff|flac|alac)";
+        private readonly string imageExtensions = @"(png|jpe?g)";
+
         public async Task<string> UploadProfilePicture(IBrowserFile file)
         {
-            string regexFileExtension = @"(png|jpe?g)";
+            string regexFileExtension = imageExtensions;
             if (!Regex.IsMatch(Path.GetExtension(file.Name).ToLower(), regexFileExtension) || !file.ContentType.ToLower().Contains("image"))
                 throw new ArgumentException("File-type not accepted");
 
@@ -44,7 +48,7 @@ namespace WCPShared.Services
 
         public async Task<string> UploadStaticTemplateImage(IBrowserFile file)
         {
-            string regexFileExtension = @"(png|jpe?g)";
+            string regexFileExtension = imageExtensions;
             if (!Regex.IsMatch(Path.GetExtension(file.Name).ToLower(), regexFileExtension) || !file.ContentType.ToLower().Contains("image"))
                 throw new ArgumentException("File-type not accepted");
 
@@ -63,9 +67,9 @@ namespace WCPShared.Services
             return await _client.UploadFile(fileName, stream, file.ContentType);
         }
 
-        public async Task<string> UploadCreatorContent(IBrowserFile file, Project project, int video, string subFolder) // Subfolder = Visuals/Voiceover
+        public async Task<string> UploadCreatorVideo(IBrowserFile file, Project project, int video, string subFolder) // Subfolder = Visuals/Voiceover
         {
-            string regexFileExtension = @"(mp4|mov|avi|wmv)";
+            string regexFileExtension = videoExtensions;
             if (!Regex.IsMatch(Path.GetExtension(file.Name).ToLower(), regexFileExtension) || !file.ContentType.ToLower().Contains("video"))
                 throw new ArgumentException("File-type not accepted");
 
@@ -81,9 +85,27 @@ namespace WCPShared.Services
             return await _client.UploadFile(fileName, stream, file.ContentType);
         }
 
+        public async Task<string> UploadCreatorVoiceover(IBrowserFile file, Project project, int video, string subFolder) // Subfolder = Visuals/Voiceover
+        {
+            string regexFileExtension = audioExtensions;
+            if (!Regex.IsMatch(Path.GetExtension(file.Name).ToLower(), regexFileExtension) || !file.ContentType.ToLower().Contains("audio"))
+                throw new ArgumentException("File-type not accepted");
+
+            var maxFileSize = 1024 * 1024 * 1024; // 1 TB
+            if (file.Size > maxFileSize)
+                throw new ArgumentException("File size above limit");
+
+            var stream = file.OpenReadStream(maxAllowedSize: maxFileSize);
+
+            var fileExtension = Path.GetExtension(file.Name);
+            var fileName = $"{project.Brand.Name}/{project.Id}/Content/{video}/{subFolder}/{file.Name}";
+
+            return await _client.UploadFile(fileName, stream, file.ContentType);
+        }
+
         public async Task<string> UploadFinalContent(IBrowserFile file, Project project, string format, int video) // Subfolder = Visuals/Voiceover
         {
-            string regexFileExtension = @"(mp4|mov|avi|wmv)";
+            string regexFileExtension = videoExtensions;
             if (!Regex.IsMatch(Path.GetExtension(file.Name).ToLower(), regexFileExtension) || !file.ContentType.ToLower().Contains("video"))
                 throw new ArgumentException("File-type not accepted");
 
