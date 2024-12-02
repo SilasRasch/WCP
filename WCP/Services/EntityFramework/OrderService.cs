@@ -59,7 +59,7 @@ namespace WCPShared.Services.EntityFramework
             await _context.SaveChangesAsync();
 
             await _slackNetService.SendStatusNotifications(obj, oldObj);
-            await CreateShippingLabels(obj, oldObj);
+            //await CreateShippingLabels(obj, oldObj);
             return obj;
         }
         
