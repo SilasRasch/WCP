@@ -67,7 +67,7 @@ namespace WCPShared.Services
             return await _client.UploadFile(fileName, stream, file.ContentType);
         }
 
-        public async Task<string> UploadCreatorVideo(IBrowserFile file, Project project, int video, string subFolder) // Subfolder = Visuals/Voiceover
+        public async Task<string> UploadCreatorVideo(IBrowserFile file, Project project, string contentName, string subFolder) // Subfolder = Visuals/Voiceover
         {
             string regexFileExtension = videoExtensions;
             if (!Regex.IsMatch(Path.GetExtension(file.Name).ToLower(), regexFileExtension) || !file.ContentType.ToLower().Contains("video"))
@@ -80,12 +80,12 @@ namespace WCPShared.Services
             var stream = file.OpenReadStream(maxAllowedSize: maxFileSize);
 
             var fileExtension = Path.GetExtension(file.Name);
-            var fileName = $"{project.Brand.Name}/{project.Id}/Content/{video}/{subFolder}/{file.Name}";
+            var fileName = $"{project.Brand.Name}/{project.Id}/Content/{contentName}/{subFolder}/{file.Name}";
 
             return await _client.UploadFile(fileName, stream, file.ContentType);
         }
 
-        public async Task<string> UploadCreatorVoiceover(IBrowserFile file, Project project, int video, string subFolder) // Subfolder = Visuals/Voiceover
+        public async Task<string> UploadCreatorVoiceover(IBrowserFile file, Project project, string contentName, string subFolder) // Subfolder = Visuals/Voiceover
         {
             string regexFileExtension = audioExtensions;
             if (!Regex.IsMatch(Path.GetExtension(file.Name).ToLower(), regexFileExtension) || !file.ContentType.ToLower().Contains("audio"))
@@ -98,7 +98,25 @@ namespace WCPShared.Services
             var stream = file.OpenReadStream(maxAllowedSize: maxFileSize);
 
             var fileExtension = Path.GetExtension(file.Name);
-            var fileName = $"{project.Brand.Name}/{project.Id}/Content/{video}/{subFolder}/{file.Name}";
+            var fileName = $"{project.Brand.Name}/{project.Id}/Content/{contentName}/{subFolder}/{file.Name}";
+
+            return await _client.UploadFile(fileName, stream, file.ContentType);
+        }
+
+        public async Task<string> UploadCreatorImage(IBrowserFile file, Project project, string contentName, string subFolder)
+        {
+            string regexFileExtension = imageExtensions;
+            if (!Regex.IsMatch(Path.GetExtension(file.Name).ToLower(), regexFileExtension) || !file.ContentType.ToLower().Contains("video"))
+                throw new ArgumentException("File-type not accepted");
+
+            var maxFileSize = 1024 * 1024 * 64; // 64 MB
+            if (file.Size > maxFileSize)
+                throw new ArgumentException("File size above limit");
+
+            var stream = file.OpenReadStream(maxAllowedSize: maxFileSize);
+
+            var fileExtension = Path.GetExtension(file.Name);
+            var fileName = $"{project.Brand.Name}/{project.Id}/Content/{contentName}/{subFolder}/{file.Name}";
 
             return await _client.UploadFile(fileName, stream, file.ContentType);
         }
@@ -135,6 +153,20 @@ namespace WCPShared.Services
 
             var fileExtension = Path.GetExtension(file.Name);
             var fileName = $"{project.Brand.Name}/{project.Id}/Scripts/{file.Name}";
+
+            return await _client.UploadFile(fileName, stream, file.ContentType);
+        }
+
+        public async Task<string> UploadOtherFile(IBrowserFile file, Project project)
+        {
+            var maxFileSize = 1024 * 1024 * 1024; // 1 TB
+            if (file.Size > maxFileSize)
+                throw new ArgumentException("File size above limit");
+
+            var stream = file.OpenReadStream(maxAllowedSize: maxFileSize);
+
+            var fileExtension = Path.GetExtension(file.Name);
+            var fileName = $"{project.Brand.Name}/{project.Id}/Other/{file.Name}";
 
             return await _client.UploadFile(fileName, stream, file.ContentType);
         }

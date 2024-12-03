@@ -1,0 +1,90 @@
+﻿@inject IDialogService DialogService
+
+<MudGrid Spacing="0" Justify="Justify.Center" Class="my-2 p-4 mud-secondary rounded-lg gap-2">
+    @* <MudItem Class="cursor-pointer">
+        <MudPaper Height="86px" Width="86px">
+            <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Class="w-full h-full">
+                <MudIcon Icon="@Icons.Material.Filled.PlayArrow" Size="Size.Large" />
+            </MudStack>
+        </MudPaper>
+        <MudText Class="text-center">Scripts</MudText>
+    </MudItem> *@
+
+    <MudFab StartIcon="@Icons.Material.Filled.Folder" IconSize="Size.Large" Class="mud-background" Label="Scripts" />
+    <MudFab StartIcon="@Icons.Material.Filled.Folder" IconSize="Size.Large" Class="mud-background" Label="Content" />
+    <MudFab StartIcon="@Icons.Material.Filled.Folder" IconSize="Size.Large" Class="mud-background" Label="Product" />
+    <MudFab StartIcon="@Icons.Material.Filled.Folder" IconSize="Size.Large" Class="mud-background" Label="Other" />
+
+    @* <MudItem Class="cursor-pointer" @onclick="@(() => ToggleUploadDialog(0))">
+        <MudPaper Height="86px" Width="86px">
+            <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Class="w-full h-full">
+                <MudIcon Icon="@Icons.Material.Filled.Add" Size="Size.Large" />
+            </MudStack>
+        </MudPaper>
+        <MudText Class="text-center">Tilføj</MudText>
+    </MudItem> *@
+</MudGrid>
+
+@* <MudTabs ActivePanelIndex="_tabIndex" Elevation="4" Rounded="true" Centered="true" Color="@Color.Primary">
+    <MudTabPanel Text="Scripts">
+        
+    </MudTabPanel>
+
+    <MudTabPanel Text="Content">
+        <MudGrid Spacing="0" Justify="Justify.FlexStart" Class="my-2 p-4 mud-secondary rounded-lg gap-2">
+            <MudItem Class="cursor-pointer" @onclick="@(() => ToggleUploadDialog(1))">
+                <MudPaper Height="86px" Width="86px">
+                    <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Class="w-full h-full">
+                        <MudIcon Icon="@Icons.Material.Filled.Add" Size="Size.Large" />
+                    </MudStack>
+                </MudPaper>
+                <MudText Class="text-center">Tilføj</MudText>
+            </MudItem>
+        </MudGrid>
+    </MudTabPanel>
+
+    <MudTabPanel Text="Product">
+        <MudGrid Spacing="0" Justify="Justify.FlexStart" Class="my-2 p-4 mud-secondary rounded-lg gap-2">
+            <MudItem Class="cursor-pointer" @onclick="@(() => ToggleUploadDialog(2))">
+                <MudPaper Height="86px" Width="86px">
+                    <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Class="w-full h-full">
+                        <MudIcon Icon="@Icons.Material.Filled.Add" Size="Size.Large" />
+                    </MudStack>
+                </MudPaper>
+                <MudText Class="text-center">Tilføj</MudText>
+            </MudItem>
+        </MudGrid>
+    </MudTabPanel>
+
+    <MudTabPanel Text="Other">
+        <MudGrid Spacing="0" Justify="Justify.FlexStart" Class="my-2 p-4 mud-secondary rounded-lg gap-2">
+            <MudItem Class="cursor-pointer" @onclick="@(() => ToggleUploadDialog(3))">
+                <MudPaper Height="86px" Width="86px">
+                    <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Class="w-full h-full">
+                        <MudIcon Icon="@Icons.Material.Filled.Add" Size="Size.Large" />
+                    </MudStack>
+                </MudPaper>
+                <MudText Class="text-center">Tilføj</MudText>
+            </MudItem>
+        </MudGrid>
+    </MudTabPanel>
+</MudTabs> *@
+
+@code {
+    private int _tabIndex;
+
+    private async Task ToggleUploadDialog(int category)
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true, CloseButton = true };
+        var parameters = new DialogParameters<Dialoges.FileUploadDialog>()
+        {
+            { x => x.Category, category }
+        };
+
+        var dialog = await DialogService.ShowAsync<Dialoges.FileUploadDialog>("FileUploadDialog", options);
+        var result = await dialog.Result;
+
+        // if (result is not null && !result.Canceled)
+        //     FetchStatics();
+    }
+}

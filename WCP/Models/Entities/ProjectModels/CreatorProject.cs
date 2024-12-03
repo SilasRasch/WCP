@@ -15,8 +15,8 @@ namespace WCPShared.Models.Entities.ProjectModels
         public bool CreatorKeepsProduct { get; set; }
         public List<string> Tags { get; set; } = [];
 
-        public List<string> CreatorVideos { get; set; }
-        public List<string> CreatorVoiceovers { get; set; }
+        public List<string> CreatorVisuals { get; set; }
+        public List<string> CreatorAudio { get; set; }
         public List<string> Scripts { get; set; }
 
         public List<CreatorParticipation> Participations { get; set; } = [];

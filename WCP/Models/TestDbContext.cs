@@ -97,13 +97,13 @@ namespace WCPShared.Models
                     v => JsonConvert.DeserializeObject<List<string>>(v)!));
 
             modelBuilder.Entity<CreatorProject>()
-                .Property(x => x.CreatorVideos)
+                .Property(x => x.CreatorVisuals)
                 .HasConversion(new ValueConverter<List<string>, string>(
                     v => JsonConvert.SerializeObject(v),
                     v => JsonConvert.DeserializeObject<List<string>>(v)!));
 
             modelBuilder.Entity<CreatorProject>()
-                .Property(x => x.CreatorVoiceovers)
+                .Property(x => x.CreatorAudio)
                 .HasConversion(new ValueConverter<List<string>, string>(
                     v => JsonConvert.SerializeObject(v),
                     v => JsonConvert.DeserializeObject<List<string>>(v)!));
