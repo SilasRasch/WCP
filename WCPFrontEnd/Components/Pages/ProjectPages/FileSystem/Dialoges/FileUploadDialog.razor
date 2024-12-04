@@ -12,7 +12,7 @@
 <MudDialog ContentClass="p-2">
     <TitleContent>
         <MudText Typo="Typo.h6">
-            Upload filer (@Category)
+            Upload filer (@Path)
         </MudText>
     </TitleContent>
     <DialogContent>
@@ -61,6 +61,9 @@
 
     [Parameter]
     public int Category { get; set; }
+
+    [Parameter] 
+    public string Path { get; set; }
 
     private List<IBrowserFile> Files { get; set; } = [];
 

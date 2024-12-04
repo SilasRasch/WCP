@@ -1,90 +1,112 @@
 ﻿@inject IDialogService DialogService
 
+@* Breadcrumbs *@
+<MudStack Row>
+    <MudText Class="cursor-pointer" @onclick="@(() => GoToPath(string.Empty))">Home</MudText>
+
+    @if (_path.Contains("scripts")) 
+    {
+        <MudText>/</MudText>
+        <MudText Class="cursor-pointer" @onclick="@(() => GoToPath("scripts"))">Scripts</MudText>
+    }
+    
+
+    @if (_path.Contains("content"))
+    {
+        <MudText>/</MudText>
+        <MudText Class="cursor-pointer" @onclick="@(() => GoToPath("content"))">Content</MudText>
+
+        @if (_path.Contains("audio"))
+        {
+            <MudText>/</MudText>
+            <MudText Class="cursor-pointer" @onclick="@(() => GoToPath("content/audio"))">Audio</MudText>
+        }
+
+        @if (_path.Contains("visuals"))
+        {
+            <MudText>/</MudText>
+            <MudText Class="cursor-pointer" @onclick="@(() => GoToPath("content/visuals"))">Visuals</MudText>
+        }
+    }
+
+    @if (_path.Contains("product"))
+    {
+        <MudText>/</MudText>
+        <MudText Class="cursor-pointer" @onclick="@(() => GoToPath("product"))">Product</MudText>
+    }
+
+    @if (_path.Contains("other"))
+    {
+        <MudText>/</MudText>
+        <MudText Class="cursor-pointer" @onclick="@(() => GoToPath("other"))">Other</MudText>
+    }
+</MudStack>
+
 <MudGrid Spacing="0" Justify="Justify.Center" Class="my-2 p-4 mud-secondary rounded-lg gap-2">
-    @* <MudItem Class="cursor-pointer">
-        <MudPaper Height="86px" Width="86px">
-            <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Class="w-full h-full">
-                <MudIcon Icon="@Icons.Material.Filled.PlayArrow" Size="Size.Large" />
-            </MudStack>
-        </MudPaper>
-        <MudText Class="text-center">Scripts</MudText>
-    </MudItem> *@
+    @if (_path == string.Empty) 
+    {
+        @* if (Project is CreateProject creatorProject) *@
+        <MudFab StartIcon="@Icons.Material.Filled.Folder" IconSize="Size.Large" Class="mud-background" Label="Scripts" OnClick="@(() => GoToPath("scripts"))" />
+        <MudFab StartIcon="@Icons.Material.Filled.Folder" IconSize="Size.Large" Class="mud-background" Label="Content" OnClick="@(() => GoToPath("content"))" />
+        <MudFab StartIcon="@Icons.Material.Filled.Folder" IconSize="Size.Large" Class="mud-background" Label="Product" OnClick="@(() => GoToPath("product"))" />
+        <MudFab StartIcon="@Icons.Material.Filled.Folder" IconSize="Size.Large" Class="mud-background" Label="Other" OnClick="@(() => GoToPath("other"))" />
+    }
 
-    <MudFab StartIcon="@Icons.Material.Filled.Folder" IconSize="Size.Large" Class="mud-background" Label="Scripts" />
-    <MudFab StartIcon="@Icons.Material.Filled.Folder" IconSize="Size.Large" Class="mud-background" Label="Content" />
-    <MudFab StartIcon="@Icons.Material.Filled.Folder" IconSize="Size.Large" Class="mud-background" Label="Product" />
-    <MudFab StartIcon="@Icons.Material.Filled.Folder" IconSize="Size.Large" Class="mud-background" Label="Other" />
+    @if (_path == "scripts")
+    {
+        @* @foreach (string str in Project.Scripts) *@
+        <MudFab StartIcon="@Icons.Material.Filled.Upload" IconSize="Size.Large" Class="mud-background" Label="Upload" @onclick="@(() => ToggleUploadDialog(0))" />
+    }
 
-    @* <MudItem Class="cursor-pointer" @onclick="@(() => ToggleUploadDialog(0))">
-        <MudPaper Height="86px" Width="86px">
-            <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Class="w-full h-full">
-                <MudIcon Icon="@Icons.Material.Filled.Add" Size="Size.Large" />
-            </MudStack>
-        </MudPaper>
-        <MudText Class="text-center">Tilføj</MudText>
-    </MudItem> *@
+    @if (_path == "content")
+    {
+        <MudFab StartIcon="@Icons.Material.Filled.Folder" IconSize="Size.Large" Class="mud-background" Label="Audio" OnClick="@(() => GoToPath("content/audio"))" />
+        <MudFab StartIcon="@Icons.Material.Filled.Folder" IconSize="Size.Large" Class="mud-background" Label="Visuals" OnClick="@(() => GoToPath("content/visuals"))" />
+    }
+
+    @if (_path == "content/audio")
+    {
+        <MudFab StartIcon="@Icons.Material.Filled.UploadFile" IconSize="Size.Large" Class="mud-background" Label="Upload" @onclick="@(() => ToggleUploadDialog(1))" />
+    }
+
+    @if (_path == "content/visuals")
+    {
+        <MudFab StartIcon="@Icons.Material.Filled.UploadFile" IconSize="Size.Large" Class="mud-background" Label="Upload" @onclick="@(() => ToggleUploadDialog(1))" />
+    }
+
+    @if (_path == "product")
+    {
+        // Formater => Videoer
+        @* @foreach (string str in Project.Format) *@
+        <MudFab StartIcon="@Icons.Material.Filled.UploadFile" IconSize="Size.Large" Class="mud-background" Label="Upload" @onclick="@(() => ToggleUploadDialog(2))" />
+    }
+
+    @if (_path == "other")
+    {
+        @* @foreach (string str in Project.OtherFiles) *@
+        <MudFab StartIcon="@Icons.Material.Filled.UploadFile" IconSize="Size.Large" Class="mud-background" Label="Upload" @onclick="@(() => ToggleUploadDialog(3))" />
+    }
 </MudGrid>
-
-@* <MudTabs ActivePanelIndex="_tabIndex" Elevation="4" Rounded="true" Centered="true" Color="@Color.Primary">
-    <MudTabPanel Text="Scripts">
-        
-    </MudTabPanel>
-
-    <MudTabPanel Text="Content">
-        <MudGrid Spacing="0" Justify="Justify.FlexStart" Class="my-2 p-4 mud-secondary rounded-lg gap-2">
-            <MudItem Class="cursor-pointer" @onclick="@(() => ToggleUploadDialog(1))">
-                <MudPaper Height="86px" Width="86px">
-                    <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Class="w-full h-full">
-                        <MudIcon Icon="@Icons.Material.Filled.Add" Size="Size.Large" />
-                    </MudStack>
-                </MudPaper>
-                <MudText Class="text-center">Tilføj</MudText>
-            </MudItem>
-        </MudGrid>
-    </MudTabPanel>
-
-    <MudTabPanel Text="Product">
-        <MudGrid Spacing="0" Justify="Justify.FlexStart" Class="my-2 p-4 mud-secondary rounded-lg gap-2">
-            <MudItem Class="cursor-pointer" @onclick="@(() => ToggleUploadDialog(2))">
-                <MudPaper Height="86px" Width="86px">
-                    <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Class="w-full h-full">
-                        <MudIcon Icon="@Icons.Material.Filled.Add" Size="Size.Large" />
-                    </MudStack>
-                </MudPaper>
-                <MudText Class="text-center">Tilføj</MudText>
-            </MudItem>
-        </MudGrid>
-    </MudTabPanel>
-
-    <MudTabPanel Text="Other">
-        <MudGrid Spacing="0" Justify="Justify.FlexStart" Class="my-2 p-4 mud-secondary rounded-lg gap-2">
-            <MudItem Class="cursor-pointer" @onclick="@(() => ToggleUploadDialog(3))">
-                <MudPaper Height="86px" Width="86px">
-                    <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Class="w-full h-full">
-                        <MudIcon Icon="@Icons.Material.Filled.Add" Size="Size.Large" />
-                    </MudStack>
-                </MudPaper>
-                <MudText Class="text-center">Tilføj</MudText>
-            </MudItem>
-        </MudGrid>
-    </MudTabPanel>
-</MudTabs> *@
 
 @code {
     private int _tabIndex;
+    private string _path = string.Empty;
+
+    private void GoToPath(string path) 
+    {
+        _path = path;
+    }
 
     private async Task ToggleUploadDialog(int category)
     {
-        var options = new DialogOptions { CloseOnEscapeKey = true, CloseButton = true };
+        var options = new DialogOptions { CloseOnEscapeKey = true };
         var parameters = new DialogParameters<Dialoges.FileUploadDialog>()
         {
-            { x => x.Category, category }
+            { x => x.Category, category },
+            { x => x.Path, _path }
         };
 
-        var dialog = await DialogService.ShowAsync<Dialoges.FileUploadDialog>("FileUploadDialog", options);
+        var dialog = await DialogService.ShowAsync<Dialoges.FileUploadDialog>("FileUploadDialog", parameters, options);
         var result = await dialog.Result;
-
-        // if (result is not null && !result.Canceled)
-        //     FetchStatics();
     }
 }
