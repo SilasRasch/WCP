@@ -1,5 +1,6 @@
 ﻿@using Microsoft.EntityFrameworkCore
 @using WCPAdminFrontEnd.Services
+@using WCPFrontEnd.Components.Pages.ProjectPages.FileSystem
 @using WCPFrontEnd.Services
 @using WCPShared.Interfaces
 @using WCPShared.Models.Entities
@@ -10,7 +11,7 @@
 @inject ProjectService ProjectService
 @inject IWcpDbContext Context
 
-<MudDialog >
+<MudDialog>
     <TitleContent>
         <MudStack Row="true" AlignItems="AlignItems.Center">
             <MudText Typo="Typo.h5">
@@ -26,6 +27,8 @@
         <AuthorizeView Roles="Admin">
             <MudTextField @bind-Value="@Project.InternalNotes" Label="Interne noter" ReadOnly="!_editable" AutoGrow />
         </AuthorizeView>
+
+        <ProjectFileBar Project="Project" />
 
         <MudText Typo="Typo.h6" Class="mt-2">Projekt</MudText>
 

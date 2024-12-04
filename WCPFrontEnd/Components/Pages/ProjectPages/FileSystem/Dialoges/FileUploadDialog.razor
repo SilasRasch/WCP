@@ -12,13 +12,13 @@
 <MudDialog ContentClass="p-2">
     <TitleContent>
         <MudText Typo="Typo.h6">
-            Upload filer (@Path)
+            Upload filer til (@Path)
         </MudText>
     </TitleContent>
     <DialogContent>
         <MudPaper Elevation="0" MinWidth="256px">
             <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Class="w-full">
-                <MudFileUpload T="IReadOnlyList<IBrowserFile>" FilesChanged="SyncFiles">
+                <MudFileUpload T="IReadOnlyList<IBrowserFile>" FilesChanged="SyncFiles" Accept="@GetAcceptString()">
                     <ActivatorContent>
                         <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.CloudUpload">
                             Vælg filer
@@ -67,10 +67,18 @@
 
     private List<IBrowserFile> Files { get; set; } = [];
 
+    private string? GetAcceptString() 
+    {
+        if (Path.Contains("visuals")) return "video/*,image/*";
+        if (Path.Contains("audio")) return "audio/*";
+        if (Path.Contains("scripts")) return ".doc,.docx,application/msword";
+        return null;
+    }
+
     private async void Submit()
     {
         // Scripts
-        if (Category == 0) 
+        if (Path == "scripts") 
         {
             if (Project is CreatorProject creatorProject) 
             {
@@ -87,7 +95,7 @@
         }
 
         // Creator
-        if (Category == 1)
+        if (Path.Contains("content"))
         {
             if (Project is CreatorProject creatorProject)
             {
@@ -123,7 +131,7 @@
         }
 
         // Product
-        if (Category == 2)
+        if (Path.Contains("product"))
         {
             List<string> fileUrls = [];
 
@@ -137,7 +145,7 @@
         }
 
         // Other
-        if (Category == 3)
+        if (Path == "other")
         {
             List<string> fileUrls = [];
 

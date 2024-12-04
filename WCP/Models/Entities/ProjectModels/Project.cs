@@ -26,8 +26,8 @@ namespace WCPShared.Models.Entities.ProjectModels
         public string InternalNotes { get; set; } = string.Empty;
 
         // File storage 
-        public List<string> FinalContent { get; set; }
-        public List<string> OtherFiles { get; set; }
+        public List<string> FinalContent { get; set; } = [];
+        public List<string> OtherFiles { get; set; } = [];
 
         #endregion
 
