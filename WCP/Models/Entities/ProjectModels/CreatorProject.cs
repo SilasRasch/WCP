@@ -15,10 +15,6 @@ namespace WCPShared.Models.Entities.ProjectModels
         public bool CreatorKeepsProduct { get; set; }
         public List<string> Tags { get; set; } = [];
 
-        public List<string> CreatorVisuals { get; set; } = [];
-        public List<string> CreatorAudio { get; set; } = [];
-        public List<string> Scripts { get; set; } = [];
-
         public List<CreatorParticipation> Participations { get; set; } = [];
 
         protected CreatorProject(int id, int brandId, Brand brand, string name, ProjectStatus status, long price, DateTime created, DateTime updated, DateTime deadline, string internalNotes, string platforms, int amount, string formats, int productId, Product product,

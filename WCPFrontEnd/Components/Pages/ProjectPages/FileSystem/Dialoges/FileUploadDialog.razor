@@ -12,13 +12,13 @@
 <MudDialog ContentClass="p-2">
     <TitleContent>
         <MudText Typo="Typo.h6">
-            Upload filer til (@Path)
+            Upload filer @* (@Path) *@
         </MudText>
     </TitleContent>
     <DialogContent>
         <MudPaper Elevation="0" MinWidth="256px">
             <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Class="w-full">
-                <MudFileUpload T="IReadOnlyList<IBrowserFile>" FilesChanged="SyncFiles" Accept="@GetAcceptString()">
+                <MudFileUpload T="IReadOnlyList<IBrowserFile>" FilesChanged="SyncFiles" Accept="@ContentType">
                     <ActivatorContent>
                         <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.CloudUpload">
                             Vælg filer
@@ -33,7 +33,7 @@
                             <PropertyColumn Property="x => x.ContentType" Title="Filtype" Sortable="false" />
                             <PropertyColumn Property="x => x.Name" Title="Navn" Sortable="false" />
                             <PropertyColumn Property="x => x.Size" Title="Størrelse" Sortable="false">
-                                <CellTemplate>@(context.Item.Size / 1024) KB</CellTemplate>
+                                <CellTemplate>@GenerateFileSize(context.Item.Size)</CellTemplate>
                             </PropertyColumn>
                             <TemplateColumn>
                                 <CellTemplate>
@@ -60,105 +60,22 @@
     public Project Project { get; set; }
 
     [Parameter]
-    public int Category { get; set; }
+    public string ContentType { get; set; }
 
     [Parameter] 
     public string Path { get; set; }
 
     private List<IBrowserFile> Files { get; set; } = [];
 
-    private string? GetAcceptString() 
-    {
-        if (Path.Contains("visuals")) return "video/*,image/*";
-        if (Path.Contains("audio")) return "audio/*";
-        if (Path.Contains("scripts")) return ".doc,.docx,application/msword";
-        return null;
-    }
-
     private async void Submit()
     {
-        // Scripts
-        if (Path == "scripts") 
+        foreach (IBrowserFile file in Files)
         {
-            if (Project is CreatorProject creatorProject) 
-            {
-                List<string> fileUrls = [];
-
-                foreach (IBrowserFile file in Files)
-                {
-                    string url = await S3Service.UploadScript(file, Project);
-                    fileUrls.Add(url);
-                }
-
-                creatorProject.Scripts.AddRange(fileUrls);
-            }
+            string url = await S3Service.UploadCloudFile(file, $"brands/{Project.Brand.Name}/{Project.Id}/{Path}");
+            Project.Files.Add(url);
         }
 
-        // Creator
-        if (Path.Contains("content"))
-        {
-            if (Project is CreatorProject creatorProject)
-            {
-                List<string> audioUrls = [];
-                List<string> visualUrls = [];
-
-                // TODO: Omdøbning af filer
-                foreach (IBrowserFile file in Files)
-                {
-                    if (file.ContentType.Contains("video")) 
-                    {
-                        string url = await S3Service.UploadCreatorVideo(file, Project, "change me", "visuals");
-                        visualUrls.Add(url);
-                        break;
-                    }
-                    if (file.ContentType.Contains("image"))
-                    {
-                        string url = await S3Service.UploadCreatorImage(file, Project, "change me", "visuals");
-                        visualUrls.Add(url);
-                        break;
-                    }
-                    if (file.ContentType.Contains("audio"))
-                    {
-                        string url = await S3Service.UploadCreatorVoiceover(file, Project, "change me", "audio");
-                        audioUrls.Add(url);
-                        break;
-                    }
-                }
-
-                creatorProject.CreatorVisuals.AddRange(visualUrls);
-                creatorProject.CreatorAudio.AddRange(audioUrls);
-            }
-        }
-
-        // Product
-        if (Path.Contains("product"))
-        {
-            List<string> fileUrls = [];
-
-            foreach (IBrowserFile file in Files)
-            {
-                string url = await S3Service.UploadFinalContent(file, Project, "FORMAT", Project.FinalContent.Count + 1);
-                fileUrls.Add(url);
-            }
-
-            Project.FinalContent.AddRange(fileUrls);
-        }
-
-        // Other
-        if (Path == "other")
-        {
-            List<string> fileUrls = [];
-
-            foreach (IBrowserFile file in Files) 
-            {
-                string url = await S3Service.UploadOtherFile(file, Project);
-                fileUrls.Add(url);
-            }
-
-            Project.OtherFiles.AddRange(fileUrls);
-        }
-
-        // await ProjectService.UpdateObject(Project.Id, Project);
+        await ProjectService.UpdateObject(Project.Id, Project);
         MudDialog.Close(DialogResult.Ok(true));
     }
 
@@ -175,6 +92,20 @@
     private void RemoveFile(IBrowserFile file) 
     {
         Files.Remove(file);
+    }
+
+    private string GenerateFileSize(double fileSize) 
+    {
+        if (fileSize < 1024)
+            return fileSize + " B";
+        
+        if (fileSize < 1024 * 1024)
+            return Math.Round((double)fileSize / (double)1024, 2) + " KB";
+
+        if (fileSize < Math.Pow(1024, 3))
+            return Math.Round((double)fileSize / (double)(1024 * 1024), 2) + " MB";
+
+        return Math.Round((double)fileSize / (double)(Math.Pow(1024, 2))) + " GB";
     }
 }
 

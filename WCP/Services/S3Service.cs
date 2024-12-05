@@ -1,13 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components.Forms;
-using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using WCPShared.Interfaces;
-using WCPShared.Models;
 using WCPShared.Models.Entities.ProjectModels;
 
 namespace WCPShared.Services
@@ -16,7 +9,7 @@ namespace WCPShared.Services
     {
         private readonly IS3Client _client;
 
-        public S3Service( IS3Client client)
+        public S3Service(IS3Client client)
         {
             _client = client;
         }
@@ -73,7 +66,7 @@ namespace WCPShared.Services
             if (!Regex.IsMatch(Path.GetExtension(file.Name).ToLower(), regexFileExtension) || !file.ContentType.ToLower().Contains("video"))
                 throw new ArgumentException("File-type not accepted");
 
-            var maxFileSize = 1024 * 1024 * 1024; // 1 TB
+            var maxFileSize = 1024 * 1024 * 1024; // 1 GB
             if (file.Size > maxFileSize) 
                 throw new ArgumentException("File size above limit");
 
@@ -91,7 +84,7 @@ namespace WCPShared.Services
             if (!Regex.IsMatch(Path.GetExtension(file.Name).ToLower(), regexFileExtension) || !file.ContentType.ToLower().Contains("audio"))
                 throw new ArgumentException("File-type not accepted");
 
-            var maxFileSize = 1024 * 1024 * 1024; // 1 TB
+            var maxFileSize = 1024 * 1024 * 1024; // 1 GB
             if (file.Size > maxFileSize)
                 throw new ArgumentException("File size above limit");
 
@@ -117,6 +110,21 @@ namespace WCPShared.Services
 
             var fileExtension = Path.GetExtension(file.Name);
             var fileName = $"{project.Brand.Name}/{project.Id}/Content/{contentName}/{subFolder}/{file.Name}";
+
+            return await _client.UploadFile(fileName, stream, file.ContentType);
+        }
+
+        public async Task<string> UploadCloudFile(IBrowserFile file, string path)
+        {
+            var maxFileSize = (long) Math.Pow(1024, 3) * 8; // 8 GB
+            
+            if (file.Size > maxFileSize)
+                throw new ArgumentException("File size above limit");
+
+            var stream = file.OpenReadStream(maxAllowedSize: maxFileSize);
+
+            var fileExtension = Path.GetExtension(file.Name);
+            var fileName = $"{path}/{file.Name}";
 
             return await _client.UploadFile(fileName, stream, file.ContentType);
         }
@@ -169,6 +177,22 @@ namespace WCPShared.Services
             var fileName = $"{project.Brand.Name}/{project.Id}/Other/{file.Name}";
 
             return await _client.UploadFile(fileName, stream, file.ContentType);
+        }
+
+        public async Task DeleteFile(string fullUri)
+        {
+            await _client.DeleteFile(fullUri);
+        }
+
+        public async Task<string> RenameFile(string sourceUri, string newFileName) 
+        {
+            string newKey = sourceUri.Replace(sourceUri.Split('/').Last(), newFileName) + Path.GetExtension(sourceUri);
+            string newUri = await _client.CopyFileAsync(sourceUri, newKey);
+            
+            if (!string.IsNullOrEmpty(newUri))
+                await _client.DeleteFile(sourceUri);
+
+            return newUri;
         }
     }
 }

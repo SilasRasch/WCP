@@ -96,32 +96,8 @@ namespace WCPShared.Models
                     v => JsonConvert.SerializeObject(v),
                     v => JsonConvert.DeserializeObject<List<string>>(v)!));
 
-            modelBuilder.Entity<CreatorProject>()
-                .Property(x => x.CreatorVisuals)
-                .HasConversion(new ValueConverter<List<string>, string>(
-                    v => JsonConvert.SerializeObject(v),
-                    v => JsonConvert.DeserializeObject<List<string>>(v)!));
-
-            modelBuilder.Entity<CreatorProject>()
-                .Property(x => x.CreatorAudio)
-                .HasConversion(new ValueConverter<List<string>, string>(
-                    v => JsonConvert.SerializeObject(v),
-                    v => JsonConvert.DeserializeObject<List<string>>(v)!));
-
-            modelBuilder.Entity<CreatorProject>()
-                .Property(x => x.Scripts)
-                .HasConversion(new ValueConverter<List<string>, string>(
-                    v => JsonConvert.SerializeObject(v),
-                    v => JsonConvert.DeserializeObject<List<string>>(v)!));
-
             modelBuilder.Entity<Project>()
-                .Property(x => x.FinalContent)
-                .HasConversion(new ValueConverter<List<string>, string>(
-                    v => JsonConvert.SerializeObject(v),
-                    v => JsonConvert.DeserializeObject<List<string>>(v)!));
-
-            modelBuilder.Entity<CreatorProject>()
-                .Property(x => x.OtherFiles)
+                .Property(x => x.Files)
                 .HasConversion(new ValueConverter<List<string>, string>(
                     v => JsonConvert.SerializeObject(v),
                     v => JsonConvert.DeserializeObject<List<string>>(v)!));
