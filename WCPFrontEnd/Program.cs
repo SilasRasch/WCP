@@ -23,7 +23,7 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 // For chat
-//builder.Services.AddSignalR();
+builder.Services.AddSignalR();
 //builder.Services.AddResponseCompression(options =>
 //{
 //    options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[] { "application/octet-stream" });

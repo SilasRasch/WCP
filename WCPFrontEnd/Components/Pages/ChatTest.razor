@@ -1,0 +1,81 @@
+﻿@page "/chat"
+@using Microsoft.AspNetCore.SignalR
+@using Microsoft.AspNetCore.SignalR.Client
+@using System.Security.Claims
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<h3>Private Chat</h3>
+@User
+
+<div>
+    <ul>
+        @foreach (var chatMessage in Messages)
+        {
+            <li><b>@chatMessage.User:</b> @chatMessage.Message</li>
+        }
+    </ul>
+</div>
+
+<label>
+    Send to:
+    <input @bind="Recipient" placeholder="Recipient username" />
+</label>
+<input @bind="MessageInput" placeholder="Type your message" />
+<button @onclick="SendMessage">Send</button>
+
+@code {
+    private List<ChatMessage> Messages = new();
+    private string User = string.Empty;
+    private string Recipient = string.Empty;
+    private string MessageInput = string.Empty;
+
+    private HubConnection? HubConnection;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var auth = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        User = auth.User.FindFirst(c => c.Type == ClaimTypes.Name)?.Value;
+
+        if (!string.IsNullOrEmpty(User))
+        {
+            HubConnection = new HubConnectionBuilder()
+            .WithUrl(Navigation.ToAbsoluteUri("/chathub?user=" + User))
+            .Build();
+
+            HubConnection.On<string, string>("ReceiveMessage", async (sender, message) =>
+            {
+                await InvokeAsync(() =>
+                {
+                    Messages.Add(new ChatMessage { User = sender, Message = message });
+                    StateHasChanged(); // Notify Blazor to re-render
+                });
+            });
+
+            await HubConnection.StartAsync();
+        }
+    }
+
+    private async Task SendMessage()
+    {
+        if (HubConnection is not null && HubConnection.State == HubConnectionState.Connected)
+        {
+            await HubConnection.SendAsync("SendPrivateMessage", Recipient, MessageInput);
+            MessageInput = string.Empty;
+        }
+    }
+
+    // public override async ValueTask DisposeAsync()
+    // {
+    //     if (HubConnection is not null)
+    //     {
+    //         await HubConnection.DisposeAsync();
+    //     }
+    // }
+
+    private class ChatMessage
+    {
+        public string User { get; set; } = string.Empty;
+        public string Message { get; set; } = string.Empty;
+    }
+}
