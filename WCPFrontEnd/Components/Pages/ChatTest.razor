@@ -2,53 +2,109 @@
 @using Microsoft.AspNetCore.SignalR
 @using Microsoft.AspNetCore.SignalR.Client
 @using System.Security.Claims
+@using Microsoft.EntityFrameworkCore
+@using WCPFrontEnd.Models
+@using WCPFrontEnd.Services
+@using WCPShared.Interfaces
+@using WCPShared.Models.Entities.UserModels
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IWcpDbContext Context
+@inject ChatService ChatService
 
-<h3>Private Chat</h3>
-@User
+<MudText>WC Chat</MudText>
 
-<div>
-    <ul>
-        @foreach (var chatMessage in Messages)
+<MudIconButton Icon="@Icons.Material.Filled.ChatBubble" OnClick="() => isOpen = !isOpen"></MudIconButton>
+
+<MudPopover Open="@isOpen" Fixed AnchorOrigin="Origin.CenterCenter" TransformOrigin="Origin.CenterCenter" MaxHeight="720">
+    @if (Recipient is null) 
+    {
+        @foreach (User user in AllUsers) 
         {
-            <li><b>@chatMessage.User:</b> @chatMessage.Message</li>
+            <MudPaper Class="pa-2 cursor-pointer" onclick="@(() => ChangeRecipient(user))">
+                <MudStack Row AlignItems="AlignItems.Center">
+                    <MudAvatar Color="Color.Primary">
+                        @user.Name.First()
+                    </MudAvatar>
+                    <MudStack Justify="Justify.Center" Spacing="0">
+                        <MudText>@user.Name</MudText>
+                        <MudText Typo="Typo.caption">Sidste chat</MudText>
+                    </MudStack>
+                </MudStack>
+            </MudPaper>
         }
-    </ul>
-</div>
+    }
+    else 
+    {
+        <MudStack AlignItems="AlignItems.Start" Spacing="0">
+            <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" OnClick="() => ChangeRecipient(null)" />
+            <MudStack Row AlignItems="AlignItems.Center" Class="m-2">
+                <MudAvatar Color="Color.Primary">
+                    @Recipient.Name.First()
+                </MudAvatar>
+                <MudStack Justify="Justify.Center" Spacing="0">
+                    <MudText>@Recipient.Name</MudText>
+                </MudStack>
+            </MudStack>
 
-<label>
-    Send to:
-    <input @bind="Recipient" placeholder="Recipient username" />
-</label>
-<input @bind="MessageInput" placeholder="Type your message" />
-<button @onclick="SendMessage">Send</button>
+            
+            <div>
+                <ul>
+                    @foreach (var chatMessage in Messages)
+                    {
+                        <li><b>@chatMessage.From.Name:</b> @chatMessage.Message</li>
+                    }
+                </ul>
+            </div>
+            <MudStack Row Spacing="0">
+                <MudTextField Variant="Variant.Outlined" @bind-Value="MessageInput" Label="Besked" />
+                <MudSpacer />
+                <MudButton OnClick="SendMessage">Send</MudButton>
+            </MudStack>
+        </MudStack>
+        
+    }
+</MudPopover>
+
+
 
 @code {
+    private bool isOpen = false;
     private List<ChatMessage> Messages = new();
-    private string User = string.Empty;
-    private string Recipient = string.Empty;
+    private User ActiveUser;
+    private User Recipient;
     private string MessageInput = string.Empty;
 
+    private IEnumerable<User> AllUsers = [];
+
     private HubConnection? HubConnection;
+
+    private void ChangeRecipient(User user) 
+    {
+        Recipient = user;
+        StateHasChanged();
+    }
 
     protected override async Task OnInitializedAsync()
     {
         var auth = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        User = auth.User.FindFirst(c => c.Type == ClaimTypes.Name)?.Value;
+        string email = auth.User.FindFirst(c => c.Type == ClaimTypes.Email)?.Value!;
+        ActiveUser = await Context.Users.SingleOrDefaultAsync(x => x.Email == email);
 
-        if (!string.IsNullOrEmpty(User))
+        AllUsers = await Context.Users.ToListAsync();
+
+        if (ActiveUser is not null)
         {
             HubConnection = new HubConnectionBuilder()
-            .WithUrl(Navigation.ToAbsoluteUri("/chathub?user=" + User))
+            .WithUrl(Navigation.ToAbsoluteUri("/chathub?user=" + ActiveUser.Name))
             .Build();
 
-            HubConnection.On<string, string>("ReceiveMessage", async (sender, message) =>
+            HubConnection.On<ChatMessage>("ReceiveMessage", async (message) =>
             {
                 await InvokeAsync(() =>
                 {
-                    Messages.Add(new ChatMessage { User = sender, Message = message });
-                    StateHasChanged(); // Notify Blazor to re-render
+                    Messages.Add(message);
+                    StateHasChanged();
                 });
             });
 
@@ -58,11 +114,7 @@
 
     private async Task SendMessage()
     {
-        if (HubConnection is not null && HubConnection.State == HubConnectionState.Connected)
-        {
-            await HubConnection.SendAsync("SendPrivateMessage", Recipient, MessageInput);
-            MessageInput = string.Empty;
-        }
+        await ChatService.SendChat(new ChatMessage(), HubConnection);
     }
 
     // public override async ValueTask DisposeAsync()
@@ -72,10 +124,4 @@
     //         await HubConnection.DisposeAsync();
     //     }
     // }
-
-    private class ChatMessage
-    {
-        public string User { get; set; } = string.Empty;
-        public string Message { get; set; } = string.Empty;
-    }
 }

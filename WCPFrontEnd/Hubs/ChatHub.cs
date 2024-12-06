@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.SignalR;
+using WCPFrontEnd.Models;
 
 namespace WCPFrontEnd.Hubs
 {
@@ -27,21 +28,16 @@ namespace WCPFrontEnd.Hubs
             return base.OnDisconnectedAsync(exception);
         }
 
-        public async Task SendPrivateMessage(string toUser, string message)
+        public async Task SendPrivateMessage(ChatMessage message)
         {
-            if (_userConnections.TryGetValue(toUser, out var connectionId))
+            if (_userConnections.TryGetValue(message.To.Name, out var connectionId))
             {
                 var fromUser = _userConnections.FirstOrDefault(x => x.Value == Context.ConnectionId).Key;
                 if (!string.IsNullOrEmpty(fromUser))
                 {
                     // Send the message to the recipient
-                    await Clients.Client(connectionId).SendAsync("ReceiveMessage", fromUser, message);
+                    await Clients.Client(connectionId).SendAsync("ReceiveMessage", message);
                 }
-            }
-            else
-            {
-                // Optionally notify sender that the recipient is offline
-                await Clients.Caller.SendAsync("ReceiveMessage", "System", $"{toUser} is not online.");
             }
         }
     }

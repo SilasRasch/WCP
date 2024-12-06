@@ -1,20 +1,17 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using MudBlazor.Services;
+using Stripe;
+using System.Net.Http.Headers;
+using System.Text;
 using WCPFrontEnd.Components;
+using WCPFrontEnd.Hubs;
+using WCPFrontEnd.Services;
 using WCPShared.Extensions;
 using WCPShared.Interfaces;
 using WCPShared.Models;
-using WCPShared.Services;
-using Stripe;
-using WCPShared.Services.StaticHelpers;
 using WCPShared.Models.Enums;
-using WCPFrontEnd.Services;
-using Microsoft.AspNetCore.ResponseCompression;
-using WCPFrontEnd.Hubs;
-using SlackNet;
-using System.Net.Http.Headers;
-using System.Net.Http;
-using System.Text;
+using WCPShared.Services;
+using WCPShared.Services.StaticHelpers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,11 +21,6 @@ builder.Services.AddRazorComponents()
 
 // For chat
 builder.Services.AddSignalR();
-//builder.Services.AddResponseCompression(options =>
-//{
-//    options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[] { "application/octet-stream" });
-//});
-
 builder.Services.AddHttpClient<ShippingService>(client =>
 {
     client.BaseAddress = new Uri("https://app.shipmondo.com/api/public/v3/");
@@ -45,10 +37,10 @@ builder.Services.AddDataServices(builder.Configuration);
 builder.Services.AddAuthenticationServices();
 builder.Services.AddScoped<IS3Client, S3Client>();
 builder.Services.AddScoped<S3Service>();
+builder.Services.AddScoped<ChatService>();
 StripeConfiguration.ApiKey = Secrets.GetStripeApiKey(builder.Configuration);
 builder.Services.AddScoped<StripeService>();
 builder.Services.AddScoped<ProjectService>();
-//builder.Services.AddScoped<ShippingService>();
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
