@@ -97,7 +97,7 @@
             <FileElement FileUri="@str" Project="Project" Delete="DeleteFile" Rename="RenameFile" />
         }
         <MudFab StartIcon="@Icons.Material.Filled.Upload" IconSize="Size.Large" Class="mud-background" Label="Upload" @onclick="@(() => ToggleUploadDialog(GetAcceptString()))" />
-    }>
+    }
     
     @* Other files *@
     @if (_path == "other")

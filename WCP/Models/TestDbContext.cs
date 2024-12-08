@@ -1,13 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using WCPShared.Interfaces;
 using WCPShared.Models.Entities;
-using WCPShared.Models.Entities.UserModels;
-using WCPShared.Models.Enums;
 using WCPShared.Models.Entities.ProjectModels;
+using WCPShared.Models.Entities.UserModels;
 
 namespace WCPShared.Models
 {
@@ -28,6 +25,7 @@ namespace WCPShared.Models
         public DbSet<StaticProject> StaticProjects { get; set; }
         public DbSet<PhotoProject> PhotoProjects { get; set; }
         public DbSet<Product> Products { get; set; }
+        public DbSet<ChatMessage> Chats { get; set; }
 
         public TestDbContext(DbContextOptions<TestDbContext> options) : base(options)
         {

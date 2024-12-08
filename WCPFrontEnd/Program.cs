@@ -37,7 +37,7 @@ builder.Services.AddDataServices(builder.Configuration);
 builder.Services.AddAuthenticationServices();
 builder.Services.AddScoped<IS3Client, S3Client>();
 builder.Services.AddScoped<S3Service>();
-builder.Services.AddScoped<ChatService>();
+//builder.Services.AddScoped<ChatService>();
 StripeConfiguration.ApiKey = Secrets.GetStripeApiKey(builder.Configuration);
 builder.Services.AddScoped<StripeService>();
 builder.Services.AddScoped<ProjectService>();

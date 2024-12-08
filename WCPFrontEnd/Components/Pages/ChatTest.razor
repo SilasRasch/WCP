@@ -1,97 +1,165 @@
-﻿@page "/chat"
-@using Microsoft.AspNetCore.SignalR
+﻿@using Microsoft.AspNetCore.SignalR
 @using Microsoft.AspNetCore.SignalR.Client
 @using System.Security.Claims
 @using Microsoft.EntityFrameworkCore
 @using WCPFrontEnd.Models
 @using WCPFrontEnd.Services
 @using WCPShared.Interfaces
+@using WCPShared.Models.Entities
 @using WCPShared.Models.Entities.UserModels
+@using WCPShared.Models.Enums
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider AuthenticationStateProvider
-@inject IWcpDbContext Context
-@inject ChatService ChatService
+@inject IWcpDbContextFactory ContextFactory
+@inject IJSRuntime JSRuntime
 
-<MudText>WC Chat</MudText>
+<MudIconButton Icon="@Icons.Material.Filled.Chat" OnClick="() => isOpen = !isOpen"></MudIconButton>
 
-<MudIconButton Icon="@Icons.Material.Filled.ChatBubble" OnClick="() => isOpen = !isOpen"></MudIconButton>
+<MudPopover Open="@isOpen" Fixed AnchorOrigin="Origin.TopRight" TransformOrigin="Origin.TopRight" MaxHeight="640">
+    <MudStack Row Spacing="0">
+        <MudStack Spacing="0" Class="overflow-y-scroll max-h-[640px] min-w-72">
+            <MudStack Row Class="px-2 py-2 mud-secondary" Spacing="0">
+                <input Class="px-2 text-lg mud-secondary" placeholder="Søg" @onchange="e => SearchInputChanged((string) e.Value)" />
+                @* <MudSpacer /> *@
+                <MudIconButton Icon="@Icons.Material.Filled.Search" />
+            </MudStack>
 
-<MudPopover Open="@isOpen" Fixed AnchorOrigin="Origin.CenterCenter" TransformOrigin="Origin.CenterCenter" MaxHeight="720">
-    @if (Recipient is null) 
-    {
-        @foreach (User user in AllUsers) 
-        {
-            <MudPaper Class="pa-2 cursor-pointer" onclick="@(() => ChangeRecipient(user))">
-                <MudStack Row AlignItems="AlignItems.Center">
+            <MudDivider />
+
+            @foreach (var user in Users)
+            {
+                <MudStack Class="pa-2 cursor-pointer" Row AlignItems="AlignItems.Center" onclick="@(() => ChangeRecipient(user.User))">
                     <MudAvatar Color="Color.Primary">
-                        @user.Name.First()
+                        @(user.User.Name.First())
                     </MudAvatar>
                     <MudStack Justify="Justify.Center" Spacing="0">
-                        <MudText>@user.Name</MudText>
-                        <MudText Typo="Typo.caption">Sidste chat</MudText>
+                        <MudText>@user.User.Name</MudText>
+                        @if (user.LatestMessage is not null)
+                        {
+                            <MudText Typo="Typo.caption" Class="opacity-75">@user.LatestMessage.Message - @(GetTimeSpanString(DateTime.Now - user.LatestMessage.Sent))</MudText>
+                        }
                     </MudStack>
                 </MudStack>
-            </MudPaper>
-        }
-    }
-    else 
-    {
-        <MudStack AlignItems="AlignItems.Start" Spacing="0">
-            <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" OnClick="() => ChangeRecipient(null)" />
-            <MudStack Row AlignItems="AlignItems.Center" Class="m-2">
-                <MudAvatar Color="Color.Primary">
-                    @Recipient.Name.First()
-                </MudAvatar>
-                <MudStack Justify="Justify.Center" Spacing="0">
-                    <MudText>@Recipient.Name</MudText>
-                </MudStack>
-            </MudStack>
-
-            
-            <div>
-                <ul>
-                    @foreach (var chatMessage in Messages)
-                    {
-                        <li><b>@chatMessage.From.Name:</b> @chatMessage.Message</li>
-                    }
-                </ul>
-            </div>
-            <MudStack Row Spacing="0">
-                <MudTextField Variant="Variant.Outlined" @bind-Value="MessageInput" Label="Besked" />
-                <MudSpacer />
-                <MudButton OnClick="SendMessage">Send</MudButton>
-            </MudStack>
+                <MudDivider />
+            }
         </MudStack>
-        
-    }
+
+        @if (Recipient is not null)
+        {
+            <MudStack AlignItems="AlignItems.Start" Spacing="0" Class="h-full min-w-72">
+                <MudStack Row AlignItems="AlignItems.Center" Class="p-2 mud-secondary w-full" Spacing="0">
+                    <MudAvatar Color="Color.Primary">
+                        @Recipient.Name.First()
+                    </MudAvatar>
+                    <MudStack Class="mx-2" Spacing="0">
+                        <MudText>@Recipient.Name</MudText>
+                        <MudText Typo="Typo.caption">@Recipient.Role</MudText>
+                    </MudStack>
+                    <MudSpacer />
+                    <MudIconButton OnClick="@(() => Recipient = null)" Icon="@Icons.Material.Filled.Close" />
+                </MudStack>
+
+                <MudDivider />
+
+                <div id="scrollContainer" class="m-2 flex flex-col gap-2 w-72 overflow-y-scroll max-h-[500px]">
+                    @foreach (var chatMessage in Messages.OrderBy(x => x.Sent))
+                    {
+                        if (chatMessage.From.Id == ActiveUser.Id) 
+                        {
+                            <MudTooltip Placement="Placement.Left" RootClass="self-end" Text="@chatMessage.Sent.ToString()">
+                                <MudText Class="mud-primary text-white p-2 rounded-lg mr-2">@chatMessage.Message</MudText>
+                            </MudTooltip>
+                        }
+                        else if (chatMessage.From.Id == Recipient.Id) 
+                        {
+                            <MudTooltip Placement="Placement.Right" RootClass="self-start" Text="@chatMessage.Sent.ToString()">
+                                <MudText Class="mud-secondary p-2 rounded-lg">@chatMessage.Message</MudText>
+                            </MudTooltip>
+                        }
+                    }
+                </div>
+
+                <MudSpacer />
+
+                <MudStack Spacing="0" Class="absolute bottom-0 right-0">
+                    <MudDivider />
+                    <MudStack Row Spacing="0" AlignItems="AlignItems.Center" Class="w-[304px] p-2">
+                        <MudTextField TextUpdateSuppression="false" Variant="Variant.Text" @bind-Value="MessageInput" Immediate OnKeyDown="OnSendEnter" Placeholder="Aa" />
+                        <MudIconButton Disabled="string.IsNullOrEmpty(MessageInput)" Icon="@Icons.Material.Filled.Send" OnClick="SendMessage" />
+                    </MudStack>
+                </MudStack>
+
+            </MudStack>
+        }
+    </MudStack>
 </MudPopover>
 
-
+<script>
+    function scrollToBottom(elementId) {
+        const container = document.getElementById(elementId);
+        if (container) {
+            container.scrollTop = container.scrollHeight;
+        }
+    }
+</script>
 
 @code {
     private bool isOpen = false;
-    private List<ChatMessage> Messages = new();
+    private List<ChatMessage> Messages = [];
     private User ActiveUser;
     private User Recipient;
     private string MessageInput = string.Empty;
 
-    private IEnumerable<User> AllUsers = [];
+    private ChatService ChatService;
+    private IWcpDbContext Context;
 
     private HubConnection? HubConnection;
 
-    private void ChangeRecipient(User user) 
+    private IEnumerable<UserWithLatestMessage> Users = [];
+
+    private async Task ScrollToBottomAsync()
+    {
+        await JSRuntime.InvokeVoidAsync("scrollToBottom", "scrollContainer");
+    }
+
+    private async Task SearchInputChanged(string input) 
+    {
+        if (string.IsNullOrEmpty(input))
+        {
+            Users = await ChatService.GetUsersWithLatestChat(x => x.Id != ActiveUser.Id);
+        }
+        else 
+        {
+            Users = await ChatService.GetUsersWithLatestChat(x => x.Id != ActiveUser.Id && x.Name.Contains(input));
+        }
+
+        StateHasChanged();
+    }
+
+    private async Task OnSendEnter(KeyboardEventArgs args) 
+    {
+        if (args.Key == "Enter") 
+        {
+            await SendMessage();
+        }
+    }
+
+    private async Task ChangeRecipient(User user) 
     {
         Recipient = user;
+        Messages = await ChatService.GetChatsByUsers(ActiveUser, Recipient);
         StateHasChanged();
+        ScrollToBottomAsync();
     }
 
     protected override async Task OnInitializedAsync()
     {
+        Context = ContextFactory.CreateDbContext();
+        ChatService = new ChatService(Context);
         var auth = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         string email = auth.User.FindFirst(c => c.Type == ClaimTypes.Email)?.Value!;
         ActiveUser = await Context.Users.SingleOrDefaultAsync(x => x.Email == email);
-
-        AllUsers = await Context.Users.ToListAsync();
+        Users = await ChatService.GetUsersWithLatestChat(x => x.Id != ActiveUser.Id);
 
         if (ActiveUser is not null)
         {
@@ -103,7 +171,14 @@
             {
                 await InvokeAsync(() =>
                 {
-                    Messages.Add(message);
+                    // Update message in contact view
+                    var user = Users.FirstOrDefault(x => x.User.Id == message.From.Id);
+                    if (user is not null)
+                        user.LatestMessage = message;
+
+                    if (Recipient.Id == message.From.Id)
+                        Messages.Add(message);
+
                     StateHasChanged();
                 });
             });
@@ -114,14 +189,44 @@
 
     private async Task SendMessage()
     {
-        await ChatService.SendChat(new ChatMessage(), HubConnection);
+        if (!string.IsNullOrEmpty(MessageInput)) 
+        {
+            var msg = new ChatMessage { From = ActiveUser, To = Recipient, Message = MessageInput, Sent = DateTime.Now };
+            await ChatService.SendChat(msg, HubConnection);
+            Messages.Add(msg);
+            MessageInput = string.Empty;
+
+            // Update message in contact view
+            var user = Users.FirstOrDefault(x => x.User.Id == msg.To.Id);
+            if (user is not null)
+                user.LatestMessage = msg;
+
+            StateHasChanged();
+            ScrollToBottomAsync();
+        }
     }
 
-    // public override async ValueTask DisposeAsync()
-    // {
-    //     if (HubConnection is not null)
-    //     {
-    //         await HubConnection.DisposeAsync();
-    //     }
-    // }
+    public static string GetTimeSpanString(TimeSpan timeSpan)
+    {
+        if (timeSpan.TotalMinutes < 1)
+        {
+            return "Nu";
+        }
+        else if (timeSpan.TotalMinutes < 60)
+        {
+            return $"{timeSpan.TotalMinutes:F0} min.";
+        }
+        else if (timeSpan.TotalHours < 24)
+        {
+            return $"{timeSpan.TotalHours:F0} t.";
+        }
+        else if (timeSpan.TotalDays < 7)
+        {
+            return $"{timeSpan.TotalDays:F0} d.";
+        }
+        else
+        {
+            return $"{timeSpan.Days / 7} u.";
+        }
+    }
 }

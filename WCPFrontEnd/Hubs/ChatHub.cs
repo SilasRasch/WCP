@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.SignalR;
-using WCPFrontEnd.Models;
+using WCPShared.Models.Entities;
 
 namespace WCPFrontEnd.Hubs
 {

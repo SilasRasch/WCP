@@ -25,6 +25,7 @@ namespace WCPShared.Interfaces
         DbSet<StaticProject> StaticProjects { get; set; }
         DbSet<PhotoProject> PhotoProjects { get; set; }
         DbSet<Product> Products { get; set; }
+        DbSet<ChatMessage> Chats { get; set; }
 
         // Abstractions
         ChangeTracker ChangeTracker { get; }

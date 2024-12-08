@@ -8,7 +8,7 @@ namespace WCPShared.Services.EntityFramework
     public class GenericEFService<T> : IDatabaseService<T>, IDatabaseServiceExtensions<T>
         where T : class, IWcpEntity
     {
-        private readonly IWcpDbContext _context;
+        protected readonly IWcpDbContext _context;
 
         public GenericEFService(IWcpDbContext context)
         {

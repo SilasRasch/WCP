@@ -22,6 +22,7 @@ namespace WCPShared.Models
         public DbSet<StaticProject> StaticProjects { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public DbSet<PhotoProject> PhotoProjects { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public DbSet<Product> Products { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public DbSet<ChatMessage> Chats { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         public WcpDbContext(DbContextOptions<WcpDbContext> options) : base(options)
         {

@@ -34,6 +34,7 @@
             </AuthorizeView>
             <AuthorizeView>
                 <Authorized>
+                    <WCPFrontEnd.Components.Pages.ChatTest />
                     <MudIconButton Icon="@(DarkLightModeButtonIcon)" Color="Color.Warning" OnClick="@DarkModeToggle" />
                     <MudNavLink Style="max-width: fit-content" Href="/logout" Match="NavLinkMatch.Prefix" IconColor="Color.Error" Icon="@Icons.Material.Filled.Logout">Log ud</MudNavLink>
                 </Authorized>
@@ -110,7 +111,16 @@
         {
             PaletteLight = _lightPalette,
             PaletteDark = _darkPalette,
-            LayoutProperties = new LayoutProperties()
+            LayoutProperties = new LayoutProperties(),
+            ZIndex = new ZIndex() 
+            {
+                AppBar = 1100,       // Default is 1100
+                Drawer = 1200,       // Default is 1200
+                Popover = 1300,      // Default is 1300
+                Dialog = 1400,       // Default is 1400
+                Snackbar = 1500,     // Default is 1500
+                Tooltip = 9999       // Default is 1600
+            }
         };
 
         await GetBalance();
