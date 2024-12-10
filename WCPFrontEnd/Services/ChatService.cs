@@ -41,7 +41,7 @@ namespace WCPFrontEnd.Services
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<UserWithLatestMessage>> GetUsersWithLatestChat(Expression<Func<User, bool>> predicate)
+        public async Task<IEnumerable<UserWithLatestMessage>> GetUsersWithLatestChat(Expression<Func<User, bool>> predicate, User callingUser)
         {
             return await _context.Users
             .Where(predicate)
@@ -49,9 +49,9 @@ namespace WCPFrontEnd.Services
             {
                 User = user,
                 LatestMessage = _context.Chats
-                    .Where(m => m.From.Id == user.Id || m.To.Id == user.Id) // Filter for messages related to the user
-                    .OrderByDescending(m => m.Sent)                         // Order by latest
-                    .FirstOrDefault()                                       // Take the latest message
+                    .Where(m => (m.From.Id == callingUser.Id && m.To.Id == user.Id) || (m.From.Id == user.Id && m.To.Id == callingUser.Id)) // Filter for messages related to the user
+                    .OrderByDescending(m => m.Sent) // Order by latest
+                    .FirstOrDefault() // Take the latest message
             })
             .OrderByDescending(u => u.LatestMessage != null ? u.LatestMessage.Sent : DateTime.MinValue) // Sort by Timestamp
             .ToListAsync();

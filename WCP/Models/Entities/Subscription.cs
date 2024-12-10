@@ -8,6 +8,7 @@ namespace WCPShared.Models.Entities
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
+        public string StripeSubscriptionId { get; set; } = string.Empty;
         public int OrganizationId { get; set; }
         public Organization Organization { get; set; }
         public SubscriptionType Type { get; set; }

@@ -126,11 +126,11 @@
     {
         if (string.IsNullOrEmpty(input))
         {
-            Users = await ChatService.GetUsersWithLatestChat(x => x.Id != ActiveUser.Id);
+            Users = await ChatService.GetUsersWithLatestChat(x => x.Id != ActiveUser.Id, ActiveUser);
         }
         else 
         {
-            Users = await ChatService.GetUsersWithLatestChat(x => x.Id != ActiveUser.Id && x.Name.Contains(input));
+            Users = await ChatService.GetUsersWithLatestChat(x => x.Id != ActiveUser.Id && x.Name.Contains(input), ActiveUser);
         }
 
         StateHasChanged();
@@ -159,7 +159,7 @@
         var auth = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         string email = auth.User.FindFirst(c => c.Type == ClaimTypes.Email)?.Value!;
         ActiveUser = await Context.Users.SingleOrDefaultAsync(x => x.Email == email);
-        Users = await ChatService.GetUsersWithLatestChat(x => x.Id != ActiveUser.Id);
+        Users = await ChatService.GetUsersWithLatestChat(x => x.Id != ActiveUser.Id, ActiveUser);
 
         if (ActiveUser is not null)
         {
@@ -176,7 +176,7 @@
                     if (user is not null)
                         user.LatestMessage = message;
 
-                    if (Recipient.Id == message.From.Id)
+                    if (Recipient is not null && Recipient.Id == message.From.Id)
                         Messages.Add(message);
 
                     StateHasChanged();

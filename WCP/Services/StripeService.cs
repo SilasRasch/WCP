@@ -337,5 +337,48 @@ namespace WCPShared.Services
 
             return true;
         }
+
+        public async Task<List<Stripe.Subscription>> GetAllSubscriptions(string accountId)
+        {
+            var options = new SubscriptionListOptions
+            {
+                Customer = accountId,
+            };
+
+            var service = new SubscriptionService();
+            return (await service.ListAsync(options)).ToList();
+        }
+
+        public async Task<Stripe.Subscription> GetSubscription(string subscriptionId)
+        {
+            var options = new SubscriptionGetOptions
+            {
+                Expand = new List<string> { "items.data.price.product" }
+            };
+
+            var service = new SubscriptionService();
+            return await service.GetAsync(subscriptionId, options);
+        }
+
+        public async Task CancelAllSusbcriptions(string accountId)
+        {
+            var subscriptions = await GetAllSubscriptions(accountId);
+
+            foreach (var subscription in subscriptions)
+            {
+                await CancelSubscriptionAtEndOfBillingCycle(subscription.Id);
+            }
+        }
+ 
+        public async Task CancelSubscriptionAtEndOfBillingCycle(string subscriptionId)
+        {
+            var options = new SubscriptionUpdateOptions
+            {
+                CancelAtPeriodEnd = true
+            };
+
+            var service = new SubscriptionService();
+            await service.UpdateAsync(subscriptionId, options);
+        }
     }
 }

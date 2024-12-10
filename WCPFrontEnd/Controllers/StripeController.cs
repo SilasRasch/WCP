@@ -67,6 +67,10 @@ namespace WCPFrontEnd.Controllers
                         {
                             org.Subscription.LastPaid = DateTime.Now;
                             org.IsActive = true;
+
+                            if (!string.IsNullOrEmpty(checkout.SubscriptionId))
+                                org.Subscription.StripeSubscriptionId = checkout.SubscriptionId;
+                            
                             await _context.SaveChangesAsync();
                             Console.WriteLine("A new subscription was successful for {0}.", org.Name);
                         }
