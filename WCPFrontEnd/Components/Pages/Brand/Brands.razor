@@ -23,7 +23,13 @@
     <ToolBarContent>
         <MudStack Row="true" AlignItems="AlignItems.Center">
             <MudText Typo="Typo.h6">Brands</MudText>
-            <MudIconButton Icon="@Icons.Material.Filled.Add" OnClick="ToggleAddDialog"></MudIconButton>
+            
+            <AuthorizeView Context="authcontext" Roles="Bruger">
+                <MudIconButton Disabled="User.Organization.Subscription.NumberOfBrands <= BrandList.Count()" Icon="@Icons.Material.Filled.Add" OnClick="ToggleAddDialog"></MudIconButton>
+            </AuthorizeView>
+            <AuthorizeView Context="authcontext" Roles="Admin">
+                <MudIconButton Icon="@Icons.Material.Filled.Add" OnClick="ToggleAddDialog"></MudIconButton>
+            </AuthorizeView>
         </MudStack>
         <MudSpacer />
         <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
@@ -58,43 +64,51 @@
         {
             <SelectColumn T="BrandView" />
         }
-        <PropertyColumn Property="x => x.Id" Title="Id">
-            <CellTemplate>
-                <div @onclick="() => ToggleEditDialog(context.Item)" class="flex justify-center rounded-full w-10 p-2 cursor-pointer bg-red-500 text-white">
-                    <MudText>@context.Item.Id</MudText>
-                </div>
-            </CellTemplate>
-        </PropertyColumn>
-        <PropertyColumn Property="x => x.Name" Title="Navn" />
-        <PropertyColumn Property="x => x.URL" Title="URL" />
 
-        <PropertyColumn Property="x => x.Organization.Name" Title="Organisation" Grouping="_groupOrganization">
-            <CellTemplate>
-                <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
-                    <MudText Typo="Typo.h6">@ProjectHelper.CountryStringToFlag(context.Item.Organization.Language.IsoLanguageCode) </MudText>
-                    @context.Item.Organization.Name
-                </MudStack>
-            </CellTemplate>
-        </PropertyColumn>
+        <AuthorizeView Context="authcontext" Roles="Admin">
+            <PropertyColumn Property="x => x.Id" Title="Id">
+                <CellTemplate>
+                    <div @onclick="() => ToggleEditDialog(context.Item)" class="flex justify-center rounded-full w-10 p-2 cursor-pointer bg-red-500 text-white">
+                        <MudText>@context.Item.Id</MudText>
+                    </div>
+                </CellTemplate>
+            </PropertyColumn>
+        </AuthorizeView>
+        
+        <AuthorizeView Context="authcontext">
+            <PropertyColumn Property="x => x.Name" Title="Navn" />
+            <PropertyColumn Property="x => x.URL" Title="URL" />
 
-        <TemplateColumn Title="Actions" StickyRight="@_stickyActions">
-            <CellTemplate>
-                <MudMenu Icon="@Icons.Material.Filled.MoreHoriz" AriaLabel="Åben aktionsmenu" AnchorOrigin="Origin.BottomCenter">
-                    <MudMenuItem OnClick="() => ToggleEditDialog(context.Item)">
-                        <MudStack Row="true">
-                            <MudIcon Icon="@Icons.Material.Filled.Edit"></MudIcon>
-                            <MudText>Rediger</MudText>
-                        </MudStack>
-                    </MudMenuItem>
-                    <MudMenuItem OnClick="() => ToggleDeleteModal(context.Item.Id)">
-                        <MudStack Row="true">
-                            <MudIcon Icon="@Icons.Material.Filled.Delete" Color="Color.Error"></MudIcon>
-                            <MudText>Slet</MudText>
-                        </MudStack>
-                    </MudMenuItem>
-                </MudMenu>
-            </CellTemplate>
-        </TemplateColumn>
+            <PropertyColumn Property="x => x.Organization.Name" Title="Organisation" Grouping="_groupOrganization">
+                <CellTemplate>
+                    <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
+                        <MudText Typo="Typo.h6">@ProjectHelper.CountryStringToFlag(context.Item.Organization.Language.IsoLanguageCode) </MudText>
+                        @context.Item.Organization.Name
+                    </MudStack>
+                </CellTemplate>
+            </PropertyColumn>
+        </AuthorizeView>
+        
+        <AuthorizeView Context="authcontext" Roles="Admin">
+            <TemplateColumn Title="Actions" StickyRight="@_stickyActions">
+                <CellTemplate>
+                    <MudMenu Icon="@Icons.Material.Filled.MoreHoriz" AriaLabel="Åben aktionsmenu" AnchorOrigin="Origin.BottomCenter">
+                        <MudMenuItem OnClick="() => ToggleEditDialog(context.Item)">
+                            <MudStack Row="true">
+                                <MudIcon Icon="@Icons.Material.Filled.Edit"></MudIcon>
+                                <MudText>Rediger</MudText>
+                            </MudStack>
+                        </MudMenuItem>
+                        <MudMenuItem OnClick="() => ToggleDeleteModal(context.Item.Id)">
+                            <MudStack Row="true">
+                                <MudIcon Icon="@Icons.Material.Filled.Delete" Color="Color.Error"></MudIcon>
+                                <MudText>Slet</MudText>
+                            </MudStack>
+                        </MudMenuItem>
+                    </MudMenu>
+                </CellTemplate>
+            </TemplateColumn>
+        </AuthorizeView>
     </Columns>
     <PagerContent>
         <MudDataGridPager T="Brand" PageSizeOptions="[100, 200, 300, 400, 500]" RowsPerPageString="Rækker per side:" />
@@ -134,7 +148,7 @@
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var email = authState.User.FindFirst(c => c.Type == ClaimTypes.Email)?.Value;
-        User = await Context.Users.Include(x => x.Organization).SingleOrDefaultAsync(x => x.Email == email);
+        User = await Context.Users.Include(x => x.Organization).ThenInclude(x => x.Subscription).SingleOrDefaultAsync(x => x.Email == email);
 
         await FetchBrands();
     }
@@ -181,7 +195,7 @@
     {
         var parameters = new DialogParameters<Dialoges.AddBrandDialog>
         {
-            { x => x.OrganizationId, User.OrganizationId != default ? User.OrganizationId : null }
+            { x => x.Organization, User.Organization != default ? User.Organization : null }
         };
         
         var options = new DialogOptions { CloseOnEscapeKey = true, CloseButton = true };

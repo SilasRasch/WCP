@@ -1,4 +1,5 @@
-﻿@using WCPAdminFrontEnd.Services
+﻿@using Microsoft.EntityFrameworkCore
+@using WCPAdminFrontEnd.Services
 @using WCPFrontEnd.Services
 @using WCPShared.Interfaces
 @using WCPShared.Models.DTOs
@@ -7,8 +8,8 @@
 @using WCPShared.Models
 @using WCPShared.Services.EntityFramework
 @using WCPShared.Services.StaticHelpers
-@inject OrganizationService OrganizationService
-@inject BrandService BrandService
+@using WCPShared.Models.Entities
+@inject IWcpDbContext Context
 
 <MudDialog>
     <TitleContent>
@@ -19,12 +20,12 @@
     <DialogContent>
         <MudForm @ref="_brandForm" @bind-IsValid="@_brandSuccess" @bind-Errors="@_brandErrors">
             <AuthorizeView Roles="Admin">
-                <MudSelect @bind-Value="_brand.OrganizationId" Label="Organisation" Required="true" RequiredError="Dette felt er påkrævet" AnchorOrigin="Origin.BottomCenter" Placeholder="Vælg organisation">
+                <MudSelect @bind-Value="_brand.Organization" Label="Organisation" Required="true" RequiredError="Dette felt er påkrævet" AnchorOrigin="Origin.BottomCenter" Placeholder="Vælg organisation">
                     @foreach (var org in _organizations)
                     {
-                        <MudSelectItem Value="@org.Id">
+                        <MudSelectItem Value="@org">
                             <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
-                                <MudText Typo="Typo.h6">@ProjectHelper.CountryStringToFlag(org.Language) </MudText>
+                                <MudText Typo="Typo.h6">@ProjectHelper.LanguageToStringFlag(org.Language)</MudText>
                                 @org.Name
                             </MudStack>
                         </MudSelectItem>
@@ -49,27 +50,30 @@
     private MudDialogInstance MudDialog { get; set; }
 
     [Parameter]
-    public int? OrganizationId { get; set; }
+    public Organization? Organization { get; set; }
 
     private MudForm _brandForm;
     private bool _brandSuccess;
     private string[] _brandErrors = { };
-    private BrandDto _brand = new();
+    private Brand _brand = new();
 
-    private IEnumerable<OrganizationView> _organizations = new List<OrganizationView>();
+    private IEnumerable<Organization> _organizations = [];
 
     protected override async Task OnInitializedAsync()
     {
-        _organizations = await OrganizationService.GetAllObjectsView();
+        _organizations = await Context.Organizations.Include(x => x.Brands).ToListAsync();
     }
 
     private async Task Submit()
     {
-        if (OrganizationId is not null)
-            _brand.OrganizationId = OrganizationId.Value;
+        if (Organization is not null)
+            _brand.Organization = Organization;
 
-        if (_brand.Validate())
-            await BrandService.AddObject(_brand);
+        if (_brand.Validate()) 
+        {
+            await Context.AddAsync(_brand);
+            await Context.SaveChangesAsync();
+        }
 
         MudDialog.Close(DialogResult.Ok(true));
     }
