@@ -1,4 +1,5 @@
 ﻿@page "/register-creator"
+@using Microsoft.EntityFrameworkCore
 @using WCPAdminFrontEnd.Services
 @using WCPFrontEnd.Components.Shared
 @using WCPFrontEnd.Services
@@ -34,7 +35,7 @@
                         <MudStack Row>
                             <MudTextField @bind-Value="User.Phone" Label="Telefon" Placeholder="Dit telefonnummer" Validation="@(new Func<string, string>(ValidationHelpers.PhoneValidation))" Required RequiredError="Dette felt er påkrævet" />
                             <MudTooltip Placement="Placement.Top" Text="Landet du vælger dikterer hvilken valuta, der vil blive brugt til din bruger.">
-                                <LanguageSelector @bind-Value="User.Language" Label="Land" Country />
+                                <LanguageSelector @bind-Value="User.Language" Label="Land" Country Languages="Languages" />
                             </MudTooltip>
                         </MudStack>
 
@@ -135,7 +136,13 @@
 </div>
 
 @code {
+    protected override async Task OnInitializedAsync()
+    {
+        Languages = await Context.Languages.ToListAsync();
+    }
+    private IEnumerable<Language> Languages = [];
     private IEnumerable<Language> selectedLanguages = new HashSet<Language>();
+    
     private User User { get; set; } = new User();
     private Creator Creator { get; set; } = new Creator();
 

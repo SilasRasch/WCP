@@ -1,6 +1,7 @@
 ﻿@using System.Text.RegularExpressions
 @using WCPFrontEnd.Services
 @using WCPShared.Models.Entities.ProjectModels
+@using WCPShared.Models.Entities.ProjectModels.Concepts
 @using WCPShared.Services
 @inject IDialogService DialogService
 @inject S3Service S3Service
@@ -28,7 +29,7 @@
     @* Home *@
     @if (_path == string.Empty) 
     {
-        if (Project is CreatorProject) 
+        if (Project.Concepts.Any(x => x is CreatorConcept)) 
         {
             <AuthorizeView Roles="Admin, Creator">
                 <MudFab StartIcon="@Icons.Material.Filled.Folder" IconSize="Size.Large" Class="mud-background" Label="Scripts" OnClick="@(() => GoToPath("scripts"))" />
@@ -41,7 +42,7 @@
     }
 
     <AuthorizeView Roles="Admin, Creator">
-        @if (Project is CreatorProject creatorProject)
+        @if (Project.Concepts.Any(x => x is CreatorConcept))
         {
             @* Scripts *@
             @if (_path == "scripts")
@@ -51,13 +52,13 @@
                     <FileElement FileUri="@str" Project="Project" Delete="DeleteFile" Rename="RenameFile" />
                 }
 
-                <MudFab StartIcon="@Icons.Material.Filled.Upload" IconSize="Size.Large" Class="mud-background" Label="Upload" @onclick="@(() => ToggleUploadDialog(GetAcceptString()))" />
+                <MudFab StartIcon="@Icons.Material.Filled.Upload" IconSize="Size.Large" Class="mud-background" Label="Upload" @onclick="ToggleUploadDialog" />
             }
 
             @* Creator content *@
             @if (_path == "content")
             {
-                for (int i = 1; i <= Project.Amount; i++)
+                for (int i = 1; i <= Project.Concepts.Count(); i++)
                 {
                     <MudFab StartIcon="@Icons.Material.Filled.Folder" IconSize="Size.Large" Class="mud-background" Label="@($"Content {i}")" OnClick="@(() => GoToPath("content/" + i))" />
                 }
@@ -75,19 +76,27 @@
                 {
                     <FileElement FileUri="@str" Project="Project" Delete="DeleteFile" Rename="RenameFile" />
                 }
-                <MudFab StartIcon="@Icons.Material.Filled.Upload" IconSize="Size.Large" Class="mud-background" Label="Upload" @onclick="@(() => ToggleUploadDialog(GetAcceptString()))" />
+                <MudFab StartIcon="@Icons.Material.Filled.Upload" IconSize="Size.Large" Class="mud-background" Label="Upload" @onclick="ToggleUploadDialog" />
             }
         }
     </AuthorizeView>
 
     
-    @* Product *@
+    @* Product TODO: FIX FORMAT FOLDER *@
     @if (_path == "product")
     {
-        @foreach (string str in Project.Formats.Trim().Split(','))
+       @*  @foreach (var concept in Project.Concepts)
         {
-            <MudFab StartIcon="@Icons.Material.Filled.Folder" IconSize="Size.Large" Class="mud-background" Label="@str" OnClick="@(() => GoToPath($"product/{str}"))" />
-        }
+            @foreach (var format in concept.Formats)
+            {
+                <MudFab StartIcon="@Icons.Material.Filled.Folder" IconSize="Size.Large" Class="mud-background" Label="@format" OnClick="@(() => GoToPath($"product/{format}"))" />
+            }
+        } *@
+
+        <MudFab StartIcon="@Icons.Material.Filled.Folder" IconSize="Size.Large" Class="mud-background" Label="16:9" OnClick="@(() => GoToPath($"product/16:9"))" />
+        <MudFab StartIcon="@Icons.Material.Filled.Folder" IconSize="Size.Large" Class="mud-background" Label="4:5" OnClick="@(() => GoToPath($"product/4:5"))" />
+        <MudFab StartIcon="@Icons.Material.Filled.Folder" IconSize="Size.Large" Class="mud-background" Label="1:1" OnClick="@(() => GoToPath($"product/1:1"))" />
+        <MudFab StartIcon="@Icons.Material.Filled.Folder" IconSize="Size.Large" Class="mud-background" Label="Uden captions" OnClick="@(() => GoToPath($"product/uden captions"))" />
     }
 
     @if (_path.Contains("product/"))
@@ -96,7 +105,7 @@
         {
             <FileElement FileUri="@str" Project="Project" Delete="DeleteFile" Rename="RenameFile" />
         }
-        <MudFab StartIcon="@Icons.Material.Filled.Upload" IconSize="Size.Large" Class="mud-background" Label="Upload" @onclick="@(() => ToggleUploadDialog(GetAcceptString()))" />
+        <MudFab StartIcon="@Icons.Material.Filled.Upload" IconSize="Size.Large" Class="mud-background" Label="Upload" @onclick="ToggleUploadDialog" />
     }
     
     @* Other files *@
@@ -106,7 +115,7 @@
         {
             <FileElement FileUri="@str" Project="Project" Delete="DeleteFile" Rename="RenameFile" />
         }
-        <MudFab StartIcon="@Icons.Material.Filled.Upload" IconSize="Size.Large" Class="mud-background" Label="Upload" @onclick="@(() => ToggleUploadDialog(GetAcceptString()))" />
+        <MudFab StartIcon="@Icons.Material.Filled.Upload" IconSize="Size.Large" Class="mud-background" Label="Upload" @onclick="ToggleUploadDialog" />
     }
 </MudGrid>
 
@@ -130,14 +139,14 @@
         return null;
     }
 
-    private async Task ToggleUploadDialog(string contentType)
+    private async Task ToggleUploadDialog()
     {
         var options = new DialogOptions { CloseOnEscapeKey = true };
         var parameters = new DialogParameters<Dialoges.FileUploadDialog>()
         {
             { x => x.Path, _path },
             { x => x.Project, Project },
-            { x => x.ContentType, contentType }
+            { x => x.ContentType, GetAcceptString() }
         };
 
         var dialog = await DialogService.ShowAsync<Dialoges.FileUploadDialog>("FileUploadDialog", parameters, options);

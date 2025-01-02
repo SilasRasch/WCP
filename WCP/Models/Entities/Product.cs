@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using WCPShared.Models.Entities.ProjectModels;
+using WCPShared.Models.Entities.ProjectModels.Concepts;
 
 namespace WCPShared.Models.Entities
 {
@@ -21,6 +22,7 @@ namespace WCPShared.Models.Entities
         public int BrandId { get; set; }
         public Brand Brand { get; set; }
 
-        public ICollection<Project> Projects { get; set; } = [];
+        //public ICollection<Project> Projects { get; set; } = [];
+        public ICollection<Concept> Concepts { get; set; } = [];
     }
 }

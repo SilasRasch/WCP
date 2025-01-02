@@ -1,13 +1,13 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using WCPShared.Models.Enums;
-using Microsoft.SqlServer.Server;
 using WCPShared.Services.StaticHelpers;
 using WCPShared.Interfaces;
+using WCPShared.Models.Entities.ProjectModels.Concepts;
 
 namespace WCPShared.Models.Entities.ProjectModels
 {
-    public abstract class Project : IWcpEntity, IEquatable<Project?>
+    public class Project : IWcpEntity, IEquatable<Project?>
     {
         #region Base
 
@@ -18,6 +18,7 @@ namespace WCPShared.Models.Entities.ProjectModels
         public string Name { get; set; } = string.Empty;
         public ProjectStatus Status { get; set; }
         public long Price { get; set; }
+        public ProjectType Type { get; set; }
 
         // Management
         public DateTime Created { get; set; }
@@ -32,20 +33,16 @@ namespace WCPShared.Models.Entities.ProjectModels
 
         #region Project
 
-        public string Platforms { get; set; } = string.Empty;
-        public int Amount { get; set; } = 1;
-        public string Formats { get; set; } = string.Empty;
+        public List<Concept> Concepts { get; set; } = [];
 
         #endregion
 
-        #region Product
+        public Project()
+        {
+            
+        }
 
-        public int ProductId { get; set; }
-        public Product Product { get; set; } = new Product();
-
-        #endregion
-
-        protected Project(int id, int brandId, Brand brand, string name, ProjectStatus status, long price, DateTime created, DateTime updated, DateTime deadline, string internalNotes, string platforms, int amount, string formats, int productId, Product product)
+        protected Project(int id, int brandId, Brand brand, string name, ProjectStatus status, long price, DateTime created, DateTime updated, DateTime deadline, string internalNotes)
         {
             Id = id;
             BrandId = brandId;
@@ -57,11 +54,6 @@ namespace WCPShared.Models.Entities.ProjectModels
             Updated = updated;
             Deadline = deadline;
             InternalNotes = internalNotes;
-            Platforms = platforms;
-            Amount = amount;
-            Formats = formats;
-            ProductId = productId;
-            Product = product;
         }
 
         protected Project(Project existingProject)
@@ -76,16 +68,6 @@ namespace WCPShared.Models.Entities.ProjectModels
             Updated = existingProject.Updated;
             Deadline = existingProject.Deadline;
             InternalNotes = existingProject.InternalNotes;
-            Platforms = existingProject.Platforms;
-            Amount = existingProject.Amount;
-            Formats = existingProject.Formats;
-            ProductId = existingProject.ProductId;
-            Product = existingProject.Product;
-        }
-
-        protected Project()
-        {
-            
         }
 
         public virtual bool Validate()
@@ -105,7 +87,7 @@ namespace WCPShared.Models.Entities.ProjectModels
         /// <returns>100 dkk per content amount</returns>
         public virtual long CalculatePrice()
         {
-            return Amount * 100;
+            throw new NotImplementedException();
         }
 
         public override bool Equals(object? obj)
@@ -125,12 +107,7 @@ namespace WCPShared.Models.Entities.ProjectModels
                    Created == other.Created &&
                    Updated == other.Updated &&
                    Deadline == other.Deadline &&
-                   InternalNotes == other.InternalNotes &&
-                   Platforms == other.Platforms &&
-                   Amount == other.Amount &&
-                   Formats == other.Formats &&
-                   ProductId == other.ProductId &&
-                   EqualityComparer<Product>.Default.Equals(Product, other.Product);
+                   InternalNotes == other.InternalNotes;
         }
 
         public override int GetHashCode()
@@ -146,11 +123,6 @@ namespace WCPShared.Models.Entities.ProjectModels
             hash.Add(Updated);
             hash.Add(Deadline);
             hash.Add(InternalNotes);
-            hash.Add(Platforms);
-            hash.Add(Amount);
-            hash.Add(Formats);
-            hash.Add(ProductId);
-            hash.Add(Product);
             return hash.ToHashCode();
         }
 

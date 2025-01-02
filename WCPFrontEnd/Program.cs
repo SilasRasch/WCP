@@ -37,7 +37,6 @@ builder.Services.AddDataServices(builder.Configuration);
 builder.Services.AddAuthenticationServices();
 builder.Services.AddScoped<IS3Client, S3Client>();
 builder.Services.AddScoped<S3Service>();
-//builder.Services.AddScoped<ChatService>();
 StripeConfiguration.ApiKey = Secrets.GetStripeApiKey(builder.Configuration);
 builder.Services.AddScoped<StripeService>();
 builder.Services.AddScoped<ProjectService>();
@@ -55,6 +54,17 @@ builder.Services.AddAuthorizationBuilder()
     .AddPolicy("IsNotStripeConnected", policy => policy.RequireClaim("IsNotStripeConnected").RequireRole(UserRole.Creator.ToString()))
     .AddPolicy("OnboardingIncomplete", policy => policy.RequireClaim("OnboardingIncomplete").RequireRole(UserRole.Creator.ToString()));
 builder.Services.AddCascadingAuthenticationState();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("SignalRCorsPolicy", builder =>
+    {
+        builder.WithOrigins("https://test.wcp.dk", "https://admin.wcp.dk", "https://wcp.dk", "https://platform.webcontent.dk") // Replace with the actual origin
+               .AllowAnyMethod()
+               .AllowAnyHeader()
+               .AllowCredentials();
+    });
+});
 
 var app = builder.Build();
 
@@ -79,6 +89,7 @@ app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
-app.MapHub<ChatHub>("/chathub");
+app.UseCors("SignalRCorsPolicy");
+app.MapHub<ChatHub>("/chathub").RequireCors("SignalRCorsPolicy");
 
 app.Run();

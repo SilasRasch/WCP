@@ -4,6 +4,7 @@
 @using WCPShared.Models.DTOs
 @using WCPShared.Models.Entities.AuthModels
 @using WCPShared.Models.Entities.UserModels
+@using WCPShared.Models.Entities
 @using WCPShared.Models.Enums
 @using WCPShared.Models.Views
 @using WCPShared.Services
@@ -27,7 +28,7 @@
             <MudStack Row="true">
                 @if (!_selfRegister)
                 {
-                <MudTextField T="string" @bind-Value="_user.Name" Label="Navn" Required="!_selfRegister" Validation="@(new Func<string, string>(ValidationHelpers.NameValidation))" RequiredError="Dette felt er påkrævet" />
+                    <MudTextField T="string" @bind-Value="_user.Name" Label="Navn" Required="!_selfRegister" Validation="@(new Func<string, string>(ValidationHelpers.NameValidation))" RequiredError="Dette felt er påkrævet" />
                 }
                 <MudTextField T="string" @bind-Value="_user.Email" Label="Email" Required="true" Validation="@(new Func<string, string>(ValidationHelpers.EmailValidation))" RequiredError="Dette felt er påkrævet" />
             </MudStack>
@@ -42,63 +43,70 @@
 
                 @if (_isCreator && _selfRegister)
                 {
-                <MudSelect @bind-Value="_creator.SubType" Label="Undertype" Required="_isCreator" RequiredError="Dette felt er påkrævet" AnchorOrigin="Origin.BottomCenter" Placeholder="Vælg en undertype">
-                    @foreach (CreatorSubType item in Enum.GetValues(typeof(CreatorSubType)))
-                    {
-                        <MudSelectItem Value="@item">@item</MudSelectItem>
-                    }
-                </MudSelect>
+                    <MudSelect @bind-Value="_creator.SubType" Label="Undertype" Required="_isCreator" RequiredError="Dette felt er påkrævet" AnchorOrigin="Origin.BottomCenter" Placeholder="Vælg en undertype">
+                        @foreach (CreatorSubType item in Enum.GetValues(typeof(CreatorSubType)))
+                        {
+                            <MudSelectItem Value="@item">@item</MudSelectItem>
+                        }
+                    </MudSelect>
                 }
             </MudStack>
 
 
             @if (_user.Role == UserRole.Bruger)
             {
-            <MudSelect @bind-Value="_orgId" Label="Organisation" Required="_isUser" RequiredError="Dette felt er påkrævet" AnchorOrigin="Origin.BottomCenter" Placeholder="Vælg organisation">
-                @foreach (var org in _organizations)
+                <MudSelect @bind-Value="_user.Organization" Label="Organisation" Required="_isUser" RequiredError="Dette felt er påkrævet" AnchorOrigin="Origin.BottomCenter" Placeholder="Vælg organisation">
+                    @foreach (var org in _organizations)
+                    {
+                        <MudSelectItem Value="@org">
+                            <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
+                                <MudText Typo="Typo.h6">@ProjectHelper.LanguageToStringFlag(org.Language) </MudText>
+                                @org.Name
+                            </MudStack>
+                        </MudSelectItem>
+                    }
+                </MudSelect>
+            }
+
+            <MudSelect @bind-Value="_user.Language" ToStringFunc="(e) => ProjectHelper.LanguageToStringFlag(e)" Label="Sprog" Required="_creator.SubType == CreatorSubType.UGC" RequiredError="Dette felt er påkrævet" AnchorOrigin="Origin.BottomCenter">
+                @foreach (var lang in _languages)
                 {
-                    <MudSelectItem Value="@org.Id">
-                        <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
-                            <MudText Typo="Typo.h6">@ProjectHelper.CountryStringToFlag(org.Language) </MudText>
-                            @org.Name
-                        </MudStack>
-                    </MudSelectItem>
+                    <MudSelectItem Value="@lang">@ProjectHelper.CountryStringToFlag(lang.IsoLanguageCode)</MudSelectItem>
                 }
             </MudSelect>
-            }
 
             @if (!_selfRegister)
             {
-            <MudTextField T="string" @bind-Value="_user.Phone" Label="Telefon" Required="(_isUser || (_creator is not null && _isCreator && _creator.SubType == CreatorSubType.UGC)) && !_selfRegister" Validation="@(new Func<string, string>(ValidationHelpers.PhoneValidation))" RequiredError="Dette felt er påkrævet" />
+                <MudTextField T="string" @bind-Value="_user.Phone" Label="Telefon" Required="(_isUser || (_creator is not null && _isCreator && _creator.SubType == CreatorSubType.UGC)) && !_selfRegister" Validation="@(new Func<string, string>(ValidationHelpers.PhoneValidation))" RequiredError="Dette felt er påkrævet" />
             }
 
             @if (_user.Role == UserRole.Creator && !_selfRegister)
             {
-            <MudStack Row="true">
-                <MudDatePicker Label="Fødselsdag" @bind-Date="_creator.DateOfBirth" Required="_creator.SubType == CreatorSubType.UGC" DateFormat="dd.MM.yyyy"></MudDatePicker>
-                <MudSelect @bind-Value="_creator.Gender" Label="Køn" Required="_creator.SubType == CreatorSubType.UGC" RequiredError="Dette felt er påkrævet" AnchorOrigin="Origin.BottomCenter" Placeholder="Vælg et køn">
-                    <MudSelectItem Value="@("Mand")">Mand</MudSelectItem>
-                    <MudSelectItem Value="@("Kvinde")">Kvinde</MudSelectItem>
-                    <MudSelectItem Value="@("Andet")">Andet</MudSelectItem>
-                </MudSelect>
-            </MudStack>
+                <MudStack Row="true">
+                    <MudDatePicker Label="Fødselsdag" @bind-Date="_creator.DateOfBirth" Required="_creator.SubType == CreatorSubType.UGC" DateFormat="dd.MM.yyyy"></MudDatePicker>
+                    <MudSelect @bind-Value="_creator.Gender" Label="Køn" Required="_creator.SubType == CreatorSubType.UGC" RequiredError="Dette felt er påkrævet" AnchorOrigin="Origin.BottomCenter" Placeholder="Vælg et køn">
+                        <MudSelectItem Value="@("Mand")">Mand</MudSelectItem>
+                        <MudSelectItem Value="@("Kvinde")">Kvinde</MudSelectItem>
+                        <MudSelectItem Value="@("Andet")">Andet</MudSelectItem>
+                    </MudSelect>
+                </MudStack>
 
-            <MudSelect @bind-SelectedValues="_selectedLanguages" ToStringFunc="(e) => ProjectHelper.LanguageToStringFlag(e)" Delimiter=" " MultiSelection="true" Label="Sprog" Required="_creator.SubType == CreatorSubType.UGC" RequiredError="Dette felt er påkrævet" AnchorOrigin="Origin.BottomCenter">
-                @foreach (var lang in _languages)
-                {
-                        <MudSelectItem Value="@lang">@ProjectHelper.CountryStringToFlag(lang.IsoLanguageCode)</MudSelectItem>
-                }
-            </MudSelect>
-
-            <MudStack Row="true">
-                <MudTextField T="string" @bind-Value="_creator.Address" Label="Adresse" Required="_creator.SubType == CreatorSubType.UGC" RequiredError="Dette felt er påkrævet" />
-                <MudSelect @bind-Value="_creator.SubType" Label="Undertype" Required="_isCreator" RequiredError="Dette felt er påkrævet" AnchorOrigin="Origin.BottomCenter" Placeholder="Vælg en undertype">
-                    @foreach (CreatorSubType item in Enum.GetValues(typeof(CreatorSubType)))
+                <MudSelect @bind-SelectedValues="_selectedLanguages" ToStringFunc="(e) => ProjectHelper.LanguageToStringFlag(e)" Delimiter=" " MultiSelection="true" Label="Sprog" Required="_creator.SubType == CreatorSubType.UGC" RequiredError="Dette felt er påkrævet" AnchorOrigin="Origin.BottomCenter">
+                    @foreach (var lang in _languages)
                     {
-                        <MudSelectItem Value="@item">@item</MudSelectItem>
+                            <MudSelectItem Value="@lang">@ProjectHelper.CountryStringToFlag(lang.IsoLanguageCode)</MudSelectItem>
                     }
                 </MudSelect>
-            </MudStack>
+
+                <MudStack Row="true">
+                    <MudTextField T="string" @bind-Value="_creator.Address" Label="Adresse" Required="_creator.SubType == CreatorSubType.UGC" RequiredError="Dette felt er påkrævet" />
+                    <MudSelect @bind-Value="_creator.SubType" Label="Undertype" Required="_isCreator" RequiredError="Dette felt er påkrævet" AnchorOrigin="Origin.BottomCenter" Placeholder="Vælg en undertype">
+                        @foreach (CreatorSubType item in Enum.GetValues(typeof(CreatorSubType)))
+                        {
+                            <MudSelectItem Value="@item">@item</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudStack>
 
                 if (_creator.SubType == CreatorSubType.UGC) 
                 {
@@ -136,7 +144,6 @@
     private bool _success;
     private string[] _errors = { };
     private bool _selfRegister = false;
-    private int _orgId;
 
     private bool _isCreator => _user.Role == UserRole.Creator;
     private bool _isUser => _user.Role == UserRole.Bruger;
@@ -146,12 +153,12 @@
 
     private IEnumerable<Language> _selectedLanguages { get; set; } = new HashSet<Language>();
 
-    private IEnumerable<OrganizationView> _organizations = new List<OrganizationView>();
+    private IEnumerable<Organization> _organizations = new List<Organization>();
     private IEnumerable<Language> _languages = new List<Language>();
 
     protected override async Task OnInitializedAsync()
     {
-        _organizations = await OrganizationService.GetAllObjectsView();
+        _organizations = await OrganizationService.GetAllObjects();
         _languages = await LanguageService.GetAllObjects();
     }
 
@@ -163,9 +170,6 @@
     {
         if (_user.Validate())
         {
-            if (_isUser)
-                _user.OrganizationId = _orgId;
-
             if (_isCreator)
             {
                 if (_profilePicture is not null)

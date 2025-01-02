@@ -4,7 +4,9 @@ using Newtonsoft.Json;
 using WCPShared.Interfaces;
 using WCPShared.Models.Entities;
 using WCPShared.Models.Entities.ProjectModels;
+using WCPShared.Models.Entities.ProjectModels.Concepts;
 using WCPShared.Models.Entities.UserModels;
+using WCPShared.Models.Enums;
 
 namespace WCPShared.Models
 {
@@ -21,11 +23,13 @@ namespace WCPShared.Models
 
         // Project 2.0
         public DbSet<Project> Projects { get; set; }
-        public DbSet<UgcProject> UgcProjects { get; set; }
-        public DbSet<StaticProject> StaticProjects { get; set; }
-        public DbSet<PhotoProject> PhotoProjects { get; set; }
+        //public DbSet<UgcProject> UgcProjects { get; set; }
+        //public DbSet<StaticProject> StaticProjects { get; set; }
+        //public DbSet<PhotoProject> PhotoProjects { get; set; }
+        public virtual DbSet<Concept> Concepts { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<ChatMessage> Chats { get; set; }
+        public DbSet<Feedback> Feedbacks { get; set; }
 
         public TestDbContext(DbContextOptions<TestDbContext> options) : base(options)
         {
@@ -33,14 +37,22 @@ namespace WCPShared.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Project>().UseTpcMappingStrategy();
+            modelBuilder.Entity<Concept>()
+                .HasDiscriminator<ProjectType>("Type")
+                .HasValue<UgcConcept>(ProjectType.UGC)
+                .HasValue<StaticConcept>(ProjectType.Statics)
+                .HasValue<PhotoConcept>(ProjectType.Photos);
 
-            modelBuilder.Entity<Project>()
+            modelBuilder.Entity<Concept>()
                 .HasOne(x => x.Product)
-                .WithMany(x => x.Projects);
+                .WithMany(x => x.Concepts);
 
             modelBuilder.Entity<Project>()
                 .Property(x => x.Status)
+                .HasConversion<string>();
+
+            modelBuilder.Entity<Project>()
+                .Property(x => x.Type)
                 .HasConversion<string>();
 
             modelBuilder.Entity<Subscription>()
@@ -72,27 +84,33 @@ namespace WCPShared.Models
                 .WithMany(e => e.Participations)
                 .HasForeignKey(e => e.ProjectId);
 
-            modelBuilder.Entity<StaticProject>()
+            modelBuilder.Entity<StaticConcept>()
                 .HasMany(x => x.StaticTemplates)
-                .WithMany(x => x.Projects);
+                .WithMany(x => x.Concepts);
 
-            modelBuilder.Entity<CreatorProject>()
+            modelBuilder.Entity<Concept>()
+                .Property(x => x.Formats)
+                .HasConversion(new ValueConverter<List<string>, string>(
+                    v => JsonConvert.SerializeObject(v),
+                    v => JsonConvert.DeserializeObject<List<string>>(v)!));
+
+            modelBuilder.Entity<CreatorConcept>()
                 .Property(x => x.CreatorAge)
                 .HasConversion(new ValueConverter<int[], string>(
                     v => JsonConvert.SerializeObject(v),
                     v => JsonConvert.DeserializeObject<int[]>(v)!));
 
-            modelBuilder.Entity<CreatorProject>()
+            modelBuilder.Entity<CreatorConcept>()
                 .Property(x => x.CreatorBudget)
                 .HasConversion(new ValueConverter<long[], string>(
                     v => JsonConvert.SerializeObject(v),
                     v => JsonConvert.DeserializeObject<long[]>(v)!));
 
-            modelBuilder.Entity<CreatorProject>()
+            modelBuilder.Entity<CreatorConcept>()
                 .Property(x => x.Tags)
-                .HasConversion(new ValueConverter<List<string>, string>(
+                .HasConversion(new ValueConverter<IEnumerable<string>, string>(
                     v => JsonConvert.SerializeObject(v),
-                    v => JsonConvert.DeserializeObject<List<string>>(v)!));
+                    v => JsonConvert.DeserializeObject<IEnumerable<string>>(v)!));
 
             modelBuilder.Entity<Project>()
                 .Property(x => x.Files)

@@ -134,7 +134,8 @@ namespace WCPAdminFrontEnd.Services
             if (country == "SWE") return "🇸🇪";
             if (country == "NOR") return "🇳🇴";
 
-            throw new ArgumentException("Country does not correspond to any existing country flag");
+            return "";
+            //throw new ArgumentException("Country does not correspond to any existing country flag");
         }
 
         public static string LanguageToStringFlag(Language lang) => lang is not null ? CountryStringToFlag(lang.IsoLanguageCode) : "";

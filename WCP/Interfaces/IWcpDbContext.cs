@@ -1,10 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
-using Microsoft.EntityFrameworkCore.Metadata;
-using System.Diagnostics.CodeAnalysis;
 using WCPShared.Models.Entities;
 using WCPShared.Models.Entities.ProjectModels;
+using WCPShared.Models.Entities.ProjectModels.Concepts;
 using WCPShared.Models.Entities.UserModels;
 
 namespace WCPShared.Interfaces
@@ -21,11 +19,13 @@ namespace WCPShared.Interfaces
         DbSet<Subscription> Subscriptions { get; set; }
 
         DbSet<Project> Projects { get; set; }
-        DbSet<UgcProject> UgcProjects { get; set; }
-        DbSet<StaticProject> StaticProjects { get; set; }
-        DbSet<PhotoProject> PhotoProjects { get; set; }
+        //DbSet<UgcProject> UgcProjects { get; set; }
+        //DbSet<StaticProject> StaticProjects { get; set; }
+        //DbSet<PhotoProject> PhotoProjects { get; set; }
+        public DbSet<Concept> Concepts { get; set; }
         DbSet<Product> Products { get; set; }
         DbSet<ChatMessage> Chats { get; set; }
+        DbSet<Feedback> Feedbacks { get; set; }
 
         // Abstractions
         ChangeTracker ChangeTracker { get; }

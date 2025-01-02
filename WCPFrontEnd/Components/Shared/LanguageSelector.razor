@@ -2,7 +2,6 @@
 @using WCPAdminFrontEnd.Services
 @using WCPShared.Interfaces
 @using WCPShared.Models.Entities.UserModels
-@inject IWcpDbContext Context
 
 <MudSelect @bind-Value="Value" Text="@ProjectHelper.LanguageToStringFlag(Value)" Label="@Label"
 Required="@Required" Placeholder="@Placeholder" RequiredError="Dette felt er påkrævet" AnchorOrigin="Origin.BottomCenter">
@@ -16,6 +15,9 @@ Required="@Required" Placeholder="@Placeholder" RequiredError="Dette felt er på
 </MudSelect>
 
 @code {
+    [Parameter]
+    public IEnumerable<Language> Languages { get; set; }
+
     [Parameter]
     public Language Value
     {
@@ -45,11 +47,4 @@ Required="@Required" Placeholder="@Placeholder" RequiredError="Dette felt er på
     public bool Country { get; set; } = false;
 
     private Language _value;
-
-    public IEnumerable<Language> Languages { get; set; }
-
-    protected override async Task OnInitializedAsync()
-    {
-        Languages = await Context.Languages.ToListAsync();
-    }
 }

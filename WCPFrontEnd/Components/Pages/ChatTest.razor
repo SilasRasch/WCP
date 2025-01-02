@@ -164,7 +164,7 @@
         if (ActiveUser is not null)
         {
             HubConnection = new HubConnectionBuilder()
-            .WithUrl(Navigation.ToAbsoluteUri("/chathub?user=" + ActiveUser.Name))
+            .WithUrl("https://test.wcp.dk/chathub?user=" + ActiveUser.Name)
             .Build();
 
             HubConnection.On<ChatMessage>("ReceiveMessage", async (message) =>

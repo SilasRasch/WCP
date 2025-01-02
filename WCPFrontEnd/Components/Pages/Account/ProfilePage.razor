@@ -120,17 +120,24 @@ ApplyEffectsToContainer="true" PanelClass="pa-4">
             <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
         }
     </AuthorizeView>
-    
+
     <MudTabPanel Text="Skift kodeord">
         <MudStack Class="w-full" Spacing="0">
             <MudText Typo="Typo.h6">Skift kodeord</MudText>
             <MudDivider Class="mb-2" />
 
             <MudStack>
-                <MudTextField @bind-Value="OldPassword" Label="Dit gamle kodeord" Required />
-                <MudTextField @bind-Value="NewPassword" Label="Dit nye kodeord" Required />
-                <MudTextField @bind-Value="ConfirmNewPassword" Label="Bekræft nye kodeord" Required />
-                <MudButton Color="Color.Success" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save">Skift kodeord</MudButton>
+                <MudTextField InputType="InputType.Password" @bind-Value="OldPassword" Label="Dit gamle kodeord" Required />
+                <MudTextField InputType="InputType.Password" @bind-Value="NewPassword" Label="Dit nye kodeord" Required />
+                <MudTextField InputType="InputType.Password" @bind-Value="ConfirmNewPassword" Label="Bekræft nye kodeord" Required />
+                <MudButton OnClick="ChangePassword" Color="Color.Success" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save">Skift kodeord</MudButton>
+
+                @if (PasswordChanged) 
+                {
+                    <MudPaper Class="pa-4 mud-success">
+                        <MudText Class="text-white">Dit password er nu skiftet</MudText>
+                    </MudPaper>
+                }
             </MudStack>
         </MudStack>
     </MudTabPanel>
@@ -140,6 +147,7 @@ ApplyEffectsToContainer="true" PanelClass="pa-4">
     private IEnumerable<Language> _languages = new List<Language>();
     private User User;
     private bool HasBeenSaved = false;
+    private bool PasswordChanged = false;
 
     private Creator Creator;
     private IEnumerable<Language> _selectedLanguages { get; set; } = new HashSet<Language>();
@@ -193,5 +201,20 @@ ApplyEffectsToContainer="true" PanelClass="pa-4">
             return Color.Primary;
 
         return Color.Error;
+    }
+
+    private async Task ChangePassword() 
+    {
+        if (BCrypt.Net.BCrypt.Verify(OldPassword, User.PasswordHash) && NewPassword == ConfirmNewPassword)
+        {
+            string passwordHash = BCrypt.Net.BCrypt.HashPassword(NewPassword);
+            User.PasswordHash = passwordHash;
+            await Context.SaveChangesAsync();
+
+            PasswordChanged = true;
+            OldPassword = string.Empty;
+            NewPassword = string.Empty;
+            ConfirmNewPassword = string.Empty;
+        }
     }
 }

@@ -1,8 +1,12 @@
-﻿@using Stripe
+﻿@using Microsoft.EntityFrameworkCore
+@using Stripe
+@using System.Security.Claims
 @using WCPAdminFrontEnd.Services
 @using WCPFrontEnd.Services
+@using WCPShared.Interfaces
 @using WCPShared.Models.Entities
 @using WCPShared.Models.Entities.ProjectModels
+@using WCPShared.Models.Entities.UserModels
 @using WCPShared.Models.Enums
 @using WCPShared.Models.Views
 @using WCPShared.Services
@@ -11,6 +15,7 @@
 @inject ProjectService ProjectService
 @inject StripeService StripeService
 @inject IJSRuntime JSRuntime
+@inject IWcpDbContext Context
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
 <MudDialog>
@@ -32,20 +37,31 @@
                 <MudTextField @bind-Value="Project.Price" Label="Pris" Placeholder="Pris eksl. moms" Immediate="true"></MudTextField>
             </MudStack>
 
+            @if (Project is not CreatorProject) 
+            {
+                <MudStack Row="true">
+                    <MudDatePicker @bind-Date="_deliveryDate" Label="Leveringsdato" Placeholder="Estimeret leveringsdato" DateFormat="dd.MM.yyyy"></MudDatePicker>
+                </MudStack>
+            }
+        }
+
+        @if (Project is CreatorProject && Project.Status == ProjectStatus.CreatorFilming && Project.Deadline == DateTime.MinValue)
+        {
             <MudStack Row="true">
                 <MudDatePicker @bind-Date="_deliveryDate" Label="Leveringsdato" Placeholder="Estimeret leveringsdato" DateFormat="dd.MM.yyyy"></MudDatePicker>
             </MudStack>
         }
 
-        @* From queued to planned *@
-        @* @if (Project.Status == ProjectStatus.Queued && NewStatus == (int)ProjectStatus.Scripting)
+        @if (Project.Status == ProjectStatus.Feedback && NewStatus == ProjectStatus.Finished) 
         {
-            <MudTextField @bind-Value="Project.Scripts" Label="Scripts" Placeholder="Link til script-mappe" Immediate="true"></MudTextField>
-            <MudTextField @bind-Value="Project.Content" Label="Content" Placeholder="Link til content-mappe" Immediate="true"></MudTextField>
-            <MudTextField @bind-Value="Project.Delivery" Label="Levering" Placeholder="Link til afleverings-mappe" Immediate="true"></MudTextField>
-            <MudTextField @bind-Value="Project.Other" Label="Andet" Placeholder="Link til mappe" Immediate="true"></MudTextField>
-        } *@
-
+            <MudPaper Class="pa-4" Elevation="0">
+                <MudText>Hvordan har din oplevelse været? Vi vil meget gerne høre din mening...</MudText>
+                <MudStack Class="mt-4" AlignItems="AlignItems.Center">
+                    <MudRating @bind-SelectedValue="Feedback.Score" Size="Size.Large" MaxValue="5" />
+                </MudStack>
+                <MudTextField AutoGrow @bind-Value="Feedback.Text" Label="Tekst" />
+            </MudPaper>
+        }
 
         @if (CustomerHasToPay)
         {
@@ -89,6 +105,9 @@
     [Parameter]
     public ProjectStatus NewStatus { get; set; }
 
+    private Feedback Feedback { get; set; } = new();
+    private User User { get; set; }
+
     private PaymentMethod? PaymentMethod;
     private IEnumerable<PaymentMethod> PaymentMethods;
     private string paymentStatus;
@@ -99,12 +118,17 @@
 
     protected override async Task OnInitializedAsync()
     {
-        // ProjectCopy = DtoHelper.DeepCopy(Project);
+        AuthenticationState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var email = AuthenticationState.User.FindFirst(c => c.Type == ClaimTypes.Email)?.Value;
+        User = await Context.Users.SingleOrDefaultAsync(x => x.Email == email);
+
         ProjectCopy = DtoHelper.CopyEntity(Project);
+
+        if (Project.Deadline != DateTime.MinValue)
+            _deliveryDate = Project.Deadline;
 
         if (CustomerHasToPay)
         {
-            AuthenticationState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
             StripeAccountId = AuthenticationState.User.FindFirst(c => c.Type == "StripeAccountId")?.Value;
 
             if (!string.IsNullOrEmpty(StripeAccountId)) 
@@ -112,7 +136,6 @@
                 PaymentMethods = await StripeService.GetPaymentMethods(StripeAccountId);
                 PaymentMethod = PaymentMethods.FirstOrDefault();
             }
-
         }
     }
 
@@ -121,12 +144,21 @@
         if (CustomerHasToPay)
             ConfirmPayment();
 
-        Project.Status = Enum.IsDefined(typeof(ProjectStatus), NewStatus) ? (ProjectStatus)NewStatus : Project.Status;
-
         if (_deliveryDate is not null)
         {
             Project.Deadline = _deliveryDate!.Value.AddHours(23).AddMinutes(59).AddSeconds(59);
         }
+
+        if (Project.Status == ProjectStatus.Feedback && NewStatus == ProjectStatus.Finished) 
+        {
+            Feedback.Project = Project;
+            Feedback.User = User;
+            Feedback.Created = DateTime.Now;
+            await Context.AddAsync(Feedback);
+            await Context.SaveChangesAsync();
+        }
+
+        Project.Status = NewStatus;
 
         await ProjectService.UpdateObject(Project, ProjectCopy);
         MudDialog.Close(DialogResult.Ok(true));

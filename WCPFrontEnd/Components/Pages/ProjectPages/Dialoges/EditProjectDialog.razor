@@ -38,9 +38,9 @@
         </MudStack>
 
         <MudStack Row="true">
-            <MudTextField @bind-Value="@Project.Amount" Label="Mængde af indhold" ReadOnly="!_editable" />
+            @* <MudTextField @bind-Value="@Project.Amount" Label="Mængde af indhold" ReadOnly="!_editable" /> *@
             @* <MudTextField @bind-Value="@Project.ContentLength" Label="Længde af indhold" ReadOnly="!_editable" /> *@
-            <MudTextField @bind-Value="@Project.Formats" Label="Format" ReadOnly="!_editable" />
+            @* <MudTextField @bind-Value="@Project.Formats" Label="Format" ReadOnly="!_editable" /> *@
         </MudStack>
 
         @* <MudSelect @bind-Value="Project.ProjectType" Label="Type" Placeholder="Vælg en type" AnchorOrigin="Origin.BottomCenter" Disabled="!_editable">
@@ -50,7 +50,7 @@
             }
         </MudSelect> *@
 
-        <MudTextField @bind-Value="@Project.Platforms" Label="Tiltænkte platforme" ReadOnly="!_editable" />
+        @* <MudTextField @bind-Value="@Project.Platforms" Label="Tiltænkte platforme" ReadOnly="!_editable" /> *@
         <MudSelect @bind-Value="Project.Status" Label="Status" Placeholder="Vælg ny status" AnchorOrigin="Origin.BottomCenter" Disabled="!_editable">
             @foreach (ProjectStatus item in Enum.GetValues(typeof(ProjectStatus)))
             {

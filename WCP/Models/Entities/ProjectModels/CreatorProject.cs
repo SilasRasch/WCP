@@ -3,7 +3,7 @@ using WCPShared.Models.Enums;
 
 namespace WCPShared.Models.Entities.ProjectModels
 {
-    public abstract class CreatorProject : Project
+    public class CreatorProject : Project
     {
         public int CreatorLanguageId { get; set; }
         public Language CreatorLanguage { get; set; }
@@ -17,9 +17,9 @@ namespace WCPShared.Models.Entities.ProjectModels
 
         public List<CreatorParticipation> Participations { get; set; } = [];
 
-        protected CreatorProject(int id, int brandId, Brand brand, string name, ProjectStatus status, long price, DateTime created, DateTime updated, DateTime deadline, string internalNotes, string platforms, int amount, string formats, int productId, Product product,
+        protected CreatorProject(int id, int brandId, Brand brand, string name, ProjectStatus status, long price, DateTime created, DateTime updated, DateTime deadline, string internalNotes,
                       int creatorLanguageId, Language creatorLanguage, string creatorGender, int[] creatorAge, long[] creatorBudget, int creatorCount, int creativesPerCreator, List<string> tags, List<CreatorParticipation> participations)
-        : base(id, brandId, brand, name, status, price, created, updated, deadline, internalNotes, platforms, amount, formats, productId, product)
+        : base(id, brandId, brand, name, status, price, created, updated, deadline, internalNotes)
         {
             CreatorLanguageId = creatorLanguageId;
             CreatorLanguage = creatorLanguage;

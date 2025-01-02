@@ -2,6 +2,7 @@
 using WCPShared.Interfaces;
 using WCPShared.Models.Entities;
 using WCPShared.Models.Entities.ProjectModels;
+using WCPShared.Models.Entities.ProjectModels.Concepts;
 using WCPShared.Models.Entities.UserModels;
 
 namespace WCPShared.Models
@@ -23,6 +24,8 @@ namespace WCPShared.Models
         public DbSet<PhotoProject> PhotoProjects { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public DbSet<Product> Products { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public DbSet<ChatMessage> Chats { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public DbSet<Feedback> Feedbacks { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public DbSet<Concept> Concepts { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         public WcpDbContext(DbContextOptions<WcpDbContext> options) : base(options)
         {

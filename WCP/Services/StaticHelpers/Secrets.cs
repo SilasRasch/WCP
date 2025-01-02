@@ -154,7 +154,8 @@ namespace WCPShared.Services.StaticHelpers
             "https://www.wcp.dk",
             "https://test.wcp.dk",
             "http://172.232.142.14:8181",
-            "http://172.232.142.14"
+            "http://172.232.142.14",
+            "https://app.nobitches.win"
         ];
 
         public static Uri OtlpEndpoint => new Uri("http://localhost:4317"); 

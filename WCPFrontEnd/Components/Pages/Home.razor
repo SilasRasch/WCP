@@ -54,16 +54,16 @@
     {
         <MudStack Row>
             <MudPaper Class="pa-4" Width="25%">
-                <MudText Typo="Typo.caption">Antal projekter i alt</MudText>
-                <MudText Typo="Typo.h1">@projects.Count</MudText>
+                <MudText Typo="Typo.caption">Gennemsnitlig score sidste måned</MudText>
+                <MudText Typo="Typo.h1">@AverageFeedbackScore</MudText>
             </MudPaper>
             <MudPaper Class="pa-4" Width="25%">
                 <MudText Typo="Typo.caption">Projekter denne måned</MudText>
-                <MudText Typo="Typo.h1">@projects.Where(x => x.Created.Month == DateTime.Now.Month).Count()</MudText>
+                <MudText Typo="Typo.h1">@projects.Where(x => x.Created.Month == DateTime.Now.Month && x.Created.Year == DateTime.Now.Year).Count()</MudText>
             </MudPaper>
             <MudPaper Class="pa-4" Width="25%">
                 <MudText Typo="Typo.caption">Projekter sidste måned</MudText>
-                <MudText Typo="Typo.h1">@projects.Where(x => x.Created.Month == DateTime.Now.AddMonths(-1).Month).Count()</MudText>
+                <MudText Typo="Typo.h1">@projects.Where(x => x.Created.Month == DateTime.Now.AddMonths(-1).Month && x.Created.Year == DateTime.Now.Year).Count()</MudText>
             </MudPaper>
             <MudPaper Class="pa-4" Width="25%">
                 <MudText Typo="Typo.caption">Ventende projekter</MudText>
@@ -80,7 +80,8 @@
             </MudPaper>
             <MudPaper Class="pa-4" Width="25%">
                 <MudText Typo="Typo.caption">Antal videoer i alt</MudText>
-                <MudText Typo="Typo.h1">@projects.Sum(x => x.Amount)</MudText>
+                <MudText Typo="Typo.h1">0</MudText>
+                @* <MudText Typo="Typo.h1">@projects.Sum(x => x.Amount)</MudText> *@
             </MudPaper>
         </MudStack>
         <AuthorizeView Roles="Admin">
@@ -231,14 +232,13 @@
                 </MudDataGrid>
             </MudStack>
         </MudPaper>
-
     }
     @if (data is not null)
     {
-    <MudPaper Class="pa-4">
-        <MudText Typo="Typo.h6">Fordeling af projekt-typer</MudText>
-        <MudStack Row="true" AlignItems="AlignItems.End" Justify="Justify.SpaceAround">
-            
+        <MudPaper Class="pa-4">
+            <MudText Typo="Typo.h6">Fordeling af projekt-typer</MudText>
+            <MudStack Row="true" AlignItems="AlignItems.End" Justify="Justify.SpaceAround">
+
                 <MudStack Spacing="0">
                     <MudChart ChartType="ChartType.Donut" Width="300px" Height="300px" @bind-SelectedIndex="Index" InputData="@data" InputLabels="@labels">
                         <CustomGraphics>
@@ -251,9 +251,9 @@
                 <MudStack Spacing="0">
                     <MudChart ChartOptions="@(new ChartOptions { ShowLegend = false })" ChartType="ChartType.Bar" ChartSeries="@Series" XAxisLabels="@XAxisLabels" Width="100%" Height="354px"></MudChart>
                 </MudStack>
-            
-        </MudStack>
-    </MudPaper>
+
+            </MudStack>
+        </MudPaper>
     }
     else
     {
@@ -288,6 +288,8 @@
     private int photoCount = 0;
     private User? User;
 
+    private double AverageFeedbackScore;
+
     private int Index = -1; //default value cannot be 0 -> first selectedindex is 0.
     int dataSize = 4;
     public double[] data;
@@ -300,6 +302,8 @@
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var email = authState.User.FindFirst(c => c.Type == ClaimTypes.Email)?.Value;
         User = await Context.Users.Include(x => x.Organization).AsNoTracking().SingleOrDefaultAsync(x => x.Email == email);
+        var feedback = Context.Feedbacks.Include(x => x.Project).Where(x => x.Created.Month == DateTime.Now.AddMonths(-1).Month && x.Created.Year == DateTime.Now.AddMonths(-1).Year);
+        if (feedback.Any()) AverageFeedbackScore = Math.Round(feedback.Average(x => x.Score), 1);
 
         if (User is not null) 
         {
@@ -320,10 +324,10 @@
                     .Where(x => x is CreatorProject creatorProject && 
                         creatorProject.Participations.Any(x => x.Creator.UserId == User.Id))
                         .ToList();
-
-            ugcCount = Context.UgcProjects.AsNoTracking().Count();
-            staticCount = Context.StaticProjects.AsNoTracking().Count();
-            photoCount = Context.PhotoProjects.AsNoTracking().Count();
+            
+            ugcCount = projects.Where(x => x.Type == ProjectType.UGC).Count();
+            staticCount = projects.Where(x => x.Type == ProjectType.Statics).Count();
+            photoCount = projects.Where(x => x.Type == ProjectType.Photos).Count();
 
             data = [ugcCount, staticCount, photoCount];
             Series.Add(new ChartSeries() { Data = data });

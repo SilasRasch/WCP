@@ -242,6 +242,39 @@
             </TemplateColumn>
         </AuthorizeView>
 
+        <AuthorizeView Context="authcontext" Roles="Creator">
+            <TemplateColumn Title="Actions" StickyRight="@_stickyActions">
+                <CellTemplate>
+                    <MudMenu Icon="@Icons.Material.Filled.MoreHoriz" AriaLabel="Åben aktionsmenu" AnchorOrigin="Origin.BottomCenter">
+                        <MudMenuItem OnClick="@((e) => OpenDialogAsync(context.Item))">
+                            <MudStack Row="true">
+                                <MudIcon Icon="@Icons.Material.Filled.Search"></MudIcon>
+                                <MudText>Åbn</MudText>
+                            </MudStack>
+                        </MudMenuItem>
+                        @if (context.Item.Status == ProjectStatus.CreatorFilming && context.Item.Deadline == DateTime.MinValue)
+                        {
+                            <MudMenuItem OnClick="@((e) => OpenStatusDialog(context.Item, ProjectStatus.CreatorFilming))">
+                                <MudStack Row="true">
+                                    <MudIcon Icon="@Icons.Material.Filled.EditCalendar"></MudIcon>
+                                    <MudText>Ændr deadline</MudText>
+                                </MudStack>
+                            </MudMenuItem>
+                        }
+                        else if (context.Item.Status == ProjectStatus.CreatorFilming)
+                        {
+                            <MudMenuItem OnClick="@((e) => OpenStatusDialog(context.Item, ProjectStatus.Editing))">
+                                <MudStack Row="true">
+                                    <MudIcon Icon="@Icons.Material.Filled.Check"></MudIcon>
+                                    <MudText>Aflever projekt</MudText>
+                                </MudStack>
+                            </MudMenuItem>
+                        }
+                    </MudMenu>
+                </CellTemplate>
+            </TemplateColumn>
+        </AuthorizeView>
+
     </Columns>
     <PagerContent>
         <MudDataGridPager T="Project" PageSizeOptions="[100, 200, 300, 400, 500]" RowsPerPageString="Rækker per side:" />

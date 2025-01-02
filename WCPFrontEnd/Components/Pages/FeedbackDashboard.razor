@@ -1,0 +1,64 @@
+﻿@page "/feedback"
+@using Microsoft.EntityFrameworkCore
+@using System.Security.Claims
+@using WCPAdminFrontEnd.Services
+@using WCPFrontEnd.Services
+@using WCPShared.Interfaces
+@using WCPShared.Models.Entities
+@using WCPShared.Models.Entities.ProjectModels
+@using WCPShared.Models.Entities.UserModels
+@using WCPShared.Models.Enums
+@using WCPShared.Services
+@inject IWcpDbContext Context
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@attribute [Authorize(Roles = "Admin")]
+
+<MudStack>
+    <MudStack Row>
+        <MudPaper Class="pa-4" Width="25%">
+            <MudText Typo="Typo.caption">Gennemsnitlig score</MudText>
+            <MudText Typo="Typo.h1">@AverageFeedbackScore</MudText>
+        </MudPaper>
+        <MudPaper Class="pa-4" Width="25%">
+            <MudText Typo="Typo.caption">Gennemsnitlig score denne måned</MudText>
+            <MudText Typo="Typo.h1">@AverageFeedbackScoreThisMonth</MudText>
+        </MudPaper>
+        <MudPaper Class="pa-4" Width="25%">
+            <MudText Typo="Typo.caption">Gennemsnitlig score sidste måned</MudText>
+            <MudText Typo="Typo.h1">@AverageFeedbackScoreLastMonth</MudText>
+        </MudPaper>
+        <MudPaper Class="pa-4" Width="25%">
+            <MudText Typo="Typo.caption">Antal anmeldelser denne måned</MudText>
+            <MudText Typo="Typo.h1">@FeedbackCountThisMonth</MudText>
+        </MudPaper>
+        <MudPaper Class="pa-4" Width="25%">
+            <MudText Typo="Typo.caption">Antal anmeldelser sidste måned</MudText>
+            <MudText Typo="Typo.h1">@FeedbackCountLastMonth</MudText>
+        </MudPaper>
+    </MudStack>
+</MudStack>
+
+@code {
+    private IEnumerable<Feedback> FeedbackList = [];
+    private double AverageFeedbackScore;
+    private double AverageFeedbackScoreLastMonth;
+    private double AverageFeedbackScoreThisMonth;
+    private int FeedbackCountThisMonth;
+    private int FeedbackCountLastMonth;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var email = authState.User.FindFirst(c => c.Type == ClaimTypes.Email)?.Value;
+        var FeedbackList = await Context.Feedbacks.ToListAsync();
+        if (FeedbackList.Any()) AverageFeedbackScore = Math.Round(FeedbackList.Average(x => x.Score), 1);
+
+        var feedbackLastMonth = FeedbackList.Where(x => x.Created.Month == DateTime.Now.AddMonths(-1).Month && x.Created.Year == DateTime.Now.AddMonths(-1).Year);
+        if (feedbackLastMonth.Any()) AverageFeedbackScoreLastMonth = Math.Round(feedbackLastMonth.Average(x => x.Score), 1);
+        FeedbackCountLastMonth = feedbackLastMonth.Count();
+
+        var feedbackThisMonth = FeedbackList.Where(x => x.Created.Month == DateTime.Now.Month && x.Created.Year == DateTime.Now.Year);
+        if (feedbackThisMonth.Any()) AverageFeedbackScoreThisMonth = Math.Round(feedbackThisMonth.Average(x => x.Score), 1);
+        FeedbackCountThisMonth = feedbackThisMonth.Count();
+    }
+}

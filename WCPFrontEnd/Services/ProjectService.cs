@@ -68,7 +68,7 @@ namespace WCPFrontEnd.Services
             {
                 foreach (CreatorParticipation participation in project.Participations)
                 {
-                    if (participation.Creator.StripeAccountId is not null)
+                    if (string.IsNullOrEmpty(participation.Creator.StripeAccountId))
                     {
                         var res = _stripeService.Transfer(participation.Salary, participation.Creator.StripeAccountId, $"Projektløn ({project.Id})", participation.Creator.User.Language.Currency);
                         
@@ -136,7 +136,8 @@ namespace WCPFrontEnd.Services
                 .ThenInclude(x => x.Creator)
                 .ThenInclude(x => x.User)
                 .ThenInclude(x => x.Language)
-                .Include(x => x.Product)
+                .Include(x => x.Concepts)
+                .ThenInclude(x => x.Product)
                 .AsSplitQuery()
                 .OrderBy(x => x.Status)
                 .ToListAsync();
@@ -152,7 +153,8 @@ namespace WCPFrontEnd.Services
                 .ThenInclude(x => x.Creator)
                 .ThenInclude(x => x.User)
                 .ThenInclude(x => x.Language)
-                .Include(x => x.Product)
+                .Include(x => x.Concepts)
+                .ThenInclude(x => x.Product)
                 .Where(predicate)
                 .AsSplitQuery()
                 .OrderBy(x => x.Status)
@@ -169,7 +171,8 @@ namespace WCPFrontEnd.Services
                 .ThenInclude(x => x.Creator)
                 .ThenInclude(x => x.User)
                 .ThenInclude(x => x.Language)
-                .Include(x => x.Product)
+                .Include(x => x.Concepts)
+                .ThenInclude(x => x.Product)
                 .AsSplitQuery()
                 .SingleOrDefaultAsync(predicate);
         }

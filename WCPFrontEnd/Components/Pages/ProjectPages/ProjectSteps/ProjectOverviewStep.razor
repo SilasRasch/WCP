@@ -1,6 +1,8 @@
 ﻿@using WCPAdminFrontEnd.Services
 @using WCPFrontEnd.Components.Shared
 @using WCPShared.Models.Entities.ProjectModels
+@using WCPShared.Models.Entities.ProjectModels.Concepts
+@using WCPShared.Models.Enums
 
 <MudText Class="text-center" Typo="Typo.h6">Overblik</MudText>
 
@@ -25,43 +27,33 @@
 
             <MudStack Spacing="0" Class="h-full w-full">
                 <MudText Typo="Typo.caption">Projekttype</MudText>
-                @if (Project is UgcProject)
-                {
-                    <MudText>UGC</MudText>
-                }
-                else if (Project is StaticProject)
-                {
-                    <MudText>Statics</MudText>
-                }
-                else if (Project is PhotoProject)
-                {
-                    <MudText>Photos</MudText>
-                }
+                <MudText>@Project.Type</MudText>
                 <MudDivider />
             </MudStack>
         </MudStack>
     </MudCollapse>
 
-    <MudPaper Elevation="1" Class="mud-secondary">
-        <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Row @onclick="() => ProjectSectionExpanded = !ProjectSectionExpanded" Class="w-full cursor-pointer p-2">
-            <MudText Typo="Typo.h6">Projekt</MudText>
-            <MudSpacer />
-            <MudIcon Icon="@(ProjectSectionExpanded ? Icons.Material.Filled.ArrowDropUp : Icons.Material.Filled.ArrowDropDown)" />
-        </MudStack>
-    </MudPaper>
+    @foreach (var concept in Project.Concepts) 
+    {
+        @* <MudPaper Elevation="1" Class="mud-secondary">
+            <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Row @onclick="() => ProductSectionExpanded = !ProductSectionExpanded" Class="w-full cursor-pointer p-2">
+                <MudText Typo="Typo.h6">Koncept</MudText>
+                <MudSpacer />
+                <MudIcon Icon="@(ProductSectionExpanded ? Icons.Material.Filled.ArrowDropUp : Icons.Material.Filled.ArrowDropDown)" />
+            </MudStack>
+        </MudPaper> *@
 
-    <MudCollapse Expanded="ProjectSectionExpanded">
         <MudStack Spacing="4">
             <MudStack Justify="Justify.FlexStart" Spacing="0">
                 <MudText Typo="Typo.caption">Tiltænkte platforme</MudText>
-                <MudText>@(!string.IsNullOrEmpty(Project.Platforms) ? Project.Platforms : "Ingen platforme valgt")</MudText>
+                <MudText>@(!string.IsNullOrEmpty(concept.Platforms) ? concept.Platforms : "Ingen platforme valgt")</MudText>
                 <MudDivider />
             </MudStack>
 
             <MudStack Row Justify="Justify.Center" AlignItems="AlignItems.Center">
                 <MudStack Spacing="0" Class="w-full h-full">
                     <MudText Typo="Typo.caption">Mængde</MudText>
-                    <MudText>@(Project.Amount > 0 ? $"{Project.Amount} stk" : "Nej")</MudText>
+                    <MudText>@(concept.Amount > 0 ? $"{concept.Amount} stk" : "Nej")</MudText>
                     <MudDivider />
                 </MudStack>
 
@@ -81,27 +73,17 @@
             </MudStack>
             <MudStack Justify="Justify.FlexStart" Spacing="0">
                 <MudText Typo="Typo.caption">Formater</MudText>
-                <MudText>@(!string.IsNullOrEmpty(Project.Formats) ? Project.Formats : "Ingen formater valgt")</MudText>
+                <MudText>@(concept.Formats.Any() ? string.Join(", ", concept.Formats) : "Ingen formater valgt")</MudText>
                 <MudDivider />
             </MudStack>
         </MudStack>
-    </MudCollapse>
 
-    @if (Project is CreatorProject creatorProject)
-    {
-        <MudPaper Elevation="1" Class="mud-secondary">
-            <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Row @onclick="() => CreatorSectionExpanded = !CreatorSectionExpanded" Class="w-full cursor-pointer p-2">
-                <MudText Typo="Typo.h6">Creator</MudText>
-                <MudSpacer />
-                <MudIcon Icon="@(CreatorSectionExpanded ? Icons.Material.Filled.ArrowDropUp : Icons.Material.Filled.ArrowDropDown)" />
-            </MudStack>
-        </MudPaper>
-
-        <MudCollapse Class="p-0 m-0" Expanded="CreatorSectionExpanded">
+        @if (concept is CreatorConcept creatorConcept)
+        {
             <MudStack Spacing="4">
                 <MudStack Spacing="8" Row>
-                    <LanguageSelector Label="Sprog" @bind-Value="creatorProject.CreatorLanguage" />
-                    <MudSelect Label="Køn" @bind-Value="creatorProject.CreatorGender" AnchorOrigin="Origin.BottomCenter" ReadOnly>
+                    <LanguageSelector Label="Sprog" @bind-Value="creatorConcept.CreatorLanguage" />
+                    <MudSelect Label="Køn" @bind-Value="creatorConcept.CreatorGender" AnchorOrigin="Origin.BottomCenter" ReadOnly>
                         <MudSelectItem Value="@("Male")">Mand</MudSelectItem>
                         <MudSelectItem Value="@("Female")">Kvinde</MudSelectItem>
                         <MudSelectItem Value="@("None")">Ikke vigtigt</MudSelectItem>
@@ -109,13 +91,13 @@
                     </MudSelect>
                 </MudStack>
                 <MudStack Spacing="8" Row>
-                    <MudSelect Label="Alder" @bind-Value="creatorProject.CreatorAge" ToStringFunc="ProjectHelper.ArrayToStringFunc" AnchorOrigin="Origin.BottomCenter" ReadOnly>
+                    <MudSelect Label="Alder" @bind-Value="creatorConcept.CreatorAge" ToStringFunc="ProjectHelper.ArrayToStringFunc" AnchorOrigin="Origin.BottomCenter" ReadOnly>
                         <MudSelectItem Value="@(new int[] { 18, 24 })">18-24</MudSelectItem>
                         <MudSelectItem Value="@(new int[] { 25, 30 })">25-30</MudSelectItem>
                         <MudSelectItem Value="@(new int[] { 31, 40 })">31-40</MudSelectItem>
                         <MudSelectItem Value="@(new int[] { 40 })">40+</MudSelectItem>
                     </MudSelect>
-                    <MudSelect Label="Budget" @bind-Value="creatorProject.CreatorBudget" ToStringFunc="ProjectHelper.LongArrayToStringFunc" AnchorOrigin="Origin.BottomCenter" ReadOnly>
+                    <MudSelect Label="Budget" @bind-Value="creatorConcept.CreatorBudget" ToStringFunc="ProjectHelper.LongArrayToStringFunc" AnchorOrigin="Origin.BottomCenter" ReadOnly>
                         <MudSelectItem Value="@(new long[] { 150, 250 })">150-250</MudSelectItem>
                         <MudSelectItem Value="@(new long[] { 250, 350 })">250-350</MudSelectItem>
                         <MudSelectItem Value="@(new long[] { 350, 500 })">350-500</MudSelectItem>
@@ -126,63 +108,53 @@
                 <MudStack Spacing="8" Row>
                     <MudStack Spacing="0" Class="w-full h-full">
                         <MudText Typo="Typo.caption">Antal creators</MudText>
-                        <MudText>@creatorProject.CreatorCount creators</MudText>
+                        <MudText>@creatorConcept.CreatorCount creators</MudText>
                         <MudDivider />
                     </MudStack>
                     <MudStack Spacing="0" Class="w-full h-full">
                         <MudText Typo="Typo.caption">Kreativer per creator</MudText>
-                        <MudText>@creatorProject.CreativesPerCreator per creator</MudText>
+                        <MudText>@creatorConcept.CreativesPerCreator per creator</MudText>
                         <MudDivider />
                     </MudStack>
                 </MudStack>
             </MudStack>
-            <MudSelect T="string" MultiSelection @bind-SelectedValues="Tags" Label="Kategori" AnchorOrigin="Origin.BottomCenter" ReadOnly>
+            <MudSelect T="string" MultiSelection @bind-SelectedValues="creatorConcept.Tags" Label="Kategori" AnchorOrigin="Origin.BottomCenter" ReadOnly>
                 <MudSelectItem Value="@("Beauty")">Beauty</MudSelectItem>
                 <MudSelectItem Value="@("Fashion")">Fashion</MudSelectItem>
                 <MudSelectItem Value="@("Home")">Home</MudSelectItem>
                 <MudSelectItem Value="@("Lifestyle")">Lifestyle</MudSelectItem>
                 <MudSelectItem Value="@("Technology")">Technology</MudSelectItem>
             </MudSelect>
-        </MudCollapse>
-    }
+        }
 
-    <MudPaper Elevation="1" Class="mud-secondary">
-        <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Row @onclick="() => ProductSectionExpanded = !ProductSectionExpanded" Class="w-full cursor-pointer p-2">
-            <MudText Typo="Typo.h6">Produkt</MudText>
-            <MudSpacer />
-            <MudIcon Icon="@(ProductSectionExpanded ? Icons.Material.Filled.ArrowDropUp : Icons.Material.Filled.ArrowDropDown)" />
-        </MudStack>
-    </MudPaper>
-
-    <MudCollapse Class="p-0 m-0" Expanded="ProductSectionExpanded">
         <MudStack Spacing="4">
-            <MudTextField Label="Produktlink" @bind-Value="Project.Product.Link" ReadOnly />
-            <MudTextField Label="Billedelink" @bind-Value="Project.Product.ImgUrl" ReadOnly />
+            <MudTextField Label="Produktlink" @bind-Value="concept.Product.Link" ReadOnly />
+            <MudTextField Label="Billedelink" @bind-Value="concept.Product.ImgUrl" ReadOnly />
 
             <MudStack Spacing="8" Row>
-                <MudTextField Label="Pains" AutoGrow @bind-Value="Project.Product.Link" ReadOnly />
-                <MudTextField Label="Features" AutoGrow @bind-Value="Project.Product.Link" ReadOnly />
+                <MudTextField Label="Pains" AutoGrow @bind-Value="concept.Product.Link" ReadOnly />
+                <MudTextField Label="Features" AutoGrow @bind-Value="concept.Product.Link" ReadOnly />
             </MudStack>
 
             <MudStack Spacing="8" Row>
-                <MudTextField Label="Fokuspunkter" AutoGrow @bind-Value="Project.Product.FocusPoints" ReadOnly />
-                <MudTextField Label="Beskrivelse" AutoGrow @bind-Value="Project.Product.Description" ReadOnly />
+                <MudTextField Label="Fokuspunkter" AutoGrow @bind-Value="concept.Product.FocusPoints" ReadOnly />
+                <MudTextField Label="Beskrivelse" AutoGrow @bind-Value="concept.Product.Description" ReadOnly />
             </MudStack>
 
-            <MudTextField Label="Brugsanvisinger" AutoGrow @bind-Value="Project.Product.HowToUse" ReadOnly />
+            <MudTextField Label="Brugsanvisinger" AutoGrow @bind-Value="concept.Product.HowToUse" ReadOnly />
 
-            @if (Project is CreatorProject creatorProject)
+            @if (concept is CreatorConcept creatorConcept)
             {
                 <MudStack Spacing="0">
                     <MudText Typo="Typo.caption">Må creator beholde produktet?</MudText>
 
                     <MudStack Spacing="1">
-                        <MudText>@(creatorProject.CreatorKeepsProduct ? "Ja - giv en anslået værdi" : "Nej - husk at sende returlabel med")</MudText>
+                        <MudText>@(creatorConcept.CreatorKeepsProduct ? "Ja - giv en anslået værdi" : "Nej - husk at sende returlabel med")</MudText>
 
-                        @if (creatorProject.CreatorKeepsProduct)
+                        @if (creatorConcept.CreatorKeepsProduct)
                         {
                             <MudDivider />
-                            <MudTextField Label="Anslået værdi" @bind-Value="creatorProject.Product.Value" ReadOnly Required RequiredError="Dette felt er påkrævet" />
+                            <MudTextField Label="Anslået værdi" @bind-Value="creatorConcept.Product.Value" ReadOnly Required RequiredError="Dette felt er påkrævet" />
                         }
                     </MudStack>
 
@@ -190,21 +162,23 @@
             }
 
         </MudStack>
-    </MudCollapse>
+    }
+    
 
     <MudDivider />
 
+    @* TODO: CalculatePrice *@
     <MudPaper Class="p-2 py-2 mud-secondary">
         @if (Project is CreatorProject project)
         {
             <MudStack Row>
-                <MudText Typo="Typo.body1"><strong>Estimeret pris:</strong> @GetPriceIntervalString() DKK</MudText>
+                <MudText Typo="Typo.body1"><strong>Estimeret pris:</strong> 0 DKK</MudText>
             </MudStack>
         }
         else
         {
             <MudStack Row>
-                <MudText Typo="Typo.body1"><strong>Estimeret pris:</strong> @GetPriceIntervalString() DKK</MudText>
+                <MudText Typo="Typo.body1"><strong>Estimeret pris:</strong> 0 DKK</MudText>
             </MudStack>
         }
     </MudPaper>
@@ -245,29 +219,26 @@
     public EventCallback<IEnumerable<string>> TagsChanged { get; set; }
     private IEnumerable<string> _tags;
 
-    private string GetPriceIntervalString() 
-    {
-        if (Project is UgcProject ugc) 
-        {
-            return ProjectHelper.LongArrayToStringFunc(ugc.CalculateUgcPrice());
-        }
-        else 
-        {
-            return Project.CalculatePrice().ToString();
-        }
-    }
-
-    protected override void OnInitialized()
-    {
-        base.OnInitialized();
-        Project.Formats = String.Join(", ", Formats);
-    }
-
-    [Parameter]
-    public List<string> Formats { get; set; }
-
-    private bool CreatorSectionExpanded = true;
-    private bool ProductSectionExpanded = true;
-    private bool ProjectSectionExpanded = true;
     private bool BaseSectionExpanded = true;
+    
+    // private string GetPriceIntervalString() 
+    // {
+    //     if (Project is UgcProject ugc) 
+    //     {
+    //         return ProjectHelper.LongArrayToStringFunc(ugc.CalculateUgcPrice());
+    //     }
+    //     else 
+    //     {
+    //         return Project.CalculatePrice().ToString();
+    //     }
+    // }
+
+    // protected override void OnInitialized()
+    // {
+    //     base.OnInitialized();
+    //     Project.Formats = String.Join(", ", Formats);
+    // }
+
+    // [Parameter]
+    // public List<string> Formats { get; set; }
 }

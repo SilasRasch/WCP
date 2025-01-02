@@ -263,6 +263,7 @@
             {
                 Creator? creator = await context.Creators
                     .Include(x => x.User)
+                    .ThenInclude(x => x.Language)
                     .SingleOrDefaultAsync(x => x.Id == Convert.ToInt32(creatorId));
 
                 if (creator is not null) 
