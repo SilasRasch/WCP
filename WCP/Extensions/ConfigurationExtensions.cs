@@ -70,6 +70,38 @@ namespace WCPShared.Extensions
             return services;
         }
 
+        public static IServiceCollection ConfigureDbContextPostgres(this IServiceCollection services, IConfiguration config)
+        {
+            if (Secrets.IsProd)
+            {
+                services.AddDbContextFactory<WcpDbContext>(options =>
+                    options.UseNpgsql(Secrets.GetConnectionString(config)));
+
+                services.AddDbContext<IWcpDbContext, WcpDbContext>(options =>
+                    options.UseNpgsql(Secrets.GetConnectionString(config)));
+
+                services.AddSingleton<IWcpDbContextFactory, WcpDbContextFactory>();
+            }
+            else
+            {
+                services.AddDbContextFactory<TestDbContext>(options =>
+                {
+                    options.EnableSensitiveDataLogging();
+                    options.UseNpgsql(Secrets.GetConnectionString(config));
+                });
+
+                services.AddDbContext<IWcpDbContext, TestDbContext>(options =>
+                {
+                    options.EnableSensitiveDataLogging();
+                    options.UseNpgsql(Secrets.GetConnectionString(config));
+                });
+
+                services.AddSingleton<IWcpDbContextFactory, TestDbContextFactory>();
+            }
+
+            return services;
+        }
+
         public static IServiceCollection ConfigureSwagger(this IServiceCollection services)
         {
             services.AddSwaggerGen(options =>
