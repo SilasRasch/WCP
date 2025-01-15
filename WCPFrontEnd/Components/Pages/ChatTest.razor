@@ -10,10 +10,10 @@
 @using WCPShared.Models.Enums
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider AuthenticationStateProvider
-@inject IWcpDbContextFactory ContextFactory
+@* @inject IWcpDbContextFactory ContextFactory *@
 @inject IJSRuntime JSRuntime
 
-<MudIconButton Icon="@Icons.Material.Filled.Chat" OnClick="() => isOpen = !isOpen"></MudIconButton>
+<MudIconButton Icon="@Icons.Material.Filled.ChatBubbleOutline" OnClick="() => isOpen = !isOpen"></MudIconButton>
 
 <MudPopover Open="@isOpen" Fixed AnchorOrigin="Origin.TopRight" TransformOrigin="Origin.TopRight" MaxHeight="640">
     <MudStack Row Spacing="0">
@@ -154,12 +154,12 @@
 
     protected override async Task OnInitializedAsync()
     {
-        Context = ContextFactory.CreateDbContext();
-        ChatService = new ChatService(Context);
-        var auth = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        string email = auth.User.FindFirst(c => c.Type == ClaimTypes.Email)?.Value!;
-        ActiveUser = await Context.Users.SingleOrDefaultAsync(x => x.Email == email);
-        Users = await ChatService.GetUsersWithLatestChat(x => x.Id != ActiveUser.Id, ActiveUser);
+        // Context = ContextFactory.CreateDbContext();
+        // ChatService = new ChatService(Context);
+        // var auth = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        // string email = auth.User.FindFirst(c => c.Type == ClaimTypes.Email)?.Value!;
+        // ActiveUser = await Context.Users.SingleOrDefaultAsync(x => x.Email == email);
+        // Users = await ChatService.GetUsersWithLatestChat(x => x.Id != ActiveUser.Id, ActiveUser);
 
         if (ActiveUser is not null)
         {

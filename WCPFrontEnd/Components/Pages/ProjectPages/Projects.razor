@@ -18,6 +18,7 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject StripeService StripeService
 @inject IJSRuntime jsRuntime
+@inject NavigationManager NavigationManager
 @attribute [Authorize]
 
 <PageTitle>Projekter</PageTitle>
@@ -64,21 +65,21 @@
         {
             <SelectColumn T="Project" />
         }
-        <PropertyColumn Property="x => x.Id" Title="Id">
+        @* <PropertyColumn Property="x => x.Id" Title="Id">
             <CellTemplate>
                 <div @onclick="() => OpenDialogAsync(context.Item)" class="flex justify-center rounded-full w-10 p-2 cursor-pointer bg-red-500 text-white">
                     <MudText>@context.Item.Id</MudText>
                 </div>
             </CellTemplate>
-        </PropertyColumn>
+        </PropertyColumn> *@
         <PropertyColumn Property="x => x.Name" Title="Projektnavn" />
         <PropertyColumn Property="x => x.Brand.Name" SortBy="@_sortBy" Title="Brand" Grouping="_groupBrand" />
         <TemplateColumn Title="Creators">
             <CellTemplate>
-                @if (context.Item is CreatorProject creatorProject) 
+                @if (context.Item.Type == ProjectType.UGC || context.Item.Type == ProjectType.Photos) 
                 {
-                    <MudAvatarGroup Max="1" Spacing="3" Class="cursor-pointer" @onclick="(() => OpenCreatorDialog(creatorProject))">
-                        @foreach (var participation in creatorProject.Participations)
+                    <MudAvatarGroup Max="1" Spacing="3" Class="cursor-pointer" @onclick="(() => OpenCreatorDialog(context.Item))">
+                        @foreach (var participation in context.Item.Participations)
                         {
                             <div class="flex flex-col justify-center items-center">
                                 <MudAvatar Color="Color.Primary">
@@ -95,7 +96,7 @@
                             </div>
                         }
 
-                        @if (creatorProject.Participations.Count == 0)
+                        @if (context.Item.Participations.Count == 0)
                         {
                             <MudText Class="p-2 cursor-pointer">-</MudText>
                         }
@@ -149,6 +150,12 @@
             <TemplateColumn Title="Actions" StickyRight="@_stickyActions">
                 <CellTemplate>
                     <MudMenu Icon="@Icons.Material.Filled.MoreHoriz" AriaLabel="Åben aktionsmenu" AnchorOrigin="Origin.BottomCenter">
+                        <MudMenuItem Href="@("/projects/" + @context.Item.Id)">
+                            <MudStack Row="true">
+                                <MudIcon Icon="@Icons.Material.Filled.Search"></MudIcon>
+                                <MudText>Åbn</MudText>
+                            </MudStack>
+                        </MudMenuItem>
                         <MudMenuItem OnClick="@((e) => OpenDialogAsync(context.Item))">
                             <MudStack Row="true">
                                 <MudIcon Icon="@Icons.Material.Filled.Edit"></MudIcon>
@@ -389,7 +396,7 @@
         }
     }
 
-    private async Task OpenCreatorDialog(CreatorProject project)
+    private async Task OpenCreatorDialog(Project project)
     {
         if (User.Role == UserRole.Admin) 
         {

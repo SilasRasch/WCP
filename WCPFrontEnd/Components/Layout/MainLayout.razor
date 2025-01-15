@@ -11,7 +11,8 @@
 @inject NavigationManager Navigation
 @inject IJSRuntime jsRuntime
 @inject StripeService StripeService
-@inject IWcpDbContextFactory ContextFactory
+@* @inject IWcpDbContextFactory ContextFactory *@
+@inject IWcpDbContext Context
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
 <MudThemeProvider @ref="_mudThemeProvider" Theme="@_theme" IsDarkMode="_isDarkMode" />
@@ -20,37 +21,53 @@
 <MudSnackbarProvider />
 
 <MudLayout Class="mud-background">
-    <MudAppBar Elevation="1">
+    <MudAppBar Elevation="0" Class="border-b-[1px]">
         <a href="/" class="mt-2">
             <MudImage Src="https://wcp.dk/assets/webcontent-B3eGu9V2.png" Class="max-h-[64px]" Alt="WebContent logo" />
         </a>
         <MudSpacer />
-        <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
-            <AuthorizeView Roles="Creator">
-                @if (Balance is not null) 
-                {
-                    <CreatorBalance Balance="Balance" />
-                }
-            </AuthorizeView>
+        <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.Center" Spacing="1">
             <AuthorizeView>
                 <Authorized>
-                    <MudStack Row>
-                        <WCPFrontEnd.Components.Pages.ChatTest />
+                    <WCPFrontEnd.Components.Pages.ChatTest />
 
-                        <MudMenu AriaLabel="Åben profil menu" AnchorOrigin="Origin.BottomCenter">
-                            <ActivatorContent>
-                                <MudAvatar Color="Color.Primary">
-                                    WC
-                                </MudAvatar>
-                            </ActivatorContent>
-                            <ChildContent>
-                                <MudMenuItem Href="profile" Icon="@Icons.Material.Filled.Person">Min profil</MudMenuItem>
-                                <MudMenuItem Icon="@(DarkLightModeButtonIcon)" IconColor="Color.Warning" OnClick="@DarkModeToggle">Skift tema</MudMenuItem>
-                                <MudMenuItem Href="logout" IconColor="Color.Error" Icon="@Icons.Material.Filled.Logout">Log ud</MudMenuItem>
-                            </ChildContent>
+                    <AuthorizeView Context="context2" Roles="Creator">
+                        @if (Balance is not null)
+                        {
+                            <CreatorBalance Balance="Balance" />
+                        }
+                    </AuthorizeView>
 
-                        </MudMenu>
-                    </MudStack>
+                    <div class="h-[32px] mx-2 border-l-[1px] border-gray-300"></div>
+
+                    <MudMenu AriaLabel="Åben profil menu" AnchorOrigin="Origin.BottomRight" Variant="Variant.Outlined">
+                        <ActivatorContent>
+                            <MudStack Spacing="4" Row Justify="Justify.Center" AlignItems="AlignItems.Center">
+                                <MudStack Row Spacing="2">
+                                    <MudAvatar Color="Color.Primary">
+                                        WC
+                                    </MudAvatar>
+
+                                    <MudStack Spacing="0">
+                                        <MudText>Silas H. Rasch</MudText>
+                                        <MudText Typo="Typo.caption">Admin</MudText>
+                                    </MudStack>
+                                </MudStack>
+
+                                <MudIcon Icon="@Icons.Material.Filled.KeyboardArrowDown"></MudIcon>
+                            </MudStack>
+
+                        </ActivatorContent>
+                        <ChildContent>
+                            <MudMenuItem Href="profile" Icon="@Icons.Material.Filled.Settings">Indstillinger</MudMenuItem>
+                            <MudMenuItem Href="profile" Icon="@Icons.Material.Filled.Support">Support</MudMenuItem>
+                            <MudMenuItem Href="profile" Icon="@Icons.Material.Filled.HelpOutline">FAQ</MudMenuItem>
+                            @* <MudMenuItem Icon="@(DarkLightModeButtonIcon)" IconColor="Color.Warning" OnClick="@DarkModeToggle">Skift tema</MudMenuItem> *@
+                            <MudDivider />
+                            <MudMenuItem Href="logout" Icon="@Icons.Material.Filled.Logout">Log ud</MudMenuItem>
+                        </ChildContent>
+
+                    </MudMenu>
                     @* <MudIconButton Icon="@(DarkLightModeButtonIcon)" Color="Color.Warning" OnClick="@DarkModeToggle" />
                     <MudNavLink Style="max-width: fit-content" Href="/logout" Match="NavLinkMatch.Prefix" IconColor="Color.Error" Icon="@Icons.Material.Filled.Logout">Log ud</MudNavLink> *@
                 </Authorized>
@@ -69,7 +86,7 @@
             </Authorized>
         </AuthorizeView>
 
-        <MudMainContent Class="mud-height-full mt-16 pa-4">
+        <MudMainContent Class="mud-height-full mt-16 pa-4 px-6">
             <AuthorizeView Roles="Bruger">
                 <Authorized>
                     <AuthorizeView Context="subscribed" Policy="IsNotSubscribed">
@@ -100,6 +117,7 @@
                     </AuthorizeView>
                 </Authorized>
             </AuthorizeView>
+
             @Body
         </MudMainContent>
     </MudDrawerContainer>
@@ -127,10 +145,13 @@
         {
             PaletteLight = _lightPalette,
             PaletteDark = _darkPalette,
-            LayoutProperties = new LayoutProperties(),
+            LayoutProperties = new LayoutProperties() 
+            {
+                DefaultBorderRadius = "12px",
+            },
             ZIndex = new ZIndex() 
             {
-                AppBar = 1100,       // Default is 1100
+                AppBar = 1201,       // Default is 1100
                 Drawer = 1200,       // Default is 1200
                 Popover = 1300,      // Default is 1300
                 Dialog = 1400,       // Default is 1400
@@ -175,8 +196,8 @@
         Secondary = "#ffeddc",
         Black = "#110e2d",
         AppbarText = "#424242",
-        AppbarBackground = "#ffeddc",
-        DrawerBackground = "rgb(255, 247, 230)",
+        AppbarBackground = "#FFFFFF",
+        DrawerBackground = "#FFFFFF",
         GrayLight = "#e8e8e8",
         GrayLighter = "#f9f9f9",
     };
@@ -226,28 +247,24 @@
 
         if (creatorId is not null && role is not null && role == UserRole.Creator.ToString())
         {
-            using (IWcpDbContext context = ContextFactory.CreateDbContext()) 
-            {
-                var creator = context.Creators
+            var creator = Context.Creators
                     .Include(x => x.User)
                     .ThenInclude(x => x.Language)
                     .AsNoTracking()
                     .SingleOrDefault(x => x.Id == Convert.ToInt16(creatorId));
 
-                if (stripeAccountId is not null && creator is not null) 
-                {
-                    var balances = await StripeService.GetBalance(stripeAccountId);
+            if (stripeAccountId is not null && creator is not null)
+            {
+                var balances = await StripeService.GetBalance(stripeAccountId);
 
-                    // Try and get preferred currency
-                    Balance = balances.Available.SingleOrDefault(x => x.Currency == creator.User.Language.Currency)!;
+                // Try and get preferred currency
+                Balance = balances.Available.SingleOrDefault(x => x.Currency == creator.User.Language.Currency)!;
 
-                    // Then get any
-                    if (Balance is null) Balance = balances.Available.FirstOrDefault();
-                        
-                    // Display zero
-                    if (Balance is null) Balance = new BalanceAmount { Amount = 0, Currency = creator.User.Language.Currency };
-                        
-                }
+                // Then get any
+                if (Balance is null) Balance = balances.Available.FirstOrDefault();
+
+                // Display zero
+                if (Balance is null) Balance = new BalanceAmount { Amount = 0, Currency = creator.User.Language.Currency };
             }
         }
     }
@@ -259,24 +276,21 @@
 
         if (!string.IsNullOrEmpty(creatorId)) 
         {
-            using (IWcpDbContext context = ContextFactory.CreateDbContext())
-            {
-                Creator? creator = await context.Creators
+            Creator? creator = await Context.Creators
                     .Include(x => x.User)
                     .ThenInclude(x => x.Language)
                     .SingleOrDefaultAsync(x => x.Id == Convert.ToInt32(creatorId));
 
-                if (creator is not null) 
+            if (creator is not null)
+            {
+                if (string.IsNullOrEmpty(creator.StripeAccountId))
                 {
-                    if (string.IsNullOrEmpty(creator.StripeAccountId))
-                    {
-                        creator.StripeAccountId = StripeService.CreateAccount(creator.User.Email, creator.StripeAccountType, creator.User.Language.IsoCountryCode).Id;
-                        await context.SaveChangesAsync();
-                    }
-
-                    var accountLink = StripeService.CreateAccountLink(creator.StripeAccountId);
-                    await jsRuntime.InvokeVoidAsync("open", accountLink.Url);
+                    creator.StripeAccountId = StripeService.CreateAccount(creator.User.Email, creator.StripeAccountType, creator.User.Language.IsoCountryCode).Id;
+                    await Context.SaveChangesAsync();
                 }
+
+                var accountLink = StripeService.CreateAccountLink(creator.StripeAccountId);
+                await jsRuntime.InvokeVoidAsync("open", accountLink.Url);
             }
         }
     }

@@ -59,8 +59,8 @@ namespace WCPShared.Services.StaticHelpers
             }
             else
             {
-                env = Environment.GetEnvironmentVariable("TEST_CONNECTION_STRING")!;
-                appsetting = config.GetSection("TestConnectionString").Value!;
+                env = Environment.GetEnvironmentVariable("CONNECTION_STRING")!;
+                appsetting = config.GetSection("ConnectionString").Value!;
             }
 
 

@@ -247,7 +247,7 @@
 
     private async Task OpenAddProductDialog(Concept concept)
     {
-        await productSelect.CloseMenu();
+        // await productSelect.CloseMenu();
         var options = new DialogOptions { CloseOnEscapeKey = true };
 
         var parameters = new DialogParameters<WCPFrontEnd.Components.Pages.ProductRelated.Dialoges.AddProductDialog>

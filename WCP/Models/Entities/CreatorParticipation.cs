@@ -8,7 +8,7 @@ namespace WCPShared.Models.Entities
         public int CreatorId { get; set; }
         public required Creator Creator { get; set; }
         public int ProjectId { get; set; }
-        public required CreatorProject Project { get; set; }
+        public required Project Project { get; set; }
         public float Salary { get; set; } = 0;
         public string Currency { get; set; } = string.Empty;
         public bool HasDelivered { get; set; } = false;
