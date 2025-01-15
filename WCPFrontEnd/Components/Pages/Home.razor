@@ -33,9 +33,14 @@
         </div>
     </NotAuthorized>   
     <Authorized>
-        <MudPaper Class="pa-4 mb-2">
+        <MudStack Spacing="0" Class="mb-3">
+            <MudText Typo="Typo.h6">Hej, <b>@context.User.Identity!.Name.Split(' ').First()</b>! 👋</MudText>
+            <MudText Class="text-neutral-400">Få et omfattende overblik over dine projekter</MudText>
+        </MudStack>
+
+        @* <MudPaper Class="pa-4 mb-2">
             <MudText Typo="Typo.body1">Hej, <b>@context.User.Identity!.Name.Split(' ').First()</b>! 👋</MudText>
-        </MudPaper>
+        </MudPaper> *@
     </Authorized>
 </AuthorizeView>
 
@@ -53,38 +58,88 @@
     @if (data is not null)
     {
         <MudStack Row>
-            <MudPaper Class="pa-4" Width="25%">
-                <MudText Typo="Typo.caption">Gennemsnitlig score sidste måned</MudText>
-                <MudText Typo="Typo.h1">@AverageFeedbackScore</MudText>
+            <MudPaper Class="pa-4 border-[1px] border-border" Width="25%" Elevation="0">
+                <MudStack Row AlignItems="AlignItems.Center" Class="w-full">
+                    <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Class=" h-[48px] aspect-square rounded-lg bg-error-200 flex">
+                        <MudIcon Size="Size.Large" Icon="@Icons.Material.Filled.Assignment" Class="opacity-25"></MudIcon>
+                    </MudStack>
+                    <MudStack Spacing="0" Class="w-full">
+                        <MudText Class="text-neutral-400">Total projekter</MudText>
+
+                        <MudStack Row Class="w-full" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                            <MudText Typo="Typo.h5">@projects.Count()</MudText>
+                            <span class="text-xs font-semibold bg-success-50 text-success-400 h-fit rounded-lg py-[2px] px-[6px] text-white">+3,2%</span>
+                        </MudStack>
+                    </MudStack>
+                </MudStack>
             </MudPaper>
-            <MudPaper Class="pa-4" Width="25%">
+
+            <MudPaper Class="pa-4 border-[1px] border-border" Width="25%" Elevation="0">
+                <MudStack Row AlignItems="AlignItems.Center" Class="w-full">
+                    <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Class=" h-[48px] aspect-square rounded-lg bg-primary-200 flex">
+                        <MudIcon Size="Size.Large" Icon="@Icons.Material.Filled.Star" Class="opacity-25"></MudIcon>
+                    </MudStack>
+                    <MudStack Spacing="0" Class="w-full">
+                        <MudText Class="text-neutral-400">Gennemsnitlig score</MudText>
+
+                        <MudStack Row Class="w-full" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                            <MudText Typo="Typo.h5">@AverageFeedbackScore</MudText>
+                            <span class="text-xs font-semibold bg-success-50 text-success-400 h-fit rounded-lg py-[2px] px-[6px] text-white">+3,2%</span>
+                        </MudStack>
+                    </MudStack>
+                </MudStack>
+            </MudPaper>
+
+            <MudPaper Class="pa-4 border-[1px] border-border" Width="25%" Elevation="0">
+                <MudStack Row AlignItems="AlignItems.Center" Class="w-full">
+                    <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Class=" h-[48px] aspect-square rounded-lg bg-success-200 flex">
+                        <MudIcon Size="Size.Large" Icon="@Icons.Material.Filled.Assignment" Class="opacity-25"></MudIcon>
+                    </MudStack>
+                    <MudStack Spacing="0" Class="w-full">
+                        <MudText Class="text-neutral-400">Ventende projekter</MudText>
+
+                        <MudStack Row Class="w-full" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                            <AuthorizeView Roles="Admin">
+                                <MudText Typo="Typo.h5">@projects.Where(x => x.Status == ProjectStatus.Unconfirmed || x.Status == ProjectStatus.Queued || x.Status == ProjectStatus.Editing).Count()</MudText>
+                            </AuthorizeView>
+                            <AuthorizeView Roles="Bruger">
+                                <MudText Typo="Typo.h5">@projects.Where(x => x.Status == ProjectStatus.Planned || x.Status == ProjectStatus.Feedback).Count()</MudText>
+                            </AuthorizeView>
+                            <AuthorizeView Roles="Creator">
+                                <MudText Typo="Typo.h5">@projects.Where(x => x.Status == ProjectStatus.CreatorFilming).Count()</MudText>
+                            </AuthorizeView>
+                            <span class="text-xs font-semibold bg-success-50 text-success-400 h-fit rounded-lg py-[2px] px-[6px] text-white">+3,2%</span>
+                        </MudStack>
+                    </MudStack>
+                </MudStack>
+            </MudPaper>
+
+            <MudPaper Class="pa-4 border-[1px] border-border" Width="25%" Elevation="0">
+                <MudStack Row AlignItems="AlignItems.Center" Class="w-full">
+                    <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Class=" h-[48px] aspect-square rounded-lg bg-warning-200 flex">
+                        <MudIcon Size="Size.Large" Icon="@Icons.Material.Filled.PlayArrow" Class="opacity-25"></MudIcon>
+                    </MudStack>
+                    <MudStack Spacing="0" Class="w-full">
+                        <MudText Class="text-neutral-400">Antal videoer i alt</MudText>
+
+                        <MudStack Row Class="w-full" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                            <MudText Typo="Typo.h5">0</MudText>
+                            <span class="text-xs font-semibold bg-success-50 text-success-400 h-fit rounded-lg py-[2px] px-[6px] text-white">+3,2%</span>
+                        </MudStack>
+                    </MudStack>
+                </MudStack>
+            </MudPaper>
+
+            @* <MudPaper Class="pa-4" Width="25%">
                 <MudText Typo="Typo.caption">Projekter denne måned</MudText>
                 <MudText Typo="Typo.h1">@projects.Where(x => x.Created.Month == DateTime.Now.Month && x.Created.Year == DateTime.Now.Year).Count()</MudText>
             </MudPaper>
             <MudPaper Class="pa-4" Width="25%">
                 <MudText Typo="Typo.caption">Projekter sidste måned</MudText>
                 <MudText Typo="Typo.h1">@projects.Where(x => x.Created.Month == DateTime.Now.AddMonths(-1).Month && x.Created.Year == DateTime.Now.Year).Count()</MudText>
-            </MudPaper>
-            <MudPaper Class="pa-4" Width="25%">
-                <MudText Typo="Typo.caption">Ventende projekter</MudText>
-                <AuthorizeView Roles="Admin">
-                    <MudText Typo="Typo.h1">@projects.Where(x => x.Status == ProjectStatus.Unconfirmed || x.Status == ProjectStatus.Queued || x.Status == ProjectStatus.Editing).Count()</MudText>
-                </AuthorizeView>
-                <AuthorizeView Roles="Bruger">
-                    <MudText Typo="Typo.h1">@projects.Where(x => x.Status == ProjectStatus.Planned || x.Status == ProjectStatus.Feedback).Count()</MudText>
-                </AuthorizeView>
-                <AuthorizeView Roles="Creator">
-                    <MudText Typo="Typo.h1">@projects.Where(x => x.Status == ProjectStatus.CreatorFilming).Count()</MudText>
-                </AuthorizeView>
-
-            </MudPaper>
-            <MudPaper Class="pa-4" Width="25%">
-                <MudText Typo="Typo.caption">Antal videoer i alt</MudText>
-                <MudText Typo="Typo.h1">0</MudText>
-                @* <MudText Typo="Typo.h1">@projects.Sum(x => x.Amount)</MudText> *@
-            </MudPaper>
+            </MudPaper> *@
         </MudStack>
-        <AuthorizeView Roles="Admin">
+        @* <AuthorizeView Roles="Admin">
             <Authorized>
                 <MudStack Row StretchItems="StretchItems.All">
                     <MudStack Spacing="0">
@@ -183,10 +238,71 @@
                     </MudStack>
                 </MudStack>
             </Authorized>
-        </AuthorizeView>
+        </AuthorizeView> *@
 
+        <MudGrid Spacing="3">
+            <MudItem xs="3">
+                @if (data is not null)
+                {
+                    <MudPaper Class="border-[1px] border-border" Elevation="0">
+                        <MudText Typo="Typo.h6" Class="pa-4">Projekt statusser</MudText>
+                        <MudDivider />
 
-        <MudPaper Class="pa-4">
+                        <MudStack Class="pb-4" Row="true" AlignItems="AlignItems.End" Justify="Justify.SpaceAround">
+                            <MudStack Spacing="0">
+                                <MudChart ChartType="ChartType.Donut" Width="300px" Height="300px" @bind-SelectedIndex="Index" InputData="@data" InputLabels="@labels">
+                                    <CustomGraphics>
+                                        <text class="donut-inner-text" x="50%" y="45%" dominant-baseline="middle" text-anchor="middle" font-family="Helvetica" font-size="2">Total</text>
+                                        <text class="donut-inner-text" x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" font-family="Helvetica" font-size="5">@data.Sum().ToString()</text>
+                                    </CustomGraphics>
+                                </MudChart>
+                            </MudStack>
+                        </MudStack>
+                    </MudPaper>
+                }
+            </MudItem>
+            <MudItem xs="6">
+                @if (data is not null)
+                {
+                    <MudPaper Class="border-[1px] border-border" Elevation="0">
+                        <MudText Typo="Typo.h6" Class="pa-4">Projekter per måned</MudText>
+                        <MudDivider />
+
+                        <MudStack Class="pb-4" Row="true" AlignItems="AlignItems.End" Justify="Justify.SpaceAround">
+                            <MudStack Spacing="0">
+                                <MudChart ChartOptions="@(new ChartOptions { ShowLegend = false })" ChartType="ChartType.Bar" ChartSeries="@Series" XAxisLabels="@XAxisLabels" Width="100%" Height="354px"></MudChart>
+                            </MudStack>
+                        </MudStack>
+                    </MudPaper>
+                }
+            </MudItem>
+            <MudItem xs="3">
+                @if (data is not null)
+                {
+                    <MudPaper Class="border-[1px] border-border" Elevation="0">
+                        <MudText Typo="Typo.h6" Class="pa-4">Nyheder</MudText>
+                        <MudDivider />
+
+                        <MudStack Spacing="0" Class="pb-4 max-h-[370px] overflow-hidden overflow-y-scroll" AlignItems="AlignItems.End" Justify="Justify.SpaceAround">
+                            @for (int i = 0; i < 10; i++) 
+                            {
+                                <MudStack Row Class="py-3 px-4 w-full">
+                                    <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Class=" h-[48px] aspect-square rounded-xl bg-warning-200 flex">
+                                        <MudIcon Size="Size.Large" Icon="@Icons.Material.Filled.PlayArrow" Class="opacity-50"></MudIcon>
+                                    </MudStack>
+                                    <MudStack Spacing="0">
+                                        <MudText>Notifikation</MudText>
+                                        <MudText>Der er sket en ting...</MudText>
+                                    </MudStack>
+                                </MudStack>
+                            }
+                        </MudStack>
+                    </MudPaper>
+                }
+            </MudItem>
+        </MudGrid>
+
+        <MudPaper Class="pa-4 border-[1px] border-border" Elevation="0">
             <MudStack Spacing="0">
                 <MudText Typo="Typo.h6">Nyeste projekter</MudText>
                 <MudDataGrid Items="@projects.TakeLast(5).Reverse()" Elevation="0">
@@ -232,52 +348,6 @@
                 </MudDataGrid>
             </MudStack>
         </MudPaper>
-    }
-    @if (data is not null)
-    {
-        <MudPaper Class="pa-4">
-            <MudText Typo="Typo.h6">Fordeling af projekt-typer</MudText>
-            <MudStack Row="true" AlignItems="AlignItems.End" Justify="Justify.SpaceAround">
-
-                <MudStack Spacing="0">
-                    <MudChart ChartType="ChartType.Donut" Width="300px" Height="300px" @bind-SelectedIndex="Index" InputData="@data" InputLabels="@labels">
-                        <CustomGraphics>
-                            <text class="donut-inner-text" x="50%" y="45%" dominant-baseline="middle" text-anchor="middle" font-family="Helvetica" font-size="2">Total</text>
-                            <text class="donut-inner-text" x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" font-family="Helvetica" font-size="5">@data.Sum().ToString()</text>
-                        </CustomGraphics>
-                    </MudChart>
-                </MudStack>
-
-                <MudStack Spacing="0">
-                    <MudChart ChartOptions="@(new ChartOptions { ShowLegend = false })" ChartType="ChartType.Bar" ChartSeries="@Series" XAxisLabels="@XAxisLabels" Width="100%" Height="354px"></MudChart>
-                </MudStack>
-
-            </MudStack>
-        </MudPaper>
-    }
-    else
-    {
-        @* <div class="flex flex-col gap-2 w-full">
-                    <MudPaper Width="100%" Class="pa-4">
-                        <MudStack Spacing="0">
-                            <MudSkeleton Width="100%" Height="64px" />
-                            <MudSkeleton Width="100%" Height="64px" />
-                            <MudSkeleton Width="100%" Height="64px" />
-                            <MudSkeleton Width="100%" Height="64px" />
-                            <MudSkeleton Width="100%" Height="64px" />
-                            <MudSkeleton Width="100%" Height="64px" />
-                        </MudStack>
-                    </MudPaper>
-
-                    <MudStack Row="true">
-                        <MudPaper Class="pa-4">
-                            <MudSkeleton SkeletonType="SkeletonType.Circle" Width="300px" Height="300px" />
-                        </MudPaper>
-                        <MudPaper Class="pa-4">
-                            <MudSkeleton Height="300px" Width="650px" />
-                        </MudPaper>
-                    </MudStack>
-                </div> *@
     }
 </MudStack>
 

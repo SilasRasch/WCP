@@ -33,10 +33,10 @@
 
     <MudStack Row Class="mt-4" Spacing="3">
         <MudStack Class="grow" Spacing="3">
-            <MudPaper Class="border-[1px] border-gray-300" Elevation="0">
-                <div class="bg-gray-200 rounded-t">
+            <MudPaper Class="border-[1px] border-border" Elevation="0">
+                <div class="bg-neutral-50 rounded-t">
                     <MudText Class="pa-4">Grund detajler</MudText>
-                    <MudDivider Class="border-gray-300" />
+                    <MudDivider Class="border-border" />
                 </div>
 
                 <MudGrid Class="pa-4">
@@ -73,10 +73,10 @@
                 </MudGrid>
             </MudPaper>
 
-            <MudPaper Class="border-[1px] border-gray-300" Elevation="0">
-                <div class="bg-gray-200 rounded-t">
+            <MudPaper Class="border-[1px] border-border" Elevation="0">
+                <div class="bg-neutral-50 rounded-t">
                     <MudText Class="pa-4">Projekt detajler</MudText>
-                    <MudDivider Class="border-gray-300" />
+                    <MudDivider Class="border-border" />
                 </div>
 
                 <MudGrid Class="pa-4">
@@ -134,8 +134,8 @@
                 </MudGrid>
             </MudPaper>
 
-            <MudPaper Class="border-[1px] border-gray-300" Elevation="0">
-                <div class="bg-gray-200 rounded-t">
+            <MudPaper Class="border-[1px] border-border" Elevation="0">
+                <div class="bg-neutral-50 rounded-t">
                     <MudText Class="pa-4">Koncepter</MudText>
                     <MudDivider Class="border-gray-300" />
                 </div>
@@ -144,7 +144,7 @@
                     @foreach (var concept in Project.Concepts)
                     {
                         <MudItem Class="" xs="6">
-                            <MudPaper Class="border-[1px] border-gray-300" Elevation="0">
+                            <MudPaper Class="border-[1px] border-border" Elevation="0">
                                 <div class="rounded-t">
                                     <MudStack Row Justify="Justify.Center">
                                         <MudText Class="pa-4">@concept.Product.Name</MudText>
@@ -152,7 +152,7 @@
                                         <MudText Class="pa-4" Color="Color.Info">Detaljer</MudText>
                                     </MudStack>
 
-                                    <MudDivider Class="border-gray-300" />
+                                    <MudDivider Class="border-border" />
                                 </div>
 
                                 <MudGrid Class="pa-4">
@@ -184,7 +184,7 @@
 
         <AuthorizeView Roles="Creator">
             <MudStack Spacing="3">
-                <MudPaper Class="border-[1px] border-gray-300 pa-4" Elevation="0">
+                <MudPaper Class="border-[1px] border-border pa-4" Elevation="0">
                     <MudStack>
                         <MudText Typo="Typo.h6">Tid til aflevering</MudText>
                         <MudStack Row AlignItems="AlignItems.Center">
@@ -193,14 +193,14 @@
                                 <MudText Class="text-gray-500">Dage</MudText>
                             </MudStack>
 
-                            <div class="h-[20px] mx-2 border-l-[2px] border-gray-300"></div>
+                            <div class="h-[20px] mx-2 border-l-[2px] border-border"></div>
 
                             <MudStack Spacing="0" AlignItems="AlignItems.Center">
                                 <MudText><span class="font-semibold">13</span></MudText>
                                 <MudText Class="text-gray-500">Timer</MudText>
                             </MudStack>
 
-                            <div class="h-[20px] mx-2 border-l-[2px] border-gray-300"></div>
+                            <div class="h-[20px] mx-2 border-l-[2px] border-border"></div>
 
                             <MudStack Spacing="0" AlignItems="AlignItems.Center">
                                 <MudText><span class="font-semibold">22</span></MudText>
@@ -221,7 +221,7 @@
 
                 @if (Project.Type == ProjectType.UGC || Project.Type == ProjectType.Photos)
                 {
-                    <MudPaper Class="border-[1px] border-gray-300 pa-4" Elevation="0">
+                    <MudPaper Class="border-[1px] border-border pa-4" Elevation="0">
                         <MudStack>
                             <MudText Typo="Typo.h6">Afleveringer</MudText>
 

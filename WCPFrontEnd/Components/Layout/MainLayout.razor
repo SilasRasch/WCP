@@ -21,7 +21,7 @@
 <MudSnackbarProvider />
 
 <MudLayout Class="mud-background">
-    <MudAppBar Elevation="0" Class="border-b-[1px]">
+    <MudAppBar Elevation="0" Class="border-b-[1px] border-border">
         <a href="/" class="mt-2">
             <MudImage Src="https://wcp.dk/assets/webcontent-B3eGu9V2.png" Class="max-h-[64px]" Alt="WebContent logo" />
         </a>
@@ -38,7 +38,7 @@
                         }
                     </AuthorizeView>
 
-                    <div class="h-[32px] mx-2 border-l-[1px] border-gray-300"></div>
+                    <div class="h-[32px] mx-2 border-l-[1px] border-border"></div>
 
                     <MudMenu AriaLabel="Åben profil menu" AnchorOrigin="Origin.BottomRight" Variant="Variant.Outlined">
                         <ActivatorContent>
@@ -86,7 +86,7 @@
             </Authorized>
         </AuthorizeView>
 
-        <MudMainContent Class="mud-height-full mt-16 pa-4 px-6">
+        <MudMainContent Class="mud-height-full mt-16 pa-6">
             <AuthorizeView Roles="Bruger">
                 <Authorized>
                     <AuthorizeView Context="subscribed" Policy="IsNotSubscribed">
@@ -191,7 +191,7 @@
 
     private readonly PaletteLight _lightPalette = new()
     {
-        Primary = "#ED4C4D",
+        Primary = "#f3584a",
         Background = "#f9f9f9",
         Secondary = "#ffeddc",
         Black = "#110e2d",
@@ -200,6 +200,7 @@
         DrawerBackground = "#FFFFFF",
         GrayLight = "#e8e8e8",
         GrayLighter = "#f9f9f9",
+        Error = "#dc3545",
     };
 
     private readonly PaletteDark _darkPalette = new()
