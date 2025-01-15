@@ -38,285 +38,296 @@
                 <MudButton Variant="Variant.Filled" Class="rounded-lg" Color="Color.Primary" StartIcon="@Icons.Material.Filled.AddCircleOutline">Opret ny</MudButton>
             </MudStack>
         </MudStack>
-        
 
-        <MudStack Row Spacing="0">
-            <span class="px-2 py-1 text-primary-400 font-semibold bg-primary-50 min-w-32 border-b-[1px] border-primary-400 text-center">Aktive</span>
-            <span class="px-2 py-1 text-neutral-400 min-w-32 text-center">Afsluttede</span>
-        </MudStack>
-        
 
-        <MudGrid Spacing="3">
-            @foreach (Project project in ProjectList)
-            {
-                <MudItem xs="3">
-                    <WCPFrontEnd.Components.Shared.ProjectCard Project="project" ChangeStatus="(e) => OpenStatusDialog(e.Project, e.NewStatus)" />
-                </MudItem>
-            }
-        </MudGrid>
+        @* <MudStack Row Spacing="0">
+            <span @onclick="() => showAll = true" class="px-2 py-1 text-primary-400 font-semibold bg-primary-50 min-w-32 border-b-[1px] border-primary-400 text-center">Aktive</span>
+            <span @onclick="() => showAll = false" class="px-2 py-1 text-neutral-400 min-w-32 text-center">Afsluttede</span>
+        </MudStack> *@
+
+
+        <MudTabs Elevation="0" PanelClass="pt-4">
+            <MudTabPanel Text="Aktive">
+                <MudGrid Spacing="3">
+                    @foreach (Project project in ProjectList.Where(x => x.Status != ProjectStatus.Cancelled && x.Status != ProjectStatus.Finished))
+                    {
+                        <MudItem xs="3">
+                            <WCPFrontEnd.Components.Shared.ProjectCard Project="project" ChangeStatus="(e) => OpenStatusDialog(e.Project, e.NewStatus)" />
+                        </MudItem>
+                    }
+                </MudGrid>
+            </MudTabPanel>
+            <MudTabPanel Text="Inaktive">
+                <MudGrid Spacing="3">
+                    @foreach (Project project in ProjectList.Where(x => x.Status == ProjectStatus.Cancelled || x.Status == ProjectStatus.Finished))
+                    {
+                        <MudItem xs="3">
+                            <WCPFrontEnd.Components.Shared.ProjectCard Project="project" ChangeStatus="(e) => OpenStatusDialog(e.Project, e.NewStatus)" />
+                        </MudItem>
+                    }
+                </MudGrid>
+            </MudTabPanel>
+        </MudTabs>
     </MudStack>
-
-    
-    
 </AuthorizeView>
 
 
 <AuthorizeView Context="auth" Roles="Creator,Bruger">
     <MudDataGrid T="Project" SelectOnRowClick="@_selectable" MultiSelection="@_selectable" Items="@ProjectList" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter" Hideable="@_hidable" Striped="@_striped" Elevation="3"
     ColumnResizeMode="@(_resizable ? ResizeMode.Column : ResizeMode.None)" DragDropColumnReordering="_movable" FilterCaseSensitivity="DataGridFilterCaseSensitivity.Ignore" FilterDefinitions="@filters">
-    <ToolBarContent>
-        <MudStack Row="true" AlignItems="AlignItems.Center">
-            <MudText Typo="Typo.h6">Projekter</MudText>
-            <AuthorizeView Roles="Bruger">
-                <MudIconButton Icon="@Icons.Material.Filled.Add"></MudIconButton>
-            </AuthorizeView>
-        </MudStack>
-        <MudSpacer />
-        <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
-        AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
-        <MudIconButton onclick="Refetch" Icon="@Icons.Material.Filled.Refresh" Class="hover:animate-spin-once"></MudIconButton>
-        <MudIconButton Icon="@Icons.Material.Filled.Settings" OnClick="ToggleOpenTableSettings" Class="hover:animate-spin-once"></MudIconButton>
-        <MudPopover Open="@_open" Fixed="true" Class="px-4 pt-4" AnchorOrigin="Origin.BottomRight">
-            <div class="d-flex flex-column">
-                <MudText>Tabel-indstillinger</MudText>
-                <MudDivider></MudDivider>
-                <MudSwitch @bind-Value="_selectable" Color="Color.Primary">Selectable</MudSwitch>
-                <MudDivider></MudDivider>
-                <MudSwitch @bind-Value="_resizable" Color="Color.Primary">Resizable</MudSwitch>
-                <MudDivider></MudDivider>
-                <MudSwitch @bind-Value="_movable" Color="Color.Primary">Movable</MudSwitch>
-                <MudDivider></MudDivider>
-                <MudSwitch @bind-Value="_hidable" Color="Color.Primary">Hidable</MudSwitch>
-                <MudDivider></MudDivider>
-                <MudSwitch @bind-Value="_groupBrand" Color="Color.Primary">Gruppér brands</MudSwitch>
-                <MudDivider></MudDivider>
-                <MudSwitch @bind-Value="_striped" Color="Color.Primary">Zebra</MudSwitch>
-                <MudDivider></MudDivider>
-                <MudSwitch @bind-Value="_stickyActions" Color="Color.Primary">Sticky actions</MudSwitch>
-                <MudDivider></MudDivider>
+        <ToolBarContent>
+            <MudStack Row="true" AlignItems="AlignItems.Center">
+                <MudText Typo="Typo.h6">Projekter</MudText>
+                <AuthorizeView Roles="Bruger">
+                    <MudIconButton Icon="@Icons.Material.Filled.Add"></MudIconButton>
+                </AuthorizeView>
+            </MudStack>
+            <MudSpacer />
+            <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
+            AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+            <MudIconButton onclick="Refetch" Icon="@Icons.Material.Filled.Refresh" Class="hover:animate-spin-once"></MudIconButton>
+            <MudIconButton Icon="@Icons.Material.Filled.Settings" OnClick="ToggleOpenTableSettings" Class="hover:animate-spin-once"></MudIconButton>
+            <MudPopover Open="@_open" Fixed="true" Class="px-4 pt-4" AnchorOrigin="Origin.BottomRight">
+                <div class="d-flex flex-column">
+                    <MudText>Tabel-indstillinger</MudText>
+                    <MudDivider></MudDivider>
+                    <MudSwitch @bind-Value="_selectable" Color="Color.Primary">Selectable</MudSwitch>
+                    <MudDivider></MudDivider>
+                    <MudSwitch @bind-Value="_resizable" Color="Color.Primary">Resizable</MudSwitch>
+                    <MudDivider></MudDivider>
+                    <MudSwitch @bind-Value="_movable" Color="Color.Primary">Movable</MudSwitch>
+                    <MudDivider></MudDivider>
+                    <MudSwitch @bind-Value="_hidable" Color="Color.Primary">Hidable</MudSwitch>
+                    <MudDivider></MudDivider>
+                    <MudSwitch @bind-Value="_groupBrand" Color="Color.Primary">Gruppér brands</MudSwitch>
+                    <MudDivider></MudDivider>
+                    <MudSwitch @bind-Value="_striped" Color="Color.Primary">Zebra</MudSwitch>
+                    <MudDivider></MudDivider>
+                    <MudSwitch @bind-Value="_stickyActions" Color="Color.Primary">Sticky actions</MudSwitch>
+                    <MudDivider></MudDivider>
 
-                <MudButton OnClick="@ToggleOpenTableSettings" Class="ml-auto mr-n3 mb-1" Color="Color.Error">Luk</MudButton>
-            </div>
-        </MudPopover>
-    </ToolBarContent>
-    <Columns>
-        @if (_selectable)
-        {
-            <SelectColumn T="Project" />
-        }
-        @* <PropertyColumn Property="x => x.Id" Title="Id">
+                    <MudButton OnClick="@ToggleOpenTableSettings" Class="ml-auto mr-n3 mb-1" Color="Color.Error">Luk</MudButton>
+                </div>
+            </MudPopover>
+        </ToolBarContent>
+        <Columns>
+            @if (_selectable)
+            {
+                <SelectColumn T="Project" />
+            }
+            @* <PropertyColumn Property="x => x.Id" Title="Id">
             <CellTemplate>
                 <div @onclick="() => OpenDialogAsync(context.Item)" class="flex justify-center rounded-full w-10 p-2 cursor-pointer bg-red-500 text-white">
                     <MudText>@context.Item.Id</MudText>
                 </div>
             </CellTemplate>
         </PropertyColumn> *@
-        <PropertyColumn Property="x => x.Name" Title="Projektnavn" />
-        <PropertyColumn Property="x => x.Brand.Name" SortBy="@_sortBy" Title="Brand" Grouping="_groupBrand" />
-        <TemplateColumn Title="Creators">
-            <CellTemplate>
-                @if (context.Item.Type == ProjectType.UGC || context.Item.Type == ProjectType.Photos) 
-                {
-                    <MudAvatarGroup Max="1" Spacing="3" Class="cursor-pointer" @onclick="(() => OpenCreatorDialog(context.Item))">
-                        @foreach (var participation in context.Item.Participations)
-                        {
-                            <div class="flex flex-col justify-center items-center">
-                                <MudAvatar Color="Color.Primary">
-                                    @if (participation.Creator.ImgURL is not null)
-                                    {
-                                        <MudImage Src="@participation.Creator.ImgURL" />
-                                    }
-                                    else
-                                    {
-                                        @participation.Creator.User.Name.First()
-                                        ;
-                                    }
-                                </MudAvatar>
-                            </div>
-                        }
-
-                        @if (context.Item.Participations.Count == 0)
-                        {
-                            <MudText Class="p-2 cursor-pointer">-</MudText>
-                        }
-                    </MudAvatarGroup>
-                }
-            </CellTemplate>
-        </TemplateColumn>
-        <TemplateColumn Title="Type">
-            <CellTemplate>
-                @if (context.Item is UgcProject) 
-                {
-                    <MudText>UGC</MudText>
-                }
-                else if (context.Item is StaticProject)
-                {
-                    <MudText>Statics</MudText>
-                }
-                else if (context.Item is PhotoProject)
-                {
-                    <MudText>Photos</MudText>
-                }
-            </CellTemplate>
-        </TemplateColumn>
-        <PropertyColumn Property="x => x.Status" Title="Status" CellClass="cursor-pointer">
-            <CellTemplate>
-                <div class="@ProjectHelper.GetStatusColor(context.Item.Status)" @onclick="() => OpenStatusDialogAdmin(context.Item)">
-                    @ProjectHelper.GetStatusString(context.Item.Status)
-                </div>
-            </CellTemplate>
-        </PropertyColumn>
-        <PropertyColumn Property="x => x.Deadline" Title="Deadline">
-            <CellTemplate>
-                @if (context.Item.Deadline != DateTime.MinValue)
-                {
-                    <p>@context.Item.Deadline.ToString("dd-MM-yyyy") (@((context.Item.Deadline - DateTime.Now).Days) dage)</p>
-                }
-                else
-                {
-                    <p>-</p>
-                }
-            </CellTemplate>
-        </PropertyColumn>
-        <PropertyColumn Property="x => x.Created" Title="Oprettet">
-            <CellTemplate>
-                @context.Item.Created.ToString("dd-MM-yyyy")
-            </CellTemplate>
-        </PropertyColumn>
-        <AuthorizeView Context="authcontext" Roles="Admin">
-            <PropertyColumn Property="x => x.InternalNotes" Title="Note" />
-
-            <TemplateColumn Title="Actions" StickyRight="@_stickyActions">
+            <PropertyColumn Property="x => x.Name" Title="Projektnavn" />
+            <PropertyColumn Property="x => x.Brand.Name" SortBy="@_sortBy" Title="Brand" Grouping="_groupBrand" />
+            <TemplateColumn Title="Creators">
                 <CellTemplate>
-                    <MudMenu Icon="@Icons.Material.Filled.MoreHoriz" AriaLabel="Åben aktionsmenu" AnchorOrigin="Origin.BottomCenter">
-                        <MudMenuItem Href="@("/projects/" + @context.Item.Id)">
-                            <MudStack Row="true">
-                                <MudIcon Icon="@Icons.Material.Filled.Search"></MudIcon>
-                                <MudText>Åbn</MudText>
-                            </MudStack>
-                        </MudMenuItem>
-                        <MudMenuItem OnClick="@((e) => OpenDialogAsync(context.Item))">
-                            <MudStack Row="true">
-                                <MudIcon Icon="@Icons.Material.Filled.Edit"></MudIcon>
-                                <MudText>Rediger</MudText>
-                            </MudStack>
-                        </MudMenuItem>
-                        @if (context.Item.Status == ProjectStatus.Unconfirmed)
-                        {
-                            <MudMenuItem OnClick="@((e) => OpenStatusDialog(context.Item, ProjectStatus.Queued))">
-                                <MudStack Row="true">
-                                    <MudIcon Icon="@Icons.Material.Filled.Check"></MudIcon>
-                                    <MudText>Bekræft</MudText>
-                                </MudStack>
-                            </MudMenuItem>
-                        }
-                        @if (context.Item.Status <= ProjectStatus.Feedback && context.Item.Status > ProjectStatus.Unconfirmed)
-                        {
-                            <MudMenuItem OnClick="@((e) => OpenStatusDialog(context.Item, context.Item.Status + 1))">
-                                <MudStack Row="true">
-                                    <MudIcon Icon="@Icons.Material.Filled.KeyboardDoubleArrowRight"></MudIcon>
-                                    <MudText>Ryk frem</MudText>
-                                </MudStack>
-                            </MudMenuItem>
-                        }
-                        @if (context.Item.Status > 0)
-                        {
-                            <MudMenuItem OnClick="@((e) => OpenStatusDialog(context.Item, context.Item.Status - 1))">
-                                <MudStack Row="true">
-                                    <MudIcon Icon="@Icons.Material.Filled.KeyboardDoubleArrowLeft"></MudIcon>
-                                    <MudText>Ryk tilbage</MudText>
-                                </MudStack>
-                            </MudMenuItem>
-                        }
-                        <MudMenuItem OnClick="@((e) => OpenStatusDialog(context.Item, ProjectStatus.Cancelled))" Disabled="User.Role == UserRole.Bruger && context.Item.Status != ProjectStatus.Unconfirmed">
-                            <MudStack Row="true">
-                                <MudIcon Icon="@Icons.Material.Filled.Delete" Color="Color.Error"></MudIcon>
-                                <MudText>Annullér</MudText>
-                            </MudStack>
-                        </MudMenuItem>
-                    </MudMenu>
+                    @if (context.Item.Type == ProjectType.UGC || context.Item.Type == ProjectType.Photos) 
+                    {
+                        <MudAvatarGroup Max="1" Spacing="3" Class="cursor-pointer" @onclick="(() => OpenCreatorDialog(context.Item))">
+                            @foreach (var participation in context.Item.Participations)
+                            {
+                                <div class="flex flex-col justify-center items-center">
+                                    <MudAvatar Color="Color.Primary">
+                                        @if (participation.Creator.ImgURL is not null)
+                                        {
+                                            <MudImage Src="@participation.Creator.ImgURL" />
+                                        }
+                                        else
+                                        {
+                                            @participation.Creator.User.Name.First()
+                                            ;
+                                        }
+                                    </MudAvatar>
+                                </div>
+                            }
+
+                            @if (context.Item.Participations.Count == 0)
+                            {
+                                <MudText Class="p-2 cursor-pointer">-</MudText>
+                            }
+                        </MudAvatarGroup>
+                    }
                 </CellTemplate>
             </TemplateColumn>
-        </AuthorizeView>
-
-        <AuthorizeView Context="authcontext" Roles="Bruger">
-
-            <TemplateColumn Title="Actions" StickyRight="@_stickyActions">
+            <TemplateColumn Title="Type">
                 <CellTemplate>
-                    <MudMenu Icon="@Icons.Material.Filled.MoreHoriz" AriaLabel="Åben aktionsmenu" AnchorOrigin="Origin.BottomCenter">
-                        <MudMenuItem OnClick="@((e) => OpenDialogAsync(context.Item))">
-                            <MudStack Row="true">
-                                <MudIcon Icon="@Icons.Material.Filled.Search"></MudIcon>
-                                <MudText>Åbn</MudText>
-                            </MudStack>
-                        </MudMenuItem>
-                        @if (context.Item.Status == ProjectStatus.Planned)
-                        {
-                            <MudMenuItem OnClick="@((e) => OpenStatusDialog(context.Item, ProjectStatus.CreatorFilming))">
-                                <MudStack Row="true">
-                                    <MudIcon Icon="@Icons.Material.Filled.Check"></MudIcon>
-                                    <MudText>Bekræft scripts</MudText>
-                                </MudStack>
-                            </MudMenuItem>
-                        }
-                        @if (context.Item.Status == ProjectStatus.Feedback)
-                        {
-                            <MudMenuItem OnClick="@((e) => OpenStatusDialog(context.Item, ProjectStatus.Finished))">
-                                <MudStack Row="true">
-                                    <MudIcon Icon="@Icons.Material.Filled.Check"></MudIcon>
-                                    <MudText>Bekræft videoer</MudText>
-                                </MudStack>
-                            </MudMenuItem>
-                        }
-                        <MudMenuItem OnClick="@((e) => OpenStatusDialog(context.Item, ProjectStatus.Cancelled))" Disabled="User.Role == UserRole.Bruger && context.Item.Status != ProjectStatus.Unconfirmed">
-                            <MudStack Row="true">
-                                <MudIcon Icon="@Icons.Material.Filled.Delete" Color="Color.Error"></MudIcon>
-                                <MudText>Annullér</MudText>
-                            </MudStack>
-                        </MudMenuItem>
-                    </MudMenu>
+                    @if (context.Item is UgcProject) 
+                    {
+                        <MudText>UGC</MudText>
+                    }
+                    else if (context.Item is StaticProject)
+                    {
+                        <MudText>Statics</MudText>
+                    }
+                    else if (context.Item is PhotoProject)
+                    {
+                        <MudText>Photos</MudText>
+                    }
                 </CellTemplate>
             </TemplateColumn>
-        </AuthorizeView>
-
-        <AuthorizeView Context="authcontext" Roles="Creator">
-            <TemplateColumn Title="Actions" StickyRight="@_stickyActions">
+            <PropertyColumn Property="x => x.Status" Title="Status" CellClass="cursor-pointer">
                 <CellTemplate>
-                    <MudMenu Icon="@Icons.Material.Filled.MoreHoriz" AriaLabel="Åben aktionsmenu" AnchorOrigin="Origin.BottomCenter">
-                        <MudMenuItem OnClick="@((e) => OpenDialogAsync(context.Item))">
-                            <MudStack Row="true">
-                                <MudIcon Icon="@Icons.Material.Filled.Search"></MudIcon>
-                                <MudText>Åbn</MudText>
-                            </MudStack>
-                        </MudMenuItem>
-                        @if (context.Item.Status == ProjectStatus.CreatorFilming && context.Item.Deadline == DateTime.MinValue)
-                        {
-                            <MudMenuItem OnClick="@((e) => OpenStatusDialog(context.Item, ProjectStatus.CreatorFilming))">
-                                <MudStack Row="true">
-                                    <MudIcon Icon="@Icons.Material.Filled.EditCalendar"></MudIcon>
-                                    <MudText>Ændr deadline</MudText>
-                                </MudStack>
-                            </MudMenuItem>
-                        }
-                        else if (context.Item.Status == ProjectStatus.CreatorFilming)
-                        {
-                            <MudMenuItem OnClick="@((e) => OpenStatusDialog(context.Item, ProjectStatus.Editing))">
-                                <MudStack Row="true">
-                                    <MudIcon Icon="@Icons.Material.Filled.Check"></MudIcon>
-                                    <MudText>Aflever projekt</MudText>
-                                </MudStack>
-                            </MudMenuItem>
-                        }
-                    </MudMenu>
+                    <div class="@ProjectHelper.GetStatusColor(context.Item.Status)" @onclick="() => OpenStatusDialogAdmin(context.Item)">
+                        @ProjectHelper.GetStatusString(context.Item.Status)
+                    </div>
                 </CellTemplate>
-            </TemplateColumn>
-        </AuthorizeView>
+            </PropertyColumn>
+            <PropertyColumn Property="x => x.Deadline" Title="Deadline">
+                <CellTemplate>
+                    @if (context.Item.Deadline != DateTime.MinValue)
+                    {
+                        <p>@context.Item.Deadline.ToString("dd-MM-yyyy") (@((context.Item.Deadline - DateTime.Now).Days) dage)</p>
+                    }
+                    else
+                    {
+                        <p>-</p>
+                    }
+                </CellTemplate>
+            </PropertyColumn>
+            <PropertyColumn Property="x => x.Created" Title="Oprettet">
+                <CellTemplate>
+                    @context.Item.Created.ToString("dd-MM-yyyy")
+                </CellTemplate>
+            </PropertyColumn>
+            <AuthorizeView Context="authcontext" Roles="Admin">
+                <PropertyColumn Property="x => x.InternalNotes" Title="Note" />
 
-    </Columns>
-    <PagerContent>
-        <MudDataGridPager T="Project" PageSizeOptions="[100, 200, 300, 400, 500]" RowsPerPageString="Rækker per side:" />
-    </PagerContent>
-</MudDataGrid>
+                <TemplateColumn Title="Actions" StickyRight="@_stickyActions">
+                    <CellTemplate>
+                        <MudMenu Icon="@Icons.Material.Filled.MoreHoriz" AriaLabel="Åben aktionsmenu" AnchorOrigin="Origin.BottomCenter">
+                            <MudMenuItem Href="@("/projects/" + @context.Item.Id)">
+                                <MudStack Row="true">
+                                    <MudIcon Icon="@Icons.Material.Filled.Search"></MudIcon>
+                                    <MudText>Åbn</MudText>
+                                </MudStack>
+                            </MudMenuItem>
+                            <MudMenuItem OnClick="@((e) => OpenDialogAsync(context.Item))">
+                                <MudStack Row="true">
+                                    <MudIcon Icon="@Icons.Material.Filled.Edit"></MudIcon>
+                                    <MudText>Rediger</MudText>
+                                </MudStack>
+                            </MudMenuItem>
+                            @if (context.Item.Status == ProjectStatus.Unconfirmed)
+                            {
+                                <MudMenuItem OnClick="@((e) => OpenStatusDialog(context.Item, ProjectStatus.Queued))">
+                                    <MudStack Row="true">
+                                        <MudIcon Icon="@Icons.Material.Filled.Check"></MudIcon>
+                                        <MudText>Bekræft</MudText>
+                                    </MudStack>
+                                </MudMenuItem>
+                            }
+                            @if (context.Item.Status <= ProjectStatus.Feedback && context.Item.Status > ProjectStatus.Unconfirmed)
+                            {
+                                <MudMenuItem OnClick="@((e) => OpenStatusDialog(context.Item, context.Item.Status + 1))">
+                                    <MudStack Row="true">
+                                        <MudIcon Icon="@Icons.Material.Filled.KeyboardDoubleArrowRight"></MudIcon>
+                                        <MudText>Ryk frem</MudText>
+                                    </MudStack>
+                                </MudMenuItem>
+                            }
+                            @if (context.Item.Status > 0)
+                            {
+                                <MudMenuItem OnClick="@((e) => OpenStatusDialog(context.Item, context.Item.Status - 1))">
+                                    <MudStack Row="true">
+                                        <MudIcon Icon="@Icons.Material.Filled.KeyboardDoubleArrowLeft"></MudIcon>
+                                        <MudText>Ryk tilbage</MudText>
+                                    </MudStack>
+                                </MudMenuItem>
+                            }
+                            <MudMenuItem OnClick="@((e) => OpenStatusDialog(context.Item, ProjectStatus.Cancelled))" Disabled="User.Role == UserRole.Bruger && context.Item.Status != ProjectStatus.Unconfirmed">
+                                <MudStack Row="true">
+                                    <MudIcon Icon="@Icons.Material.Filled.Delete" Color="Color.Error"></MudIcon>
+                                    <MudText>Annullér</MudText>
+                                </MudStack>
+                            </MudMenuItem>
+                        </MudMenu>
+                    </CellTemplate>
+                </TemplateColumn>
+            </AuthorizeView>
+
+            <AuthorizeView Context="authcontext" Roles="Bruger">
+
+                <TemplateColumn Title="Actions" StickyRight="@_stickyActions">
+                    <CellTemplate>
+                        <MudMenu Icon="@Icons.Material.Filled.MoreHoriz" AriaLabel="Åben aktionsmenu" AnchorOrigin="Origin.BottomCenter">
+                            <MudMenuItem OnClick="@((e) => OpenDialogAsync(context.Item))">
+                                <MudStack Row="true">
+                                    <MudIcon Icon="@Icons.Material.Filled.Search"></MudIcon>
+                                    <MudText>Åbn</MudText>
+                                </MudStack>
+                            </MudMenuItem>
+                            @if (context.Item.Status == ProjectStatus.Planned)
+                            {
+                                <MudMenuItem OnClick="@((e) => OpenStatusDialog(context.Item, ProjectStatus.CreatorFilming))">
+                                    <MudStack Row="true">
+                                        <MudIcon Icon="@Icons.Material.Filled.Check"></MudIcon>
+                                        <MudText>Bekræft scripts</MudText>
+                                    </MudStack>
+                                </MudMenuItem>
+                            }
+                            @if (context.Item.Status == ProjectStatus.Feedback)
+                            {
+                                <MudMenuItem OnClick="@((e) => OpenStatusDialog(context.Item, ProjectStatus.Finished))">
+                                    <MudStack Row="true">
+                                        <MudIcon Icon="@Icons.Material.Filled.Check"></MudIcon>
+                                        <MudText>Bekræft videoer</MudText>
+                                    </MudStack>
+                                </MudMenuItem>
+                            }
+                            <MudMenuItem OnClick="@((e) => OpenStatusDialog(context.Item, ProjectStatus.Cancelled))" Disabled="User.Role == UserRole.Bruger && context.Item.Status != ProjectStatus.Unconfirmed">
+                                <MudStack Row="true">
+                                    <MudIcon Icon="@Icons.Material.Filled.Delete" Color="Color.Error"></MudIcon>
+                                    <MudText>Annullér</MudText>
+                                </MudStack>
+                            </MudMenuItem>
+                        </MudMenu>
+                    </CellTemplate>
+                </TemplateColumn>
+            </AuthorizeView>
+
+            <AuthorizeView Context="authcontext" Roles="Creator">
+                <TemplateColumn Title="Actions" StickyRight="@_stickyActions">
+                    <CellTemplate>
+                        <MudMenu Icon="@Icons.Material.Filled.MoreHoriz" AriaLabel="Åben aktionsmenu" AnchorOrigin="Origin.BottomCenter">
+                            <MudMenuItem OnClick="@((e) => OpenDialogAsync(context.Item))">
+                                <MudStack Row="true">
+                                    <MudIcon Icon="@Icons.Material.Filled.Search"></MudIcon>
+                                    <MudText>Åbn</MudText>
+                                </MudStack>
+                            </MudMenuItem>
+                            @if (context.Item.Status == ProjectStatus.CreatorFilming && context.Item.Deadline == DateTime.MinValue)
+                            {
+                                <MudMenuItem OnClick="@((e) => OpenStatusDialog(context.Item, ProjectStatus.CreatorFilming))">
+                                    <MudStack Row="true">
+                                        <MudIcon Icon="@Icons.Material.Filled.EditCalendar"></MudIcon>
+                                        <MudText>Ændr deadline</MudText>
+                                    </MudStack>
+                                </MudMenuItem>
+                            }
+                            else if (context.Item.Status == ProjectStatus.CreatorFilming)
+                            {
+                                <MudMenuItem OnClick="@((e) => OpenStatusDialog(context.Item, ProjectStatus.Editing))">
+                                    <MudStack Row="true">
+                                        <MudIcon Icon="@Icons.Material.Filled.Check"></MudIcon>
+                                        <MudText>Aflever projekt</MudText>
+                                    </MudStack>
+                                </MudMenuItem>
+                            }
+                        </MudMenu>
+                    </CellTemplate>
+                </TemplateColumn>
+            </AuthorizeView>
+
+        </Columns>
+        <PagerContent>
+            <MudDataGridPager T="Project" PageSizeOptions="[100, 200, 300, 400, 500]" RowsPerPageString="Rækker per side:" />
+        </PagerContent>
+    </MudDataGrid>
 </AuthorizeView>
 
 @code {
@@ -329,6 +340,8 @@
     private bool _striped = true;
     private bool _stickyActions = true;
     private bool _groupBrand = false;
+
+    private bool showAll = true;
 
     private User? User;
 
