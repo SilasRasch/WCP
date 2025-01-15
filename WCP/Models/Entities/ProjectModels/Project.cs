@@ -32,7 +32,7 @@ namespace WCPShared.Models.Entities.ProjectModels
         #endregion
 
         #region Project
-
+        public List<CreatorParticipation> Participations { get; set; } = [];
         public List<Concept> Concepts { get; set; } = [];
 
         #endregion

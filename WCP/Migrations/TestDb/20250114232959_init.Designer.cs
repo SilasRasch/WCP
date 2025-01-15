@@ -12,15 +12,15 @@ using WCPShared.Models;
 namespace WCPShared.Migrations.TestDb
 {
     [DbContext(typeof(TestDbContext))]
-    [Migration("20241111144817_ttypes")]
-    partial class ttypes
+    [Migration("20250114232959_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.10")
+                .HasAnnotation("ProductVersion", "9.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -40,19 +40,19 @@ namespace WCPShared.Migrations.TestDb
                     b.ToTable("CreatorLanguage");
                 });
 
-            modelBuilder.Entity("OrderStaticTemplate", b =>
+            modelBuilder.Entity("StaticConceptStaticTemplate", b =>
                 {
-                    b.Property<int>("OrdersId")
+                    b.Property<int>("ConceptsId")
                         .HasColumnType("int");
 
                     b.Property<int>("StaticTemplatesId")
                         .HasColumnType("int");
 
-                    b.HasKey("OrdersId", "StaticTemplatesId");
+                    b.HasKey("ConceptsId", "StaticTemplatesId");
 
                     b.HasIndex("StaticTemplatesId");
 
-                    b.ToTable("OrderStaticTemplate");
+                    b.ToTable("StaticConceptStaticTemplate");
                 });
 
             modelBuilder.Entity("WCPShared.Models.Entities.Brand", b =>
@@ -81,13 +81,53 @@ namespace WCPShared.Migrations.TestDb
                     b.ToTable("Brands");
                 });
 
+            modelBuilder.Entity("WCPShared.Models.Entities.ChatMessage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("FromId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("Read")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("Sent")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ToId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FromId");
+
+                    b.HasIndex("ToId");
+
+                    b.ToTable("Chats");
+                });
+
             modelBuilder.Entity("WCPShared.Models.Entities.CreatorParticipation", b =>
                 {
-                    b.Property<int>("OrderId")
+                    b.Property<int>("ProjectId")
                         .HasColumnType("int");
 
                     b.Property<int>("CreatorId")
                         .HasColumnType("int");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("HasBeenPaid")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("HasDelivered")
                         .HasColumnType("bit");
@@ -95,206 +135,47 @@ namespace WCPShared.Migrations.TestDb
                     b.Property<float>("Salary")
                         .HasColumnType("real");
 
-                    b.HasKey("OrderId", "CreatorId");
+                    b.Property<int>("ShipmentId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ProjectId", "CreatorId");
 
                     b.HasIndex("CreatorId");
 
                     b.ToTable("CreatorParticipations");
                 });
 
-            modelBuilder.Entity("WCPShared.Models.Entities.Financial.Balance", b =>
+            modelBuilder.Entity("WCPShared.Models.Entities.Feedback", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("AccountId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("Available")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime>("LastUpdated")
-                        .HasColumnType("datetime2");
-
-                    b.Property<decimal>("Pending")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("Underway")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Balances");
-                });
-
-            modelBuilder.Entity("WCPShared.Models.Entities.Financial.Transaction", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("BalanceId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("CompletedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("TransactionType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BalanceId");
-
-                    b.ToTable("Transactions");
-                });
-
-            modelBuilder.Entity("WCPShared.Models.Entities.Order", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("BrandId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("ContentCount")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("ContentLength")
-                        .HasColumnType("int");
 
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Delivery")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("DeliveryDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("DeliveryTimeFrom")
+                    b.Property<int>("ProjectId")
                         .HasColumnType("int");
 
-                    b.Property<int>("DeliveryTimeTo")
+                    b.Property<int>("Score")
                         .HasColumnType("int");
 
-                    b.Property<int?>("EditorId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Email")
+                    b.Property<string>("Text")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool?>("ExtraCreator")
-                        .HasColumnType("bit");
-
-                    b.Property<int?>("ExtraHook")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ExtraNotes")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("FocusPoints")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Format")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Ideas")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("InternalNotes")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Other")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Phone")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Platforms")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<double>("Price")
-                        .HasColumnType("float");
-
-                    b.Property<string>("Products")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ProjectName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ProjectType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("RelevantFiles")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Scripts")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("Updated")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("VideographerId")
+                    b.Property<int>("UserId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BrandId");
+                    b.HasIndex("ProjectId");
 
-                    b.HasIndex("EditorId");
+                    b.HasIndex("UserId");
 
-                    b.HasIndex("VideographerId");
-
-                    b.ToTable("Orders");
+                    b.ToTable("Feedbacks");
                 });
 
             modelBuilder.Entity("WCPShared.Models.Entities.Organization", b =>
@@ -328,6 +209,150 @@ namespace WCPShared.Migrations.TestDb
                     b.HasIndex("LanguageId");
 
                     b.ToTable("Organizations");
+                });
+
+            modelBuilder.Entity("WCPShared.Models.Entities.Product", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BrandId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Features")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FocusPoints")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("HowToUse")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ImgUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Link")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Pains")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("Value")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BrandId");
+
+                    b.ToTable("Products");
+                });
+
+            modelBuilder.Entity("WCPShared.Models.Entities.ProjectModels.Concepts.Concept", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Amount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Formats")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Platforms")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProjectId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("ProjectId");
+
+                    b.ToTable("Concepts");
+
+                    b.HasDiscriminator<int>("Type");
+
+                    b.UseTphMappingStrategy();
+                });
+
+            modelBuilder.Entity("WCPShared.Models.Entities.ProjectModels.Project", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BrandId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("Deadline")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Files")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("InternalNotes")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("Price")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("Updated")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BrandId");
+
+                    b.ToTable("Projects");
                 });
 
             modelBuilder.Entity("WCPShared.Models.Entities.StaticTemplate", b =>
@@ -389,6 +414,10 @@ namespace WCPShared.Migrations.TestDb
                     b.Property<int>("OrganizationId")
                         .HasColumnType("int");
 
+                    b.Property<string>("StripeSubscriptionId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -413,9 +442,6 @@ namespace WCPShared.Migrations.TestDb
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("BalanceId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime?>("DateOfBirth")
                         .HasColumnType("datetime2");
 
@@ -427,10 +453,15 @@ namespace WCPShared.Migrations.TestDb
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("PriceEstimate")
-                        .HasColumnType("int");
+                    b.Property<string>("PriceEstimate")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("StripeAccountId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("StripeAccountType")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -438,12 +469,14 @@ namespace WCPShared.Migrations.TestDb
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Tags")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("BalanceId");
 
                     b.HasIndex("UserId");
 
@@ -457,6 +490,18 @@ namespace WCPShared.Migrations.TestDb
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("IsoCountryCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("IsoLanguageCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -540,6 +585,68 @@ namespace WCPShared.Migrations.TestDb
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("WCPShared.Models.Entities.ProjectModels.Concepts.CreatorConcept", b =>
+                {
+                    b.HasBaseType("WCPShared.Models.Entities.ProjectModels.Concepts.Concept");
+
+                    b.Property<int>("CreativesPerCreator")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CreatorAge")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CreatorBudget")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("CreatorCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CreatorGender")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("CreatorKeepsProduct")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("CreatorLanguageId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Tags")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasIndex("CreatorLanguageId");
+                });
+
+            modelBuilder.Entity("WCPShared.Models.Entities.ProjectModels.Concepts.StaticConcept", b =>
+                {
+                    b.HasBaseType("WCPShared.Models.Entities.ProjectModels.Concepts.Concept");
+
+                    b.HasDiscriminator().HasValue(1);
+                });
+
+            modelBuilder.Entity("WCPShared.Models.Entities.ProjectModels.Concepts.PhotoConcept", b =>
+                {
+                    b.HasBaseType("WCPShared.Models.Entities.ProjectModels.Concepts.CreatorConcept");
+
+                    b.HasDiscriminator().HasValue(2);
+                });
+
+            modelBuilder.Entity("WCPShared.Models.Entities.ProjectModels.Concepts.UgcConcept", b =>
+                {
+                    b.HasBaseType("WCPShared.Models.Entities.ProjectModels.Concepts.CreatorConcept");
+
+                    b.Property<int>("ExtraHooks")
+                        .HasColumnType("int");
+
+                    b.Property<int>("LengthInSeconds")
+                        .HasColumnType("int");
+
+                    b.HasDiscriminator().HasValue(0);
+                });
+
             modelBuilder.Entity("CreatorLanguage", b =>
                 {
                     b.HasOne("WCPShared.Models.Entities.UserModels.Language", null)
@@ -555,11 +662,11 @@ namespace WCPShared.Migrations.TestDb
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("OrderStaticTemplate", b =>
+            modelBuilder.Entity("StaticConceptStaticTemplate", b =>
                 {
-                    b.HasOne("WCPShared.Models.Entities.Order", null)
+                    b.HasOne("WCPShared.Models.Entities.ProjectModels.Concepts.StaticConcept", null)
                         .WithMany()
-                        .HasForeignKey("OrdersId")
+                        .HasForeignKey("ConceptsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -581,6 +688,25 @@ namespace WCPShared.Migrations.TestDb
                     b.Navigation("Organization");
                 });
 
+            modelBuilder.Entity("WCPShared.Models.Entities.ChatMessage", b =>
+                {
+                    b.HasOne("WCPShared.Models.Entities.UserModels.User", "From")
+                        .WithMany()
+                        .HasForeignKey("FromId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("WCPShared.Models.Entities.UserModels.User", "To")
+                        .WithMany()
+                        .HasForeignKey("ToId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("From");
+
+                    b.Navigation("To");
+                });
+
             modelBuilder.Entity("WCPShared.Models.Entities.CreatorParticipation", b =>
                 {
                     b.HasOne("WCPShared.Models.Entities.UserModels.Creator", "Creator")
@@ -589,49 +715,34 @@ namespace WCPShared.Migrations.TestDb
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("WCPShared.Models.Entities.Order", "Order")
+                    b.HasOne("WCPShared.Models.Entities.ProjectModels.Project", "Project")
                         .WithMany("Participations")
-                        .HasForeignKey("OrderId")
+                        .HasForeignKey("ProjectId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Creator");
 
-                    b.Navigation("Order");
+                    b.Navigation("Project");
                 });
 
-            modelBuilder.Entity("WCPShared.Models.Entities.Financial.Transaction", b =>
+            modelBuilder.Entity("WCPShared.Models.Entities.Feedback", b =>
                 {
-                    b.HasOne("WCPShared.Models.Entities.Financial.Balance", "Balance")
-                        .WithMany("Transactions")
-                        .HasForeignKey("BalanceId")
+                    b.HasOne("WCPShared.Models.Entities.ProjectModels.Project", "Project")
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Balance");
-                });
-
-            modelBuilder.Entity("WCPShared.Models.Entities.Order", b =>
-                {
-                    b.HasOne("WCPShared.Models.Entities.Brand", "Brand")
-                        .WithMany("Orders")
-                        .HasForeignKey("BrandId")
+                    b.HasOne("WCPShared.Models.Entities.UserModels.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("WCPShared.Models.Entities.UserModels.Creator", "Editor")
-                        .WithMany()
-                        .HasForeignKey("EditorId");
+                    b.Navigation("Project");
 
-                    b.HasOne("WCPShared.Models.Entities.UserModels.Creator", "Videographer")
-                        .WithMany()
-                        .HasForeignKey("VideographerId");
-
-                    b.Navigation("Brand");
-
-                    b.Navigation("Editor");
-
-                    b.Navigation("Videographer");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("WCPShared.Models.Entities.Organization", b =>
@@ -643,6 +754,47 @@ namespace WCPShared.Migrations.TestDb
                         .IsRequired();
 
                     b.Navigation("Language");
+                });
+
+            modelBuilder.Entity("WCPShared.Models.Entities.Product", b =>
+                {
+                    b.HasOne("WCPShared.Models.Entities.Brand", "Brand")
+                        .WithMany("Products")
+                        .HasForeignKey("BrandId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Brand");
+                });
+
+            modelBuilder.Entity("WCPShared.Models.Entities.ProjectModels.Concepts.Concept", b =>
+                {
+                    b.HasOne("WCPShared.Models.Entities.Product", "Product")
+                        .WithMany("Concepts")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("WCPShared.Models.Entities.ProjectModels.Project", "Project")
+                        .WithMany("Concepts")
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("Project");
+                });
+
+            modelBuilder.Entity("WCPShared.Models.Entities.ProjectModels.Project", b =>
+                {
+                    b.HasOne("WCPShared.Models.Entities.Brand", "Brand")
+                        .WithMany("Projects")
+                        .HasForeignKey("BrandId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Brand");
                 });
 
             modelBuilder.Entity("WCPShared.Models.Entities.Subscription", b =>
@@ -658,19 +810,11 @@ namespace WCPShared.Migrations.TestDb
 
             modelBuilder.Entity("WCPShared.Models.Entities.UserModels.Creator", b =>
                 {
-                    b.HasOne("WCPShared.Models.Entities.Financial.Balance", "Balance")
-                        .WithMany()
-                        .HasForeignKey("BalanceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("WCPShared.Models.Entities.UserModels.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Balance");
 
                     b.Navigation("User");
                 });
@@ -692,19 +836,22 @@ namespace WCPShared.Migrations.TestDb
                     b.Navigation("Organization");
                 });
 
+            modelBuilder.Entity("WCPShared.Models.Entities.ProjectModels.Concepts.CreatorConcept", b =>
+                {
+                    b.HasOne("WCPShared.Models.Entities.UserModels.Language", "CreatorLanguage")
+                        .WithMany()
+                        .HasForeignKey("CreatorLanguageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CreatorLanguage");
+                });
+
             modelBuilder.Entity("WCPShared.Models.Entities.Brand", b =>
                 {
-                    b.Navigation("Orders");
-                });
+                    b.Navigation("Products");
 
-            modelBuilder.Entity("WCPShared.Models.Entities.Financial.Balance", b =>
-                {
-                    b.Navigation("Transactions");
-                });
-
-            modelBuilder.Entity("WCPShared.Models.Entities.Order", b =>
-                {
-                    b.Navigation("Participations");
+                    b.Navigation("Projects");
                 });
 
             modelBuilder.Entity("WCPShared.Models.Entities.Organization", b =>
@@ -713,6 +860,18 @@ namespace WCPShared.Migrations.TestDb
 
                     b.Navigation("Subscription")
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("WCPShared.Models.Entities.Product", b =>
+                {
+                    b.Navigation("Concepts");
+                });
+
+            modelBuilder.Entity("WCPShared.Models.Entities.ProjectModels.Project", b =>
+                {
+                    b.Navigation("Concepts");
+
+                    b.Navigation("Participations");
                 });
 
             modelBuilder.Entity("WCPShared.Models.Entities.UserModels.Creator", b =>

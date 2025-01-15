@@ -52,11 +52,11 @@ namespace WCPShared.Extensions
             }
             else
             {
-                services.AddDbContextFactory<TestDbContext>(options =>
-                {
-                    options.EnableSensitiveDataLogging();
-                    options.UseSqlServer(Secrets.GetConnectionString(config));
-                });
+                //services.AddDbContextFactory<TestDbContext>(options =>
+                //{
+                //    options.EnableSensitiveDataLogging();
+                //    options.UseSqlServer(Secrets.GetConnectionString(config));
+                //});
 
                 services.AddDbContext<IWcpDbContext, TestDbContext>(options =>
                 {
@@ -64,7 +64,7 @@ namespace WCPShared.Extensions
                     options.UseSqlServer(Secrets.GetConnectionString(config));
                 });
 
-                services.AddSingleton<IWcpDbContextFactory, TestDbContextFactory>();
+                //services.AddSingleton<IWcpDbContextFactory, TestDbContextFactory>();
             }
 
             return services;

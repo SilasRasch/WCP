@@ -3,7 +3,9 @@
 @using WCPShared.Interfaces
 @using WCPShared.Models.Entities.UserModels
 
-<MudNavLink Style="max-width: fit-content" IconColor="Color.Success" Href="/payout" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AttachMoney">@(Balance.Amount / 100) @Balance.Currency.ToUpper()</MudNavLink>
+<MudStack Justify="Justify.Center" Class="border-2 p-2 px-4 h-[40px] rounded-lg">
+    <a href="/payout">Balance: <span class="font-semibold">@Balance.Currency.ToUpper() @(Balance.Amount / 100)</span> </a>
+</MudStack>
 
 @code {
     [Parameter]

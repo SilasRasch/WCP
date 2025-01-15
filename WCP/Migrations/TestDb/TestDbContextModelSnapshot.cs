@@ -17,7 +17,7 @@ namespace WCPShared.Migrations.TestDb
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.10")
+                .HasAnnotation("ProductVersion", "9.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -319,11 +319,6 @@ namespace WCPShared.Migrations.TestDb
                     b.Property<DateTime>("Deadline")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasMaxLength(21)
-                        .HasColumnType("nvarchar(21)");
-
                     b.Property<string>("Files")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -355,10 +350,6 @@ namespace WCPShared.Migrations.TestDb
                     b.HasIndex("BrandId");
 
                     b.ToTable("Projects");
-
-                    b.HasDiscriminator().HasValue("Project");
-
-                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("WCPShared.Models.Entities.StaticTemplate", b =>
@@ -633,43 +624,6 @@ namespace WCPShared.Migrations.TestDb
                     b.HasDiscriminator().HasValue(1);
                 });
 
-            modelBuilder.Entity("WCPShared.Models.Entities.ProjectModels.CreatorProject", b =>
-                {
-                    b.HasBaseType("WCPShared.Models.Entities.ProjectModels.Project");
-
-                    b.Property<int>("CreativesPerCreator")
-                        .HasColumnType("int");
-
-                    b.Property<string>("CreatorAge")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CreatorBudget")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("CreatorCount")
-                        .HasColumnType("int");
-
-                    b.Property<string>("CreatorGender")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("CreatorKeepsProduct")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("CreatorLanguageId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Tags")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasIndex("CreatorLanguageId");
-
-                    b.HasDiscriminator().HasValue("CreatorProject");
-                });
-
             modelBuilder.Entity("WCPShared.Models.Entities.ProjectModels.Concepts.PhotoConcept", b =>
                 {
                     b.HasBaseType("WCPShared.Models.Entities.ProjectModels.Concepts.CreatorConcept");
@@ -758,7 +712,7 @@ namespace WCPShared.Migrations.TestDb
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("WCPShared.Models.Entities.ProjectModels.CreatorProject", "Project")
+                    b.HasOne("WCPShared.Models.Entities.ProjectModels.Project", "Project")
                         .WithMany("Participations")
                         .HasForeignKey("ProjectId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -890,17 +844,6 @@ namespace WCPShared.Migrations.TestDb
                     b.Navigation("CreatorLanguage");
                 });
 
-            modelBuilder.Entity("WCPShared.Models.Entities.ProjectModels.CreatorProject", b =>
-                {
-                    b.HasOne("WCPShared.Models.Entities.UserModels.Language", "CreatorLanguage")
-                        .WithMany()
-                        .HasForeignKey("CreatorLanguageId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("CreatorLanguage");
-                });
-
             modelBuilder.Entity("WCPShared.Models.Entities.Brand", b =>
                 {
                     b.Navigation("Products");
@@ -924,14 +867,11 @@ namespace WCPShared.Migrations.TestDb
             modelBuilder.Entity("WCPShared.Models.Entities.ProjectModels.Project", b =>
                 {
                     b.Navigation("Concepts");
-                });
 
-            modelBuilder.Entity("WCPShared.Models.Entities.UserModels.Creator", b =>
-                {
                     b.Navigation("Participations");
                 });
 
-            modelBuilder.Entity("WCPShared.Models.Entities.ProjectModels.CreatorProject", b =>
+            modelBuilder.Entity("WCPShared.Models.Entities.UserModels.Creator", b =>
                 {
                     b.Navigation("Participations");
                 });

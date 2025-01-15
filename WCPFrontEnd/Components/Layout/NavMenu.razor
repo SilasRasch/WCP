@@ -1,4 +1,4 @@
-﻿<MudNavMenu>
+﻿<MudNavMenu Class="h-full">
     <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Hjem</MudNavLink>
     
     <AuthorizeView Policy="IsNotSubscribed">
@@ -27,4 +27,6 @@
         <MudNavLink Href="statics" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Draw">Statics</MudNavLink>
         <MudNavLink Href="feedback" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Star">Feedback</MudNavLink>
     </AuthorizeView>
+
+    <MudNavLink Class="absolute left-0 bottom-[66px]" Href="profile" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Settings">Indstillinger</MudNavLink>
 </MudNavMenu>
