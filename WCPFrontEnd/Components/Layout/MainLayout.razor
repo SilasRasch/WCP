@@ -45,12 +45,12 @@
                             <MudStack Spacing="4" Row Justify="Justify.Center" AlignItems="AlignItems.Center">
                                 <MudStack Row Spacing="2">
                                     <MudAvatar Color="Color.Primary">
-                                        WC
+                                        @UserName.First()
                                     </MudAvatar>
 
                                     <MudStack Spacing="0">
-                                        <MudText>Silas H. Rasch</MudText>
-                                        <MudText Typo="Typo.caption">Admin</MudText>
+                                        <MudText>@UserName</MudText>
+                                        <MudText Typo="Typo.caption">@Role</MudText>
                                     </MudStack>
                                 </MudStack>
 
@@ -137,6 +137,9 @@
     private MudThemeProvider? _mudThemeProvider;
     private BalanceAmount Balance;
 
+    private string UserName = string.Empty;
+    private string Role = string.Empty;
+
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
@@ -159,6 +162,10 @@
                 Tooltip = 9999       // Default is 1600
             }
         };
+
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        Role = authState.User.FindFirst(c => c.Type == ClaimTypes.Role)?.Value;
+        UserName = authState.User.FindFirst(c => c.Type == ClaimTypes.Name)?.Value;
 
         await GetBalance();
     }
