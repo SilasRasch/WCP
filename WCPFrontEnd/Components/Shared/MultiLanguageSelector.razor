@@ -4,7 +4,7 @@
 @using WCPShared.Models.Entities.UserModels
 @inject IWcpDbContext Context
 
-<MudSelect @bind-SelectedValues="Value" ToStringFunc="(e) => ProjectHelper.LanguageToStringFlag(e)" Delimiter=" " MultiSelection="true" 
+<MudSelect @bind-SelectedValues="Value" Variant="@Variant" ToStringFunc="(e) => ProjectHelper.LanguageToStringFlag(e)" Delimiter=" " MultiSelection="true" 
 Label="@Label" Placeholder="@Placeholder" Required="@Required" RequiredError="Dette felt er påkrævet" AnchorOrigin="Origin.BottomCenter">
     @foreach (var lang in Languages)
     {
@@ -31,6 +31,9 @@ Label="@Label" Placeholder="@Placeholder" Required="@Required" RequiredError="De
 
     [Parameter]
     public bool Required { get; set; } = false;
+
+    [Parameter]
+    public Variant Variant { get; set; } = Variant.Text;
 
     [Parameter]
     public string Label { get; set; } = "Sprog";

@@ -36,7 +36,49 @@
     <NotAuthorized>
         @if (Customer is not null && Customer.Organization is not null && Customer.Organization.Subscription is not null)
         {
-            <MudPaper Class="pa-4 mud-secondary">
+            <MudPaper Elevation="0" Class="border border-border">
+                <MudStack Row AlignItems="AlignItems.Center" Class="pa-4">
+                    <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Class=" h-[48px] aspect-square rounded-xl bg-primary-50 flex">
+                        <MudIcon Size="Size.Large" Icon="@Icons.Material.Filled.AttachMoney" Class="text-primary-500"></MudIcon>
+                    </MudStack>
+                    <span class="text-[16px] font-semibold">@Customer.Organization.Subscription.Type Plan</span>
+                </MudStack>
+
+                <MudDivider />
+
+                <MudStack Class="pa-4">
+                    <div>
+                        @if (StripeSubscription is not null)
+                        {
+                            <span class="text-[30px] font-semibold text-text-700">@StripeSubscription.Currency.ToUpper() @StripeSubscription.Items.Data.Sum(x => x.Price.UnitAmount * x.Quantity / 100)</span>
+                            <span class="text-[14px] text-neutral-600">per måned</span>
+                        }
+                        else
+                        {
+                            <MudProgressCircular Class="mt-2" Color="Color.Default" Size="Size.Small" Indeterminate="true" />
+                        }
+                    </div>
+
+                    <span class="text-neutral-600">Abonnementet inkluderer følgende:</span>
+
+                    <MudStack Spacing="0">
+                        <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
+                            <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.PlayCircleOutline" />
+                            <span class="text-neutral-600">Antal videoer: <strong>@Subscription.NumberOfVideos</strong></span>
+                        </MudStack>
+                        <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
+                            <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.BusinessCenter" />
+                            <span class="text-neutral-600">Antal brands: <strong>@Subscription.NumberOfBrands</strong></span>
+                        </MudStack>
+                        <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
+                            <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.People" />
+                            <span class="text-neutral-600">Antal brugere: <strong>@Subscription.NumberOfUsers</strong></span>
+                        </MudStack>
+                    </MudStack>
+                </MudStack>
+            </MudPaper>
+
+            @* <MudPaper Class="pa-4 mud-secondary">
                 <MudStack Spacing="0">
                     <MudText><strong>@Customer.Organization.Subscription.Type</strong></MudText>
                 </MudStack>
@@ -66,7 +108,7 @@
                         </MudStack>
                     </MudStack>
                 </MudStack>
-            </MudPaper>
+            </MudPaper> *@
 
             @* List of subscriptions *@
             @* @foreach (var sub in StripeSubscriptions)
@@ -95,7 +137,7 @@
             @* Single subscription *@
             @if (StripeSubscription is not null) 
             {
-                <MudPaper Class="pa-4 mud-secondary mt-2">
+                @* <MudPaper Class="pa-4 mud-secondary mt-2">
                     <MudText><strong>Ordrelinjer</strong></MudText>
 
                      @foreach (var item in StripeSubscription.Items.Data) 
@@ -104,28 +146,24 @@
                             <MudText><strong>@(item.Quantity)x</strong> @item.Price.Product.Name - <strong>@($"{(item.Price.UnitAmount * item.Quantity / 100.0):F2}") @item.Price.Currency.ToUpper()</strong></MudText>
                         </MudStack>
                      }
-                </MudPaper>
+                </MudPaper> *@
 
                 @if (StripeSubscription.CancelAtPeriodEnd)
                 {
-                    <MudPaper Class="pa-4 mt-2 mud-primary">
-                        <MudText Class="text-white">Abonnementet er opsagt og udløber @(StripeSubscription.CurrentPeriodEnd.ToString("dd-MM-yyyy")) @* - Klik <strong>her</strong> for at genoptage *@</MudText>
-                    </MudPaper>
+                    <div class="pa-4 mt-2 bg-primary-100 border-primary-500 border rounded">
+                        <span class="text-primary-600 text-[16px]">Abonnementet er opsagt og udløber @(StripeSubscription.CurrentPeriodEnd.ToString("dd-MM-yyyy")) @* - Klik <strong>her</strong> for at genoptage *@</span>
+                    </div>
                 }
                 else
                 {
-                    <MudPaper Class="pa-4 mt-2 mud-secondary">
-                        <MudText>Næste betaling @(StripeSubscription.CurrentPeriodEnd.ToString("dd-MM-yyyy"))</MudText>
-                    </MudPaper>
+                    <div class="pa-4 mt-2 bg-warning-100 border-warning-600 border rounded">
+                        <span class="text-warning-700 text-[16px]">Næste betaling @(StripeSubscription.CurrentPeriodEnd.ToString("dd-MM-yyyy"))</span>
+                    </div>
 
-                    <MudButton StartIcon="@Icons.Material.Filled.Cancel" Class="mt-2" Color="Color.Primary" Variant="Variant.Filled" OnClick="@(() => StripeService.CancelSubscriptionAtEndOfBillingCycle(Customer.Organization.Subscription.StripeSubscriptionId))">
-                        Opsig abonnement
-                    </MudButton>
+                    <MudStack Class="w-full" AlignItems="AlignItems.End">
+                        <button Class="mt-2 rounded bg-red-500 text-white p-2 px-4 w-fit hover:bg-red-400 duration-200" onclick="@(() => StripeService.CancelSubscriptionAtEndOfBillingCycle(Customer.Organization.Subscription.StripeSubscriptionId))">Opsig abonnement</button>
+                    </MudStack>
                 }
-            }
-            else 
-            {
-                <MudProgressCircular Class="mt-2" Color="Color.Primary" Indeterminate />
             }
         }
         else

@@ -14,15 +14,14 @@
 @inject NavigationManager Navigation
 @inject ISnackbar Snackbar
 
-<MudStack Class="w-full h-full" AlignItems="AlignItems.Center">
-    <MudPaper Class="pa-4" MinHeight="86vh" MaxWidth="72rem">
-        <MudForm @ref="form" @bind-IsValid="_success" @bind-Errors="_errors">
-            <MudStepper @bind-ActiveIndex="_index">
-                <ChildContent>
-                    <MudStep Title="Grundinformation">
-                        <MudText Class="text-center" Typo="Typo.h6">Grundinformation</MudText>
-                        <MudStack Spacing="4">
-                            <MudSelect @bind-Value="Project.Brand" ToStringFunc="BrandToStringFunc" Clearable Label="Brand" Required="true" RequiredError="Dette felt er påkrævet" AnchorOrigin="Origin.BottomCenter" Placeholder="Vælg et brand">
+<MudPaper Class="pa-4 border-border border" Elevation="0" MinHeight="86vh">
+    <MudForm @ref="form" @bind-IsValid="_success" @bind-Errors="_errors">
+        <MudStepper @bind-ActiveIndex="_index">
+            <ChildContent>
+                <MudStep Title="Grundinformation">
+                    <MudStack Spacing="2">
+                        <MudStack Row>
+                            <MudSelect @bind-Value="Project.Brand" Variant="Variant.Outlined" ToStringFunc="BrandToStringFunc" Clearable Label="Brand" Required="true" RequiredError="Dette felt er påkrævet" AnchorOrigin="Origin.BottomCenter" Placeholder="Vælg et brand">
                                 @foreach (Brand brand in Brands)
                                 {
                                     <MudSelectItem Value="@brand">
@@ -34,72 +33,67 @@
                                 }
                             </MudSelect>
 
-                            <MudTextField @bind-Value="@Project.Name" Label="Projektnavn" Placeholder="Noget deskriptivt" Required RequiredError="Dette felt er påkrævet" />
+                            <MudTextField @bind-Value="@Project.Name" Variant="Variant.Outlined" Label="Projektnavn" Placeholder="Noget deskriptivt" Required RequiredError="Dette felt er påkrævet" />
+                        </MudStack>
 
-                            <MudStack Spacing="1" Justify="Justify.FlexStart">
-                                <MudText>Projekttype*</MudText>
-                                <MudStack Row Justify="Justify.SpaceEvenly" Spacing="8">
-                                    <MudButton OnClick="() => ChangeProjectType(ProjectType.UGC)" Variant="Variant.Filled" Class="@(Project.Type == ProjectType.UGC ? "w-[200px] h-[200px] mud-secondary brightness-90" : "w-[200px] h-[200px] mud-secondary")">
-                                        <MudStack Class="w-full h-full mud-text-primary" Spacing="0" Justify="Justify.Center" AlignItems="AlignItems.Center">
-                                            <MudIcon Size="Size.Large" Icon="@Icons.Material.Filled.OndemandVideo" />
-                                            <MudText Typo="Typo.h6">UGC</MudText>
-                                        </MudStack>
-                                    </MudButton>
-                                    <MudButton OnClick="() => ChangeProjectType(ProjectType.Statics)" Variant="Variant.Filled" Class="@(Project.Type == ProjectType.Statics ? "w-[200px] h-[200px] mud-secondary brightness-90" : "w-[200px] h-[200px] mud-secondary")">
-                                        <MudStack Class="w-full h-full mud-text-primary" Spacing="0" Justify="Justify.Center" AlignItems="AlignItems.Center">
-                                            <MudIcon Size="Size.Large" Icon="@Icons.Material.Filled.PhotoAlbum" />
-                                            <MudText Typo="Typo.h6">Statics</MudText>
-                                        </MudStack>
-                                    </MudButton>
-                                    <MudButton OnClick="() => ChangeProjectType(ProjectType.Photos)" Variant="Variant.Filled" Class="@(Project.Type == ProjectType.Photos ? "w-[200px] h-[200px] mud-secondary brightness-90" : "w-[200px] h-[200px] mud-secondary")">
-                                        <MudStack Class="w-full h-full mud-text-primary" Spacing="0" Justify="Justify.Center" AlignItems="AlignItems.Center">
-                                            <MudIcon Size="Size.Large" Icon="@Icons.Material.Filled.Photo" />
-                                            <MudText Typo="Typo.h6">Fotos</MudText>
-                                        </MudStack>
-                                    </MudButton>
-                                </MudStack>
+                        <MudStack Spacing="1">
+                            <MudText>Type</MudText>
+                            <MudStack Row>
+                                <span @onclick="() => ChangeProjectType(ProjectType.UGC)" class="@(Project.Type == ProjectType.UGC ? "w-[200px] h-[200px] bg-primary-50 border-2 border-primary-500 rounded cursor-pointer" : "w-[200px] h-[200px] border-2 border-border rounded cursor-pointer")">
+                                    <MudStack Class="w-full h-full" Spacing="2" Justify="Justify.Center" AlignItems="AlignItems.Center">
+                                        <MudIcon Size="Size.Large" Class="@(Project.Type == ProjectType.UGC ? "text-primary-500" : "")" Icon="@Icons.Material.Filled.OndemandVideo" />
+                                        <MudText Typo="Typo.h6" Class="@(Project.Type == ProjectType.UGC ? "text-primary-500" : "")">UGC</MudText>
+                                    </MudStack>
+                                </span>
+                                <span @onclick="() => ChangeProjectType(ProjectType.Statics)" class="@(Project.Type == ProjectType.Statics ? "w-[200px] h-[200px] bg-primary-50 border-2 border-primary-500 rounded cursor-pointer" : "w-[200px] h-[200px] border-2 border-border rounded cursor-pointer")">
+                                    <MudStack Class="w-full h-full mud-text-primary" Spacing="2" Justify="Justify.Center" AlignItems="AlignItems.Center">
+                                        <MudIcon Size="Size.Large" Class="@(Project.Type == ProjectType.Statics ? "text-primary-500" : "")" Icon="@Icons.Material.Filled.PhotoAlbum" />
+                                        <MudText Typo="Typo.h6" Class="@(Project.Type == ProjectType.Statics ? "text-primary-500" : "")">Statics</MudText>
+                                    </MudStack>
+                                </span>
+                                <span @onclick="() => ChangeProjectType(ProjectType.Photos)" class="@(Project.Type == ProjectType.Photos ? "w-[200px] h-[200px] bg-primary-50 border-2 border-primary-500 rounded cursor-pointer" : "w-[200px] h-[200px] border-2 border-border rounded cursor-pointer")">
+                                    <MudStack Class="w-full h-full mud-text-primary" Spacing="2" Justify="Justify.Center" AlignItems="AlignItems.Center">
+                                        <MudIcon Size="Size.Large" Class="@(Project.Type == ProjectType.Photos ? "text-primary-500" : "")" Icon="@Icons.Material.Filled.Photo" />
+                                        <MudText Typo="Typo.h6" Class="@(Project.Type == ProjectType.Photos ? "text-primary-500" : "")">Fotos</MudText>
+                                    </MudStack>
+                                </span>
                             </MudStack>
                         </MudStack>
-                    </MudStep>
+                    </MudStack>
+                </MudStep>
 
-                    <MudStep Title="Koncepter">
-                        <MudText Class="text-center" Typo="Typo.h6">Koncepter</MudText>
+                <MudStep Title="Koncepter">
+                    <MudStack>
+                        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="AddConcept" Class="w-fit rounded-lg">Tilføj koncept</MudButton>
+                        <ProjectConceptPage @bind-Project="Project" Context="Context" />
+                    </MudStack>
+                </MudStep>
 
-                        
+                <MudStep Title="Overblik">
+                    <ProjectDetails Project="Project" />
+                </MudStep>
+            </ChildContent>
 
-                        <MudStack>
-                            @* TODO: make collapsible *@
-                            <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="AddConcept" Class="w-fit">Tilføj koncept</MudButton>
-                            <ProjectConceptPage @bind-Project="Project" Context="Context" />
-                        </MudStack>
-                    </MudStep>
+            <ActionContent Context="stepper">
+                @if (!_completed)
+                {
+                    <MudIconButton OnClick="@(() => stepper.PreviousStepAsync())" Icon="@Icons.Material.Filled.ArrowBack" Color="Color.Primary" Disabled="@(_index <= 0)" />
+                    <MudSpacer />
 
-                    <MudStep Title="Overblik">
-                        <ProjectOverviewStep @bind-Project="Project" />
-                    </MudStep>
-                </ChildContent>
-
-                <ActionContent Context="stepper">
-                    @if (!_completed)
+                    @if (stepper.Steps[_index] == stepper.Steps.Last())
                     {
-                        <MudIconButton OnClick="@(() => stepper.PreviousStepAsync())" Icon="@Icons.Material.Filled.ArrowBack" Color="Color.Primary" Disabled="@(_index <= 0)" />
-                        <MudSpacer />
-
-                        @if (stepper.Steps[_index] == stepper.Steps.Last())
-                        {
-                            @* <MudButton Disabled="@(!_success)" OnClick="SendProject" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Done" Color="Color.Primary">Send</MudButton> *@
-                            <MudButton OnClick="SendProject" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Done" Color="Color.Primary">Send</MudButton>
-                        }
-                        else
-                        {
-                            <MudIconButton OnClick="@(() => stepper.NextStepAsync())" Icon="@Icons.Material.Filled.ArrowForward" Color="Color.Primary" />
-                        }
+                        @* <MudButton Disabled="@(!_success)" OnClick="SendProject" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Done" Color="Color.Primary">Send</MudButton> *@
+                        <MudButton OnClick="SendProject" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Done" Color="Color.Primary">Send</MudButton>
                     }
-                </ActionContent>
-            </MudStepper>
-        </MudForm>
-    </MudPaper>
-</MudStack>
+                    else
+                    {
+                        <MudIconButton OnClick="@(() => stepper.NextStepAsync())" Icon="@Icons.Material.Filled.ArrowForward" Color="Color.Primary" />
+                    }
+                }
+            </ActionContent>
+        </MudStepper>
+    </MudForm>
+</MudPaper>
 
 
 @code {

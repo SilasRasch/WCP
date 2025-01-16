@@ -33,14 +33,23 @@
         </div>
     </NotAuthorized>   
     <Authorized>
-        <MudStack Spacing="0" Class="mb-3">
-            <MudText Typo="Typo.h6">Hej, <b>@context.User.Identity!.Name.Split(' ').First()</b>! 👋</MudText>
-            <MudText Class="text-neutral-400">Få et omfattende overblik over dine projekter</MudText>
-        </MudStack>
+        <MudStack Row AlignItems="AlignItems.Center" Class="mb-2">
+            <MudStack Spacing="0" Class="mb-3">
+                <MudText Typo="Typo.h6">Hej, <b>@context.User.Identity!.Name.Split(' ').First()</b>! 👋</MudText>
+                <MudText Class="text-neutral-400">Få et omfattende overblik over dine projekter</MudText>
+            </MudStack>
 
-        @* <MudPaper Class="pa-4 mb-2">
-            <MudText Typo="Typo.body1">Hej, <b>@context.User.Identity!.Name.Split(' ').First()</b>! 👋</MudText>
-        </MudPaper> *@
+            <MudSpacer />
+
+            <AuthorizeView Context="userBtns" Roles="Bruger">
+                <MudStack Row Spacing="1" Class="h-fit">
+                    <MudButton Variant="Variant.Outlined" Class="rounded-lg !normal-case">Se rapport</MudButton>
+                    <MudButton Variant="Variant.Outlined" Class="rounded-lg !normal-case" StartIcon="@Icons.Material.Filled.FilterList">Filtre</MudButton>
+                    <MudButton DropShadow="false" Href="/new-project" Variant="Variant.Filled" Class="rounded-lg !normal-case" Color="Color.Primary" StartIcon="@Icons.Material.Filled.AddCircleOutline">Opret ny</MudButton>
+                </MudStack>
+            </AuthorizeView>
+        </MudStack>
+        
     </Authorized>
 </AuthorizeView>
 
@@ -54,7 +63,8 @@
     </Authorized>
 </AuthorizeView>
 
-<MudStack>
+<AuthorizeView Context="AuthTop">
+    <MudStack>
     @if (data is not null)
     {
         <MudStack Row>
@@ -68,7 +78,7 @@
 
                         <MudStack Row Class="w-full" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
                             <MudText Typo="Typo.h5">@projects.Count()</MudText>
-                            <span class="text-xs font-semibold bg-success-50 text-green-500 h-fit rounded-lg py-[2px] px-[6px] text-white">+3,2%</span>
+                            <span class="text-xs font-semibold bg-success-50 text-success-400 h-fit rounded-lg py-[2px] px-[6px]">+3,2%</span>
                         </MudStack>
                     </MudStack>
                 </MudStack>
@@ -84,7 +94,7 @@
 
                         <MudStack Row Class="w-full" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
                             <MudText Typo="Typo.h5">@AverageFeedbackScore</MudText>
-                            <span class="text-xs font-semibold bg-success-50 text-green-500 h-fit rounded-lg py-[2px] px-[6px] text-white">+3,2%</span>
+                            <span class="text-xs font-semibold bg-success-50 text-success-400 h-fit rounded-lg py-[2px] px-[6px]">+3,2%</span>
                         </MudStack>
                     </MudStack>
                 </MudStack>
@@ -108,7 +118,7 @@
                             <AuthorizeView Roles="Creator">
                                 <MudText Typo="Typo.h5">@projects.Where(x => x.Status == ProjectStatus.CreatorFilming).Count()</MudText>
                             </AuthorizeView>
-                            <span class="text-xs font-semibold bg-success-50 text-green-500 h-fit rounded-lg py-[2px] px-[6px] text-white">+3,2%</span>
+                            <span class="text-xs font-semibold bg-success-50 text-success-400 h-fit rounded-lg py-[2px] px-[6px]">+3,2%</span>
                         </MudStack>
                     </MudStack>
                 </MudStack>
@@ -124,7 +134,7 @@
 
                         <MudStack Row Class="w-full" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
                             <MudText Typo="Typo.h5">@projects.Sum(x => x.Concepts.Sum(c => c.Amount))</MudText>
-                            <span class="text-xs font-semibold bg-success-50 text-green-500 h-fit rounded-lg py-[2px] px-[6px] text-white">+3,2%</span>
+                            <span class="text-xs font-semibold bg-success-50 text-success-400 h-fit rounded-lg py-[2px] px-[6px]">+3,2%</span>
                         </MudStack>
                     </MudStack>
                 </MudStack>
@@ -139,107 +149,7 @@
                 <MudText Typo="Typo.h1">@projects.Where(x => x.Created.Month == DateTime.Now.AddMonths(-1).Month && x.Created.Year == DateTime.Now.Year).Count()</MudText>
             </MudPaper> *@
         </MudStack>
-        @* <AuthorizeView Roles="Admin">
-            <Authorized>
-                <MudStack Row StretchItems="StretchItems.All">
-                    <MudStack Spacing="0">
-                        <MudText Typo="Typo.h6">Creator deadlines i dag</MudText>
-                        <MudDataGrid Items="@projects.Where(x => x.Deadline.Date == DateTime.Now.Date && x.Status != ProjectStatus.Cancelled && x.Status < ProjectStatus.Feedback)">
-                            <Columns>
-                                <PropertyColumn Property="x => x.Name" Title="Navn" Sortable="false" />
-                                <PropertyColumn Context="prop" Property="x => x.Brand" Title="Brand" Sortable="false">
-                                    <CellTemplate>
-                                        <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
-                                            <MudText Typo="Typo.h6">@ProjectHelper.CountryStringToFlag(prop.Item.Brand.Organization.Language.IsoLanguageCode) </MudText>
-                                            @prop.Item.Brand.Name (@prop.Item.Brand.Organization.Name.Trim())
-                                        </MudStack>
-                                    </CellTemplate>
-                                </PropertyColumn>
-                                <TemplateColumn Context="entity" Title="Type" Sortable="false">
-                                    <CellTemplate>
-                                        @if (entity.Item is UgcProject)
-                                        {
-                                            <MudText>UGC</MudText>
-                                        }
-                                        else if (entity.Item is StaticProject)
-                                        {
-                                            <MudText>Statics</MudText>
-                                        }
-                                        else if (entity.Item is PhotoProject)
-                                        {
-                                            <MudText>Photos</MudText>
-                                        }
-                                    </CellTemplate>
-                                </TemplateColumn>
-                                <PropertyColumn Context="prop" Property="x => x.Deadline" Title="Deadline" Sortable="false">
-                                    <CellTemplate>
-                                        @prop.Item.Deadline.ToString("d")
-                                    </CellTemplate>
-                                </PropertyColumn>
-                                <PropertyColumn Context="prop" Property="x => x.Status" Title="Status" Sortable="false">
-                                    <CellTemplate>
-                                        <div class="@ProjectHelper.GetStatusColor(prop.Item.Status)">
-                                            @ProjectHelper.GetStatusString(prop.Item.Status)
-                                        </div>
-                                    </CellTemplate>
-                                </PropertyColumn>
-                            </Columns>
-                            <NoRecordsContent>
-                                <MudText>Der er ingen projekter, der forfalder i dag... 🤑</MudText>
-                            </NoRecordsContent>
-                        </MudDataGrid>
-                    </MudStack>
-                    <MudStack Spacing="0">
-                        <MudText Typo="Typo.h6">Afleveringer i dag</MudText>
-                        <MudDataGrid Items="@projects.Where(x => x.Deadline.AddDays(2).Date == DateTime.Now.Date && x.Status != ProjectStatus.Cancelled && x.Status < ProjectStatus.Feedback)">
-                            <Columns>
-                                <PropertyColumn Property="x => x.Name" Title="Navn" Sortable="false" />
-                                <PropertyColumn Context="prop" Property="x => x.Brand" Title="Brand" Sortable="false">
-                                    <CellTemplate>
-                                        <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
-                                            <MudText Typo="Typo.h6">@ProjectHelper.CountryStringToFlag(prop.Item.Brand.Organization.Language.IsoLanguageCode) </MudText>
-                                            @prop.Item.Brand.Name (@prop.Item.Brand.Organization.Name.Trim())
-                                        </MudStack>
-                                    </CellTemplate>
-                                </PropertyColumn>
-                                <TemplateColumn Context="entity" Title="Type" Sortable="false">
-                                    <CellTemplate>
-                                        @if (entity.Item is UgcProject)
-                                        {
-                                            <MudText>UGC</MudText>
-                                        }
-                                        else if (entity.Item is StaticProject)
-                                        {
-                                            <MudText>Statics</MudText>
-                                        }
-                                        else if (entity.Item is PhotoProject)
-                                        {
-                                            <MudText>Photos</MudText>
-                                        }
-                                    </CellTemplate>
-                                </TemplateColumn>
-                                <PropertyColumn Context="prop" Property="x => x.Deadline" Title="Deadline" Sortable="false">
-                                    <CellTemplate>
-                                        @prop.Item.Deadline.AddDays(2).ToString("d")
-                                    </CellTemplate>
-                                </PropertyColumn>
-                                <PropertyColumn Context="prop" Property="x => x.Status" Title="Status" Sortable="false">
-                                    <CellTemplate>
-                                        <div class="@ProjectHelper.GetStatusColor(prop.Item.Status)">
-                                            @ProjectHelper.GetStatusString(prop.Item.Status)
-                                        </div>
-                                    </CellTemplate>
-                                </PropertyColumn>
-                            </Columns>
-                            <NoRecordsContent>
-                                <MudText>Der er ingen projekter, der forfalder i dag... 💰</MudText>
-                            </NoRecordsContent>
-                        </MudDataGrid>
-                    </MudStack>
-                </MudStack>
-            </Authorized>
-        </AuthorizeView> *@
-
+        
         <MudGrid Spacing="3">
             <MudItem xs="3">
                 @if (data is not null)
@@ -350,6 +260,7 @@
         </MudPaper>
     }
 </MudStack>
+</AuthorizeView>
 
 @code {
     private List<Project> projects = [];

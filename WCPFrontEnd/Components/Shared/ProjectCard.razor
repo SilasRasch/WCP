@@ -3,7 +3,7 @@
 @using WCPShared.Models.Entities.UserModels
 @using WCPShared.Models.Enums
 
-<MudPaper Elevation="0" Class="border-[1px] border-border pa-4 w-fit max-w-[17em] min-w-[16em]">
+<MudPaper Elevation="0" Class="border-[1px] border-border pa-4 w-fit max-w-[18em] min-w-[16em]">
     <MudStack Spacing="3">
         <MudStack Spacing="0">
             <MudStack Row Justify="Justify.Center">
@@ -117,9 +117,7 @@
                 @* <MudIcon Icon="@Icons.Material.Filled.Timer" Class="text-[8px] text-violet-700"></MudIcon> *@
                 <span class="">@Project.Deadline.ToString("d")</span>
             </MudStack>
-            <MudStack Class="text-[14px] text-green-700 bg-green-300 px-2 rounded-xl w-fit border-2 border-green-400" Row Spacing="0" AlignItems="AlignItems.Center">
-                <span class="">@ProjectHelper.GetStatusString(Project.Status)</span>
-            </MudStack>
+            <span class="@ProjectHelper.GetStatusColor(Project.Status) + text-[14px]">@ProjectHelper.GetStatusString(Project.Status)</span>
         </MudStack>       
 
         <MudDivider />

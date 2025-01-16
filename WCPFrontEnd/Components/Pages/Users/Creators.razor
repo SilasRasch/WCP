@@ -14,154 +14,192 @@
 
 <PageTitle>Creators</PageTitle>
 
-<MudDataGrid T="Creator" SelectOnRowClick="@_selectable" MultiSelection="@_selectable" Items="@CreatorList.Reverse()" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter" Hideable="@_hidable" Striped="@_striped" Elevation="3"
-    ColumnResizeMode="@(_resizable ? ResizeMode.Column : ResizeMode.None)" DragDropColumnReordering="_movable" FilterCaseSensitivity="DataGridFilterCaseSensitivity.Ignore">
-    <ToolBarContent>
-        <MudStack Row="true" AlignItems="AlignItems.Center">
-            <MudText Typo="Typo.h6">Creators</MudText>
-            <MudIconButton Icon="@Icons.Material.Filled.Add" OnClick="ToggleAddDialog"></MudIconButton>
+
+<MudStack Spacing="3">
+    <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+        <MudStack Spacing="0">
+            <span class="text-[20px] font-semibold">Creators</span>
+            <span class="text-[16px] text-neutral-400">Find alle creators på denne side</span>
         </MudStack>
-        <MudSpacer />
-        <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
-            AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
-        <MudIconButton onclick="FetchCreators" Icon="@Icons.Material.Filled.Refresh" Class="hover:animate-spin-once"></MudIconButton>
-        <MudIconButton Icon="@Icons.Material.Filled.Settings" OnClick="ToggleOpenTableSettings" Class="hover:animate-spin-once"></MudIconButton>
-        <MudPopover Open="@_open" Fixed="true" Class="px-4 pt-4" AnchorOrigin="Origin.BottomRight">
-            <div class="d-flex flex-column">
-                <MudText>Tabel-indstillinger</MudText>
-                <MudDivider></MudDivider>
-                <MudSwitch @bind-Value="_selectable" Color="Color.Primary">Selectable</MudSwitch>
-                <MudDivider></MudDivider>
-                <MudSwitch @bind-Value="_resizable" Color="Color.Primary">Resizable</MudSwitch>
-                <MudDivider></MudDivider>
-                <MudSwitch @bind-Value="_movable" Color="Color.Primary">Movable</MudSwitch>
-                <MudDivider></MudDivider>
-                <MudSwitch @bind-Value="_hidable" Color="Color.Primary">Hidable</MudSwitch>
-                <MudDivider></MudDivider>
-                <MudSwitch @bind-Value="_striped" Color="Color.Primary">Zebra</MudSwitch>
-                <MudDivider></MudDivider>
-                <MudSwitch @bind-Value="_stickyActions" Color="Color.Primary">Sticky actions</MudSwitch>
-                <MudDivider></MudDivider>
 
-                <MudButton OnClick="@ToggleOpenTableSettings" Class="ml-auto mr-n3 mb-1" Color="Color.Error">Luk</MudButton>
-            </div>
-        </MudPopover>
-    </ToolBarContent>
-    <Columns>
-        @if (_selectable)
+        <MudStack Row Spacing="1">
+            <AuthorizeView Roles="Admin">
+                <MudIconButton OnClick="() => ListView = !ListView" Variant="Variant.Outlined" Class="rounded-lg" Icon="@Icons.Material.Filled.List" />
+            </AuthorizeView>
+            
+            <MudButton Variant="Variant.Outlined" Class="rounded-lg !normal-case" StartIcon="@Icons.Material.Filled.FilterList">Filtre</MudButton>
+            
+            <AuthorizeView Roles="Admin">
+                <MudButton OnClick="ToggleAddDialog" Variant="Variant.Filled" Class="rounded-lg !normal-case" Color="Color.Primary" StartIcon="@Icons.Material.Filled.AddCircleOutline">Opret ny</MudButton>
+            </AuthorizeView>
+            
+        </MudStack>
+    </MudStack>
+
+    @if (!ListView)
+    {
+
+    <MudGrid Spacing="3">
+        @foreach (Creator creator in CreatorList)
         {
-            <SelectColumn T="Creator" />
+            <MudItem>
+                <CreatorCard Creator="creator" />
+            </MudItem>
         }
+    </MudGrid>
+    } 
+    else 
+    {
+    <MudDataGrid T="Creator" SelectOnRowClick="@_selectable" MultiSelection="@_selectable" Items="@CreatorList.Reverse()" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter" Hideable="@_hidable" Striped="@_striped" Elevation="0"
+        ColumnResizeMode="@(_resizable ? ResizeMode.Column : ResizeMode.None)" DragDropColumnReordering="_movable" FilterCaseSensitivity="DataGridFilterCaseSensitivity.Ignore"
+        Class="border-border border">
+        <ToolBarContent>
+            <MudTextField Clearable @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
+                AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+            <MudSpacer />
+            
+            <MudIconButton onclick="FetchCreators" Icon="@Icons.Material.Filled.Refresh" Class="hover:animate-spin-once"></MudIconButton>
+            <MudIconButton Icon="@Icons.Material.Filled.Settings" OnClick="ToggleOpenTableSettings" Class="hover:animate-spin-once"></MudIconButton>
+            <MudPopover Open="@_open" Fixed="true" Class="px-4 pt-4" AnchorOrigin="Origin.BottomRight">
+                <div class="d-flex flex-column">
+                    <MudText>Tabel-indstillinger</MudText>
+                    <MudDivider></MudDivider>
+                    <MudSwitch @bind-Value="_selectable" Color="Color.Primary">Selectable</MudSwitch>
+                    <MudDivider></MudDivider>
+                    <MudSwitch @bind-Value="_resizable" Color="Color.Primary">Resizable</MudSwitch>
+                    <MudDivider></MudDivider>
+                    <MudSwitch @bind-Value="_movable" Color="Color.Primary">Movable</MudSwitch>
+                    <MudDivider></MudDivider>
+                    <MudSwitch @bind-Value="_hidable" Color="Color.Primary">Hidable</MudSwitch>
+                    <MudDivider></MudDivider>
+                    <MudSwitch @bind-Value="_striped" Color="Color.Primary">Zebra</MudSwitch>
+                    <MudDivider></MudDivider>
+                    <MudSwitch @bind-Value="_stickyActions" Color="Color.Primary">Sticky actions</MudSwitch>
+                    <MudDivider></MudDivider>
 
-        <PropertyColumn Property="x => x.Id" Title="Id">
-            <CellTemplate>
-                <div @onclick="() => ToggleEditDialog(context.Item)" class="flex justify-center rounded-full w-10 p-2 cursor-pointer bg-red-500 text-white">
-                    <MudText>@context.Item.Id</MudText>
+                    <MudButton OnClick="@ToggleOpenTableSettings" Class="ml-auto mr-n3 mb-1" Color="Color.Error">Luk</MudButton>
                 </div>
-            </CellTemplate>
-        </PropertyColumn>
+            </MudPopover>
+        </ToolBarContent>
+        <Columns>
+            @if (_selectable)
+            {
+                <SelectColumn T="Creator" />
+            }
 
-        <PropertyColumn Property="x => x.ImgURL" Title="Billede" Sortable="false" Filterable="false">
-            <CellTemplate>
-                @if (!String.IsNullOrEmpty(context.Item.ImgURL))
-                {
-                    <MudImage Src="@context.Item.ImgURL" Class="max-h-12 rounded-full" />
-                }
-                
-            </CellTemplate>
-        </PropertyColumn>
-
-        <PropertyColumn Property="x => x.User.Name" Title="Navn" />
-        <PropertyColumn Property="x => x.User.Email" Title="Email" />
-        <PropertyColumn Property="x => x.User.IsActive" Title="Aktivitet">
-            <CellTemplate>
-                <MudText Color="@(context.Item.User.IsActive ? Color.Success : Color.Error)">
-                    @(context.Item.User.IsActive ? "Aktiv" : "Inaktiv")
-                </MudText>
-            </CellTemplate>
-        </PropertyColumn>
-        <PropertyColumn Property="x => x.SubType" Title="Type" />
-        <PropertyColumn Property="x => x.Gender" Title="Køn">
-            <CellTemplate>
-                @if (!String.IsNullOrEmpty(context.Item.Gender))
-                {
-                    <MudText>@context.Item.Gender</MudText>
-                }
-            </CellTemplate>
-        </PropertyColumn>
-
-        <PropertyColumn Property="x => x.Address" Title="Adresse">
-            <CellTemplate>
-                @if (!String.IsNullOrEmpty(context.Item.Address))
-                {
-                    <MudText>@context.Item.Address</MudText>
-                }
-            </CellTemplate>
-        </PropertyColumn>
-
-        <PropertyColumn Property="x => x.DateOfBirth" Title="Fødselsdag">
-            <CellTemplate>
-                @if (context.Item.DateOfBirth is not null)
-                {
-                    <MudText>@context.Item.DateOfBirth.Value.ToString("dd-MM-yyyy") (@ProjectHelper.CalculateAge(context.Item.DateOfBirth.Value) år)</MudText>
-                }
-            </CellTemplate>
-        </PropertyColumn>
-
-        <PropertyColumn Property="x => x.Languages" Title="Sprog" Filterable="false" Sortable="false" >
-            <CellTemplate>
-                @if (context.Item.Languages is not null)
-                {
-                    <div class="flex justify-center gap-2">
-                        @foreach (Language lang in context.Item.Languages)
-                        {
-                            <MudText Typo="Typo.h5">
-                                @ProjectHelper.CountryStringToFlag(lang.IsoLanguageCode)
-                            </MudText>
-                        }
+            @* <PropertyColumn Property="x => x.Id" Title="Id">
+                <CellTemplate>
+                    <div @onclick="() => ToggleEditDialog(context.Item)" class="flex justify-center rounded-full w-10 p-2 cursor-pointer bg-red-500 text-white">
+                        <MudText>@context.Item.Id</MudText>
                     </div>
-                }
-            </CellTemplate>
-        </PropertyColumn>
+                </CellTemplate>
+            </PropertyColumn> *@
 
-        <PropertyColumn Property="x => x.User.Phone" Title="Telefon">
-            <CellTemplate>
-                @if (!String.IsNullOrEmpty(context.Item.User.Phone))
-                {
-                    <MudText>@context.Item.User.Phone</MudText>
-                }
-            </CellTemplate>
-        </PropertyColumn>
+            <PropertyColumn Property="x => x.ImgURL" Title="Billede" Sortable="false" Filterable="false">
+                <CellTemplate>
+                    @if (!String.IsNullOrEmpty(context.Item.ImgURL))
+                    {
+                        <MudImage Src="@context.Item.ImgURL" Class="max-h-12 rounded-full" />
+                    }
 
-        <TemplateColumn Title="Actions" StickyRight="@_stickyActions">
-            <CellTemplate>
-                <MudMenu Icon="@Icons.Material.Filled.MoreHoriz" AriaLabel="Åben aktionsmenu" AnchorOrigin="Origin.BottomCenter">
-                    <MudMenuItem OnClick="(() => ToggleEditDialog(context.Item))">
-                        <MudStack Row="true">
-                            <MudIcon Icon="@Icons.Material.Filled.Edit"></MudIcon>
-                            <MudText>Rediger</MudText>
-                        </MudStack>
-                    </MudMenuItem>
-                    <MudMenuItem OnClick="@((e) => ToggleUserActivation(context.Item))">
-                        <MudStack Row="true">
-                            <MudIcon Icon="@(context.Item.User.IsActive ? Icons.Material.Filled.Close : Icons.Material.Filled.Check)" Color="@(context.Item.User.IsActive ? Color.Error : Color.Success)"></MudIcon>
-                            <MudText>@(context.Item.User.IsActive ? "Deaktivér" : "Aktivér")</MudText>
-                        </MudStack>
-                    </MudMenuItem>
-                    <MudMenuItem OnClick="() => ToggleDeleteModal(context.Item.UserId)">
-                        <MudStack Row="true">
-                            <MudIcon Icon="@Icons.Material.Filled.Delete" Color="Color.Error"></MudIcon>
-                            <MudText>Slet</MudText>
-                        </MudStack>
-                    </MudMenuItem>
-                </MudMenu>
-            </CellTemplate>
-        </TemplateColumn>
-    </Columns>
-    <PagerContent>
-        <MudDataGridPager T="Creator" PageSizeOptions="[100, 200, 300, 400, 500]" RowsPerPageString="Rækker per side:" />
-    </PagerContent>
-</MudDataGrid>
+                </CellTemplate>
+            </PropertyColumn>
+
+            <PropertyColumn Property="x => x.User.Name" Title="Navn" />
+            <PropertyColumn Property="x => x.User.Email" Title="Email" />
+            <PropertyColumn Property="x => x.User.IsActive" Title="Aktivitet">
+                <CellTemplate>
+                    <MudText Color="@(context.Item.User.IsActive ? Color.Success : Color.Error)">
+                        @(context.Item.User.IsActive ? "Aktiv" : "Inaktiv")
+                    </MudText>
+                </CellTemplate>
+            </PropertyColumn>
+            <PropertyColumn Property="x => x.SubType" Title="Type" />
+            <PropertyColumn Property="x => x.Gender" Title="Køn">
+                <CellTemplate>
+                    @if (!String.IsNullOrEmpty(context.Item.Gender))
+                    {
+                        <MudText>@context.Item.Gender</MudText>
+                    }
+                </CellTemplate>
+            </PropertyColumn>
+
+            <PropertyColumn Property="x => x.Address" Title="Adresse">
+                <CellTemplate>
+                    @if (!String.IsNullOrEmpty(context.Item.Address))
+                    {
+                        <MudText>@context.Item.Address</MudText>
+                    }
+                </CellTemplate>
+            </PropertyColumn>
+
+            <PropertyColumn Property="x => x.DateOfBirth" Title="Fødselsdag">
+                <CellTemplate>
+                    @if (context.Item.DateOfBirth is not null)
+                    {
+                        <MudText>@context.Item.DateOfBirth.Value.ToString("dd-MM-yyyy") (@ProjectHelper.CalculateAge(context.Item.DateOfBirth.Value) år)</MudText>
+                    }
+                </CellTemplate>
+            </PropertyColumn>
+
+            <PropertyColumn Property="x => x.Languages" Title="Sprog" Filterable="false" Sortable="false">
+                <CellTemplate>
+                    @if (context.Item.Languages is not null)
+                    {
+                        <div class="flex justify-center gap-2">
+                            @foreach (Language lang in context.Item.Languages)
+                            {
+                                <MudText Typo="Typo.h5">
+                                    @ProjectHelper.CountryStringToFlag(lang.IsoLanguageCode)
+                                </MudText>
+                            }
+                        </div>
+                    }
+                </CellTemplate>
+            </PropertyColumn>
+
+            <PropertyColumn Property="x => x.User.Phone" Title="Telefon">
+                <CellTemplate>
+                    @if (!String.IsNullOrEmpty(context.Item.User.Phone))
+                    {
+                        <MudText>@context.Item.User.Phone</MudText>
+                    }
+                </CellTemplate>
+            </PropertyColumn>
+
+            <TemplateColumn Title="Actions" StickyRight="@_stickyActions">
+                <CellTemplate>
+                    <MudMenu Icon="@Icons.Material.Filled.MoreHoriz" AriaLabel="Åben aktionsmenu" AnchorOrigin="Origin.BottomCenter">
+                        <MudMenuItem OnClick="(() => ToggleEditDialog(context.Item))">
+                            <MudStack Row="true">
+                                <MudIcon Icon="@Icons.Material.Filled.Edit"></MudIcon>
+                                <MudText>Rediger</MudText>
+                            </MudStack>
+                        </MudMenuItem>
+                        <MudMenuItem OnClick="@((e) => ToggleUserActivation(context.Item))">
+                            <MudStack Row="true">
+                                <MudIcon Icon="@(context.Item.User.IsActive ? Icons.Material.Filled.Close : Icons.Material.Filled.Check)" Color="@(context.Item.User.IsActive ? Color.Error : Color.Success)"></MudIcon>
+                                <MudText>@(context.Item.User.IsActive ? "Deaktivér" : "Aktivér")</MudText>
+                            </MudStack>
+                        </MudMenuItem>
+                        <MudMenuItem OnClick="() => ToggleDeleteModal(context.Item.UserId)">
+                            <MudStack Row="true">
+                                <MudIcon Icon="@Icons.Material.Filled.Delete" Color="Color.Error"></MudIcon>
+                                <MudText>Slet</MudText>
+                            </MudStack>
+                        </MudMenuItem>
+                    </MudMenu>
+                </CellTemplate>
+            </TemplateColumn>
+        </Columns>
+        <PagerContent>
+            <MudDataGridPager T="Creator" PageSizeOptions="[100, 200, 300, 400, 500]" RowsPerPageString="Rækker per side:" />
+        </PagerContent>
+    </MudDataGrid>
+}
+</MudStack>
+
+    
 
 @code {
     // Open table settings
@@ -172,6 +210,8 @@
     private bool _hidable = false;
     private bool _striped = true;
     private bool _stickyActions = true;
+
+    private bool ListView = false;
 
     private IEnumerable<Creator> CreatorList = new List<Creator>();
     private string? _searchString;
@@ -198,6 +238,7 @@
         CreatorList = await Context.Creators
             .Include(x => x.User)
             .Include(x => x.Languages)
+            .Include(x => x.Participations)
             .ToListAsync();
     }
 

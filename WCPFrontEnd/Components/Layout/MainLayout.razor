@@ -23,7 +23,7 @@
 <MudLayout Class="mud-background">
     <MudAppBar Elevation="0" Class="border-b-[1px] border-border">
         <a href="/" class="mt-2">
-            <MudImage Src="https://wcp.dk/assets/webcontent-B3eGu9V2.png" Class="max-h-[64px]" Alt="WebContent logo" />
+            <MudImage Src="https://wc-files.se-sto-1.linodeobjects.com/media/wc-logo.png" Height="28" Class="max-h-[28px]" Alt="WebContent logo" />
         </a>
         <MudSpacer />
         <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.Center" Spacing="1">
@@ -59,7 +59,7 @@
 
                         </ActivatorContent>
                         <ChildContent>
-                            <MudMenuItem Href="profile" Icon="@Icons.Material.Filled.Settings">Indstillinger</MudMenuItem>
+                            <MudMenuItem Href="settings" Icon="@Icons.Material.Filled.Settings">Indstillinger</MudMenuItem>
                             <MudMenuItem Href="profile" Icon="@Icons.Material.Filled.Support">Support</MudMenuItem>
                             <MudMenuItem Href="profile" Icon="@Icons.Material.Filled.HelpOutline">FAQ</MudMenuItem>
                             @* <MudMenuItem Icon="@(DarkLightModeButtonIcon)" IconColor="Color.Warning" OnClick="@DarkModeToggle">Skift tema</MudMenuItem> *@
@@ -86,7 +86,7 @@
             </Authorized>
         </AuthorizeView>
 
-        <MudMainContent Class="mud-height-full mt-16 pa-6">
+        <MudMainContent Class="mud-height-full mt-16 px-6 py-3">
             <AuthorizeView Roles="Bruger">
                 <Authorized>
                     <AuthorizeView Context="subscribed" Policy="IsNotSubscribed">

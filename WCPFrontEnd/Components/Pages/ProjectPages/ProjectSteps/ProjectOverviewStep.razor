@@ -4,8 +4,6 @@
 @using WCPShared.Models.Entities.ProjectModels.Concepts
 @using WCPShared.Models.Enums
 
-<MudText Class="text-center" Typo="Typo.h6">Overblik</MudText>
-
 <MudStack Spacing="2" Class="mt-4">
     <MudPaper Elevation="1" Class="mud-secondary">
         <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Row @onclick="() => BaseSectionExpanded = !BaseSectionExpanded" Class="w-full cursor-pointer p-2">
@@ -35,13 +33,6 @@
 
     @foreach (var concept in Project.Concepts) 
     {
-        @* <MudPaper Elevation="1" Class="mud-secondary">
-            <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Row @onclick="() => ProductSectionExpanded = !ProductSectionExpanded" Class="w-full cursor-pointer p-2">
-                <MudText Typo="Typo.h6">Koncept</MudText>
-                <MudSpacer />
-                <MudIcon Icon="@(ProductSectionExpanded ? Icons.Material.Filled.ArrowDropUp : Icons.Material.Filled.ArrowDropDown)" />
-            </MudStack>
-        </MudPaper> *@
 
         <MudStack Spacing="4">
             <MudStack Justify="Justify.FlexStart" Spacing="0">

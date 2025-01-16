@@ -40,6 +40,7 @@ builder.Services.AddScoped<S3Service>();
 StripeConfiguration.ApiKey = Secrets.GetStripeApiKey(builder.Configuration);
 builder.Services.AddScoped<StripeService>();
 builder.Services.AddScoped<ProjectService>();
+builder.Services.AddScoped<CustomDialogService>();
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>

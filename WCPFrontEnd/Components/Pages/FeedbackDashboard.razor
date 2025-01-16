@@ -14,24 +14,29 @@
 @attribute [Authorize(Roles = "Admin")]
 
 <MudStack>
+    <MudStack Spacing="0">
+        <span class="text-[20px] font-semibold">Feedback</span>
+        <span class="text-[16px] text-neutral-400">Følg med i brugernes feedback herfra</span>
+    </MudStack>
+
     <MudStack Row>
-        <MudPaper Class="pa-4" Width="25%">
+        <MudPaper Elevation="0" Class="pa-4 border border-border" Width="25%">
             <MudText Typo="Typo.caption">Gennemsnitlig score</MudText>
             <MudText Typo="Typo.h1">@AverageFeedbackScore</MudText>
         </MudPaper>
-        <MudPaper Class="pa-4" Width="25%">
+        <MudPaper Elevation="0" Class="pa-4 border border-border" Width="25%">
             <MudText Typo="Typo.caption">Gennemsnitlig score denne måned</MudText>
             <MudText Typo="Typo.h1">@AverageFeedbackScoreThisMonth</MudText>
         </MudPaper>
-        <MudPaper Class="pa-4" Width="25%">
+        <MudPaper Elevation="0" Class="pa-4 border border-border" Width="25%">
             <MudText Typo="Typo.caption">Gennemsnitlig score sidste måned</MudText>
             <MudText Typo="Typo.h1">@AverageFeedbackScoreLastMonth</MudText>
         </MudPaper>
-        <MudPaper Class="pa-4" Width="25%">
+        <MudPaper Elevation="0" Class="pa-4 border border-border" Width="25%">
             <MudText Typo="Typo.caption">Antal anmeldelser denne måned</MudText>
             <MudText Typo="Typo.h1">@FeedbackCountThisMonth</MudText>
         </MudPaper>
-        <MudPaper Class="pa-4" Width="25%">
+        <MudPaper Elevation="0" Class="pa-4 border border-border" Width="25%">
             <MudText Typo="Typo.caption">Antal anmeldelser sidste måned</MudText>
             <MudText Typo="Typo.h1">@FeedbackCountLastMonth</MudText>
         </MudPaper>

@@ -1,0 +1,181 @@
+﻿@using WCPFrontEnd.Components.Pages.ProductRelated.Dialoges
+@using WCPFrontEnd.Services
+@using WCPShared.Models.Entities
+@using WCPShared.Models.Entities.ProjectModels
+@using WCPShared.Models.Enums
+@inject IDialogService DialogService
+
+<MudStack Row Class="mt-4" Spacing="3">
+    <MudStack Class="grow" Spacing="3">
+        <MudPaper Class="border-[1px] border-border" Elevation="0">
+            <div class="bg-neutral-50 rounded-t">
+                <MudText Class="pa-4">Grund detajler</MudText>
+                <MudDivider Class="border-border" />
+            </div>
+
+            <MudGrid Class="pa-4">
+                <MudItem Class="" xs="4">
+                    <MudStack Spacing="0">
+                        <MudText Class="text-gray-500">Brand</MudText>
+
+                        @if (Project.Brand is not null) 
+                        {
+                            <MudText>@Project.Brand.Name</MudText>
+                        }
+                    </MudStack>
+                </MudItem>
+                <MudItem Class="" xs="4">
+                    <MudStack Spacing="0">
+                        <MudText Class="text-gray-500">Projektnavn</MudText>
+                        <MudText>@Project.Name</MudText>
+                    </MudStack>
+                </MudItem>
+                <MudItem Class="" xs="4">
+                    <MudStack Spacing="0">
+                        <MudText Class="text-gray-500">Type</MudText>
+                        <MudText>@Project.Type</MudText>
+                    </MudStack>
+                </MudItem>
+                <MudItem Class="" xs="4">
+                    <MudStack Spacing="0">
+                        <MudText Class="text-gray-500">Oprettet</MudText>
+                        <MudText>@Project.Created.ToString("d")</MudText>
+                    </MudStack>
+                </MudItem>
+                <MudItem Class="" xs="4">
+                    <MudStack Spacing="0">
+                        <MudText Class="text-gray-500">Status</MudText>
+                        <MudText>@Project.Status</MudText>
+                    </MudStack>
+                </MudItem>
+            </MudGrid>
+        </MudPaper>
+
+        <MudPaper Class="border-[1px] border-border" Elevation="0">
+            <div class="bg-neutral-50 rounded-t">
+                <MudText Class="pa-4">Projekt detajler</MudText>
+                <MudDivider Class="border-border" />
+            </div>
+
+            <MudGrid Class="pa-4">
+                <MudItem Class="" xs="6">
+                    <MudStack Spacing="0">
+                        <MudText Class="text-gray-500">Pris</MudText>
+                        <MudText>@(Project.Price != 0 ? $"{Project.Price} kr" : "Ingen pris endnu")</MudText>
+                    </MudStack>
+                </MudItem>
+                <MudItem Class="" xs="6">
+                    <MudStack Spacing="0">
+                        <MudText Class="text-gray-500">Deadline</MudText>
+                        <MudText>@Project.Deadline.ToString("d")</MudText>
+                    </MudStack>
+                </MudItem>
+
+                <MudItem Class="" xs="6">
+                    <MudStack Spacing="0">
+                        <MudText Class="text-gray-500">Koncepter</MudText>
+                        <MudText>@Project.Concepts.Count() stk (@Project.Concepts.Sum(x => x.Amount) videoer)</MudText>
+                    </MudStack>
+                </MudItem>
+
+                @if (Project.Type == ProjectType.UGC || Project.Type == ProjectType.Photos)
+                {
+                    <MudItem Class="" xs="6">
+                        <MudStack Spacing="0">
+                            <MudText Class="text-gray-500">Creators</MudText>
+                            <MudAvatarGroup Max="5" Spacing="3">
+                                @foreach (var participation in Project.Participations)
+                                {
+                                    <div class="flex flex-col justify-center items-center">
+                                        <MudAvatar Color="Color.Primary">
+                                            @if (!string.IsNullOrEmpty(participation.Creator.ImgURL))
+                                            {
+                                                <MudImage Src="@participation.Creator.ImgURL" />
+                                            }
+                                            else
+                                            {
+                                                @participation.Creator.User.Name.First()
+                                            }
+                                        </MudAvatar>
+                                    </div>
+                                }
+
+                                @if (Project.Participations.Count == 0)
+                                {
+                                    <MudText Class="p-2 cursor-pointer">-</MudText>
+                                }
+                            </MudAvatarGroup>
+                        </MudStack>
+                    </MudItem>
+                }
+
+            </MudGrid>
+        </MudPaper>
+
+        <MudPaper Class="border-[1px] border-border" Elevation="0">
+            <div class="bg-neutral-50 rounded-t">
+                <MudText Class="pa-4">Koncepter</MudText>
+                <MudDivider Class="border-gray-300" />
+            </div>
+
+            <MudGrid Class="pa-4">
+                @foreach (var concept in Project.Concepts)
+                {
+                    <MudItem Class="" xs="6">
+                        <MudPaper Class="border-[1px] border-border" Elevation="0">
+                            <div class="rounded-t">
+                                <MudStack Row Justify="Justify.Center">
+                                    <MudText Class="pa-4">@concept.Product.Name</MudText>
+                                    <MudSpacer />
+                                    <span @onclick="() => OpenProductDialog(concept.Product)" class="cursor-pointer text-[16px] pa-4 text-blue-500 hover:underline">Detaljer</span>
+                                </MudStack>
+
+                                <MudDivider Class="border-border" />
+                            </div>
+
+                            <MudGrid Class="pa-4">
+                                <MudItem xs="6">
+                                    <MudStack Spacing="0">
+                                        <MudText Class="text-gray-500">Antal</MudText>
+                                        <MudText>@concept.Amount videoer</MudText>
+                                    </MudStack>
+                                </MudItem>
+                                <MudItem xs="6">
+                                    <MudStack Spacing="0">
+                                        <MudText Class="text-gray-500">Platforme</MudText>
+                                        <MudText>@concept.Platforms</MudText>
+                                    </MudStack>
+                                </MudItem>
+                                <MudItem xs="12">
+                                    <MudStack Spacing="0">
+                                        <MudText Class="text-gray-500">Formater</MudText>
+                                        <MudText>@String.Join(", ", concept.Formats)</MudText>
+                                    </MudStack>
+                                </MudItem>
+                            </MudGrid>
+                        </MudPaper>
+                    </MudItem>
+                }
+            </MudGrid>
+        </MudPaper>
+    </MudStack>
+</MudStack>
+   
+
+@code {
+    [Parameter]
+    public Project Project { get; set; }
+
+    public async Task OpenProductDialog(Product product)
+    {
+        var parameters = new DialogParameters<ProductDetailDialog>
+        {
+            { x => x.Product, product }
+        };
+
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+
+        var dialog = await DialogService.ShowAsync<ProductDetailDialog>("Product details", parameters, options);
+        var result = await dialog.Result;
+    }
+}

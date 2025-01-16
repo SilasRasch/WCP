@@ -1,5 +1,5 @@
 ﻿<MudNavMenu Class="h-full">
-    <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Hjem</MudNavLink>
+    <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Dashboard</MudNavLink>
     
     <AuthorizeView Policy="IsNotSubscribed">
         <MudNavLink Href="subscription" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AttachMoney">Køb adgang</MudNavLink>
@@ -9,15 +9,12 @@
         <MudNavLink Href="new-project" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Add">Opret nyt projekt</MudNavLink>
     </AuthorizeView>
 
-    <AuthorizeView Roles="Admin,Bruger,Creator">
+    <AuthorizeView>
         <MudNavLink Href="projects" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Assignment">Projekter</MudNavLink>
     </AuthorizeView>
 
-    <AuthorizeView Roles="Bruger,Admin">
-        <MudNavLink Href="brands" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.BusinessCenter">Brands</MudNavLink>
-    </AuthorizeView>
-
     <AuthorizeView Roles="Admin">
+        <MudNavLink Href="brands" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.BusinessCenter">Brands</MudNavLink>
         <MudNavGroup Icon="@Icons.Material.Filled.People" Title="Brugerelateret" Expanded="true" HideExpandIcon="true">
             <MudNavLink Href="users" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Person">Brugere</MudNavLink>
             <MudNavLink Href="creators" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.VideoCameraFront">Creators</MudNavLink>
@@ -28,5 +25,9 @@
         <MudNavLink Href="feedback" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Star">Feedback</MudNavLink>
     </AuthorizeView>
 
-    <MudNavLink Class="absolute left-0 bottom-[66px]" Href="profile" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Settings">Indstillinger</MudNavLink>
+    <AuthorizeView Roles="Creator">
+        <MudNavLink Href="payout" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.CreditCard">Udbetaling</MudNavLink>
+    </AuthorizeView>
+
+    <MudNavLink Class="absolute left-0 bottom-[66px]" Href="settings" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Settings">Indstillinger</MudNavLink>
 </MudNavMenu>

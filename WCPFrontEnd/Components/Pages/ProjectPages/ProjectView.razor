@@ -2,6 +2,7 @@
 
 @using Microsoft.EntityFrameworkCore
 @using WCPAdminFrontEnd.Services
+@using WCPFrontEnd.Components.Pages.ProductRelated.Dialoges
 @using WCPFrontEnd.Components.Pages.ProjectPages.FileSystem
 @using WCPFrontEnd.Services
 @using WCPShared.Interfaces
@@ -11,6 +12,8 @@
 @using WCPShared.Models.Enums
 @inject ProjectService ProjectService
 @inject IWcpDbContext Context
+@inject IDialogService DialogService
+@inject CustomDialogService CustomDialogService
 @attribute [Authorize]
 
 @if (Project is not null) 
@@ -24,9 +27,9 @@
 
         <AuthorizeView Roles="Admin">
             <MudMenu Icon="@Icons.Material.Filled.MoreHoriz" AnchorOrigin="Origin.BottomRight">
-                <MudMenuItem Icon="@Icons.Material.Filled.Edit">Redigér projekt</MudMenuItem>
-                <MudMenuItem Icon="@Icons.Material.Filled.ChangeCircle">Skift status</MudMenuItem>
-                <MudMenuItem IconColor="Color.Error" Icon="@Icons.Material.Filled.Delete">Annuller projekt</MudMenuItem>
+                <MudMenuItem Disabled Icon="@Icons.Material.Filled.Edit">Redigér projekt</MudMenuItem>
+                <MudMenuItem OnClick="() => CustomDialogService.OpenStatusDialogAdmin(Project)" Icon="@Icons.Material.Filled.ChangeCircle">Skift status</MudMenuItem>
+                <MudMenuItem Disabled IconColor="Color.Error" Icon="@Icons.Material.Filled.Delete">Annuller projekt</MudMenuItem>
             </MudMenu>
         </AuthorizeView>
     </MudStack>
@@ -149,7 +152,7 @@
                                     <MudStack Row Justify="Justify.Center">
                                         <MudText Class="pa-4">@concept.Product.Name</MudText>
                                         <MudSpacer />
-                                        <MudText Class="pa-4" Color="Color.Info">Detaljer</MudText>
+                                        <span @onclick="() => OpenProductDialog(concept.Product)" class="cursor-pointer text-[16px] pa-4 text-blue-500 hover:underline">Detaljer</span>
                                     </MudStack>
 
                                     <MudDivider Class="border-border" />
@@ -215,7 +218,7 @@
                             </MudStack>
 
                         </MudStack>
-                        <MudButton Color="Color.Primary" Variant="Variant.Filled" Class="rounded-lg" EndIcon="@Icons.Material.Filled.ArrowOutward">Aflever nu</MudButton>
+                        <MudButton DropShadow="false" Color="Color.Primary" Variant="Variant.Filled" Class="rounded-lg" EndIcon="@Icons.Material.Filled.ArrowOutward">Aflever nu</MudButton>
                     </MudStack>
                 </MudPaper>
 
@@ -295,5 +298,18 @@ else
     private void ToggleEditable()
     {
         _editable = !_editable;
+    }
+
+    public async Task OpenProductDialog(Product product)
+    {
+        var parameters = new DialogParameters<ProductDetailDialog>
+        {
+            { x => x.Product, product }
+        };
+
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+
+        var dialog = await DialogService.ShowAsync<ProductDetailDialog>("Product details", parameters, options);
+        var result = await dialog.Result;
     }
 }
