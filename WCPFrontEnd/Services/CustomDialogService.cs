@@ -1,5 +1,7 @@
 ﻿using MudBlazor;
+using WCPFrontEnd.Components.Pages.ProductRelated.Dialoges;
 using WCPFrontEnd.Components.Pages.ProjectPages.Dialoges;
+using WCPShared.Models.Entities;
 using WCPShared.Models.Entities.ProjectModels;
 using WCPShared.Models.Enums;
 
@@ -38,6 +40,19 @@ namespace WCPFrontEnd.Services
             var options = new DialogOptions { CloseOnEscapeKey = true };
 
             var dialog = await DialogService.ShowAsync<ProjectStatusDialog_Admin>("Status admin dialog", parameters, options);
+            var result = await dialog.Result;
+        }
+
+        public async Task OpenProductDialog(Product product)
+        {
+            var parameters = new DialogParameters<ProductDetailDialog>
+            {
+                { x => x.Product, product }
+            };
+
+            var options = new DialogOptions { CloseOnEscapeKey = true };
+
+            var dialog = await DialogService.ShowAsync<ProductDetailDialog>("Product details", parameters, options);
             var result = await dialog.Result;
         }
     }
