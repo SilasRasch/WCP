@@ -1,0 +1,119 @@
+﻿@using Microsoft.EntityFrameworkCore
+@using WCPAdminFrontEnd.Services
+@using WCPFrontEnd.Services
+@using WCPShared.Interfaces
+@using WCPShared.Interfaces.Auth
+@using WCPShared.Models.DTOs
+@using WCPShared.Models.Entities.AuthModels
+@using WCPShared.Models.Entities.UserModels
+@using WCPShared.Models.Enums
+@using WCPShared.Models.Views
+@using WCPShared.Models.Entities
+@using WCPShared.Services
+@using WCPShared.Services.EntityFramework
+@inject UserService UserService
+@inject CreatorService CreatorService
+@inject IWcpDbContext Context
+
+<MudDialog>
+    <TitleContent>
+        <MudStack Row Spacing="2" AlignItems="AlignItems.Center" Class="w-full">
+            <MudAvatar Color="Color.Primary" Size="Size.Large" Class="mb-2">
+                @if (!string.IsNullOrEmpty(Creator.ImgURL))
+                {
+                    <MudImage Src="@Creator.ImgURL" />
+                }
+                else
+                {
+                    @Creator.User.Name.First()
+                }
+            </MudAvatar>
+
+            <MudStack Spacing="0">
+                <span class="font-medium text-[18px]">@Creator.User.Name</span>
+                <span class="text-neutral-400 text-[15px]">@Creator.Gender, @ProjectHelper.CalculateAge(Creator.DateOfBirth.Value)</span>
+            </MudStack>
+        </MudStack>
+        <MudDivider />
+    </TitleContent>
+    <DialogContent>
+        <MudGrid Spacing="3">
+            <MudItem xs="6">
+                <MudStack Spacing="0">
+                    <span class="text-neutral-400 text-[14px]">Sprog</span>
+
+                    @if (Creator.Languages is not null && Creator.Languages.Any())
+                    {
+                        <span class="text-nowrap text-ellipsis overflow-hidden">@String.Join(", ", Creator.Languages.Select(x => x.Name))</span>
+                    }
+                    else
+                    {
+                        <span class="text-nowrap text-ellipsis overflow-hidden">Ingen information</span>
+                    }
+                </MudStack>
+            </MudItem>
+            <MudItem xs="6">
+                <MudStack Spacing="0">
+                    <span class="text-neutral-400 text-[14px]">Tags</span>
+                    <span class="text-nowrap text-ellipsis overflow-hidden">@String.Join(", ", Creator.Tags)</span>
+                </MudStack>
+            </MudItem>
+            <MudItem xs="6">
+                <MudStack Spacing="0">
+                    <span class="text-neutral-400 text-[14px]">Pris</span>
+                    <span class="text-nowrap text-ellipsis overflow-hidden bg-success-50 w-fit rounded-xl border border-success-500 px-2 text-success-400">@String.Join("-", Creator.PriceEstimate) kr</span>
+                </MudStack>
+            </MudItem>
+            <MudItem xs="6">
+                <MudStack Spacing="0">
+                    <span class="text-neutral-400 text-[14px]">Land</span>
+                    <span class="text-nowrap text-ellipsis overflow-hidden">@ProjectHelper.LanguageToStringFlag(Creator.User.Language)</span>
+                </MudStack>
+            </MudItem>
+            
+
+            <AuthorizeView Roles="Admin">
+                <MudItem xs="6">
+                    <MudStack Spacing="0">
+                        <span class="text-neutral-400 text-[14px]">Adresse</span>
+                        <span class="text-nowrap text-ellipsis overflow-hidden">@Creator.Address</span>
+                    </MudStack>
+                </MudItem>
+                <MudItem xs="6">
+                    <MudStack Spacing="0">
+                        <span class="text-neutral-400 text-[14px]">Telefon</span>
+                        <span class="text-nowrap text-ellipsis overflow-hidden">@Creator.User.Phone</span>
+                    </MudStack>
+                </MudItem>
+                <MudItem xs="6">
+                    <MudStack Spacing="0">
+                        <span class="text-neutral-400 text-[14px]">Aktivitet</span>
+                        <span class="text-nowrap text-ellipsis overflow-hidden bg-violet-50 w-fit rounded-xl border border-violet-500 px-2 text-violet-400">@Creator.User.IsActive</span>
+                    </MudStack>
+                </MudItem>
+            </AuthorizeView>
+
+            <MudItem xs="6">
+                <MudStack Spacing="0">
+                    <span class="text-neutral-400 text-[14px]">Projekter</span>
+                    <span class="text-nowrap text-ellipsis overflow-hidden bg-violet-50 w-fit rounded-xl border border-violet-500 px-2 text-violet-400">@Creator.Participations.Count()</span>
+                </MudStack>
+            </MudItem>
+        </MudGrid>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Luk</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; }
+
+    [Parameter]
+    public Creator Creator { get; set; }
+
+    private async Task Submit() => MudDialog.Close(DialogResult.Ok(true));
+
+    private void Cancel() => MudDialog.Cancel();
+}

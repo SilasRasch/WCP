@@ -1,6 +1,8 @@
 ﻿@using WCPAdminFrontEnd.Services
+@using WCPFrontEnd.Services
 @using WCPShared.Models.Entities
 @using WCPShared.Models.Entities.UserModels
+@inject CustomDialogService DialogService
 
 <MudPaper Elevation="0" Class="border-[1px] border-border pa-4 w-[270px]">
     <MudStack Spacing="3">
@@ -28,18 +30,16 @@
 
         <MudStack Row>
             <MudMenu Size="Size.Small" Icon="@Icons.Material.Filled.MoreVert" AnchorOrigin="Origin.BottomRight">
-                <MudMenuItem>
+                <MudMenuItem OnClick="() => DialogService.OpenBrandDetailDialog(Brand)">
                     <MudStack Row="true">
-                        <MudIcon Icon="@Icons.Material.Filled.ContactMail"></MudIcon>
-                        <MudText>Kontakt</MudText>
+                        <MudIcon Icon="@Icons.Material.Filled.Search"></MudIcon>
+                        <MudText>Åbn</MudText>
                     </MudStack>
                 </MudMenuItem>
             </MudMenu>
 
-            <a class="bg-primary-50 text-[14px] text-primary-500 w-full flex-grow font-semibold border border-primary-500 rounded-lg py-2 text-center hover:bg-primary-100 cursor-pointer duration-200">Se detaljer</a>
+            <a @onclick="() => DialogService.OpenBrandDetailDialog(Brand)" class="bg-primary-50 text-[14px] text-primary-500 w-full flex-grow font-semibold border border-primary-500 rounded-lg py-2 text-center hover:bg-primary-100 cursor-pointer duration-200">Se detaljer</a>
         </MudStack>
-
-
     </MudStack>
 </MudPaper>
 

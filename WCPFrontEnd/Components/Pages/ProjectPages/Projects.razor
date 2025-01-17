@@ -16,7 +16,6 @@
 @inject IWcpDbContext Context
 @inject IDialogService DialogService
 @inject AuthenticationStateProvider AuthenticationStateProvider
-@inject StripeService StripeService
 @inject IJSRuntime jsRuntime
 @inject NavigationManager NavigationManager
 @attribute [Authorize]
@@ -40,15 +39,9 @@
         </MudStack>
     </MudStack>
 
-
-        @* <MudStack Row Spacing="0">
-            <span @onclick="() => showAll = true" class="px-2 py-1 text-primary-400 font-semibold bg-primary-50 min-w-32 border-b-[1px] border-primary-400 text-center">Aktive</span>
-            <span @onclick="() => showAll = false" class="px-2 py-1 text-neutral-400 min-w-32 text-center">Afsluttede</span>
-        </MudStack> *@
-
     @if (!ListView) 
     {
-        <MudTabs Elevation="0" PanelClass="pt-4" Border>
+        <MudTabs Elevation="0" PanelClass="pt-4" TabHeaderClass="mud-background" Border>
             <MudTabPanel Text="Aktive">
                 <MudGrid Spacing="3">
                     @foreach (Project project in ProjectList.Where(x => x.Status != ProjectStatus.Cancelled && x.Status != ProjectStatus.Finished))
@@ -77,15 +70,9 @@
                 ColumnResizeMode="@(_resizable ? ResizeMode.Column : ResizeMode.None)" DragDropColumnReordering="_movable" FilterCaseSensitivity="DataGridFilterCaseSensitivity.Ignore" FilterDefinitions="@filters"
                 Class="border-border border">
             <ToolBarContent>
-                <MudStack Row="true" AlignItems="AlignItems.Center">
-                    <MudText Typo="Typo.h6">Projekter</MudText>
-                    <AuthorizeView Roles="Bruger">
-                        <MudIconButton Icon="@Icons.Material.Filled.Add"></MudIconButton>
-                    </AuthorizeView>
-                </MudStack>
-                <MudSpacer />
                 <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
-                              AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                    AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                <MudSpacer />
                 <MudIconButton onclick="Refetch" Icon="@Icons.Material.Filled.Refresh" Class="hover:animate-spin-once"></MudIconButton>
                 <MudIconButton Icon="@Icons.Material.Filled.Settings" OnClick="ToggleOpenTableSettings" Class="hover:animate-spin-once"></MudIconButton>
                 <MudPopover Open="@_open" Fixed="true" Class="px-4 pt-4" AnchorOrigin="Origin.BottomRight">

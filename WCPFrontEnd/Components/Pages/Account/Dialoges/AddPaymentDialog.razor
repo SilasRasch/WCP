@@ -1,0 +1,97 @@
+﻿@using Microsoft.EntityFrameworkCore
+@using Stripe
+@using WCPAdminFrontEnd.Services
+@using WCPFrontEnd.Services
+@using WCPShared.Interfaces
+@using WCPShared.Interfaces.Auth
+@using WCPShared.Models.DTOs
+@using WCPShared.Models.Entities.AuthModels
+@using WCPShared.Models.Entities.UserModels
+@using WCPShared.Models.Enums
+@using WCPShared.Models.Views
+@using WCPShared.Models.Entities
+@using WCPShared.Services
+@using WCPShared.Services.EntityFramework
+@inject IWcpDbContext Context
+@inject BrandService BrandService
+
+<MudDialog>
+    <TitleContent>
+        <MudStack Spacing="0">
+            <span class="font-medium text-xl">Tilføj betalingsmiddel</span>
+            <span class="text-neutral-400 text-lg">Vi understøtter kun betalingskort</span>
+        </MudStack>
+    </TitleContent>
+    <DialogContent>
+
+        <MudGrid>
+            <MudItem xs="12">
+                <MudForm @ref="_form" @bind-IsValid="@_success" @bind-Errors="@_errors">
+                    <MudGrid>
+                        <MudItem xs="6">
+                            <MudStack Spacing="0" Class="w-full">
+                                <span class="text-neutral-400 text-[14px]">Kortholders navn</span>
+                                <MudTextField T="string" Variant="Variant.Outlined" Required />
+                            </MudStack>
+                        </MudItem>
+                        <MudItem xs="6">
+                            <MudStack Spacing="0" Class="w-full">
+                                <span class="text-neutral-400 text-[14px]">Kort nummer</span>
+                                <MudTextField T="string" Variant="Variant.Outlined" @bind-Value="NewMethod.Card.Number" Required />
+                            </MudStack>
+                        </MudItem>
+                        <MudItem xs="3">
+                            <MudStack Spacing="0" Class="w-full">
+                                <span class="text-neutral-400 text-[14px]">Udløber</span>
+
+                                <MudStack Row Spacing="0" Class="border border-border rounded" AlignItems="AlignItems.Center">
+                                    <MudTextField Variant="Variant.Outlined" @bind-Value="NewMethod.Card.ExpMonth" Required />
+                                    <span class="text-[18px]">/</span>
+                                    <MudTextField Variant="Variant.Outlined" @bind-Value="NewMethod.Card.ExpYear" Required />
+                                </MudStack>
+                            </MudStack>
+                        </MudItem>
+                        <MudItem xs="3">
+                            <MudStack Spacing="0" Class="w-full">
+                                <span class="text-neutral-400 text-[14px]">CVC</span>
+                                <MudTextField T="string" Variant="Variant.Outlined" @bind-Value="NewMethod.Card.Cvc" Required />
+                            </MudStack>
+                        </MudItem>
+                    </MudGrid>
+                </MudForm>
+            </MudItem>
+        </MudGrid>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Luk</MudButton>
+        <AuthorizeView Roles="Admin">
+            <MudButton Color="@Color.Success" Variant="Variant.Filled" Disabled="@(!_success)" OnClick="Submit">Gem</MudButton>
+        </AuthorizeView>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; }
+
+    [Parameter]
+    public User User { get; set; }
+
+    private PaymentMethodCreateOptions NewMethod = new PaymentMethodCreateOptions() 
+    {
+        Type = "card",
+        Card = new PaymentMethodCardOptions()
+    };
+
+    private MudForm _form;
+    private bool _success;
+    private string[] _errors = { };
+
+    private async Task Submit()
+    {
+
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}

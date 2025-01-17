@@ -6,6 +6,7 @@
 @using WCPShared.Models.DTOs
 @using WCPShared.Models.Entities.AuthModels
 @using WCPShared.Models.Entities.UserModels
+@using WCPShared.Models.Enums
 @using WCPShared.Models.Views
 @using WCPShared.Models.Entities
 @using WCPShared.Services
@@ -15,21 +16,70 @@
 
 <MudDialog>
     <TitleContent>
-        <MudText Typo="Typo.h6">
-            Rediger brand
-        </MudText>
+        <MudStack Spacing="0">
+            <span class="font-medium text-xl">@Brand.Name</span>
+            <span class="text-neutral-400 text-lg">@Brand.Organization.Name</span>
+        </MudStack>
     </TitleContent>
     <DialogContent>
-        <MudForm @ref="_form" @bind-IsValid="@_success" @bind-Errors="@_errors">
-            <MudStack Row="true">
-                <MudTextField T="string" @bind-Value="Brand.Name" Label="Brandnavn" Required="true" Validation="@(new Func<string, string>(ValidationHelpers.NameValidation))" RequiredError="Dette felt er påkrævet" />
-                <MudTextField T="string" @bind-Value="Brand.URL" Label="URL" Required="true" Validation="@(new Func<string, string>(ValidationHelpers.URLValidation))" RequiredError="Dette felt er påkrævet" />
-            </MudStack>
-        </MudForm>
+        
+        <MudGrid>
+            <AuthorizeView Roles="Admin">
+                <MudItem xs="12">
+                    <MudForm @ref="_form" @bind-IsValid="@_success" @bind-Errors="@_errors">
+                        <MudStack Row Class="w-full">
+                            <MudStack Spacing="0" Class="w-full">
+                                <span class="text-neutral-400 text-[14px]">Navn</span>
+                                <MudTextField T="string" Variant="Variant.Outlined" @bind-Value="Brand.Name" Required="true" Validation="@(new Func<string, string>(ValidationHelpers.NameValidation))" RequiredError="Dette felt er påkrævet" />
+                            </MudStack>
+                            <MudStack Spacing="0" Class="w-full">
+                                <span class="text-neutral-400 text-[14px]">URL</span>
+                                <MudTextField T="string" Variant="Variant.Outlined" @bind-Value="Brand.URL" Required="true" Validation="@(new Func<string, string>(ValidationHelpers.URLValidation))" RequiredError="Dette felt er påkrævet" />
+                            </MudStack>
+                        </MudStack>
+                    </MudForm>
+                </MudItem>
+            </AuthorizeView>
+            <AuthorizeView Roles="Creator,Bruger">
+                <MudItem xs="6">
+                    <MudStack Spacing="0">
+                        <span class="text-neutral-400 text-[14px]">Navn</span>
+                        <span class="text-nowrap text-ellipsis overflow-hidden">@Brand.Name</span>
+                    </MudStack>
+                </MudItem>
+                <MudItem xs="6">
+                    <MudStack Spacing="0">
+                        <span class="text-neutral-400 text-[14px]">URL</span>
+                        <span class="text-nowrap text-ellipsis overflow-hidden">@Brand.URL</span>
+                    </MudStack>
+                </MudItem>
+            </AuthorizeView>
+
+            <MudItem xs="4">
+                <MudStack Spacing="0">
+                    <span class="text-neutral-400 text-[14px]">Projekter</span>
+                    <span class="text-nowrap text-ellipsis overflow-hidden bg-success-50 w-fit rounded-xl border border-success-500 px-2 text-success-400">@Brand.Projects.Count()</span>
+                </MudStack>
+            </MudItem>
+            <MudItem xs="4">
+                <MudStack Spacing="0">
+                    <span class="text-neutral-400 text-[14px]">Aktive projekter</span>
+                    <span class="text-nowrap text-ellipsis overflow-hidden bg-success-50 w-fit rounded-xl border border-success-500 px-2 text-success-400">@Brand.Projects.Where(x => x.Status != ProjectStatus.Cancelled && x.Status != ProjectStatus.Finished).Count()</span>
+                </MudStack>
+            </MudItem>
+            <MudItem xs="4">
+                <MudStack Spacing="0">
+                    <span class="text-neutral-400 text-[14px]">Produkter</span>
+                    <span class="text-nowrap text-ellipsis overflow-hidden bg-violet-50 w-fit rounded-xl border border-violet-500 px-2 text-violet-400">@Brand.Products.Count()</span>
+                </MudStack>
+            </MudItem>
+        </MudGrid>
     </DialogContent>
     <DialogActions>
-        <MudButton OnClick="Cancel">Annuller</MudButton>
-        <MudButton Color="@Color.Success" Variant="Variant.Filled" Disabled="@(!_success)" OnClick="Submit">Gem</MudButton>
+        <MudButton OnClick="Cancel">Luk</MudButton>
+        <AuthorizeView Roles="Admin">
+            <MudButton Color="@Color.Success" Variant="Variant.Filled" Disabled="@(!_success)" OnClick="Submit">Gem</MudButton>
+        </AuthorizeView>
     </DialogActions>
 </MudDialog>
 

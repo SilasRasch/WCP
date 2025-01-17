@@ -1,8 +1,12 @@
 ﻿using MudBlazor;
+using WCPFrontEnd.Components.Pages.Account.Dialoges;
+using WCPFrontEnd.Components.Pages.Brand.Dialoges;
 using WCPFrontEnd.Components.Pages.ProductRelated.Dialoges;
 using WCPFrontEnd.Components.Pages.ProjectPages.Dialoges;
+using WCPFrontEnd.Components.Pages.Users.Dialoges;
 using WCPShared.Models.Entities;
 using WCPShared.Models.Entities.ProjectModels;
+using WCPShared.Models.Entities.UserModels;
 using WCPShared.Models.Enums;
 
 namespace WCPFrontEnd.Services
@@ -53,6 +57,42 @@ namespace WCPFrontEnd.Services
             var options = new DialogOptions { CloseOnEscapeKey = true };
 
             var dialog = await DialogService.ShowAsync<ProductDetailDialog>("Product details", parameters, options);
+            var result = await dialog.Result;
+        }
+
+        public async Task OpenBrandDetailDialog(Brand brand)
+        {
+            var parameters = new DialogParameters<EditBrandDialog>
+            {
+                { x => x.Brand, brand }
+            };
+
+            var options = new DialogOptions { CloseOnEscapeKey = true, CloseButton = true };
+            var dialog = await DialogService.ShowAsync<EditBrandDialog>("Delete dialog", parameters, options);
+            var result = await dialog.Result;
+        }
+
+        public async Task OpenCreatorDetailDialog(Creator creator)
+        {
+            var parameters = new DialogParameters<CreatorDetailDialog>
+            {
+                { x => x.Creator, creator }
+            };
+
+            var options = new DialogOptions { CloseOnEscapeKey = true, CloseButton = true };
+            var dialog = await DialogService.ShowAsync<CreatorDetailDialog>("Creator detail dialog", parameters, options);
+            var result = await dialog.Result;
+        }
+
+        public async Task OpenAddPaymentMethodDialog(User user)
+        {
+            var parameters = new DialogParameters<AddPaymentDialog>
+            {
+                { x => x.User, user }
+            };
+
+            var options = new DialogOptions { CloseOnEscapeKey = true, CloseButton = true };
+            var dialog = await DialogService.ShowAsync<AddPaymentDialog>("Creator detail dialog", parameters, options);
             var result = await dialog.Result;
         }
     }
