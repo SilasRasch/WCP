@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using WCPShared.Interfaces;
 using WCPShared.Models.Entities;
 using WCPShared.Models.Entities.UserModels;
@@ -21,14 +22,29 @@ namespace WCPFrontEnd.Services
 
         public event Action? OnChange;
 
-        public async Task LoadDataAsync(int userId)
+        public async Task LoadDataAsync(Claim? userId)
         {
             if (IsDataLoaded) return; // Prevent duplicate loading
 
-            CurrentUser = await _context.Users.Include(x => x.Language).SingleOrDefaultAsync(x => x.Id == userId);
-            Language = CurrentUser.Language;
+            if (userId is null)
+            {
+                IsDataLoaded = true;
+                NotifyStateChanged();
+                return;
+            }
+
+            CurrentUser = await _context.Users.Include(x => x.Language).SingleOrDefaultAsync(x => x.Id.ToString() == userId.Value);
+            Language = CurrentUser!.Language;
             IsDataLoaded = true;
 
+            NotifyStateChanged();
+        }
+
+        public void UnloadData()
+        {
+            CurrentUser = null;
+            Language = null;
+            IsDataLoaded = false;
             NotifyStateChanged();
         }
 

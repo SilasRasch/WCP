@@ -42,21 +42,39 @@
 
                     <MudMenu AriaLabel="Åben profil menu" AnchorOrigin="Origin.BottomRight" Variant="Variant.Outlined">
                         <ActivatorContent>
-                            <MudStack Spacing="4" Row Justify="Justify.Center" AlignItems="AlignItems.Center">
-                                <MudStack Row Spacing="2">
-                                    <MudAvatar Color="Color.Primary">
-                                        @ApplicationState.CurrentUser.Name.First()
-                                    </MudAvatar>
+                            @if (ApplicationState.IsDataLoaded) 
+                            {
+                                <MudStack Spacing="4" Row Justify="Justify.Center" AlignItems="AlignItems.Center">
+                                    <MudStack Row Spacing="2">
+                                        <MudAvatar Color="Color.Primary">
+                                            @ApplicationState.CurrentUser.Name.First()
+                                        </MudAvatar>
 
-                                    <MudStack Spacing="0">
-                                        <MudText>@ApplicationState.CurrentUser.Name</MudText>
-                                        <MudText Typo="Typo.caption">@ApplicationState.CurrentUser.Role</MudText>
+                                        <MudStack Spacing="0">
+                                            <MudText>@ApplicationState.CurrentUser.Name</MudText>
+                                            <MudText Typo="Typo.caption">@ApplicationState.CurrentUser.Role</MudText>
+                                        </MudStack>
                                     </MudStack>
+
+                                    <MudIcon Icon="@Icons.Material.Filled.KeyboardArrowDown"></MudIcon>
                                 </MudStack>
+                            }
+                            else 
+                            {
+                                <MudStack Spacing="4" Row Justify="Justify.Center" AlignItems="AlignItems.Center">
+                                    <MudStack Row Spacing="2">
+                                        <MudAvatar Color="Color.Primary">
+                                            WC
+                                        </MudAvatar>
 
-                                <MudIcon Icon="@Icons.Material.Filled.KeyboardArrowDown"></MudIcon>
-                            </MudStack>
+                                        <MudStack Spacing="0">
+                                            <MudText>Indlæser...</MudText>
+                                        </MudStack>
+                                    </MudStack>
 
+                                    <MudIcon Icon="@Icons.Material.Filled.KeyboardArrowDown"></MudIcon>
+                                </MudStack>
+                            }
                         </ActivatorContent>
                         <ChildContent>
                             <MudMenuItem Href="settings" Icon="@Icons.Material.Filled.Settings">Indstillinger</MudMenuItem>
@@ -120,7 +138,7 @@
             {
                 @Body
             }
-            
+
         </MudMainContent>
     </MudDrawerContainer>
 </MudLayout>
@@ -163,8 +181,11 @@
         };
 
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        await ApplicationState.LoadDataAsync(Convert.ToInt16(authState.User.FindFirst(c => c.Type == "Id")?.Value));
-        await GetBalance();
+        var id = authState.User.FindFirst(c => c.Type == "Id");
+
+        await ApplicationState.LoadDataAsync(id);
+
+        if (id is not null) await GetBalance();
     }
 
     private void DrawerToggle()
