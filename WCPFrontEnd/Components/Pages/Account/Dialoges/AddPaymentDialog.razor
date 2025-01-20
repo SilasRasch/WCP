@@ -13,7 +13,7 @@
 @using WCPShared.Services
 @using WCPShared.Services.EntityFramework
 @inject IWcpDbContext Context
-@inject BrandService BrandService
+@inject StripeService StripeService
 
 <MudDialog>
     <TitleContent>
@@ -31,42 +31,38 @@
                         <MudItem xs="6">
                             <MudStack Spacing="0" Class="w-full">
                                 <span class="text-neutral-400 text-[14px]">Kortholders navn</span>
-                                <MudTextField T="string" Variant="Variant.Outlined" Required />
+                                <MudTextField Placeholder="Lars Larsen" T="string" @bind-Value="NewMethod.BillingDetails.Name" Variant="Variant.Outlined" Required />
                             </MudStack>
                         </MudItem>
                         <MudItem xs="6">
                             <MudStack Spacing="0" Class="w-full">
                                 <span class="text-neutral-400 text-[14px]">Kort nummer</span>
-                                <MudTextField T="string" Variant="Variant.Outlined" @bind-Value="NewMethod.Card.Number" Required />
+                                <MudTextField T="string" Placeholder="1234 1234 1234 1234" Variant="Variant.Outlined" @bind-Value="NewMethod.Card.Number" Required />
                             </MudStack>
                         </MudItem>
                         <MudItem xs="3">
                             <MudStack Spacing="0" Class="w-full">
                                 <span class="text-neutral-400 text-[14px]">Udløber</span>
-
-                                <MudStack Row Spacing="0" Class="border border-border rounded" AlignItems="AlignItems.Center">
-                                    <MudTextField Variant="Variant.Outlined" @bind-Value="NewMethod.Card.ExpMonth" Required />
-                                    <span class="text-[18px]">/</span>
-                                    <MudTextField Variant="Variant.Outlined" @bind-Value="NewMethod.Card.ExpYear" Required />
-                                </MudStack>
+                                <MudTextField Placeholder="03/2024" Variant="Variant.Outlined" @bind-Value="ExpiryString" Required />
                             </MudStack>
                         </MudItem>
                         <MudItem xs="3">
                             <MudStack Spacing="0" Class="w-full">
                                 <span class="text-neutral-400 text-[14px]">CVC</span>
-                                <MudTextField T="string" Variant="Variant.Outlined" @bind-Value="NewMethod.Card.Cvc" Required />
+                                <MudTextField T="string" Placeholder="123" Variant="Variant.Outlined" @bind-Value="NewMethod.Card.Cvc" Required />
                             </MudStack>
                         </MudItem>
                     </MudGrid>
                 </MudForm>
             </MudItem>
+            <MudItem xs="12" Class="text-center">
+                @StripeError
+            </MudItem>
         </MudGrid>
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="Cancel">Luk</MudButton>
-        <AuthorizeView Roles="Admin">
-            <MudButton Color="@Color.Success" Variant="Variant.Filled" Disabled="@(!_success)" OnClick="Submit">Gem</MudButton>
-        </AuthorizeView>
+        <MudButton Color="@Color.Primary" Class="rounded-lg" Variant="Variant.Filled" Disabled="@(!_success)" OnClick="Submit">Tilføj</MudButton>
     </DialogActions>
 </MudDialog>
 
@@ -80,17 +76,38 @@
     private PaymentMethodCreateOptions NewMethod = new PaymentMethodCreateOptions() 
     {
         Type = "card",
-        Card = new PaymentMethodCardOptions()
+        Card = new PaymentMethodCardOptions(),
+        BillingDetails = new PaymentMethodBillingDetailsOptions()
     };
+
+    private string ExpiryString = string.Empty;
 
     private MudForm _form;
     private bool _success;
     private string[] _errors = { };
 
+    private string StripeError = string.Empty;
+
     private async Task Submit()
     {
+        if (ExpiryString.Contains("/"))
+        {
+            var expiryArr = ExpiryString.Split('/');
+            NewMethod.Card.ExpMonth = Convert.ToInt32(expiryArr.First());
+            NewMethod.Card.ExpYear = Convert.ToInt32(expiryArr.Last());
 
-        MudDialog.Close(DialogResult.Ok(true));
+            try
+            {
+                await StripeService.AddPaymentMethod(User.Organization!.StripeAccountId, NewMethod);
+                MudDialog.Close(DialogResult.Ok(true));
+            }
+            catch (Exception ex)
+            {
+                StripeError = ex.Message;
+            }
+        }
+        
+        
     }
 
     private void Cancel() => MudDialog.Cancel();

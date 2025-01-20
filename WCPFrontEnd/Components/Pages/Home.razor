@@ -12,6 +12,7 @@
 @inject IWcpDbContext Context
 @inject IJSRuntime jsRuntime
 @inject StripeService StripeService
+@inject ProjectService ProjectService
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
 <PageTitle>WebContent Platform</PageTitle>
@@ -84,21 +85,41 @@
                 </MudStack>
             </MudPaper>
 
-            <MudPaper Class="pa-4 border-[1px] border-border" Width="25%" Elevation="0">
-                <MudStack Row AlignItems="AlignItems.Center" Class="w-full">
-                    <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Class=" h-[48px] aspect-square rounded-lg bg-yellow-200 flex">
-                        <MudIcon Size="Size.Large" Icon="@Icons.Material.Filled.Star" Class="text-yellow-700"></MudIcon>
-                    </MudStack>
-                    <MudStack Spacing="0" Class="w-full">
-                        <MudText Class="text-neutral-400">Gennemsnitlig score</MudText>
+            <AuthorizeView Roles="Admin">
+                    <MudPaper Class="pa-4 border-[1px] border-border" Width="25%" Elevation="0">
+                        <MudStack Row AlignItems="AlignItems.Center" Class="w-full">
+                            <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Class=" h-[48px] aspect-square rounded-lg bg-yellow-200 flex">
+                                <MudIcon Size="Size.Large" Icon="@Icons.Material.Filled.Star" Class="text-yellow-700"></MudIcon>
+                            </MudStack>
+                            <MudStack Spacing="0" Class="w-full">
+                                <MudText Class="text-neutral-400">Gennemsnitlig score</MudText>
 
-                        <MudStack Row Class="w-full" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-                            <MudText Typo="Typo.h5">@AverageFeedbackScore</MudText>
-                            <span class="text-xs font-semibold bg-success-50 text-success-400 h-fit rounded-lg py-[2px] px-[6px]">+3,2%</span>
+                                <MudStack Row Class="w-full" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                                    <MudText Typo="Typo.h5">@AverageFeedbackScore</MudText>
+                                    <span class="text-xs font-semibold bg-success-50 text-success-400 h-fit rounded-lg py-[2px] px-[6px]">+3,2%</span>
+                                </MudStack>
+                            </MudStack>
+                        </MudStack>
+                    </MudPaper>
+            </AuthorizeView>
+            
+            <AuthorizeView Roles="Creator,Bruger">
+                <MudPaper Class="pa-4 border-[1px] border-border" Width="25%" Elevation="0">
+                    <MudStack Row AlignItems="AlignItems.Center" Class="w-full">
+                        <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Class=" h-[48px] aspect-square rounded-lg bg-yellow-200 flex">
+                            <MudIcon Size="Size.Large" Icon="@Icons.Material.Filled.Star" Class="text-yellow-700"></MudIcon>
+                        </MudStack>
+                        <MudStack Spacing="0" Class="w-full">
+                            <MudText Class="text-neutral-400">Projekter denne måned</MudText>
+
+                            <MudStack Row Class="w-full" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                                <MudText Typo="Typo.h5">@projects.Where(x => x.Created.Month == DateTime.Now.Month && x.Created.Year == DateTime.Now.Year).Count()</MudText>
+                                <span class="text-xs font-semibold bg-success-50 text-success-400 h-fit rounded-lg py-[2px] px-[6px]">+3,2%</span>
+                            </MudStack>
                         </MudStack>
                     </MudStack>
-                </MudStack>
-            </MudPaper>
+                </MudPaper>
+            </AuthorizeView>
 
             <MudPaper Class="pa-4 border-[1px] border-border" Width="25%" Elevation="0">
                 <MudStack Row AlignItems="AlignItems.Center" Class="w-full">
@@ -288,24 +309,22 @@
 
         if (User is not null) 
         {
-            projects = await Context.Projects
-                .Include(x => x.Concepts)
-                .Include(x => x.Brand)
-                .ThenInclude(x => x.Organization)
-                .ThenInclude(x => x.Language)
-                .Where(x => x.Status != ProjectStatus.Cancelled)
-                .AsSplitQuery()
-                .AsNoTracking()
-                .ToListAsync();
+            if (User is not null && User.Role == UserRole.Admin)
+            {
+                projects = await ProjectService.GetAllProjects();
+            }
 
-            if (User.Role == UserRole.Bruger)
-                projects = projects.Where(x => x.Brand.OrganizationId == User.OrganizationId).ToList();
+            if (User is not null && User.Role == UserRole.Bruger)
+            {
+                projects = await ProjectService.GetProjectsBy(x => x.Brand.OrganizationId == User.OrganizationId);
+            }
 
-            if (User.Role == UserRole.Creator)
-                projects = projects
-                    .Where(x => x is CreatorProject creatorProject && 
-                        creatorProject.Participations.Any(x => x.Creator.UserId == User.Id))
-                        .ToList();
+            if (User is not null && User.Role == UserRole.Creator)
+            {
+                projects = (await ProjectService.GetAllProjects())
+                    .Where(x => x.Participations.Any(x => x.Creator.UserId == User.Id))
+                    .ToList();
+            }
 
             ugcCount = projects.Where(x => x.Type == ProjectType.UGC).Count();
             staticCount = projects.Where(x => x.Type == ProjectType.Statics).Count();

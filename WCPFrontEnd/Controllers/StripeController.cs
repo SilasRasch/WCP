@@ -62,18 +62,14 @@ namespace WCPFrontEnd.Controllers
                         var service = new SessionLineItemService();
                         StripeList<LineItem> lineItems = service.List(checkout.Id);
 
-                        // Check the product ID of WCP subscription in line items
-                        if (lineItems.Any(x => x.Price.ProductId == "prod_RASyvFiFqfKwLD"))
-                        {
-                            org.Subscription.LastPaid = DateTime.Now;
-                            org.IsActive = true;
+                        org.Subscription.LastPaid = DateTime.Now;
+                        org.IsActive = true;
 
-                            if (!string.IsNullOrEmpty(checkout.SubscriptionId))
-                                org.Subscription.StripeSubscriptionId = checkout.SubscriptionId;
-                            
-                            await _context.SaveChangesAsync();
-                            Console.WriteLine("A new subscription was successful for {0}.", org.Name);
-                        }
+                        if (!string.IsNullOrEmpty(checkout.SubscriptionId))
+                            org.Subscription.StripeSubscriptionId = checkout.SubscriptionId;
+
+                        await _context.SaveChangesAsync();
+                        Console.WriteLine("A new subscription was successful for {0}.", org.Name);
                     }
                 }
                 else if (stripeEvent.Type == EventTypes.CustomerSubscriptionDeleted)

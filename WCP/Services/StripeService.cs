@@ -61,48 +61,59 @@ namespace WCPShared.Services
             return customerService.Create(customerOptions);
         }
 
+        public List<SessionLineItemOptions> GenerateLineItemsOld(WCPShared.Models.Entities.Subscription subscription)
+        {
+            var lineItems = new List<SessionLineItemOptions>();
+
+            //if (subscription.Type == SubscriptionType.Small)
+            //    lineItems.Add(new SessionLineItemOptions { Price = "price_1QIcSMHvTm5ojAP1fHGmabbx", Quantity = 1 });
+
+            //if (subscription.Type == SubscriptionType.Medium)
+            //    lineItems.Add(new SessionLineItemOptions { Price = "price_1QI82YHvTm5ojAP1RfnEQ6aY", Quantity = 1 });
+
+            //if (subscription.Type == SubscriptionType.Large)
+            //    lineItems.Add(new SessionLineItemOptions { Price = "price_1QIcSfHvTm5ojAP1bIm4bRat", Quantity = 1 });
+
+            //var subscriptionIncluded = GetSubscriptionInfo(subscription.Type);
+
+            //if (subscription.NumberOfVideos > subscriptionIncluded.NumberOfVideos)
+            //    lineItems.Add(new SessionLineItemOptions { Price = "price_1QIcUKHvTm5ojAP1Jvpzjhlv", Quantity = subscription.NumberOfVideos - subscriptionIncluded.NumberOfVideos });
+
+            //if (subscription.NumberOfBrands > subscriptionIncluded.NumberOfBrands)
+            //    lineItems.Add(new SessionLineItemOptions { Price = "price_1QIcUZHvTm5ojAP1Nd5KbYkj", Quantity = subscription.NumberOfBrands - subscriptionIncluded.NumberOfBrands });
+
+            //if (subscription.NumberOfUsers > subscriptionIncluded.NumberOfUsers)
+            //    lineItems.Add(new SessionLineItemOptions { Price = "price_1QIcUoHvTm5ojAP1qdp3Fuks", Quantity = subscription.NumberOfUsers - subscriptionIncluded.NumberOfUsers });
+            return lineItems;
+        }
+        
         public List<SessionLineItemOptions> GenerateLineItems(WCPShared.Models.Entities.Subscription subscription)
         {
             var lineItems = new List<SessionLineItemOptions>();
 
             if (subscription.Type == SubscriptionType.Small)
-                lineItems.Add(new SessionLineItemOptions { Price = "price_1QIcSMHvTm5ojAP1fHGmabbx", Quantity = 1 });
+                lineItems.Add(new SessionLineItemOptions { Price = "price_1QjIx4RvgKwQz1aGXGC1dQtn", Quantity = 1 });
 
             if (subscription.Type == SubscriptionType.Medium)
-                lineItems.Add(new SessionLineItemOptions { Price = "price_1QI82YHvTm5ojAP1RfnEQ6aY", Quantity = 1 });
+                lineItems.Add(new SessionLineItemOptions { Price = "price_1QjIxIRvgKwQz1aGGX6AszdN", Quantity = 1 });
 
             if (subscription.Type == SubscriptionType.Large)
-                lineItems.Add(new SessionLineItemOptions { Price = "price_1QIcSfHvTm5ojAP1bIm4bRat", Quantity = 1 });
+                lineItems.Add(new SessionLineItemOptions { Price = "price_1QjIxTRvgKwQz1aG0LN0p4Xy", Quantity = 1 });
 
             var subscriptionIncluded = GetSubscriptionInfo(subscription.Type);
 
-            if (subscription.NumberOfVideos > subscriptionIncluded.NumberOfVideos)
-                lineItems.Add(new SessionLineItemOptions { Price = "price_1QIcUKHvTm5ojAP1Jvpzjhlv", Quantity = subscription.NumberOfVideos - subscriptionIncluded.NumberOfVideos });
-
-            if (subscription.NumberOfBrands > subscriptionIncluded.NumberOfBrands)
-                lineItems.Add(new SessionLineItemOptions { Price = "price_1QIcUZHvTm5ojAP1Nd5KbYkj", Quantity = subscription.NumberOfBrands - subscriptionIncluded.NumberOfBrands });
+            // Add extras
+            if (subscription.Type != SubscriptionType.Large)
+            {
+                if (subscription.NumberOfBrands > subscriptionIncluded.NumberOfBrands)
+                    lineItems.Add(new SessionLineItemOptions { Price = "price_1QjIwCRvgKwQz1aGP9UD21X9", Quantity = subscription.NumberOfBrands - subscriptionIncluded.NumberOfBrands });
+            }
 
             if (subscription.NumberOfUsers > subscriptionIncluded.NumberOfUsers)
-                lineItems.Add(new SessionLineItemOptions { Price = "price_1QIcUoHvTm5ojAP1qdp3Fuks", Quantity = subscription.NumberOfUsers - subscriptionIncluded.NumberOfUsers });
+                lineItems.Add(new SessionLineItemOptions { Price = "price_1QjIvERvgKwQz1aGbanCgfU5", Quantity = subscription.NumberOfUsers - subscriptionIncluded.NumberOfUsers });
+
             return lineItems;
         }
-
-        //public List<SessionLineItemOptions> GenerateLineItems(Project project)
-        //{
-        //    var lineItems = new List<SessionLineItemOptions>();
-
-        //    if (project.Amount > 0)
-        //        lineItems.Add(new SessionLineItemOptions { Price = "price_1QIrTeHvTm5ojAP1MAqeK8M6", Quantity = project.Amount });
-
-        //    if (project.GetType() == typeof(UgcProject))
-        //    {
-        //        project = (UgcProject)project;
-        //        if (project.ExtraHooks is not null && project.ExtraHooks > 0)
-        //            lineItems.Add(new SessionLineItemOptions { Price = "price_1QIrTFHvTm5ojAP1dMVOoweU", Quantity = project.ExtraHooks });
-        //    }
-
-        //    return lineItems;
-        //}
 
         public Account CreateAccount(string email, string type, string country)
         {
@@ -155,7 +166,6 @@ namespace WCPShared.Services
                 subscription = new WCPShared.Models.Entities.Subscription
                 {
                     Type = type,
-                    NumberOfVideos = 3,
                     NumberOfBrands = 1,
                     NumberOfUsers = 1,
                 };
@@ -164,7 +174,6 @@ namespace WCPShared.Services
                 subscription = new WCPShared.Models.Entities.Subscription
                 {
                     Type = type,
-                    NumberOfVideos = 9,
                     NumberOfBrands = 1,
                     NumberOfUsers = 1,
                 };
@@ -173,7 +182,6 @@ namespace WCPShared.Services
                 subscription = new WCPShared.Models.Entities.Subscription
                 {
                     Type = type,
-                    NumberOfVideos = -1,
                     NumberOfBrands = -1,
                     NumberOfUsers = 1,
                 };
@@ -273,17 +281,6 @@ namespace WCPShared.Services
             return await payoutService.ListAsync(payoutListOptions, requestOptions);
         }
 
-        //public async Task<AccountLink> OnboardCreator(Creator creator)
-        //{
-        //    if (string.IsNullOrEmpty(creator.StripeAccountId))
-        //    {
-        //        creator.StripeAccountId = CreateAccount(creator.User.Email).Id;
-        //        await _context.SaveChangesAsync();
-        //    }
-
-        //    return CreateAccountLink(creator.StripeAccountId);
-        //}
-
         public async Task<IEnumerable<PaymentMethod>> GetPaymentMethods(string accountId)
         {
             var options = new PaymentMethodListOptions
@@ -328,6 +325,9 @@ namespace WCPShared.Services
 
         public async Task<bool> CheckOnboardingStatus(string accountId)
         {
+            if (string.IsNullOrEmpty(accountId))
+                return false;
+            
             var service = new AccountService();
             var account = await service.GetAsync(accountId);
             var requirements = account.Requirements;
@@ -379,6 +379,29 @@ namespace WCPShared.Services
 
             var service = new SubscriptionService();
             await service.UpdateAsync(subscriptionId, options);
+        }
+
+        public async Task AddPaymentMethod(string customerId, PaymentMethodCreateOptions method)
+        {
+            var paymentMethodService = new PaymentMethodService();
+            var paymentMethod = await paymentMethodService.CreateAsync(method);
+
+            await paymentMethodService.AttachAsync(paymentMethod.Id, new PaymentMethodAttachOptions
+            {
+                Customer = customerId,
+            });
+        }
+
+        public async Task SetDefaultPaymentMethod(string customerId, string paymentMethodId)
+        {
+            var customerService = new CustomerService();
+            await customerService.UpdateAsync(customerId, new CustomerUpdateOptions
+            {
+                InvoiceSettings = new CustomerInvoiceSettingsOptions
+                {
+                    DefaultPaymentMethod = paymentMethodId,
+                },
+            });
         }
     }
 }

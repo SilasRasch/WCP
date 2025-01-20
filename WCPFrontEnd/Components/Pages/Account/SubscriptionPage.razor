@@ -14,24 +14,25 @@
 
 <AuthorizeView Policy="IsNotSubscribed">
     <Authorized>
-        <MudText>Tilpas dit abonnement</MudText>
+        <span class="mb-2 font-semibold text-[18px]">Tilpas dit abonnement</span>
+        <div class="max-w-96">
+            <SubscriptionPicker @bind-Value="Subscription" @bind-Type="Subscription.Type" />
 
-        <SubscriptionPicker @bind-Value="Subscription" />
-
-        @if (string.IsNullOrEmpty(CheckoutUrl))
-        {
-            <MudStack AlignItems="AlignItems.Center">
-                <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Checkout">Køb abonnement</MudButton>
-                <MudText Typo="Typo.caption">Tryk <u><a href="https://webcontent.dk/priser" target="_blank">her</a></u> for at se vores priser</MudText>
-            </MudStack>
-        }
-        else
-        {
-            <MudStack AlignItems="AlignItems.Center" Spacing="0">
-                <MudText>Du vil nu blive viderstillet til vores Stripe onboarding...</MudText>
-                <MudText>Hvis ikke kan du trykke <a href="@CheckoutUrl" target="_blank"><u>her</u></a> for at gå til siden manuelt</MudText>
-            </MudStack>
-        }
+            @if (string.IsNullOrEmpty(CheckoutUrl))
+            {
+                <MudStack AlignItems="AlignItems.Center">
+                    <MudButton Class="rounded-lg" DropShadow="false" Color="Color.Primary" Variant="Variant.Filled" OnClick="Checkout">Køb abonnement</MudButton>
+                    <MudText Class="text-center" Typo="Typo.caption">Alle abonnementer inkluderer ubegrænset bestilling af videoer. Tryk <u><a href="https://webcontent.dk/priser" target="_blank">her</a></u> for at se vores priser</MudText>
+                </MudStack>
+            }
+            else
+            {
+                <MudStack AlignItems="AlignItems.Center" Spacing="0">
+                    <MudText>Du vil nu blive viderstillet til vores Stripe onboarding...</MudText>
+                    <MudText>Hvis ikke kan du trykke <a href="@CheckoutUrl" target="_blank"><u>her</u></a> for at gå til siden manuelt</MudText>
+                </MudStack>
+            }
+        </div>
     </Authorized>
     <NotAuthorized>
         @if (Customer is not null && Customer.Organization is not null && Customer.Organization.Subscription is not null)
@@ -63,10 +64,6 @@
 
                     <MudStack Spacing="0">
                         <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
-                            <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.PlayCircleOutline" />
-                            <span class="text-neutral-600">Antal videoer: <strong>@Subscription.NumberOfVideos</strong></span>
-                        </MudStack>
-                        <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
                             <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.BusinessCenter" />
                             <span class="text-neutral-600">Antal brands: <strong>@Subscription.NumberOfBrands</strong></span>
                         </MudStack>
@@ -77,62 +74,6 @@
                     </MudStack>
                 </MudStack>
             </MudPaper>
-
-            @* <MudPaper Class="pa-4 mud-secondary">
-                <MudStack Spacing="0">
-                    <MudText><strong>@Customer.Organization.Subscription.Type</strong></MudText>
-                </MudStack>
-
-                <MudStack Row>
-                    <MudStack Spacing="0" AlignItems="AlignItems.Center">
-                        <MudText>Antal videoer</MudText>
-                        <MudStack Row AlignItems="AlignItems.Center">
-                            <MudIcon Size="Size.Large" Icon="@Icons.Material.Filled.PlayArrow" />
-                            <MudText Typo="Typo.h6">@Customer.Organization.Subscription.NumberOfVideos</MudText>
-                        </MudStack>
-                    </MudStack>
-
-                    <MudStack Spacing="0" AlignItems="AlignItems.Center">
-                        <MudText>Antal brands</MudText>
-                        <MudStack Row AlignItems="AlignItems.Center">
-                            <MudIcon Size="Size.Large" Icon="@Icons.Material.Filled.BusinessCenter" />
-                            <MudText Typo="Typo.h6">@Customer.Organization.Subscription.NumberOfBrands</MudText>
-                        </MudStack>
-                    </MudStack>
-
-                    <MudStack Spacing="0" AlignItems="AlignItems.Center">
-                        <MudText>Antal brugere</MudText>
-                        <MudStack Row AlignItems="AlignItems.Center">
-                            <MudIcon Size="Size.Large" Icon="@Icons.Material.Filled.People" />
-                            <MudText Typo="Typo.h6">@Customer.Organization.Subscription.NumberOfUsers</MudText>
-                        </MudStack>
-                    </MudStack>
-                </MudStack>
-            </MudPaper> *@
-
-            @* List of subscriptions *@
-            @* @foreach (var sub in StripeSubscriptions)
-            {
-                @if (sub.CancelAtPeriodEnd)
-                {
-                    <MudPaper Class="pa-4 mt-2 mud-primary">
-                        <MudText Class="text-white">Abonnementet er opsagt og udløber @(sub.CurrentPeriodEnd.ToString("dd-MM-yyyy")) - Klik <strong>her</strong> for at genoptage</MudText>
-                    </MudPaper>
-                }
-                else
-                {
-                    <MudPaper Class="pa-4 mt-2 mud-secondary">
-                        <MudText>Næste betaling @(sub.CurrentPeriodEnd.ToString("dd-MM-yyyy"))</MudText>
-                    </MudPaper>
-                }
-            }
-
-            @if (StripeSubscriptions.All(x => !x.CancelAtPeriodEnd)) 
-            {
-                <MudButton StartIcon="@Icons.Material.Filled.Cancel" Class="mt-2" Color="Color.Primary" Variant="Variant.Filled" OnClick="@(() => StripeService.CancelAllSusbcriptions(Customer.Organization.StripeAccountId))">
-                    Opsig abonnement
-                </MudButton>
-            } *@
 
             @* Single subscription *@
             @if (StripeSubscription is not null) 
@@ -178,7 +119,7 @@
 
 @code {
     [Parameter]
-    public Subscription Subscription { get; set; }
+    public Subscription Subscription { get; set; } = new();
 
     [Parameter]
     public User Customer { get; set; }
@@ -192,8 +133,12 @@
         if (Customer.Organization.Subscription.Type != SubscriptionType.None) 
             Subscription = StripeService.GetSubscriptionInfo(Customer.Organization.Subscription.Type);
         else Subscription = StripeService.GetSubscriptionInfo(SubscriptionType.Medium);
-        StripeSubscriptions = await StripeService.GetAllSubscriptions(Customer.Organization.StripeAccountId);
-        StripeSubscription = await StripeService.GetSubscription(Customer.Organization.Subscription.StripeSubscriptionId);
+        
+        if (!string.IsNullOrEmpty(Customer.Organization.StripeAccountId)) 
+        {
+            StripeSubscriptions = await StripeService.GetAllSubscriptions(Customer.Organization.StripeAccountId);
+            StripeSubscription = await StripeService.GetSubscription(Customer.Organization.Subscription.StripeSubscriptionId);
+        }
     }
 
     private async Task Checkout() 
@@ -201,6 +146,11 @@
         Customer.Organization.Subscription = Subscription;
         await Context.SaveChangesAsync();
         
+        if (string.IsNullOrEmpty(Customer.Organization.StripeAccountId)) 
+        {
+            Customer.Organization.StripeAccountId = StripeService.CreateCustomer(Customer).Id;
+        }
+
         var lineItems = StripeService.GenerateLineItems(Subscription);
         var checkout = StripeService.StartCheckoutSession(lineItems, "subscription", customerEmail: Customer.Email);
         CheckoutUrl = checkout.Url;

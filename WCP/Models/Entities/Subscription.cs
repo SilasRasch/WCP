@@ -12,7 +12,6 @@ namespace WCPShared.Models.Entities
         public int OrganizationId { get; set; }
         public Organization Organization { get; set; }
         public SubscriptionType Type { get; set; }
-        public int NumberOfVideos { get; set; }
         public int NumberOfBrands { get; set; }
         public int NumberOfUsers { get; set; }
         public DateTime Created { get; set; }

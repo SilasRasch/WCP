@@ -115,7 +115,6 @@
     {
         NumberOfBrands = 1,
         NumberOfUsers = 1,
-        NumberOfVideos = 3,
         Type = SubscriptionType.Medium
     };
 
@@ -139,8 +138,6 @@
     protected override void OnInitialized()
     {
         var uri = NavManager.ToAbsoluteUri(NavManager.Uri);
-        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("videos", out var videoCount))
-            Subscription.NumberOfVideos = Convert.ToInt32(videoCount);
 
         if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("brands", out var brandCount))
             Subscription.NumberOfBrands = Convert.ToInt32(brandCount);

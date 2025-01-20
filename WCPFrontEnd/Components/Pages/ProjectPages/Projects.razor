@@ -453,7 +453,7 @@
     {
         Context.ChangeTracker.Clear();
 
-        if (User is not null && (User.Role == UserRole.Admin || User.Role == UserRole.Creator)) 
+        if (User is not null && User.Role == UserRole.Admin) 
         {
             ProjectList = await ProjectService.GetAllProjects();
         }

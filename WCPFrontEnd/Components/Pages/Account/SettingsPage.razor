@@ -13,6 +13,8 @@
 @inject IWcpDbContext Context
 @inject StripeService StripeService
 @inject CustomDialogService DialogService
+@inject NavigationManager Navigation
+@inject IJSRuntime jsRuntime
 
 <PageTitle>Indstillinger</PageTitle>
 
@@ -122,7 +124,7 @@
                                                             @* @if (method.Card == method.Card.Is) *@
                                                             <span class="text-[16px] font-medium capitalize">(Standard)</span>
                                                         </MudStack>
-                                                        
+
                                                         <span class="text-neutral-400">**** **** **** @method.Card.Last4</span>
                                                     </MudStack>
                                                     <span class="text-[16px]">Udløber: @method.Card.ExpMonth/@method.Card.ExpYear.ToString().Substring(2)</span>
@@ -147,6 +149,7 @@
                     </MudGrid>
                 </MudStack>
             </MudTabPanel>
+
             <MudTabPanel Text="Brands">
                 <MudStack Class="w-full" Spacing="0">
                     <BrandCollection ListView="false" />
@@ -283,6 +286,50 @@
                         </MudStack>
                     </MudStack>
                 </MudTabPanel>
+
+                <MudTabPanel Text="Udbetaling">
+                    <MudStack Class="w-full" Spacing="0">
+                        <MudStack>
+                            <MudGrid>
+                                <MudItem xs="3">
+                                    <span>Connect onboarding</span>
+                                </MudItem>
+                                <MudItem xs="6" Class="my-2">
+                                    @if (CreatorOnboardingStatusConnect) 
+                                    {
+                                        <span class="p-2 bg-success-50 text-success-700 border-success-700 border rounded">Onboarded</span>
+                                    }
+                                    else 
+                                    {
+                                        <MudStack Row AlignItems="AlignItems.Center">
+                                            <span class="p-2 bg-error-50 text-error-700 border-error-700 border rounded">Ikke onboarded</span>
+                                            <a href="@CreatorOnboardingURL" class="hover:underline text-blue-500 cursor-pointer">Tryk her for at blive onboardet</a>
+                                        </MudStack>
+                                    }
+                                </MudItem>
+                            </MudGrid>
+
+                            <MudDivider />
+
+                            <MudGrid>
+                                <MudItem xs="3">
+                                    <span>ID validering</span>
+                                </MudItem>
+                                <MudItem xs="6" Class="my-2">
+                                    @if (CreatorOnboardingStatusConnect)
+                                    {
+                                        <span class="p-2 bg-success-50 text-success-700 border-success-700 border rounded">Verificeret</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="p-2 bg-error-50 text-error-700 border-error-700 border rounded">Ikke verificeret</span>
+                                        <span class="hover:underline text-blue-500 cursor-pointer">Tryk her for at blive verificeret</span>
+                                    }
+                                </MudItem>
+                            </MudGrid>
+                        </MudStack>
+                    </MudStack>
+                </MudTabPanel>
             }
             else
             {
@@ -357,6 +404,9 @@
     private string NewPassword = string.Empty;
     private string ConfirmNewPassword = string.Empty;
 
+    private bool CreatorOnboardingStatusConnect = false;
+    private string CreatorOnboardingURL = string.Empty;
+
     protected override async Task OnInitializedAsync()
     {
         var auth = await AuthenticationStateProvider.GetAuthenticationStateAsync();
@@ -371,8 +421,15 @@
         {
             Creator = await Context.Creators.Include(x => x.Languages).SingleOrDefaultAsync(x => x.UserId == User.Id);
 
-            if (Creator is not null && Creator.Languages is not null)
+            if (Creator is not null && Creator.Languages is not null) 
+            {
                 _selectedLanguages = Creator.Languages;
+
+                CreatorOnboardingStatusConnect = await StripeService.CheckOnboardingStatus(Creator.StripeAccountId);
+
+                if (!CreatorOnboardingStatusConnect)
+                    await CheckOnboarding(Creator);
+            }
         }
 
         PaymentMethods = await GetPaymentInfo(User);
@@ -437,5 +494,17 @@
             NewPassword = string.Empty;
             ConfirmNewPassword = string.Empty;
         }
+    }
+
+    private async Task CheckOnboarding(Creator creator)
+    {
+        if (string.IsNullOrEmpty(creator.StripeAccountId))
+        {
+            creator.StripeAccountId = StripeService.CreateAccount(creator.User.Email, creator.StripeAccountType, creator.User.Language.IsoCountryCode).Id;
+            await Context.SaveChangesAsync();
+        }
+
+        var accountLink = StripeService.CreateAccountLink(creator.StripeAccountId);
+        CreatorOnboardingURL = accountLink.Url;
     }
 }
