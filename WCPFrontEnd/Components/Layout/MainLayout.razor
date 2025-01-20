@@ -45,12 +45,12 @@
                             <MudStack Spacing="4" Row Justify="Justify.Center" AlignItems="AlignItems.Center">
                                 <MudStack Row Spacing="2">
                                     <MudAvatar Color="Color.Primary">
-                                        @UserName.First()
+                                        @ApplicationState.CurrentUser.Name.First()
                                     </MudAvatar>
 
                                     <MudStack Spacing="0">
-                                        <MudText>@UserName</MudText>
-                                        <MudText Typo="Typo.caption">@Role</MudText>
+                                        <MudText>@ApplicationState.CurrentUser.Name</MudText>
+                                        <MudText Typo="Typo.caption">@ApplicationState.CurrentUser.Role</MudText>
                                     </MudStack>
                                 </MudStack>
 
@@ -139,9 +139,6 @@
     private MudThemeProvider? _mudThemeProvider;
     private BalanceAmount Balance;
 
-    private string UserName = string.Empty;
-    private string Role = string.Empty;
-
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
@@ -166,9 +163,6 @@
         };
 
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        Role = authState.User.FindFirst(c => c.Type == ClaimTypes.Role)?.Value;
-        UserName = authState.User.FindFirst(c => c.Type == ClaimTypes.Name)?.Value;
-
         await ApplicationState.LoadDataAsync(Convert.ToInt16(authState.User.FindFirst(c => c.Type == "Id")?.Value));
         await GetBalance();
     }
@@ -237,9 +231,8 @@
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var stripeAccountId = authState.User.FindFirst(c => c.Type == "StripeAccountId")?.Value;
-        var role = authState.User.FindFirst(c => c.Type == ClaimTypes.Role)?.Value;
 
-        if (role is not null && role == UserRole.Creator.ToString())
+        if (ApplicationState.CurrentUser.Role == UserRole.Creator)
         {
             if (stripeAccountId is not null)
             {
