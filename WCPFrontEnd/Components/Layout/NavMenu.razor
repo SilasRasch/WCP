@@ -1,4 +1,4 @@
-﻿<MudNavMenu Class="h-full">
+﻿<MudNavMenu Class="h-full" Color="Color.Primary" Rounded>
     <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Dashboard</MudNavLink>
     
     <AuthorizeView Policy="IsNotSubscribed">
@@ -29,5 +29,5 @@
         <MudNavLink Href="payout" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.CreditCard">Udbetaling</MudNavLink>
     </AuthorizeView>
 
-    <MudNavLink Class="absolute left-0 bottom-[66px]" Href="settings" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Settings">Indstillinger</MudNavLink>
+    <MudNavLink Class="absolute left-0 bottom-0" Href="settings" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Settings">Indstillinger</MudNavLink>
 </MudNavMenu>

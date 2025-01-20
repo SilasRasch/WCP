@@ -39,7 +39,90 @@
         </AuthorizeView>
     </MudStack>
 
-    <MudStack Row Class="mt-4" Spacing="3">
+    <MudStack Row Class="mt-3">
+        <MudPaper Class="pa-4 border-[1px] border-border" Width="25%" Elevation="0">
+            <MudStack Row AlignItems="AlignItems.Center" Class="w-full">
+                <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Class=" h-[48px] aspect-square rounded-lg bg-primary-200 flex">
+                    <MudIcon Size="Size.Large" Icon="@Icons.Material.Filled.PlayArrow" Class="text-primary-700"></MudIcon>
+                </MudStack>
+                <MudStack Spacing="0" Class="w-full">
+                    <MudText Class="text-neutral-400">Antal videoer</MudText>
+
+                    <MudStack Row Class="w-full" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                        <MudText Typo="Typo.h5">@Project.Concepts.Sum(x => x.Amount)</MudText>
+                    </MudStack>
+                </MudStack>
+            </MudStack>
+        </MudPaper>
+
+        <MudPaper Class="pa-4 border-[1px] border-border" Width="25%" Elevation="0">
+            <MudStack Row AlignItems="AlignItems.Center" Class="w-full">
+                <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Class=" h-[48px] aspect-square rounded-lg bg-warning-200 flex">
+                    <MudIcon Size="Size.Large" Icon="@Icons.Material.Filled.LocalShipping" Class="text-warning-700"></MudIcon>
+                </MudStack>
+                <MudStack Spacing="0" Class="w-full">
+                    <MudText Class="text-neutral-400">Antal produkter</MudText>
+
+                    <MudStack Row Class="w-full" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                        <MudText Typo="Typo.h5">@Project.Concepts.Count()</MudText>
+                    </MudStack>
+                </MudStack>
+            </MudStack>
+        </MudPaper>
+
+        <MudPaper Class="pa-4 border-[1px] border-border" Width="25%" Elevation="0">
+            <MudStack Row AlignItems="AlignItems.Center" Class="w-full">
+                <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Class=" h-[48px] aspect-square rounded-lg bg-success-200 flex">
+                    <MudIcon Size="Size.Large" Icon="@Icons.Material.Filled.Assignment" Class="text-success-700"></MudIcon>
+                </MudStack>
+                <MudStack Spacing="0" Class="w-full">
+                    <MudText Class="text-neutral-400">Status</MudText>
+
+                    <MudStack Row Class="w-full" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                        <MudText Typo="Typo.h5">@Project.Status</MudText>
+                    </MudStack>
+                </MudStack>
+            </MudStack>
+        </MudPaper>
+
+        @if (Project.Status >= ProjectStatus.CreatorFilming) 
+        {
+            <MudPaper Class="pa-4 border-[1px] border-border" Width="25%" Elevation="0">
+                <MudStack Row AlignItems="AlignItems.Center" Class="w-full">
+                    <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Class=" h-[48px] aspect-square rounded-lg bg-blue-200 flex">
+                        <MudIcon Size="Size.Large" Icon="@Icons.Material.Filled.LocalMovies" Class="text-blue-700"></MudIcon>
+                    </MudStack>
+                    <MudStack Spacing="0" Class="w-full">
+                        <MudText Class="text-neutral-400">Afleveringer</MudText>
+
+                        <MudStack Row Class="w-full" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                            <MudText Typo="Typo.h5">@(Project.Participations.Where(x => x.HasDelivered).Count())/@Project.Participations.Count()</MudText>
+                        </MudStack>
+                    </MudStack>
+                </MudStack>
+            </MudPaper>
+        }
+        else 
+        {
+            <MudPaper Class="pa-4 border-[1px] border-border" Width="25%" Elevation="0">
+                <MudStack Row AlignItems="AlignItems.Center" Class="w-full">
+                    <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Class=" h-[48px] aspect-square rounded-lg bg-blue-200 flex">
+                        <MudIcon Size="Size.Large" Icon="@Icons.Material.Filled.LocalMovies" Class="text-blue-700"></MudIcon>
+                    </MudStack>
+                    <MudStack Spacing="0" Class="w-full">
+                        <MudText Class="text-neutral-400">Antal creators</MudText>
+
+                        <MudStack Row Class="w-full" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                            <MudText Typo="Typo.h5">@Project.Participations.Count()</MudText>
+                        </MudStack>
+                    </MudStack>
+                </MudStack>
+            </MudPaper>
+        }
+        
+    </MudStack>
+
+    <MudStack Row Class="mt-3" Spacing="3">
         <MudStack Class="grow" Spacing="3">
             <MudPaper Class="border-[1px] border-border" Elevation="0">
                 <div class="bg-neutral-50 rounded-t">
