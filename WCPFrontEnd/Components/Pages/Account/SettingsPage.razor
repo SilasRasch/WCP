@@ -322,8 +322,10 @@
                                     }
                                     else
                                     {
-                                        <span class="p-2 bg-error-50 text-error-700 border-error-700 border rounded">Ikke verificeret</span>
-                                        <span class="hover:underline text-blue-500 cursor-pointer">Tryk her for at blive verificeret</span>
+                                        <MudStack Row AlignItems="AlignItems.Center">
+                                            <span class="p-2 bg-error-50 text-error-700 border-error-700 border rounded">Ikke verificeret</span>
+                                            <a href="@CreatorOnboardingURL" class="hover:underline text-blue-500 cursor-pointer">Tryk her for at blive verificeret</a>
+                                        </MudStack>
                                     }
                                 </MudItem>
                             </MudGrid>

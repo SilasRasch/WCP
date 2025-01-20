@@ -11,9 +11,9 @@
 @inject NavigationManager Navigation
 @inject IJSRuntime jsRuntime
 @inject StripeService StripeService
-@* @inject IWcpDbContextFactory ContextFactory *@
 @inject IWcpDbContext Context
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject ApplicationState ApplicationState
 
 <MudThemeProvider @ref="_mudThemeProvider" Theme="@_theme" IsDarkMode="_isDarkMode" />
 <MudPopoverProvider />
@@ -68,8 +68,6 @@
                         </ChildContent>
 
                     </MudMenu>
-                    @* <MudIconButton Icon="@(DarkLightModeButtonIcon)" Color="Color.Warning" OnClick="@DarkModeToggle" />
-                    <MudNavLink Style="max-width: fit-content" Href="/logout" Match="NavLinkMatch.Prefix" IconColor="Color.Error" Icon="@Icons.Material.Filled.Logout">Log ud</MudNavLink> *@
                 </Authorized>
                 <NotAuthorized>
                     <MudNavLink Style="max-width: fit-content" Href="/login" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Login">Log ind</MudNavLink>
@@ -104,21 +102,25 @@
                     <AuthorizeView Context="connected" Policy="IsNotStripeConnected">
                         <Authorized>
                             <MudPaper Class="pa-2 mb-2 mud-error">
-                                <MudText Class="text-white" Typo="Typo.body1">🛑 Det ser ikke ud til at du er onboardet på vores <em>nye</em> betalingsplatform... Klik <a class="cursor-pointer underline" href="/settings">her</a> for kunne blive betalt! 💲</MudText>
+                                <MudText Class="text-white" Typo="Typo.body1">🛑 Det ser ikke ud til at du er onboardet på vores <em>nye</em> betalingsplatform... Klik <a class="cursor-pointer text-white underline" href="/settings">her</a> for kunne blive betalt! 💲</MudText>
                             </MudPaper>
                         </Authorized>
                     </AuthorizeView>
                     <AuthorizeView Context="connected" Policy="OnboardingIncomplete">
                         <Authorized>
                             <MudPaper Class="pa-2 mb-2 mud-error">
-                                <MudText Class="text-white" Typo="Typo.body1">🛑 Det ser ud til at vi mangler nogle informationer om dig for at kunne lave udbetalinger... Klik <a class="cursor-pointer underline" href="/settings">her</a> for kunne blive betalt! 💲</MudText>
+                                <MudText Class="text-white" Typo="Typo.body1">🛑 Det ser ud til at vi mangler nogle informationer om dig for at kunne lave udbetalinger... Klik <a class="cursor-pointer text-white underline" href="/settings">her</a> for kunne blive betalt! 💲</MudText>
                             </MudPaper>
                         </Authorized>
                     </AuthorizeView>
                 </Authorized>
             </AuthorizeView>
 
-            @Body
+            @if (ApplicationState.IsDataLoaded) 
+            {
+                @Body
+            }
+            
         </MudMainContent>
     </MudDrawerContainer>
 </MudLayout>
@@ -167,22 +169,7 @@
         Role = authState.User.FindFirst(c => c.Type == ClaimTypes.Role)?.Value;
         UserName = authState.User.FindFirst(c => c.Type == ClaimTypes.Name)?.Value;
 
-        await GetBalance();
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        // if (firstRender)
-        // {
-        //     _isDarkMode = await _mudThemeProvider!.GetSystemPreference();
-        //     StateHasChanged();
-        // }
-    }
-
-    protected override async Task OnParametersSetAsync()
-    {
-        await base.OnParametersSetAsync();
-
+        await ApplicationState.LoadDataAsync(Convert.ToInt16(authState.User.FindFirst(c => c.Type == "Id")?.Value));
         await GetBalance();
     }
 
@@ -249,30 +236,23 @@
     private async Task GetBalance()
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var creatorId = authState.User.FindFirst(c => c.Type == "CreatorId")?.Value;
         var stripeAccountId = authState.User.FindFirst(c => c.Type == "StripeAccountId")?.Value;
         var role = authState.User.FindFirst(c => c.Type == ClaimTypes.Role)?.Value;
 
-        if (creatorId is not null && role is not null && role == UserRole.Creator.ToString())
+        if (role is not null && role == UserRole.Creator.ToString())
         {
-            var creator = Context.Creators
-                    .Include(x => x.User)
-                    .ThenInclude(x => x.Language)
-                    .AsNoTracking()
-                    .SingleOrDefault(x => x.Id == Convert.ToInt16(creatorId));
-
-            if (stripeAccountId is not null && creator is not null)
+            if (stripeAccountId is not null)
             {
                 var balances = await StripeService.GetBalance(stripeAccountId);
 
                 // Try and get preferred currency
-                Balance = balances.Available.SingleOrDefault(x => x.Currency == creator.User.Language.Currency)!;
+                Balance = balances.Available.SingleOrDefault(x => x.Currency == ApplicationState.Language.Currency)!;
 
                 // Then get any
                 if (Balance is null) Balance = balances.Available.FirstOrDefault();
 
                 // Display zero
-                if (Balance is null) Balance = new BalanceAmount { Amount = 0, Currency = creator.User.Language.Currency };
+                if (Balance is null) Balance = new BalanceAmount { Amount = 0, Currency = ApplicationState.Language.Currency };
             }
         }
     }

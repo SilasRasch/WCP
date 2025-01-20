@@ -214,20 +214,20 @@
                         <MudText Typo="Typo.h6" Class="pa-4">Nyheder</MudText>
                         <MudDivider />
 
-                        <MudStack Spacing="0" Class="pb-4 max-h-[370px] overflow-hidden overflow-y-scroll" AlignItems="AlignItems.End" Justify="Justify.SpaceAround">
-                            @for (int i = 0; i < 11; i++) 
-                            {
-                                <MudStack Row Class="py-3 px-4 w-full">
-                                    <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Class=" h-[48px] aspect-square rounded-xl bg-warning-200 flex">
-                                        <MudIcon Size="Size.Large" Icon="@Icons.Material.Filled.PlayArrow" Class="text-warning-700"></MudIcon>
-                                    </MudStack>
-                                    <MudStack Spacing="0">
-                                        <MudText>Notifikation</MudText>
-                                        <MudText>Der er sket en ting...</MudText>
-                                    </MudStack>
+                        <MudStack Spacing="0" Class="pb-4 h-[370px] overflow-hidden overflow-y-scroll" Justify="Justify.FlexStart">
+                            <MudStack Row Class="py-3 px-4 w-full" AlignItems="AlignItems.Center">
+                                <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Class=" h-[48px] aspect-square rounded-xl bg-success-200 flex">
+                                    <MudIcon Size="Size.Large" Icon="@Icons.Material.Filled.Newspaper" Class="text-success-700"></MudIcon>
                                 </MudStack>
-                            }
+                                <MudStack Spacing="0">
+                                    <MudText>Platform 2.0</MudText>
+                                        <span class="text-neutral-400">Succesfuld release af Platform 2.0! <a class="text-blue-500 underline">Læs mere</a></span>
+                                </MudStack>
+                            </MudStack>
+
+                            <MudDivider />
                         </MudStack>
+                        
                     </MudPaper>
                 }
             </MudItem>
@@ -304,7 +304,7 @@
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var email = authState.User.FindFirst(c => c.Type == ClaimTypes.Email)?.Value;
         User = await Context.Users.Include(x => x.Organization).AsNoTracking().SingleOrDefaultAsync(x => x.Email == email);
-        var feedback = Context.Feedbacks.Include(x => x.Project).Where(x => x.Created.Month == DateTime.Now.AddMonths(-1).Month && x.Created.Year == DateTime.Now.AddMonths(-1).Year);
+        var feedback = await Context.Feedbacks.Include(x => x.Project).Where(x => x.Created.Month == DateTime.Now.AddMonths(-1).Month && x.Created.Year == DateTime.Now.AddMonths(-1).Year).ToListAsync();
         if (feedback.Any()) AverageFeedbackScore = Math.Round(feedback.Average(x => x.Score), 1);
 
         if (User is not null) 

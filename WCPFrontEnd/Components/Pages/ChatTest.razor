@@ -10,10 +10,10 @@
 @using WCPShared.Models.Enums
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider AuthenticationStateProvider
-@* @inject IWcpDbContextFactory ContextFactory *@
+@inject IWcpDbContext Context
 @inject IJSRuntime JSRuntime
 
-<MudIconButton Icon="@Icons.Material.Filled.ChatBubbleOutline" OnClick="() => isOpen = !isOpen"></MudIconButton>
+<MudIconButton Icon="@Icons.Material.Filled.ChatBubbleOutline" OnClick="OpenChat"></MudIconButton>
 
 <MudPopover Open="@isOpen" Fixed AnchorOrigin="Origin.TopRight" TransformOrigin="Origin.TopRight" MaxHeight="640">
     <MudStack Row Spacing="0">
@@ -96,10 +96,10 @@
 
 <script>
     function scrollToBottom(elementId) {
-        const container = document.getElementById(elementId);
-        if (container) {
-            container.scrollTop = container.scrollHeight;
-        }
+    const container = document.getElementById(elementId);
+    if (container) {
+    container.scrollTop = container.scrollHeight;
+    }
     }
 </script>
 
@@ -109,9 +109,8 @@
     private User ActiveUser;
     private User Recipient;
     private string MessageInput = string.Empty;
-
     private ChatService ChatService;
-    private IWcpDbContext Context;
+
 
     private HubConnection? HubConnection;
 
@@ -154,18 +153,15 @@
 
     protected override async Task OnInitializedAsync()
     {
-        // Context = ContextFactory.CreateDbContext();
-        // ChatService = new ChatService(Context);
-        // var auth = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        // string email = auth.User.FindFirst(c => c.Type == ClaimTypes.Email)?.Value!;
-        // ActiveUser = await Context.Users.SingleOrDefaultAsync(x => x.Email == email);
-        // Users = await ChatService.GetUsersWithLatestChat(x => x.Id != ActiveUser.Id, ActiveUser);
-
-        if (ActiveUser is not null)
+        ChatService = new ChatService(Context);
+        
+        var auth = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        string name = auth.User.FindFirst(c => c.Type == ClaimTypes.Name)?.Value!;
+        if (!string.IsNullOrEmpty(name))
         {
             HubConnection = new HubConnectionBuilder()
-            .WithUrl("https://test.wcp.dk/chathub?user=" + ActiveUser.Name)
-            .Build();
+                .WithUrl("https://test.wcp.dk/chathub?user=" + name)
+                .Build();
 
             HubConnection.On<ChatMessage>("ReceiveMessage", async (message) =>
             {
@@ -228,5 +224,15 @@
         {
             return $"{timeSpan.Days / 7} u.";
         }
+    }
+
+    public async Task OpenChat() 
+    {
+        isOpen = !isOpen;
+
+        var auth = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        string email = auth.User.FindFirst(c => c.Type == ClaimTypes.Email)?.Value!;
+        ActiveUser = await Context.Users.SingleOrDefaultAsync(x => x.Email == email);
+        Users = await ChatService.GetUsersWithLatestChat(x => x.Id != ActiveUser.Id, ActiveUser);
     }
 }

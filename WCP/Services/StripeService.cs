@@ -241,8 +241,15 @@ namespace WCPShared.Services
 
         public async Task<Balance> GetBalance(string accountId)
         {
-            BalanceService balanceService = new BalanceService();
-            return await balanceService.GetAsync(new RequestOptions { StripeAccount = accountId });
+            try
+            {
+                BalanceService balanceService = new BalanceService();
+                return await balanceService.GetAsync(new RequestOptions { StripeAccount = accountId });
+            }
+            catch
+            {
+                return null!;
+            }
         }
 
         public async Task<Payout> CreatePayout(string accountId, float amount, string currency)
@@ -266,19 +273,26 @@ namespace WCPShared.Services
 
         public async Task<IEnumerable<Payout>> GetAccountPayouts(string accountId)
         {
-            var payoutService = new PayoutService();
-
-            var payoutListOptions = new PayoutListOptions
+            try
             {
-                Limit = 100,
-            };
+                var payoutService = new PayoutService();
 
-            var requestOptions = new RequestOptions
+                var payoutListOptions = new PayoutListOptions
+                {
+                    Limit = 100,
+                };
+
+                var requestOptions = new RequestOptions
+                {
+                    StripeAccount = accountId
+                };
+
+                return await payoutService.ListAsync(payoutListOptions, requestOptions);
+            }
+            catch
             {
-                StripeAccount = accountId
-            };
-
-            return await payoutService.ListAsync(payoutListOptions, requestOptions);
+                return [];
+            }
         }
 
         public async Task<IEnumerable<PaymentMethod>> GetPaymentMethods(string accountId)
@@ -307,8 +321,15 @@ namespace WCPShared.Services
 
         public Account GetAccount(string accountId)
         {
-            var accountService = new AccountService();
-            return accountService.Get(accountId);
+            try
+            {
+                var accountService = new AccountService();
+                return accountService.Get(accountId);
+            }
+            catch
+            {
+                return null!;
+            }
         }
 
         public async Task<IEnumerable<Transfer>> GetAccountTransfers(string accountId)
@@ -328,14 +349,21 @@ namespace WCPShared.Services
             if (string.IsNullOrEmpty(accountId))
                 return false;
             
-            var service = new AccountService();
-            var account = await service.GetAsync(accountId);
-            var requirements = account.Requirements;
+            try
+            {
+                var service = new AccountService();
+                var account = await service.GetAsync(accountId);
+                var requirements = account.Requirements;
 
-            if (requirements != null && requirements.CurrentlyDue.Count > 0)
-                 return false;
+                if (requirements != null && requirements.CurrentlyDue.Count > 0)
+                    return false;
 
-            return true;
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         public async Task<List<Stripe.Subscription>> GetAllSubscriptions(string accountId)

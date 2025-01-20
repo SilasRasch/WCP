@@ -125,7 +125,7 @@
     </MudStack>
 
     <div Class="pa-4 border-warning-300 border bg-orange-100 rounded">
-        <MudStack Row>
+        <MudStack Row AlignItems="AlignItems.Center">
             <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Class=" h-[48px] aspect-square rounded-lg bg-warning-200 flex">
                 <MudIcon Size="Size.Large" Icon="@Icons.Material.Outlined.Info" Class="text-warning-700"></MudIcon>
             </MudStack>
@@ -215,12 +215,11 @@
     private Creator? Creator;
     private Balance Balance;
     private Account Account;
-    private IEnumerable<Transfer> Transfers = [];
+    private IEnumerable<Transfer> Transfers;
 
     private IEnumerable<Payout> AccountPayouts;
 
     private string? StripeAccount;
-    private Payout Payout;
 
     protected override async Task OnInitializedAsync()
     {
@@ -235,35 +234,14 @@
             .AsSplitQuery()
             .SingleOrDefaultAsync(x => x.Id == Convert.ToInt32(creatorId));
 
-        if (Creator is not null)
-            Balance = await StripeService.GetBalance(StripeAccount);
-
-        if (StripeAccount is not null) 
+        if (!string.IsNullOrEmpty(StripeAccount)) 
         {
+            if (Creator is not null)
+                Balance = await StripeService.GetBalance(StripeAccount);
+
             AccountPayouts = await StripeService.GetAccountPayouts(StripeAccount);
             Account = StripeService.GetAccount(StripeAccount);
             Transfers = await StripeService.GetAccountTransfers(StripeAccount);
         }
     }
-
-    // private async Task TestWithdrawal() 
-    // {
-    //     await TransactionService.TakeFromBalance(Creator.BalanceId, 100, "Udbetaling", WCPShared.Models.Enums.TransactionType.Payout);
-    //     StateHasChanged();
-    // }
-
-    // private async Task TestDeposit()
-    // {
-    //     await TransactionService.AddToBalance(Creator.BalanceId, 500, "Indbetaling", WCPShared.Models.Enums.TransactionType.IncomingTransfer);
-    //     StateHasChanged();
-    // }
-
-    // private async Task StartPayout() 
-    // {
-    //     if (StripeAccount is not null) 
-    //     {
-    //         Payout = await StripeService.CreatePayout(StripeAccount, PayoutAmount);
-    //         PayoutConfirmed = true;
-    //     }
-    // }
 }
