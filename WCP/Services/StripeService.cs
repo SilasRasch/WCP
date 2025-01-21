@@ -431,5 +431,19 @@ namespace WCPShared.Services
                 },
             });
         }
+
+        public async Task<StripeList<IExternalAccount>> GetPayoutAccount(string accountId)
+        {
+            try
+            {
+                var options = new AccountExternalAccountListOptions { Object = "bank_account" };
+                var service = new AccountExternalAccountService();
+                return service.List(accountId, options);
+            }
+            catch
+            {
+                return [];
+            }
+        }
     }
 }

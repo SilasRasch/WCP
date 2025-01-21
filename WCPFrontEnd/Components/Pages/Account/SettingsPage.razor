@@ -329,6 +329,28 @@
                                     }
                                 </MudItem>
                             </MudGrid>
+
+                            <MudDivider />
+
+                            <MudGrid>
+                                <MudItem xs="3">
+                                    <span>Konto til udbetaling</span>
+                                </MudItem>
+                                <MudItem xs="6">
+                                    @foreach (var account in PayoutAccounts)
+                                    {
+                                        if (account is BankAccount bankAccount)
+                                        {
+                                            <MudStack Row AlignItems="AlignItems.Center">
+                                                <span>@bankAccount.Country************@bankAccount.Last4 (@bankAccount.BankName)</span>
+                                                <MudMenu Size="Size.Small" Icon="@Icons.Material.Filled.MoreHoriz" AnchorOrigin="Origin.BottomCenter">
+                                                    <MudMenuItem>Ændre</MudMenuItem>
+                                                </MudMenu>
+                                            </MudStack>
+                                        }
+                                    }
+                                </MudItem>
+                            </MudGrid>
                         </MudStack>
                     </MudStack>
                 </MudTabPanel>
@@ -400,6 +422,7 @@
 
     private Creator Creator;
     private IEnumerable<PaymentMethod> PaymentMethods = [];
+    private IEnumerable<IExternalAccount> PayoutAccounts = [];
     private IEnumerable<Language> _selectedLanguages { get; set; } = new HashSet<Language>();
 
     private string OldPassword = string.Empty;
@@ -426,6 +449,7 @@
             if (Creator is not null && Creator.Languages is not null) 
             {
                 _selectedLanguages = Creator.Languages;
+                PayoutAccounts = await StripeService.GetPayoutAccount(Creator.StripeAccountId);
 
                 CreatorOnboardingStatusConnect = await StripeService.CheckOnboardingStatus(Creator.StripeAccountId);
 
