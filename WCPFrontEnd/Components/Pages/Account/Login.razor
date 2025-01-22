@@ -16,35 +16,40 @@
 @inject StripeService StripeService
 @inject ApplicationState ApplicationState
 
-<div class="grid justify-center gap-2 pt-4 pb-4">
+<MudGrid Class="absolute top-0 left-0 min-h-[100vh]" Spacing="0">
+    <MudItem xs="5">
+        <MudStack Spacing="1" Justify="Justify.Center" AlignItems="AlignItems.Center" Class="h-full">
+            <MudImage Src="https://wc-files.se-sto-1.linodeobjects.com/media/wc-logo.png" Height="28" Class="max-h-[36px] my-4" Alt="WebContent logo" />
+            <h1 class="text-[2em] font-semibold">Velkommen tilbage</h1>
+            <h1 class="text-[16px] text-neutral-400">Vi har savnet dig!</h1>
+            <EditForm Model="@Model" OnValidSubmit="Authenticate" FormName="LoginForm" class="w-full px-16 flex flex-column gap-2 mt-4 mb-2">
+                <DataAnnotationsValidator />
+                <div class="grid w-full">
+                    <span>Email</span>
+                    <InputText @bind-Value="Model.Email" class="p-2 rounded-lg w-full" placeholder="Email" />
+                    <ValidationMessage For="() => Model.Email" class="text-red-600" />
+                </div>
+                <div class="grid w-full">
+                    <span>Kode</span>
+                    <InputText type="password" @bind-Value="Model.Password" class="p-2 rounded-lg w-full" placeholder="Kodeord" />
+                    <ValidationMessage For="() => Model.Password" class="text-red-600" />
+                </div>
 
-    <MudPaper>
-        <EditForm Model="@Model" OnValidSubmit="Authenticate" FormName="LoginForm" class="p-8 rounded-md flex flex-column gap-2 mud-secondary">
-            <DataAnnotationsValidator />
-            <div class="font-semibold">
-                Login
-            </div>
-            <div class="grid">
-                <InputText @bind-Value="Model.Email" class="p-2 rounded-lg" placeholder="Email" />
-                <ValidationMessage For="() => Model.Email" class="text-red-600" />
-            </div>
-            <div class="grid">
-                <InputText type="password" @bind-Value="Model.Password" class="p-2 rounded-lg" placeholder="Password" />
-                <ValidationMessage For="() => Model.Password" class="text-red-600" />
-            </div>
+                @if (errorMessage is not null)
+                {
+                    <span class="text-red-600 mt-2">@errorMessage</span>
+                }
 
-            @if (errorMessage is not null)
-            {
-                <span class="text-red-600 mt-2">@errorMessage</span>
-            }
+                <hr />
 
-            <hr />
-
-            <button type="submit" class="rounded-lg p-2 bg-green-500 text-white hover:bg-green-600 duration-200">Login</button>
-        </EditForm>
-    </MudPaper>
-
-</div>
+                <button type="submit" class="rounded-lg p-2 bg-primary-500 text-white hover:bg-primary-600 duration-200 w-full">Login</button>
+            </EditForm>
+            @* <span>Har du ikke en bruger? Registrer dig her</span> *@
+        </MudStack>
+        
+    </MudItem>
+    <MudItem xs="7" Class="bg-primary-600"></MudItem>
+</MudGrid>
 
 @code {
     [CascadingParameter]
