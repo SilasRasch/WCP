@@ -16,22 +16,22 @@
 @inject StripeService StripeService
 @inject ApplicationState ApplicationState
 
-<MudGrid Class="absolute top-0 left-0 min-h-[100vh]" Spacing="0">
-    <MudItem xs="5">
+<MudGrid Class="absolute top-0 left-0 min-h-[100vh] overflow-hidden" Spacing="0">
+    <MudItem xs="6">
         <MudStack Spacing="1" Justify="Justify.Center" AlignItems="AlignItems.Center" Class="h-full">
-            <MudImage Src="https://wc-files.se-sto-1.linodeobjects.com/media/wc-logo.png" Height="28" Class="max-h-[36px] my-4" Alt="WebContent logo" />
-            <h1 class="text-[2em] font-semibold">Velkommen tilbage</h1>
+            <MudImage Src="https://wc-files.se-sto-1.linodeobjects.com/media/wc-logo.png" Height="28" Class="max-h-[48px] my-6" Alt="WebContent logo" />
+            <h1 class="text-[2.5em] font-medium">Velkommen tilbage</h1>
             <h1 class="text-[16px] text-neutral-400">Vi har savnet dig!</h1>
-            <EditForm Model="@Model" OnValidSubmit="Authenticate" FormName="LoginForm" class="w-full px-16 flex flex-column gap-2 mt-4 mb-2">
+            <EditForm Model="@Model" OnValidSubmit="Authenticate" FormName="LoginForm" class="w-full max-w-[360px] flex flex-column gap-2 mt-4 mb-2">
                 <DataAnnotationsValidator />
                 <div class="grid w-full">
                     <span>Email</span>
-                    <InputText @bind-Value="Model.Email" class="p-2 rounded-lg w-full" placeholder="Email" />
+                    <InputText type="email" @bind-Value="Model.Email" class="p-2 rounded-lg w-full border border-border" />
                     <ValidationMessage For="() => Model.Email" class="text-red-600" />
                 </div>
                 <div class="grid w-full">
                     <span>Kode</span>
-                    <InputText type="password" @bind-Value="Model.Password" class="p-2 rounded-lg w-full" placeholder="Kodeord" />
+                    <InputText type="password" @bind-Value="Model.Password" class="p-2 rounded-lg w-full border border-border" />
                     <ValidationMessage For="() => Model.Password" class="text-red-600" />
                 </div>
 
@@ -48,7 +48,41 @@
         </MudStack>
         
     </MudItem>
-    <MudItem xs="7" Class="bg-primary-600"></MudItem>
+    <MudItem xs="6" Class="bg-primary-600 overflow-hidden">
+        <div class="relative h-full w-full flex flex-column align-items-center bg-transparent overflow-hidden">
+            <h1 class="text-[3.5em] font-bold leading-none text-white pt-24 px-24">Creators og brands forenet på samme Platform</h1>
+            <h1 class="text-[2em] leading-tight text-white px-24 mt-6">Transformér dine projekter med den ultimative platform til kollaboration.</h1>
+
+            <MudPaper Elevation="21" Class="w-[300px] absolute left-16 bottom-64 z-40">
+                <MudText Typo="Typo.h6" Class="pa-4">Projekt status</MudText>
+                <MudDivider />
+                <MudChart ChartType="ChartType.Donut" Height="250px" InputData="@donutData" InputLabels="@donutLabels" ChartOptions="new ChartOptions() { }">
+                    <CustomGraphics>
+                        <text class="donut-inner-text" x="50%" y="45%" dominant-baseline="middle" text-anchor="middle" font-family="Helvetica" font-size="2">Total</text>
+                        <text class="donut-inner-text" x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" font-family="Helvetica" font-size="5">12</text>
+                    </CustomGraphics>
+                </MudChart>
+            </MudPaper>
+
+            <MudPaper Class="pa-4 absolute right-16 top-96 z-40" Width="25%" Elevation="21">
+                <MudStack Row AlignItems="AlignItems.Center" Class="w-full">
+                    <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Class=" h-[48px] aspect-square rounded-lg bg-yellow-200 flex">
+                        <MudIcon Size="Size.Large" Icon="@Icons.Material.Filled.Star" Class="text-yellow-700"></MudIcon>
+                    </MudStack>
+                    <MudStack Spacing="0" Class="w-full">
+                        <MudText Class="text-neutral-400">Total projekter</MudText>
+
+                        <MudStack Row Class="w-full" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                            <MudText Typo="Typo.h5">08</MudText>
+                            <span class="text-xs font-semibold bg-success-50 text-success-400 h-fit rounded-lg py-[2px] px-[6px]">+25%</span>
+                        </MudStack>
+                    </MudStack>
+                </MudStack>
+            </MudPaper>
+
+            <MudImage Src="https://wc-files.se-sto-1.linodeobjects.com/media/f20f8d5a4a4522bbc01c3dc175ec1a6f.png" Class="rounded-xl border-8 border-neutral-900 absolute max-w-[50vw] z-30 -right-64 -bottom-6 overflow-hidden" Alt="WebContent Dashboard" />
+        </div>
+    </MudItem>
 </MudGrid>
 
 @code {
@@ -62,6 +96,9 @@
     private MudForm _form;
     private bool _success;
     private string[] _errors = { };
+
+    public string[] donutLabels = { "I gang", "Færdig", "Afventer" };
+    public double[] donutData = { 3, 3, 6 };
 
     private async Task Authenticate()
     {
