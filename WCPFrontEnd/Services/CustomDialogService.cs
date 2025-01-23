@@ -2,6 +2,7 @@
 using WCPFrontEnd.Components.Pages.Account.Dialoges;
 using WCPFrontEnd.Components.Pages.Brand.Dialoges;
 using WCPFrontEnd.Components.Pages.ProductRelated.Dialoges;
+using WCPFrontEnd.Components.Pages.ProjectPages;
 using WCPFrontEnd.Components.Pages.ProjectPages.Dialoges;
 using WCPFrontEnd.Components.Pages.Users.Dialoges;
 using WCPShared.Models.Entities;
@@ -67,7 +68,7 @@ namespace WCPFrontEnd.Services
                 { x => x.Brand, brand }
             };
 
-            var options = new DialogOptions { CloseOnEscapeKey = true, CloseButton = true };
+            var options = new DialogOptions { CloseOnEscapeKey = true };
             var dialog = await DialogService.ShowAsync<EditBrandDialog>("Delete dialog", parameters, options);
             var result = await dialog.Result;
         }
@@ -79,7 +80,7 @@ namespace WCPFrontEnd.Services
                 { x => x.Creator, creator }
             };
 
-            var options = new DialogOptions { CloseOnEscapeKey = true, CloseButton = true };
+            var options = new DialogOptions { CloseOnEscapeKey = true };
             var dialog = await DialogService.ShowAsync<CreatorDetailDialog>("Creator detail dialog", parameters, options);
             var result = await dialog.Result;
         }
@@ -91,8 +92,15 @@ namespace WCPFrontEnd.Services
                 { x => x.User, user }
             };
 
-            var options = new DialogOptions { CloseOnEscapeKey = true, CloseButton = true };
+            var options = new DialogOptions { CloseOnEscapeKey = true };
             var dialog = await DialogService.ShowAsync<AddPaymentDialog>("Creator detail dialog", parameters, options);
+            var result = await dialog.Result;
+        }
+
+        public async Task OpenProjectCreation()
+        {
+            var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Large, FullWidth = true };
+            var dialog = await DialogService.ShowAsync<CreateProject>("Creator detail dialog", options);
             var result = await dialog.Result;
         }
     }

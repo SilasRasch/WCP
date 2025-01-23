@@ -30,7 +30,7 @@ namespace WCPFrontEnd.Hubs
 
         public async Task SendPrivateMessage(ChatMessage message)
         {
-            if (_userConnections.TryGetValue(message.To.Name, out var connectionId))
+            if (_userConnections.TryGetValue(message.To.Email, out var connectionId))
             {
                 var fromUser = _userConnections.FirstOrDefault(x => x.Value == Context.ConnectionId).Key;
                 if (!string.IsNullOrEmpty(fromUser))

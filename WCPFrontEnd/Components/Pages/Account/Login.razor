@@ -59,7 +59,7 @@
             <h1 class="text-[3.5em] font-bold leading-none text-white pt-24 px-24">Creators og brands forenet på samme Platform</h1>
             <h1 class="text-[2em] leading-tight text-white px-24 mt-6">Transformér dine projekter med den ultimative platform til kollaboration.</h1>
 
-            <MudPaper Elevation="21" Class="w-[300px] absolute left-16 bottom-64 z-40">
+            <MudPaper Elevation="21" Class="w-[300px] absolute left-16 top-1/2 z-40">
                 <MudText Typo="Typo.h6" Class="pa-4">Projekt status</MudText>
                 <MudDivider />
                 <MudChart ChartType="ChartType.Donut" Height="250px" InputData="@donutData" InputLabels="@donutLabels" ChartOptions="new ChartOptions() { }">
@@ -70,7 +70,7 @@
                 </MudChart>
             </MudPaper>
 
-            <MudPaper Class="pa-4 absolute right-16 top-96 z-40" Width="25%" Elevation="21">
+            <MudPaper Class="pa-4 absolute right-16 sm:top-1/4 md:top-1/3 z-40" Width="312px" Elevation="21">
                 <MudStack Row AlignItems="AlignItems.Center" Class="w-full">
                     <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Class=" h-[48px] aspect-square rounded-lg bg-yellow-200 flex">
                         <MudIcon Size="Size.Large" Icon="@Icons.Material.Filled.Star" Class="text-yellow-700"></MudIcon>
@@ -85,9 +85,8 @@
                     </MudStack>
                 </MudStack>
             </MudPaper>
-
-            <MudImage Src="https://wc-files.se-sto-1.linodeobjects.com/media/f20f8d5a4a4522bbc01c3dc175ec1a6f.png" Class="rounded-xl border-8 border-neutral-900 absolute max-w-[50vw] z-30 -right-64 -bottom-6 overflow-hidden" Alt="WebContent Dashboard" />
         </div>
+        <MudImage Src="https://wc-files.se-sto-1.linodeobjects.com/media/f20f8d5a4a4522bbc01c3dc175ec1a6f.png" Class="rounded-xl border-8 border-neutral-900 absolute h-[64vh] z-30 xl:-right-32 -right-[48em] -bottom-6 overflow-hidden" Alt="WebContent Dashboard" />
     </MudItem>
 </MudGrid>
 

@@ -25,7 +25,7 @@ namespace WCPFrontEnd.Services
                 // Save chat to DB
                 await _context.AddAsync(message);
                 await _context.SaveChangesAsync();
-                await hubConnection.SendAsync("SendPrivateMessage", message);
+                await hubConnection.SendAsync("SendPrivateMessage", new ChatMessageDto(message));
             }
 
             return message;

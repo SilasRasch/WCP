@@ -36,18 +36,26 @@
                         <MudText>@Project.Type</MudText>
                     </MudStack>
                 </MudItem>
-                <MudItem Class="" xs="4">
-                    <MudStack Spacing="0">
-                        <MudText Class="text-gray-500">Oprettet</MudText>
-                        <MudText>@Project.Created.ToString("d")</MudText>
-                    </MudStack>
-                </MudItem>
-                <MudItem Class="" xs="4">
-                    <MudStack Spacing="0">
-                        <MudText Class="text-gray-500">Status</MudText>
-                        <MudText>@Project.Status</MudText>
-                    </MudStack>
-                </MudItem>
+
+                @if (ShowCreated)
+                {
+                    <MudItem Class="" xs="4">
+                        <MudStack Spacing="0">
+                            <MudText Class="text-gray-500">Oprettet</MudText>
+                            <MudText>@Project.Created.ToString("d")</MudText>
+                        </MudStack>
+                    </MudItem>
+                }
+
+                @if (ShowStatus) 
+                {
+                    <MudItem Class="" xs="4">
+                        <MudStack Spacing="0">
+                            <MudText Class="text-gray-500">Status</MudText>
+                            <MudText>@Project.Status</MudText>
+                        </MudStack>
+                    </MudItem>
+                }
             </MudGrid>
         </MudPaper>
 
@@ -58,18 +66,25 @@
             </div>
 
             <MudGrid Class="pa-4">
-                <MudItem Class="" xs="6">
-                    <MudStack Spacing="0">
-                        <MudText Class="text-gray-500">Pris</MudText>
-                        <MudText>@(Project.Price != 0 ? $"{Project.Price} kr" : "Ingen pris endnu")</MudText>
-                    </MudStack>
-                </MudItem>
-                <MudItem Class="" xs="6">
-                    <MudStack Spacing="0">
-                        <MudText Class="text-gray-500">Deadline</MudText>
-                        <MudText>@Project.Deadline.ToString("d")</MudText>
-                    </MudStack>
-                </MudItem>
+                @if (ShowPrice)
+                {
+                    <MudItem Class="" xs="6">
+                        <MudStack Spacing="0">
+                            <MudText Class="text-gray-500">Pris</MudText>
+                            <MudText>@(Project.Price != 0 ? $"{Project.Price} kr" : "Ingen pris endnu")</MudText>
+                        </MudStack>
+                    </MudItem>
+                }
+
+                @if (ShowDeadline)
+                {
+                    <MudItem Class="" xs="6">
+                        <MudStack Spacing="0">
+                            <MudText Class="text-gray-500">Deadline</MudText>
+                            <MudText>@Project.Deadline.ToString("d")</MudText>
+                        </MudStack>
+                    </MudItem>
+                }
 
                 <MudItem Class="" xs="6">
                     <MudStack Spacing="0">
@@ -78,7 +93,7 @@
                     </MudStack>
                 </MudItem>
 
-                @if (Project.Type == ProjectType.UGC || Project.Type == ProjectType.Photos)
+                @if (ShowCreators && (Project.Type == ProjectType.UGC || Project.Type == ProjectType.Photos))
                 {
                     <MudItem Class="" xs="6">
                         <MudStack Spacing="0">
@@ -160,11 +175,26 @@
         </MudPaper>
     </MudStack>
 </MudStack>
-   
+
 
 @code {
     [Parameter]
     public Project Project { get; set; }
+
+    [Parameter]
+    public bool ShowStatus { get; set; } = true;
+
+    [Parameter]
+    public bool ShowDeadline { get; set; } = true;
+
+    [Parameter]
+    public bool ShowPrice { get; set; } = true;
+
+    [Parameter]
+    public bool ShowCreated { get; set; } = true;
+
+    [Parameter]
+    public bool ShowCreators { get; set; } = true;
 
     public async Task OpenProductDialog(Product product)
     {

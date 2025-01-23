@@ -1,14 +1,21 @@
-﻿<MudNavMenu Class="h-full" Color="Color.Primary" Rounded>
+﻿@using WCPFrontEnd.Services
+@inject CustomDialogService DialogService
+
+<MudNavMenu Class="h-full" Color="Color.Primary" Rounded>
+    <AuthorizeView Roles="Bruger">
+        <MudStack @onclick="DialogService.OpenProjectCreation" AlignItems="AlignItems.Center" Row Class="my-4 p-2 px-4 bg-primary-50 hover:bg-primary-500 hover:text-white duration-200 text-primary-500 cursor-pointer rounded">
+            <MudIcon Icon="@Icons.Material.Filled.Add" />
+            <p class="font-medium">Opret nyt projekt</p>
+        </MudStack>
+    
+    </AuthorizeView>
+    
     <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Dashboard</MudNavLink>
     
     <AuthorizeView Policy="IsNotSubscribed">
         <MudNavLink Href="settings" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AttachMoney">Køb adgang</MudNavLink>
     </AuthorizeView>
     
-    <AuthorizeView Roles="Bruger">
-        <MudNavLink Href="new-project" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Add">Opret nyt projekt</MudNavLink>
-    </AuthorizeView>
-
     <AuthorizeView>
         <MudNavLink Href="projects" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Assignment">Projekter</MudNavLink>
     </AuthorizeView>

@@ -14,6 +14,7 @@
 @inject StripeService StripeService
 @inject ProjectService ProjectService
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject CustomDialogService DialogService
 @attribute [Authorize]
 
 <PageTitle>WebContent Platform</PageTitle>
@@ -47,7 +48,7 @@
                 <MudStack Row Spacing="1" Class="h-fit">
                     <MudButton Variant="Variant.Outlined" Class="rounded-lg !normal-case">Se rapport</MudButton>
                     <MudButton Variant="Variant.Outlined" Class="rounded-lg !normal-case" StartIcon="@Icons.Material.Filled.FilterList">Filtre</MudButton>
-                    <MudButton DropShadow="false" Href="/new-project" Variant="Variant.Filled" Class="rounded-lg !normal-case" Color="Color.Primary" StartIcon="@Icons.Material.Filled.AddCircleOutline">Opret ny</MudButton>
+                    <MudButton DropShadow="false" OnClick="DialogService.OpenProjectCreation" Variant="Variant.Filled" Class="rounded-lg !normal-case" Color="Color.Primary" StartIcon="@Icons.Material.Filled.AddCircleOutline">Opret ny</MudButton>
                 </MudStack>
             </AuthorizeView>
         </MudStack>

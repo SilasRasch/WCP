@@ -18,6 +18,7 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IJSRuntime jsRuntime
 @inject NavigationManager NavigationManager
+@inject CustomDialogService CustomDialogService
 @attribute [Authorize]
 
 <PageTitle>Projekter</PageTitle>
@@ -34,7 +35,7 @@
             <MudButton Variant="Variant.Outlined" Class="rounded-lg !normal-case" StartIcon="@Icons.Material.Filled.FilterList">Filtre</MudButton>
 
             <AuthorizeView Roles="Bruger">
-                <MudButton Href="/new-project" Variant="Variant.Filled" Class="rounded-lg !normal-case" Color="Color.Primary" StartIcon="@Icons.Material.Filled.AddCircleOutline">Opret ny</MudButton>
+                <MudButton OnClick="CustomDialogService.OpenProjectCreation" Variant="Variant.Filled" Class="rounded-lg !normal-case" Color="Color.Primary" DropShadow="false" StartIcon="@Icons.Material.Filled.AddCircleOutline">Opret ny</MudButton>
             </AuthorizeView>
         </MudStack>
     </MudStack>

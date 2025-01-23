@@ -15,40 +15,63 @@
 
 <MudIconButton Icon="@Icons.Material.Filled.ChatBubbleOutline" OnClick="OpenChat"></MudIconButton>
 
-<MudPopover Open="@isOpen" Fixed AnchorOrigin="Origin.TopRight" TransformOrigin="Origin.TopRight" MaxHeight="640">
-    <MudStack Row Spacing="0">
-        <MudStack Spacing="0" Class="overflow-y-scroll max-h-[640px] min-w-72">
-            <MudStack Row Class="px-2 py-2 mud-secondary" Spacing="0">
-                <input Class="px-2 text-lg mud-secondary" placeholder="Søg" @onchange="e => SearchInputChanged((string) e.Value)" />
-                @* <MudSpacer /> *@
-                <MudIconButton Icon="@Icons.Material.Filled.Search" />
-            </MudStack>
+@if (isOpen) 
+{
 
-            <MudDivider />
-
-            @foreach (var user in Users)
-            {
-                <MudStack Class="pa-2 cursor-pointer" Row AlignItems="AlignItems.Center" onclick="@(() => ChangeRecipient(user.User))">
-                    <MudAvatar Color="Color.Primary">
-                        @(user.User.Name.First())
-                    </MudAvatar>
-                    <MudStack Justify="Justify.Center" Spacing="0">
-                        <MudText>@user.User.Name</MudText>
-                        @if (user.LatestMessage is not null)
-                        {
-                            <MudText Typo="Typo.caption" Class="opacity-75">@user.LatestMessage.Message - @(GetTimeSpanString(DateTime.Now - user.LatestMessage.Sent))</MudText>
-                        }
+    <div class="absolute right-0 top-0 h-[100vh] bg-white z-40 shadow-lg shadow-black/30 xl:min-w-[384px]">
+        @if (Recipient is null) 
+        {
+            <MudStack Spacing="0" Class="">
+                <MudStack Row AlignItems="AlignItems.Center" Class="p-2 py-4" Spacing="2">
+                    <MudIcon @onclick="() => isOpen = false" Class="cursor-pointer" Icon="@Icons.Material.Filled.KeyboardArrowLeft" />
+                    <MudStack Spacing="0">
+                        <span class="text-[18px] font-semibold">WebChat</span> 
+                        <span class="text-neutral-400">Interagér med Platformens kollaboratører!</span>
                     </MudStack>
                 </MudStack>
-                <MudDivider />
-            }
-        </MudStack>
 
-        @if (Recipient is not null)
+                <MudDivider />
+                <MudStack Row Class="px-2 py-2 w-full" Spacing="0">
+                    <input Class="px-2 text-lg w-full" placeholder="Søg efter personer" @onchange="e => SearchInputChanged((string) e.Value)" />
+                    <MudSpacer />
+                    <MudIconButton Icon="@Icons.Material.Filled.Search" />
+                </MudStack>
+                <MudDivider />
+
+                @foreach (var user in Users)
+                {
+                    <MudStack Class="pa-4 cursor-pointer" Row AlignItems="AlignItems.Center" onclick="@(() => ChangeRecipient(user.User))">
+                        <MudAvatar Color="Color.Primary" Square Rounded>
+                            @(user.User.Name.First())
+                        </MudAvatar>
+                        <MudStack Justify="Justify.Center" Spacing="0">
+                            <MudStack Row>
+                                <MudText>@user.User.Name</MudText>
+                                @if (user.LatestMessage is not null) 
+                                {
+                                    @(GetTimeSpanString(DateTime.Now - user.LatestMessage.Sent))
+                                }
+                            </MudStack>
+                            @if (user.LatestMessage is not null)
+                            {
+                                <MudText Typo="Typo.caption" Class="opacity-75">@user.LatestMessage.Message</MudText>
+                            }
+                            else 
+                            {
+                                <MudText Typo="Typo.caption" Class="opacity-75">I har ikke skabt kontakt endnu...</MudText>
+                            }
+                        </MudStack>
+                    </MudStack>
+                    <MudDivider />
+                }
+            </MudStack>
+        }
+        else
         {
-            <MudStack AlignItems="AlignItems.Start" Spacing="0" Class="h-full min-w-72">
-                <MudStack Row AlignItems="AlignItems.Center" Class="p-2 mud-secondary w-full" Spacing="0">
-                    <MudAvatar Color="Color.Primary">
+            <MudStack AlignItems="AlignItems.Start" Spacing="0" Class="relative h-full min-w-72">
+                <MudStack Row AlignItems="AlignItems.Center" Class="p-2 py-4 w-full" Spacing="2">
+                    <MudIcon @onclick="() => Recipient = null" Class="cursor-pointer" Icon="@Icons.Material.Filled.KeyboardArrowLeft" />
+                    <MudAvatar Color="Color.Primary" Square Rounded>
                         @Recipient.Name.First()
                     </MudAvatar>
                     <MudStack Class="mx-2" Spacing="0">
@@ -56,21 +79,21 @@
                         <MudText Typo="Typo.caption">@Recipient.Role</MudText>
                     </MudStack>
                     <MudSpacer />
-                    <MudIconButton OnClick="@(() => Recipient = null)" Icon="@Icons.Material.Filled.Close" />
+                    <MudIconButton OnClick="() => isOpen = false" Icon="@Icons.Material.Filled.Close" />
                 </MudStack>
 
                 <MudDivider />
 
-                <div id="scrollContainer" class="m-2 flex flex-col gap-2 w-72 overflow-y-scroll max-h-[500px]">
+                <div id="scrollContainer" class="m-2 flex flex-col gap-2 overflow-y-scroll h-[90vh] w-full">
                     @foreach (var chatMessage in Messages.OrderBy(x => x.Sent))
                     {
-                        if (chatMessage.From.Id == ActiveUser.Id) 
+                        if (chatMessage.From.Id == ActiveUser.Id)
                         {
                             <MudTooltip Placement="Placement.Left" RootClass="self-end" Text="@chatMessage.Sent.ToString()">
                                 <MudText Class="mud-primary text-white p-2 rounded-lg mr-2">@chatMessage.Message</MudText>
                             </MudTooltip>
                         }
-                        else if (chatMessage.From.Id == Recipient.Id) 
+                        else if (chatMessage.From.Id == Recipient.Id)
                         {
                             <MudTooltip Placement="Placement.Right" RootClass="self-start" Text="@chatMessage.Sent.ToString()">
                                 <MudText Class="mud-secondary p-2 rounded-lg">@chatMessage.Message</MudText>
@@ -81,18 +104,18 @@
 
                 <MudSpacer />
 
-                <MudStack Spacing="0" Class="absolute bottom-0 right-0">
+                <MudStack Spacing="0" Class="absolute bottom-0 right-0 w-full">
                     <MudDivider />
-                    <MudStack Row Spacing="0" AlignItems="AlignItems.Center" Class="w-[304px] p-2">
-                        <MudTextField TextUpdateSuppression="false" Variant="Variant.Text" @bind-Value="MessageInput" Immediate OnKeyDown="OnSendEnter" Placeholder="Aa" />
-                        <MudIconButton Disabled="string.IsNullOrEmpty(MessageInput)" Icon="@Icons.Material.Filled.Send" OnClick="SendMessage" />
+                    <MudStack Row Spacing="2" AlignItems="AlignItems.Center" Class="p-4 bg-neutral-50">
+                        <MudTextField Class="bg-white rounded !p-2" TextUpdateSuppression="false" Variant="Variant.Text" @bind-Value="MessageInput" Immediate OnKeyDown="OnSendEnter" Placeholder="Aa" />
+                        <MudIconButton Disabled="string.IsNullOrEmpty(MessageInput)" Icon="@Icons.Material.Filled.Send" Color="Color.Primary" OnClick="SendMessage" />
                     </MudStack>
                 </MudStack>
-
             </MudStack>
         }
-    </MudStack>
-</MudPopover>
+    </div>
+}
+
 
 <script>
     function scrollToBottom(elementId) {
@@ -156,11 +179,11 @@
         ChatService = new ChatService(Context);
         
         var auth = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        string name = auth.User.FindFirst(c => c.Type == ClaimTypes.Name)?.Value!;
-        if (!string.IsNullOrEmpty(name))
+        string email = auth.User.FindFirst(c => c.Type == ClaimTypes.Email)?.Value!;
+        if (!string.IsNullOrEmpty(email))
         {
             HubConnection = new HubConnectionBuilder()
-                .WithUrl("https://test.wcp.dk/chathub?user=" + name)
+                .WithUrl("https://test.wcp.dk/chathub?user=" + email)
                 .Build();
 
             HubConnection.On<ChatMessage>("ReceiveMessage", async (message) =>
@@ -168,11 +191,11 @@
                 await InvokeAsync(() =>
                 {
                     // Update message in contact view
-                    var user = Users.FirstOrDefault(x => x.User.Id == message.From.Id);
+                    var user = Users.FirstOrDefault(x => x.User.Id == message.FromId);
                     if (user is not null)
                         user.LatestMessage = message;
 
-                    if (Recipient is not null && Recipient.Id == message.From.Id)
+                    if (Recipient is not null && Recipient.Id == message.FromId)
                         Messages.Add(message);
 
                     StateHasChanged();

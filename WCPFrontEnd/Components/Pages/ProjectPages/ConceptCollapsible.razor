@@ -1,0 +1,288 @@
+﻿@using Microsoft.EntityFrameworkCore
+@using WCPAdminFrontEnd.Services
+@using WCPFrontEnd.Components.Shared
+@using WCPShared.Interfaces
+@using WCPShared.Models.Entities
+@using WCPShared.Models.Entities.ProjectModels
+@using WCPShared.Models.Entities.ProjectModels.Concepts
+@using WCPShared.Models.Entities.UserModels
+@inject IDialogService DialogService
+
+<MudPaper Elevation="0" Class="border-border border">
+    <MudStack Row Class="px-4 py-2" AlignItems="AlignItems.Center" @onclick="() => ConceptExpanded = !ConceptExpanded">
+        <MudText Typo="Typo.h6">Koncept @(Project.Concepts.IndexOf(Concept) + 1)</MudText>
+        <MudSpacer />
+
+        @if (Project.Concepts.Count > 1)
+        {
+            <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => RemoveConcept.InvokeAsync(Concept)" />
+        }
+        else
+        {
+            <MudIconButton Icon="@Icons.Material.Filled.KeyboardArrowDown" OnClick="() => ConceptExpanded = !ConceptExpanded" />
+        }
+
+    </MudStack>
+
+    <MudCollapse Expanded="ConceptExpanded">
+        <MudDivider />
+
+        <MudStack Spacing="0" Class="pa-4">
+            <MudStack Spacing="4" Class="mt-4">
+
+                <MudStack Spacing="0">
+                    <span>Produkt</span>
+                    <span class="text-[16px] cursor-pointer p-4 bg-primary-50 border-primary-500 border rounded text-primary-500 duration-200 hover:bg-primary-100">Vælg produkt</span>
+                </MudStack>
+            </MudStack>
+
+            <MudStack Row Spacing="8" AlignItems="AlignItems.Center" Justify="Justify.Center" Class="mt-4">
+                <MudSelect T="string" Variant="Variant.Outlined" MultiSelection @bind-Text="Concept.Platforms" Label="Tiltænkte platforme" Placeholder="Alle tiltænkte platforme" AnchorOrigin="Origin.BottomCenter">
+                    <MudSelectItem Value="@("TikTok")">TikTok</MudSelectItem>
+                    <MudSelectItem Value="@("Instagram")">Instagram</MudSelectItem>
+                    <MudSelectItem Value="@("Facebook")">Facebook</MudSelectItem>
+                    <MudSelectItem Value="@("YouTube")">YouTube</MudSelectItem>
+                    <MudSelectItem Value="@("Snapchat")">Snapchat</MudSelectItem>
+                </MudSelect>
+            </MudStack>
+
+            <MudStack Spacing="0" AlignItems="AlignItems.Center" Class="w-full h-full">
+                <MudSlider T="int" ValueLabel Size="Size.Medium" @bind-Value="Concept.Amount" Min="1" Max="16" Color="Color.Primary">
+                    <ValueLabelContent>
+                        @(context.Value > 0 ? $"{context.Value} stk" : "Nej")
+                    </ValueLabelContent>
+                    <ChildContent>
+                        <MudText Typo="Typo.caption">Mængde</MudText>
+                    </ChildContent>
+                </MudSlider>
+                <MudText Class="opacity-75">@(Concept.Amount > 0 ? $"{Concept.Amount} stk" : "Nej")</MudText>
+            </MudStack>
+
+            <MudStack>
+                @if (Concept is UgcConcept ugcConcept)
+                {
+                    <MudStack Spacing="4" Row AlignItems="AlignItems.End" Justify="Justify.Center">
+                        <MudStack Spacing="0" AlignItems="AlignItems.Center" Class="w-full h-full">
+                            <MudSlider T="int" ValueLabel Size="Size.Medium" @bind-Value="ugcConcept.LengthInSeconds" Min="15" Max="90" Step="5" Color="Color.Primary">
+                                <ValueLabelContent>
+                                    @context.Value sek
+                                </ValueLabelContent>
+                                <ChildContent>
+                                    <MudText Typo="Typo.caption">Længde</MudText>
+                                </ChildContent>
+                            </MudSlider>
+                            <MudText Class="opacity-75">@ugcConcept.LengthInSeconds sekunder</MudText>
+                        </MudStack>
+                        <MudStack Spacing="0" AlignItems="AlignItems.Center" Class="w-full h-full">
+                            <MudSlider T="int" ValueLabel Size="Size.Medium" @bind-Value="ugcConcept.ExtraHooks" Min="0" Max="100" Color="Color.Primary">
+                                <ValueLabelContent>
+                                    @(context.Value > 0 ? $"{context.Value} stk" : "Nej")
+                                </ValueLabelContent>
+                                <ChildContent>
+                                    <MudText Typo="Typo.caption">Ekstra hooks</MudText>
+                                </ChildContent>
+                            </MudSlider>
+                            <MudText Class="opacity-75">@(ugcConcept.ExtraHooks > 0 ? $"{ugcConcept.ExtraHooks} stk" : "Nej")</MudText>
+                        </MudStack>
+                    </MudStack>
+                }
+            </MudStack>
+
+            <MudStack Justify="Justify.FlexStart" Spacing="0" Class="mt-2">
+                <MudText>Formater</MudText>
+                <MudStack Row>
+                    <span @onclick="@(() => ToggleFormat("16:9", Concept))" class="@(Concept.Formats.Contains("16:9") ? "w-[144px] h-[256px] bg-primary-50 border-2 border-primary-500 rounded cursor-pointer" : "w-[144px] h-[256px] border-2 border-border rounded cursor-pointer")">
+                        <MudStack Class="h-full w-full mud-text-primary" AlignItems="AlignItems.Center" Justify="Justify.Center">
+                            <MudText Typo="Typo.h6">16:9</MudText>
+                        </MudStack>
+                    </span>
+
+                    <span @onclick="@(() => ToggleFormat("4:5", Concept))" class="@(Concept.Formats.Contains("4:5") ? "w-[144px] h-[180px] bg-primary-50 border-2 border-primary-500 rounded cursor-pointer" : "w-[144px] h-[180px] border-2 border-border rounded cursor-pointer")">
+                        <MudStack Class="h-full w-full mud-text-primary" AlignItems="AlignItems.Center" Justify="Justify.Center">
+                            <MudText Typo="Typo.h6">4:5</MudText>
+                        </MudStack>
+                    </span>
+
+                    <span @onclick="@(() => ToggleFormat("1:1", Concept))" class="@(Concept.Formats.Contains("1:1") ? "w-[144px] h-[144px] bg-primary-50 border-2 border-primary-500 rounded cursor-pointer" : "w-[144px] h-[144px] border-2 border-border rounded cursor-pointer")">
+                        <MudStack Class="h-full w-full mud-text-primary" AlignItems="AlignItems.Center" Justify="Justify.Center">
+                            <MudText Typo="Typo.h6">1:1</MudText>
+                        </MudStack>
+                    </span>
+
+                    @if (Concept is UgcConcept)
+                    {
+                        <span @onclick="@(() => ToggleFormat("Uden captions", Concept))" class="@(Concept.Formats.Contains("Uden captions") ? "w-[216px] h-[144px] bg-primary-50 border-2 border-primary-500 rounded cursor-pointer" : "w-[216px] h-[144px] border-2 border-border rounded cursor-pointer")">
+                            <MudStack Class="h-full w-full mud-text-primary" AlignItems="AlignItems.Center" Justify="Justify.Center">
+                                <MudText Typo="Typo.h6">Uden captions</MudText>
+                            </MudStack>
+                        </span>
+                    }
+                </MudStack>
+            </MudStack>
+
+
+        </MudStack>
+
+        @if (Concept is CreatorConcept creatorConcept)
+        {
+            <MudDivider />
+
+            <MudStack Spacing="0">
+                <MudStack Row Class="px-4 py-2" AlignItems="AlignItems.Center" @onclick="() => CreatorSectionExpanded = !CreatorSectionExpanded">
+                    <MudText Typo="Typo.h6">Creator præferencer</MudText>
+                    <MudSpacer />
+                    <MudIconButton Icon="@Icons.Material.Filled.KeyboardArrowDown" OnClick="() => CreatorSectionExpanded = !CreatorSectionExpanded" />
+                </MudStack>
+
+                <MudCollapse Expanded="CreatorSectionExpanded">
+                    <MudDivider />
+
+                    <MudStack Spacing="3" Class="pa-4">
+                        <MudStack Spacing="4" Row>
+                            <LanguageSelector Variant="Variant.Outlined" Label="Sprog" @bind-Value="creatorConcept.CreatorLanguage" Languages="Languages" />
+                            <MudSelect Variant="Variant.Outlined" Label="Køn" @bind-Value="creatorConcept.CreatorGender" AnchorOrigin="Origin.BottomCenter">
+                                <MudSelectItem Value="@("Male")">Mand</MudSelectItem>
+                                <MudSelectItem Value="@("Female")">Kvinde</MudSelectItem>
+                                <MudSelectItem Value="@("None")">Ikke vigtigt</MudSelectItem>
+                                <MudSelectItem Value="@("Other")">Andet</MudSelectItem>
+                            </MudSelect>
+                        </MudStack>
+                        <MudStack Spacing="4" Row>
+                            <MudSelect Variant="Variant.Outlined" Label="Alder" @bind-Value="creatorConcept.CreatorAge" ToStringFunc="ProjectHelper.ArrayToStringFunc" AnchorOrigin="Origin.BottomCenter">
+                                <MudSelectItem Value="@(new int[] { 18, 24 })">18-24</MudSelectItem>
+                                <MudSelectItem Value="@(new int[] { 25, 30 })">25-30</MudSelectItem>
+                                <MudSelectItem Value="@(new int[] { 31, 40 })">31-40</MudSelectItem>
+                                <MudSelectItem Value="@(new int[] { 40 })">40+</MudSelectItem>
+                            </MudSelect>
+                            <MudSelect Variant="Variant.Outlined" Label="Budget" @bind-Value="creatorConcept.CreatorBudget" ToStringFunc="ProjectHelper.LongArrayToStringFunc" AnchorOrigin="Origin.BottomCenter">
+                                <MudSelectItem Value="@(new long[] { 150, 250 })">150-250</MudSelectItem>
+                                <MudSelectItem Value="@(new long[] { 250, 350 })">250-350</MudSelectItem>
+                                <MudSelectItem Value="@(new long[] { 350, 500 })">350-500</MudSelectItem>
+                                <MudSelectItem Value="@(new long[] { 500, 700 })">500-700</MudSelectItem>
+                                <MudSelectItem Value="@(new long[] { 700 })">700+</MudSelectItem>
+                            </MudSelect>
+                            <MudSelect Variant="Variant.Outlined" MultiSelection @bind-SelectedValues="creatorConcept.Tags" Label="Kategori" AnchorOrigin="Origin.BottomCenter">
+                                <MudSelectItem Value="@("Beauty")">Beauty</MudSelectItem>
+                                <MudSelectItem Value="@("Fashion")">Fashion</MudSelectItem>
+                                <MudSelectItem Value="@("Home")">Home</MudSelectItem>
+                                <MudSelectItem Value="@("Lifestyle")">Lifestyle</MudSelectItem>
+                                <MudSelectItem Value="@("Technology")">Technology</MudSelectItem>
+                            </MudSelect>
+                        </MudStack>
+                        <MudStack Spacing="4" Row>
+                            <MudStack Spacing="0" AlignItems="AlignItems.Center" Class="w-full h-full">
+                                <MudSlider T="int" ValueLabel Size="Size.Medium" @bind-Value="creatorConcept.CreatorCount" Min="1" Max="creatorConcept.Amount" Color="Color.Primary">
+                                    <ValueLabelContent>
+                                        @context.Value.ToString()
+                                    </ValueLabelContent>
+                                    <ChildContent>
+                                        <MudText Typo="Typo.caption">Antal creators</MudText>
+                                    </ChildContent>
+                                </MudSlider>
+                                <MudText Class="opacity-75">@creatorConcept.CreatorCount creators</MudText>
+                            </MudStack>
+                            <MudStack Spacing="0" AlignItems="AlignItems.Center" Class="w-full h-full">
+                                <MudSlider T="int" ValueLabel Size="Size.Medium" @bind-Value="creatorConcept.CreativesPerCreator" Min="1" Max="@(creatorConcept.Amount / creatorConcept.CreatorCount)" Color="Color.Primary">
+                                    <ValueLabelContent>
+                                        @context.Value.ToString()
+                                    </ValueLabelContent>
+                                    <ChildContent>
+                                        <MudText Typo="Typo.caption">Kreativer per creator</MudText>
+                                    </ChildContent>
+                                </MudSlider>
+                                <MudText Class="opacity-75">@creatorConcept.CreativesPerCreator per creator</MudText>
+                            </MudStack>
+                        </MudStack>
+                    </MudStack>
+                </MudCollapse>
+            </MudStack>
+        }
+    </MudCollapse>
+</MudPaper>
+
+@code {
+    [Parameter]
+    public IWcpDbContext Context { get; set; }
+
+    [Parameter]
+    public Concept Concept
+    {
+        get { return _concept; }
+        set
+        {
+            if (_concept == value) return;
+
+            _concept = value;
+            ConceptChanged.InvokeAsync(value);
+        }
+    }
+
+    [Parameter]
+    public EventCallback<Concept> ConceptChanged { get; set; }
+    private Concept _concept;
+
+    [Parameter]
+    public Project Project
+    {
+        get { return _project; }
+        set
+        {
+            if (_project == value) return;
+
+            _project = value;
+            ProjectChanged.InvokeAsync(value);
+        }
+    }
+
+    [Parameter]
+    public EventCallback<Project> ProjectChanged { get; set; }
+    private Project _project;
+
+    [Parameter]
+    public EventCallback<Concept> RemoveConcept { get; set; }
+
+    private bool ConceptExpanded = true;
+    private bool CreatorSectionExpanded = true;
+
+    private MudSelect<Product> productSelect;
+    private IEnumerable<Product> Products = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Project.Brand is not null)
+        {
+            Products = await Context.Products.Where(x => x.BrandId == Project.Brand.Id).ToListAsync();
+            Languages = await Context.Languages.ToListAsync();
+        }
+    }
+
+    private async Task OpenAddProductDialog(Concept concept)
+    {
+        // await productSelect.CloseMenu();
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+
+        var parameters = new DialogParameters<WCPFrontEnd.Components.Pages.ProductRelated.Dialoges.AddProductDialog>
+        {
+            { x => x.Brand, Project.Brand }
+        };
+
+        var dialog = await DialogService.ShowAsync<WCPFrontEnd.Components.Pages.ProductRelated.Dialoges.AddProductDialog>("Add product dialog", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled && result.Data is Product addedProduct)
+        {
+            concept.Product = addedProduct;
+            Products = await Context.Products.Where(x => x.BrandId == Project.Brand.Id).AsNoTracking().ToListAsync();
+        }
+    }
+
+    private string ProductToString(Product product) => product is not null ? product.Name : string.Empty;
+
+    private void ToggleFormat(string format, Concept concept)
+    {
+        if (!concept.Formats.Contains(format)) concept.Formats.Add(format);
+        else concept.Formats.Remove(format);
+    }
+
+    private IEnumerable<Language> Languages = [];
+}
