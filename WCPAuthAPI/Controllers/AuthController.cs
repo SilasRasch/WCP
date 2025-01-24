@@ -186,9 +186,9 @@ namespace WCPAuthAPI.Controllers
             user.ResetTokenExpiry = DateTime.Now.AddMinutes(30);
             await _userService.UpdateObject(user.Id, user);
 
-            var status = await _emailService.SendForgotPasswordEmail(user, token);
-
-            return status == HttpStatusCode.Accepted ? Ok() : BadRequest("Email could not be sent...");
+            //var status = await _emailService.SendForgotPasswordEmail(user, token);
+            return Ok();
+            //return status == HttpStatusCode.Accepted ? Ok() : BadRequest("Email could not be sent...");
         }
 
         // PUT api/<UsersController>/5 - Used when changing password while already authenticated

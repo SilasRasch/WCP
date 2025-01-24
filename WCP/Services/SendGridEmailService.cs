@@ -45,7 +45,7 @@ namespace WCPShared.Services
             return response.StatusCode;
         }
 
-        public async Task<HttpStatusCode> SendForgotPasswordEmail(User user, string token)
+        public async Task<HttpStatusCode> SendForgotPasswordEmail(User user, string token, string host)
         {
             var apiKey = Secrets.GetSendGridAPI(_configuration);
             var client = new SendGridClient(apiKey);
@@ -56,7 +56,7 @@ namespace WCPShared.Services
 
             var dynamicTemplateDate = new
             {
-                link = Secrets.IsProd ? $"https://wcp.dk/reset-kodeord?token={token}" : $"https://test.wcp.dk/reset-kodeord?token={token}",
+                link = $"https://{host}/reset-kodeord?token={token}"
             };
             msg.SetTemplateData(dynamicTemplateDate);
 
