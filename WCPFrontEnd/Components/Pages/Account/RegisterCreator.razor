@@ -15,125 +15,134 @@
 @inject StripeService StripeService
 @inject IAuthService AuthService
 
-<PageTitle>Kunderegistrering</PageTitle>
+<PageTitle>Registrering</PageTitle>
 
-<div class="w-full grid justify-center">
-    <MudPaper Class="pa-4">
-        <MudText Class="text-center" Typo="Typo.h4">Bliv registreret som creator</MudText>
-        <MudStepper @bind-ActiveIndex=_index>
-            <ChildContent>
-                <MudStep Title="Brugerinformation" Completed="UserCompleted">
-                    <MudText Typo="Typo.body2">Vi skal bruge lidt information til <em>din</em> bruger</MudText>
-                    <MudDivider Class="mb-2" />
+<MudGrid Class="absolute top-0 left-0 min-h-[100vh] overflow-hidden" Spacing="0">
+    <MudItem xs="6">
+        <MudStack Class="pa-4 h-full">
+            <img src="https://wc-files.se-sto-1.linodeobjects.com/media/wc-logo.png" class="max-h-[36px] object-contain my-4" alt="WebContent logo" />
+            <MudStack Spacing="0">
+                <MudText Class="text-center" Typo="Typo.h6">Bliv registreret som creator</MudText>
+                <span class="text-center text-neutral-400 text-[16px]">Vi glæder os alle sammen til at arbejde med dig!</span>
+            </MudStack>
+            <MudStepper @bind-ActiveIndex=_index StepClass="my-2">
+                <ChildContent>
+                    <MudStep Title="Bruger" Completed="UserCompleted">
+                        <MudStack>
+                            <MudTextField @bind-Value="User.Name" Variant="Variant.Outlined" Label="Fulde navn" Placeholder="Dit fulde navn" Validation="@(new Func<string, string>(ValidationHelpers.NameValidation))" Required RequiredError="Dette felt er påkrævet" />
+                            <MudTextField @bind-Value="User.Email" Variant="Variant.Outlined" Label="E-mail" Placeholder="Din e-mail" Validation="@(new Func<string, string>(ValidationHelpers.EmailValidation))" Required RequiredError="Dette felt er påkrævet" />
+                            <MudTextField @bind-Value="Creator.Address" Variant="Variant.Outlined" Placeholder="Adressen forsendelser bliver sendt til" Label="Adresse" Required RequiredError="Dette felt er påkrævet" />
 
-                    <MudTextField @bind-Value="User.Name" Label="Fulde navn" Placeholder="Dit fulde navn" Validation="@(new Func<string, string>(ValidationHelpers.NameValidation))" Required RequiredError="Dette felt er påkrævet" />
-                    <MudTextField @bind-Value="User.Email" Label="E-mail" Placeholder="Din e-mail" Validation="@(new Func<string, string>(ValidationHelpers.EmailValidation))" Required RequiredError="Dette felt er påkrævet" />
+                            <MudStack Spacing="0">
+                                <MudStack Row>
+                                    <MudTextField @bind-Value="User.Phone" Variant="Variant.Outlined" Label="Telefon" Placeholder="Dit telefonnummer" Validation="@(new Func<string, string>(ValidationHelpers.PhoneValidation))" Required RequiredError="Dette felt er påkrævet" />
+                                    <MudTooltip Placement="Placement.Top" Text="Landet du vælger dikterer hvilken valuta, der vil blive brugt til din bruger.">
+                                        <LanguageSelector @bind-Value="User.Language" Variant="Variant.Outlined" Label="Land" Country Languages="Languages" />
+                                    </MudTooltip>
+                                </MudStack>
+                            </MudStack>
 
-                    <MudTextField @bind-Value="Creator.Address" Placeholder="Adressen forsendelser bliver sendt til" Label="Adresse" Required RequiredError="Dette felt er påkrævet" />
+                            <MudStack Spacing="1">
+                                <MudTooltip Text="Ønsker du at modtage betaling via din CVR-registrerede virksomhed?">
+                                    <MudText Typo="Typo.caption">Er du CVR registreret?</MudText>
+                                </MudTooltip>
+                                <MudToggleGroup @bind-Value="Creator.StripeAccountType" Color="Color.Primary">
+                                    <MudToggleItem Value="@("business")">Ja</MudToggleItem>
+                                    <MudToggleItem Value="@("individual")">Nej</MudToggleItem>
+                                </MudToggleGroup>
+                            </MudStack>
+                            
+                            <MudDivider Class="mt-2" />
 
-                    <MudStack Spacing="0">
-                        <MudStack Row>
-                            <MudTextField @bind-Value="User.Phone" Label="Telefon" Placeholder="Dit telefonnummer" Validation="@(new Func<string, string>(ValidationHelpers.PhoneValidation))" Required RequiredError="Dette felt er påkrævet" />
-                            <MudTooltip Placement="Placement.Top" Text="Landet du vælger dikterer hvilken valuta, der vil blive brugt til din bruger.">
-                                <LanguageSelector @bind-Value="User.Language" Label="Land" Country Languages="Languages" />
-                            </MudTooltip>
+                            <MudStack Row>
+                                <MudTextField @bind-Value="Password" Variant="Variant.Outlined" InputType="InputType.Password" Placeholder="Vi kigger væk..." Label="Kodeord" Required RequiredError="Dette felt er påkrævet" />
+                                <MudTextField @bind-Value="ConfirmPassword" Variant="Variant.Outlined" InputType="InputType.Password" Label="Gentag kodeord" Placeholder="Har du skrevet det ned?" Required RequiredError="Dette felt er påkrævet" />
+                            </MudStack>
+
+                            @if (!string.IsNullOrEmpty(ConfirmPassword) && ConfirmPassword != Password)
+                            {
+                                <MudText Typo="Typo.caption" Color="Color.Error">* De to passwords matcher ikke</MudText>
+                            }
+                        </MudStack>
+                    </MudStep>
+                    <MudStep Title="Creator">
+                        <MudStack>
+
+                        </MudStack>
+                        <MudDatePicker Label="Fødselsdag" Variant="Variant.Outlined" @bind-Date="Creator.DateOfBirth" Required DateFormat="dd.MM.yyyy"></MudDatePicker>
+                        <MudSelect @bind-Value="Creator.Gender" Label="Køn" Variant="Variant.Outlined" Required RequiredError="Dette felt er påkrævet" AnchorOrigin="Origin.BottomCenter" Placeholder="Vælg et køn">
+                            <MudSelectItem Value="@("Mand")">Mand</MudSelectItem>
+                            <MudSelectItem Value="@("Kvinde")">Kvinde</MudSelectItem>
+                        </MudSelect>
+                        <MultiLanguageSelector @bind-Value="selectedLanguages" Variant="Variant.Outlined" />
+
+                        <MudSelect T="string" MultiSelection @bind-SelectedValues="Creator.Tags" Label="Kategori" Variant="Variant.Outlined" AnchorOrigin="Origin.BottomCenter">
+                            <MudSelectItem Value="@("Beauty")">Beauty</MudSelectItem>
+                            <MudSelectItem Value="@("Fashion")">Fashion</MudSelectItem>
+                            <MudSelectItem Value="@("Home")">Home</MudSelectItem>
+                            <MudSelectItem Value="@("Lifestyle")">Lifestyle</MudSelectItem>
+                            <MudSelectItem Value="@("Technology")">Technology</MudSelectItem>
+                        </MudSelect>
+
+                        <MudSelect Label="Budget" @bind-Value="Creator.PriceEstimate" ToStringFunc="ProjectHelper.LongArrayToStringFunc" Variant="Variant.Outlined" AnchorOrigin="Origin.BottomCenter">
+                            <MudSelectItem Value="@(new long[] { 150, 250 })">150-250</MudSelectItem>
+                            <MudSelectItem Value="@(new long[] { 250, 350 })">250-350</MudSelectItem>
+                            <MudSelectItem Value="@(new long[] { 350, 500 })">350-500</MudSelectItem>
+                            <MudSelectItem Value="@(new long[] { 500, 700 })">500-700</MudSelectItem>
+                            <MudSelectItem Value="@(new long[] { 700 })">700+</MudSelectItem>
+                        </MudSelect>
+
+                        <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.Center" Spacing="4" Class="my-3">
+                            <p class="text-nowrap">God pris</p>
+                            <MudProgressLinear Color="@GetEstimateBarColor(CalculateBudgetEstimate(Creator.PriceEstimate))" Value="@CalculateBudgetEstimate(Creator.PriceEstimate)" Rounded Size="Size.Large" />
+                            <p class="text-nowrap">Høj pris</p>
                         </MudStack>
 
-                        <MudTooltip Text="Ønsker du at modtage betaling via din CVR-registrerede virksomhed?">
-                            <MudText Typo="Typo.caption">Er du CVR registreret?</MudText>
-                        </MudTooltip>
+                        @if (!ValidateModels)
+                        {
+                            <MudText Class="mt-2" Color="Color.Error">* Tjek venligst at du har udfyldt alle felter</MudText>
+                        }
+                    </MudStep>
+                </ChildContent>
+                <CompletedContent>
+                    Du er færdig! Det kan tage et par minutter før din bruger <i>faktisk</i> er blevet oprettet.
 
-                    </MudStack>
-
-                    <MudToggleGroup @bind-Value="Creator.StripeAccountType" Color="Color.Primary">
-                        <MudToggleItem Value="@("business")">Ja</MudToggleItem>
-                        <MudToggleItem Value="@("individual")">Nej</MudToggleItem>
-                    </MudToggleGroup>
-
-                    <MudDivider Class="mt-4" />
-
-                    <MudStack Row Class="mt-2">
-                        <MudTextField @bind-Value="Password" InputType="InputType.Password" Label="Kodeord" Required RequiredError="Dette felt er påkrævet" />
-                        <MudTextField @bind-Value="ConfirmPassword" InputType="InputType.Password" Label="Gentag kodeord" Required RequiredError="Dette felt er påkrævet" />
-                    </MudStack>
-
-                    @if (!string.IsNullOrEmpty(ConfirmPassword) && ConfirmPassword != Password) 
+                    @if (User.Id != default && Creator.Id != default)
                     {
-                        <MudText Typo="Typo.caption" Color="Color.Error">* De to passwords matcher ikke</MudText>
+                        <MudText>Din bruger er oprettet, og du bør kunne logge ind! 🌞</MudText>
                     }
-                </MudStep>
-                <MudStep Title="Din creatorprofil">
-                    <MudText Typo="Typo.body2">Vi skal bruge lidt information til din creatorprofil</MudText>
-                    <MudDivider Class="mb-2" />
 
-                    <MudDatePicker Label="Fødselsdag" @bind-Date="Creator.DateOfBirth" Required DateFormat="dd.MM.yyyy"></MudDatePicker>
-                    <MudSelect @bind-Value="Creator.Gender" Label="Køn" Required RequiredError="Dette felt er påkrævet" AnchorOrigin="Origin.BottomCenter" Placeholder="Vælg et køn">
-                        <MudSelectItem Value="@("Mand")">Mand</MudSelectItem>
-                        <MudSelectItem Value="@("Kvinde")">Kvinde</MudSelectItem>
-                    </MudSelect>
-                    <MultiLanguageSelector @bind-Value="selectedLanguages" />
-
-                    <MudSelect T="string" MultiSelection @bind-SelectedValues="Creator.Tags" Label="Kategori" AnchorOrigin="Origin.BottomCenter">
-                        <MudSelectItem Value="@("Beauty")">Beauty</MudSelectItem>
-                        <MudSelectItem Value="@("Fashion")">Fashion</MudSelectItem>
-                        <MudSelectItem Value="@("Home")">Home</MudSelectItem>
-                        <MudSelectItem Value="@("Lifestyle")">Lifestyle</MudSelectItem>
-                        <MudSelectItem Value="@("Technology")">Technology</MudSelectItem>
-                    </MudSelect>
-
-                    <MudSelect Label="Budget" @bind-Value="Creator.PriceEstimate" ToStringFunc="ProjectHelper.LongArrayToStringFunc" AnchorOrigin="Origin.BottomCenter">
-                        <MudSelectItem Value="@(new long[] { 150, 250 })">150-250</MudSelectItem>
-                        <MudSelectItem Value="@(new long[] { 250, 350 })">250-350</MudSelectItem>
-                        <MudSelectItem Value="@(new long[] { 350, 500 })">350-500</MudSelectItem>
-                        <MudSelectItem Value="@(new long[] { 500, 700 })">500-700</MudSelectItem>
-                        <MudSelectItem Value="@(new long[] { 700 })">700+</MudSelectItem>
-                    </MudSelect>
-
-                    <MudStack Class="mt-2" Row AlignItems="AlignItems.Center">
-                        <MudText>God pris</MudText>
-                        <MudProgressLinear Color="@GetEstimateBarColor(CalculateBudgetEstimate(Creator.PriceEstimate))" Value="@CalculateBudgetEstimate(Creator.PriceEstimate)" Rounded Size="Size.Large" />
-                        <MudText>Høj pris</MudText>
-                    </MudStack>
-
-                    @if (!ValidateModels)
+                    @if (!string.IsNullOrEmpty(Error))
                     {
-                        <MudText Class="mt-2" Color="Color.Error">* Tjek venligst at du har udfyldt alle felter</MudText>
+                        <MudText Color="Color.Error">@Error</MudText>
                     }
-                </MudStep>
-            </ChildContent>
-            <CompletedContent>
-                Du er færdig! Det kan tage et par minutter før din bruger <i>faktisk</i> er blevet oprettet.
 
-                @if (User.Id != default && Creator.Id != default)
-                {
-                    <MudText>Din bruger er oprettet, og du bør kunne logge ind! 🌞</MudText>
-                }
-
-                @if (!string.IsNullOrEmpty(Error))
-                {
-                    <MudText Color="Color.Error">@Error</MudText>
-                }
-
-            </CompletedContent>
-            <ActionContent Context="stepper">
-                @if (!_completed) 
-                {
-                    <MudIconButton OnClick="@(() => stepper.PreviousStepAsync())" Icon="@Icons.Material.Filled.ArrowBack" Color="Color.Primary" Disabled="@(_index <= 0)" />
-                    <MudSpacer />
-
-                    @if (stepper.Steps[_index] == stepper.Steps.Last())
+                </CompletedContent>
+                <ActionContent Context="stepper">
+                    @if (!_completed)
                     {
-                        <MudButton OnClick="() => CompleteRegistration(stepper)" StartIcon="@Icons.Material.Filled.Done" Color="Color.Primary" Disabled="@(!ValidateModels || Password != ConfirmPassword)">Registrér</MudButton>
+                        <MudStack Row Class="px-4 w-full">
+                            <MudButton OnClick="@(() => stepper.PreviousStepAsync())" Variant="Variant.Outlined" Color="Color.Primary" Disabled="@(_index <= 0)" DropShadow="false" Class="rounded-lg">Tilbage</MudButton>
+                            <MudSpacer />
+
+                            @if (stepper.Steps[_index] == stepper.Steps.Last())
+                            {
+                                <MudButton OnClick="() => CompleteRegistration(stepper)" StartIcon="@Icons.Material.Filled.Done" Color="Color.Primary" Disabled="@(!ValidateModels)">Registrér</MudButton>
+                            }
+                            else
+                            {
+                                <MudButton OnClick="@(() => stepper.NextStepAsync())" Variant="Variant.Filled" Color="Color.Primary" DropShadow="false" Class="rounded-lg">Næste</MudButton>
+                            }
+                        </MudStack>
                     }
-                    else
-                    {
-                        <MudIconButton OnClick="@(() => stepper.NextStepAsync())" Icon="@Icons.Material.Filled.ArrowForward" Color="Color.Primary" />
-                    }
-                }   
-            </ActionContent>
-        </MudStepper>
-    </MudPaper>
-</div>
+                </ActionContent>
+            </MudStepper>
+        </MudStack>
+    </MudItem>
+    <MudItem xs="6" Class="bg-primary-600 overflow-hidden">
+        <DashboardAdvert />
+    </MudItem>
+</MudGrid>
 
 @code {
     protected override async Task OnInitializedAsync()

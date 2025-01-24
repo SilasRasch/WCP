@@ -13,98 +13,105 @@
 @inject IWcpDbContext Context
 @inject IJSRuntime jsRuntime
 @inject IAuthService AuthService
+@inject IWcpDbContext Context
 @inject StripeService StripeService
 @inject NavigationManager NavManager
 
 <PageTitle>Kunderegistrering</PageTitle>
 
-<div class="w-full grid justify-center">
-    <MudPaper Class="pa-4">
-        <MudText Class="text-center" Typo="Typo.h4">Bliv registreret som kunde</MudText>
-        <MudStepper @bind-ActiveIndex="_index">
-            <ChildContent>
-                <MudStep Title="Abonnement">
-                    <MudText Typo="Typo.body2">Lad os lige tjekke at dine abonnementsinformationer er korrekte</MudText>
-                    <MudDivider Class="mb-2" />
+<MudGrid Class="absolute top-0 left-0 min-h-[100vh] overflow-hidden" Spacing="0">
+    <MudItem xs="6">
+        <MudStack Class="pa-4 h-full">
+            <img src="https://wc-files.se-sto-1.linodeobjects.com/media/wc-logo.png" class="max-h-[36px] object-contain my-4" alt="WebContent logo" />
+            <MudStack Spacing="0">
+                <MudText Class="text-center" Typo="Typo.h6">Bliv registreret som kunde</MudText>
+                <span class="text-center text-neutral-400 text-[16px]">Vi glæder os alle sammen til at arbejde med dig!</span>
+            </MudStack>
+            <MudStepper @bind-ActiveIndex="_index" StepClass="my-2">
+                <ChildContent>
+                    <MudStep Title="Abonnement">
+                        <MudText>Abonnement</MudText>
+                        <SubscriptionPicker @bind-Value="Subscription" @bind-Type="Subscription.Type" />
+                    </MudStep>
 
-                    <SubscriptionPicker @bind-Value="Subscription" />
-                </MudStep>
-                <MudStep Title="Brugerinformation" Completed="UserCompleted">
-                    <MudText Typo="Typo.body2">Vi skal bruge lidt information til <em>din</em> bruger</MudText>
-                    <MudDivider Class="mb-2" />
+                    <MudStep Title="Bruger" Completed="UserCompleted">
+                        <MudStack>
+                            <MudTextField Variant="Variant.Outlined" @bind-Value="User.Name" Label="Fulde navn" Placeholder="Dit fulde navn" Validation="@(new Func<string, string>(ValidationHelpers.NameValidation))" Required RequiredError="Dette felt er påkrævet" />
+                            <MudTextField Variant="Variant.Outlined" @bind-Value="User.Email" Label="E-mail" Placeholder="Din e-mail" Validation="@(new Func<string, string>(ValidationHelpers.EmailValidation))" Required RequiredError="Dette felt er påkrævet" />
+                            <MudTextField Variant="Variant.Outlined" @bind-Value="User.Phone" Label="Telefon" Placeholder="Dit telefonnummer" Validation="@(new Func<string, string>(ValidationHelpers.PhoneValidation))" Required RequiredError="Dette felt er påkrævet" />
 
-                    <MudTextField @bind-Value="User.Name" Label="Fulde navn" Placeholder="Dit fulde navn" Validation="@(new Func<string, string>(ValidationHelpers.NameValidation))" Required RequiredError="Dette felt er påkrævet" />
-                    <MudTextField @bind-Value="User.Email" Label="E-mail" Placeholder="Din e-mail" Validation="@(new Func<string, string>(ValidationHelpers.EmailValidation))" Required RequiredError="Dette felt er påkrævet" />
-                    <MudTextField @bind-Value="User.Phone" Label="Telefon" Placeholder="Dit telefonnummer" Validation="@(new Func<string, string>(ValidationHelpers.PhoneValidation))" Required RequiredError="Dette felt er påkrævet" />
+                            @* TODO: Password validation *@
+                            <MudStack Row>
+                                <MudTextField Variant="Variant.Outlined" @bind-Value="Password" InputType="InputType.Password" Label="Kodeord" Placeholder="Vi kigger væk..." Required RequiredError="Dette felt er påkrævet" />
+                                <MudTextField Variant="Variant.Outlined" @bind-Value="ConfirmPassword" InputType="InputType.Password" Label="Gentag kodeord" Placeholder="Har du skrevet det ned?" Required RequiredError="Dette felt er påkrævet" />
+                            </MudStack>
+                        </MudStack>
+                    </MudStep>
 
-                    <MudStack Row>
-                        <MudTextField @bind-Value="Password" InputType="InputType.Password" Label="Kodeord" Required RequiredError="Dette felt er påkrævet" />
-                        <MudTextField @bind-Value="ConfirmPassword" InputType="InputType.Password" Label="Gentag kodeord" Required RequiredError="Dette felt er påkrævet" />
+                    <MudStep Title="Organisation" Completed="OrganizationCompleted">
+                        <MudStack>
+                            <MudTextField Variant="Variant.Outlined" @bind-Value="Organization.Name" Placeholder="Virksomhedens navn" Label="Navn" Required Validation="@(new Func<string, string>(ValidationHelpers.NameValidation))" RequiredError="Dette felt er påkrævet" />
+                            <MudTextField Variant="Variant.Outlined" @bind-Value="Organization.CVR" Placeholder="Virksomhedens CVR" Label="CVR" Required Validation="@(new Func<string, string>(ValidationHelpers.CvrValidation))" RequiredError="Dette felt er påkrævet" />
+                            <LanguageSelector @bind-Value="Organization.Language" Languages="Languages" Variant="Variant.Outlined" Label="Land" Placeholder="Hvor opererer din virksomhed fra?" />
+                        </MudStack>
+                    </MudStep>
+
+                    <MudStep Title="Brand" @bind-Completed="_completed">
+                        <MudStack>
+                            <MudTextField Variant="Variant.Outlined" @bind-Value="Brand.Name" Label="Brandnavn" Placeholder="Brandets navn" Validation="@(new Func<string, string>(ValidationHelpers.NameValidation))" Required RequiredError="Dette felt er påkrævet" />
+                            <MudTextField Variant="Variant.Outlined" @bind-Value="Brand.URL" Label="Brand URL" Placeholder="Brandets URL" Validation="@(new Func<string, string>(ValidationHelpers.URLValidation))" Required RequiredError="Dette felt er påkrævet" />
+
+                            @if (!ValidateModels)
+                            {
+                                <MudText Class="mt-2" Color="Color.Error">* Tjek venligst at du har udfyldt alle felter</MudText>
+                            }
+                        </MudStack>
+                    </MudStep>
+                </ChildContent>
+                <CompletedContent>
+                    <MudStack>
+                        <MudText>Du vil nu blive viderstillet til vores Stripe onboarding...</MudText>
+                        <MudText>Hvis ikke kan du trykke <a href="@CheckoutUrl" target="_blank"><u>her</u></a> for at gå til siden manuelt</MudText>
+
+                        @if (User.Id != default)
+                        {
+                            <MudText> Din bruger er oprettet, men dit abonnement vil først blive aktiveret når du har betalt 🌞</MudText>
+                        }
+
+                        @if (!string.IsNullOrEmpty(Error))
+                        {
+                            <MudText Color="Color.Error">@Error</MudText>
+                        }
+
                     </MudStack>
-                </MudStep>
-                <MudStep Title="Din organisation"Completed="OrganizationCompleted">
-                    <MudText Typo="Typo.body2">Vi skal bruge lidt information om din virksomhed</MudText>
-                    <MudDivider Class="mb-2" />
 
-                    <MudTextField @bind-Value="Organization.Name" Placeholder="Virksomhedens navn" Label="Navn" Required Validation="@(new Func<string, string>(ValidationHelpers.NameValidation))" RequiredError="Dette felt er påkrævet" />
-                    <MudTextField @bind-Value="Organization.CVR" Placeholder="Virksomhedens CVR" Label="CVR" Required Validation="@(new Func<string, string>(ValidationHelpers.CvrValidation))" RequiredError="Dette felt er påkrævet" />
-                    <LanguageSelector @bind-Value="Organization.Language" Label="Land" Placeholder="Hvor opererer din virksomhed fra?" />
-                </MudStep>
-                <MudStep Title="Dit brand" @bind-Completed="_completed">
-                    <MudText Typo="Typo.body2">Vi skal bruge lidt information om dit første brand</MudText>
-                    <MudDivider Class="mb-2" />
 
-                    <MudTextField @bind-Value="Brand.Name" Label="Brandnavn" Placeholder="Brandets navn" Validation="@(new Func<string, string>(ValidationHelpers.NameValidation))" Required RequiredError="Dette felt er påkrævet" />
-                    <MudTextField @bind-Value="Brand.URL" Label="Brand URL" Placeholder="Brandets URL" Validation="@(new Func<string, string>(ValidationHelpers.URLValidation))" Required RequiredError="Dette felt er påkrævet" />
-
-                    @if (!ValidateModels) 
+                </CompletedContent>
+                <ActionContent Context="stepper">
+                    @if (!_completed)
                     {
-                        <MudText Class="mt-2" Color="Color.Error">* Tjek venligst at du har udfyldt alle felter</MudText>
-                    }
-                </MudStep>
-            </ChildContent>
-            <CompletedContent>
-                <MudStack>
-                    <MudText>Du vil nu blive viderstillet til vores Stripe onboarding...</MudText>
-                    <MudText>Hvis ikke kan du trykke <a href="@CheckoutUrl" target="_blank"><u>her</u></a> for at gå til siden manuelt</MudText>
+                        <MudStack Row Class="px-4 w-full">
+                            <MudButton OnClick="@(() => stepper.PreviousStepAsync())" Variant="Variant.Outlined" Color="Color.Primary" Disabled="@(_index <= 0)" DropShadow="false" Class="rounded-lg">Tilbage</MudButton>
+                            <MudSpacer />
 
-                    @if (User.Id != default) 
-                    {
-                        <MudText> Din bruger er oprettet, men dit abonnement vil først blive aktiveret når du har betalt 🌞</MudText>
+                            @if (stepper.Steps[_index] == stepper.Steps.Last())
+                            {
+                                <MudButton OnClick="() => CompleteRegistration(stepper)" StartIcon="@Icons.Material.Filled.Done" Color="Color.Primary" Disabled="@(!ValidateModels)">Registrér</MudButton>
+                            }
+                            else
+                            {
+                                <MudButton OnClick="@(() => stepper.NextStepAsync())" Variant="Variant.Filled" Color="Color.Primary" DropShadow="false" Class="rounded-lg">Næste</MudButton>
+                            }
+                        </MudStack>
                     }
-
-                    @if (!string.IsNullOrEmpty(Error))
-                    {
-                        <MudText Color="Color.Error">@Error</MudText>
-                    }
-
-                </MudStack>
-
-
-            </CompletedContent>
-            <ActionContent Context="stepper">
-                @if (!_completed) 
-                {
-                    <MudIconButton OnClick="@(() => stepper.PreviousStepAsync())" Icon="@Icons.Material.Filled.ArrowBack" Color="Color.Primary" Disabled="@(_index <= 0)" />
-                    <MudSpacer />
-                    @if (stepper.Steps[_index].Skippable == true)
-                    {
-                        <MudIconButton OnClick="@(() => stepper.SkipCurrentStepAsync())" Icon="@stepper.SkipButtonIcon" Color="Color.Primary" />
-                    }
-
-                    @if (stepper.Steps[_index] == stepper.Steps.Last())
-                    {
-                        <MudButton OnClick="() => CompleteRegistration(stepper)" StartIcon="@Icons.Material.Filled.Done" Color="Color.Primary" Disabled="@(!ValidateModels)">Registrér</MudButton>
-                    }
-                    else
-                    {
-                        <MudIconButton OnClick="@(() => stepper.NextStepAsync())" Icon="@Icons.Material.Filled.ArrowForward" Color="Color.Primary" />
-                    }
-                }   
-            </ActionContent>
-        </MudStepper>
-    </MudPaper>
-</div>
+                </ActionContent>
+            </MudStepper>
+        </MudStack>
+    </MudItem>
+    <MudItem xs="6" Class="bg-primary-600 overflow-hidden">
+        <DashboardAdvert />
+    </MudItem>
+</MudGrid>
 
 @code {
     private User User { get; set; } = new User();
@@ -120,6 +127,8 @@
 
     private string Password;
     private string ConfirmPassword;
+
+    private IEnumerable<Language> Languages = [];
 
     private bool ValidateModels => UserCompleted && Organization.Validate() && Brand.Validate();
     private bool UserCompleted => ValidationHelpers.NameValidation(User.Name) is null && 
@@ -147,6 +156,11 @@
 
         if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("type", out var type))
             Subscription.Type = (SubscriptionType) Enum.Parse(typeof(SubscriptionType), type);
+
+        if (Subscription.Type == SubscriptionType.None)
+            Subscription.Type = SubscriptionType.Medium;
+
+        Languages = Context.Languages.ToList();
     }
 
     private async Task CompleteRegistration(MudStepper stepper) 

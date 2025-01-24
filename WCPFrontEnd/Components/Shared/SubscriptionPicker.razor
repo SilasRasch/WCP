@@ -14,9 +14,11 @@
     <MudSelectItem Value="SubscriptionType.Large">Stor</MudSelectItem>
 </MudSelect>
 
-<MudStack Class="mx-2 mb-3">
-    <MudSlider Disabled="Value.NumberOfBrands == -1" Variant="Variant.Outlined" T="int" Size="Size.Large" @bind-Value="Value.NumberOfBrands" Step="1" Min="1" Max="10">Antal brands: @(Value.NumberOfBrands == -1 ? "Ubegrænset" : Value.NumberOfBrands)</MudSlider>
-    <MudSlider Disabled="Value.NumberOfUsers == -1" Variant="Variant.Outlined" T="int" Size="Size.Large" @bind-Value="Value.NumberOfUsers" Step="1" Min="1" Max="10">Antal brugere: @(Value.NumberOfUsers == -1 ? "Ubegrænset" : Value.NumberOfUsers)</MudSlider>
+<MudStack Class="mt-3" Spacing="2">
+    <MudText>Antal brands: @(Value.NumberOfBrands == -1 ? "Ubegrænset" : Value.NumberOfBrands)</MudText>
+    <MudSlider Class="px-2" Disabled="Value.NumberOfBrands == -1" Variant="Variant.Outlined" T="int" Color="Color.Success" Size="Size.Large" @bind-Value="Value.NumberOfBrands" Step="1" Min="1" Max="10"></MudSlider>
+    <MudText>Antal brugere: @(Value.NumberOfUsers == -1 ? "Ubegrænset" : Value.NumberOfUsers)</MudText>
+    <MudSlider Class="px-2" Disabled="Value.NumberOfUsers == -1" Variant="Variant.Outlined" T="int" Color="Color.Success" Size="Size.Large" @bind-Value="Value.NumberOfUsers" Step="1" Min="1" Max="10"></MudSlider>
 </MudStack>
 
 @code {
