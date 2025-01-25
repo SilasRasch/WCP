@@ -25,20 +25,20 @@
     }
 </MudStack>
 
-<MudGrid Spacing="0" Justify="Justify.Center" Class="my-2 p-4 mud-secondary rounded-lg gap-2">
+<MudGrid Spacing="0" Justify="Justify.FlexStart" Class="my-2 p-4 bg-neutral-50 rounded-lg gap-2">
     @* Home *@
     @if (_path == string.Empty) 
     {
         if (Project.Concepts.Any(x => x is CreatorConcept)) 
         {
             <AuthorizeView Roles="Admin, Creator">
-                <MudFab StartIcon="@Icons.Material.Filled.Folder" IconSize="Size.Large" Class="mud-background" Label="Scripts" OnClick="@(() => GoToPath("scripts"))" />
-                <MudFab StartIcon="@Icons.Material.Filled.Folder" IconSize="Size.Large" Class="mud-background" Label="Content" OnClick="@(() => GoToPath("content"))" />
+                <MudFab StartIcon="@Icons.Material.Filled.Folder" IconColor="Color.Primary" IconSize="Size.Large" Class="mud-background" Label="Scripts" OnClick="@(() => GoToPath("scripts"))" />
+                <MudFab StartIcon="@Icons.Material.Filled.Folder" IconColor="Color.Primary" IconSize="Size.Large" Class="mud-background" Label="Content" OnClick="@(() => GoToPath("content"))" />
             </AuthorizeView>
         }
 
-        <MudFab StartIcon="@Icons.Material.Filled.Folder" IconSize="Size.Large" Class="mud-background" Label="Product" OnClick="@(() => GoToPath("product"))" />
-        <MudFab StartIcon="@Icons.Material.Filled.Folder" IconSize="Size.Large" Class="mud-background" Label="Other" OnClick="@(() => GoToPath("other"))" />
+        <MudFab StartIcon="@Icons.Material.Filled.Folder" IconColor="Color.Primary" IconSize="Size.Large" Class="mud-background" Label="Product" OnClick="@(() => GoToPath("product"))" />
+        <MudFab StartIcon="@Icons.Material.Filled.Folder" IconColor="Color.Primary" IconSize="Size.Large" Class="mud-background" Label="Other" OnClick="@(() => GoToPath("other"))" />
     }
 
     <AuthorizeView Roles="Admin, Creator">
@@ -47,12 +47,11 @@
             @* Scripts *@
             @if (_path == "scripts")
             {
+                <MudFab StartIcon="@Icons.Material.Filled.Upload" IconSize="Size.Large" Class="mud-background" Label="Upload" @onclick="ToggleUploadDialog" />
                 @foreach (string str in Project.Files.Where(x => x.Contains(_path)))
                 {
                     <FileElement FileUri="@str" Project="Project" Delete="DeleteFile" Rename="RenameFile" />
                 }
-
-                <MudFab StartIcon="@Icons.Material.Filled.Upload" IconSize="Size.Large" Class="mud-background" Label="Upload" @onclick="ToggleUploadDialog" />
             }
 
             @* Creator content *@
@@ -72,11 +71,11 @@
 
             if (Regex.IsMatch(_path, @"^content\/\d{1,2}\/"))
             {
+                <MudFab StartIcon="@Icons.Material.Filled.Upload" IconSize="Size.Large" Class="mud-background" Label="Upload" @onclick="ToggleUploadDialog" />
                 @foreach (string str in Project.Files.Where(x => x.Contains(_path)))
                 {
                     <FileElement FileUri="@str" Project="Project" Delete="DeleteFile" Rename="RenameFile" />
                 }
-                <MudFab StartIcon="@Icons.Material.Filled.Upload" IconSize="Size.Large" Class="mud-background" Label="Upload" @onclick="ToggleUploadDialog" />
             }
         }
     </AuthorizeView>
@@ -101,21 +100,21 @@
 
     @if (_path.Contains("product/"))
     {
+        <MudFab StartIcon="@Icons.Material.Filled.Upload" IconSize="Size.Large" Class="mud-background" Label="Upload" @onclick="ToggleUploadDialog" />
         @foreach (string str in Project.Files.Where(x => x.Contains(_path)))
         {
             <FileElement FileUri="@str" Project="Project" Delete="DeleteFile" Rename="RenameFile" />
         }
-        <MudFab StartIcon="@Icons.Material.Filled.Upload" IconSize="Size.Large" Class="mud-background" Label="Upload" @onclick="ToggleUploadDialog" />
     }
     
     @* Other files *@
     @if (_path == "other")
     {
+        <MudFab StartIcon="@Icons.Material.Filled.Upload" IconSize="Size.Large" Class="mud-background" Label="Upload" @onclick="ToggleUploadDialog" />
         @foreach (string str in Project.Files.Where(x => x.Contains(_path)))
         {
             <FileElement FileUri="@str" Project="Project" Delete="DeleteFile" Rename="RenameFile" />
         }
-        <MudFab StartIcon="@Icons.Material.Filled.Upload" IconSize="Size.Large" Class="mud-background" Label="Upload" @onclick="ToggleUploadDialog" />
     }
 </MudGrid>
 

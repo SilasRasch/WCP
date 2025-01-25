@@ -7,7 +7,6 @@
             <MudIcon Icon="@Icons.Material.Filled.Add" />
             <p class="font-medium">Opret nyt projekt</p>
         </MudStack>
-    
     </AuthorizeView>
     
     <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Dashboard</MudNavLink>
@@ -18,6 +17,10 @@
     
     <AuthorizeView>
         <MudNavLink Href="projects" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Assignment">Projekter</MudNavLink>
+    </AuthorizeView>
+
+    <AuthorizeView Roles="Bruger">
+        <MudNavLink Href="creators" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Person">Creators</MudNavLink>
     </AuthorizeView>
 
     <AuthorizeView Roles="Admin">

@@ -15,12 +15,13 @@
 @inject IWcpDbContext Context
 @inject StripeService StripeService
 
-<MudDialog>
+<MudDialog TitleClass="!p-0 mb-2">
     <TitleContent>
-        <MudStack Spacing="0">
+        <MudStack Spacing="0" Class="px-4 pt-4 pb-2">
             <span class="font-medium text-xl">Tilføj betalingsmiddel</span>
             <span class="text-neutral-400 text-lg">Vi understøtter kun betalingskort</span>
         </MudStack>
+        <MudDivider />
     </TitleContent>
     <DialogContent>
 

@@ -14,12 +14,13 @@
 @inject IWcpDbContext Context
 @inject BrandService BrandService
 
-<MudDialog>
+<MudDialog TitleClass="!p-0">
     <TitleContent>
-        <MudStack Spacing="0">
+        <MudStack Spacing="0" Class="pt-4 px-4 pb-2">
             <span class="font-medium text-xl">@Brand.Name</span>
             <span class="text-neutral-400 text-lg">@Brand.Organization.Name</span>
         </MudStack>
+        <MudDivider />
     </TitleContent>
     <DialogContent>
         
