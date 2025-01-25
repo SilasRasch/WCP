@@ -174,7 +174,7 @@ namespace WCPShared.Services
                 subscription = new WCPShared.Models.Entities.Subscription
                 {
                     Type = type,
-                    NumberOfBrands = 1,
+                    NumberOfBrands = 3,
                     NumberOfUsers = 1,
                 };
 

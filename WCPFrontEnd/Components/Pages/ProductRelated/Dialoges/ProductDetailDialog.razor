@@ -10,80 +10,86 @@
 @using WCPShared.Services.EntityFramework
 @using WCPShared.Services.StaticHelpers
 
-<MudDialog>
+<MudDialog Gutters="false" TitleClass="!p-0 pt-4" ActionsClass="!p-0" ContentClass="py-2">
     <TitleContent>
-        <MudText Typo="Typo.h6">
-            @Product.Name
+        <MudText Typo="Typo.h6" Class="px-4 mb-2">
+            @Product.Name - Detaljer
         </MudText>
+        <MudDivider />
     </TitleContent>
     <DialogContent>
+        <MudGrid Class="px-4">
+            <MudItem xs="4" Class="flex align-items-center">
+                @if (!string.IsNullOrEmpty(Product.ImgUrl))
+                {
+                    <MudImage Src="@Product.ImgUrl" ObjectFit="ObjectFit.Contain" Class="border-border border rounded"></MudImage>
+                }
+            </MudItem>
+            <MudItem xs="8">
+                <MudGrid>
+                    <MudItem Class="" xs="4">
+                        <MudStack Spacing="0">
+                            <MudText Class="text-gray-500">Brand</MudText>
 
-        <MudStack Row>
-            @if (!string.IsNullOrEmpty(Product.ImgUrl)) 
-            {
-                <MudImage Src="@Product.ImgUrl" Width="100" ObjectFit="ObjectFit.Contain"></MudImage>
-            }
-            
-            <MudGrid>
-                <MudItem Class="" xs="4">
-                    <MudStack Spacing="0">
-                        <MudText Class="text-gray-500">Brand</MudText>
-
-                        @if (Product.Brand is not null) 
-                        {
-                            <MudText>@Product.Brand.Name</MudText>
-                        }
-                    </MudStack>
-                </MudItem>
-                <MudItem Class="" xs="4">
-                    <MudStack Spacing="0">
-                        <MudText Class="text-gray-500">Billede link</MudText>
-                        <MudText>@Product.ImgUrl</MudText>
-                    </MudStack>
-                </MudItem>
-                <MudItem Class="" xs="4">
-                    <MudStack Spacing="0">
-                        <MudText Class="text-gray-500">Produkt link</MudText>
-                        <MudText>@Product.Link</MudText>
-                    </MudStack>
-                </MudItem>
-                <MudItem Class="" xs="4">
-                    <MudStack Spacing="0">
-                        <MudText Class="text-gray-500">Pains</MudText>
-                        <MudText>@Product.Pains</MudText>
-                    </MudStack>
-                </MudItem>
-                <MudItem Class="" xs="4">
-                    <MudStack Spacing="0">
-                        <MudText Class="text-gray-500">Features</MudText>
-                        <MudText>@Product.Features</MudText>
-                    </MudStack>
-                </MudItem>
-                <MudItem Class="" xs="4">
-                    <MudStack Spacing="0">
-                        <MudText Class="text-gray-500">Fokuspunkter</MudText>
-                        <MudText>@Product.FocusPoints</MudText>
-                    </MudStack>
-                </MudItem>
-                <MudItem Class="" xs="4">
-                    <MudStack Spacing="0">
-                        <MudText Class="text-gray-500">Værdi</MudText>
-                        <MudText>@Product.Value</MudText>
-                    </MudStack>
-                </MudItem>
-                <MudItem Class="" xs="4">
-                    <MudStack Spacing="0">
-                        <MudText Class="text-gray-500">Brugsanvisninger</MudText>
-                        <MudText>@Product.HowToUse</MudText>
-                    </MudStack>
-                </MudItem>
-            </MudGrid>
-        </MudStack>
+                            @if (Product.Brand is not null)
+                            {
+                                <MudText>@Product.Brand.Name</MudText>
+                            }
+                        </MudStack>
+                    </MudItem>
+                    <MudItem Class="" xs="4">
+                        <MudStack Spacing="0">
+                            <MudText Class="text-gray-500">Billede link</MudText>
+                            <MudText>@Product.ImgUrl</MudText>
+                        </MudStack>
+                    </MudItem>
+                    <MudItem Class="" xs="4">
+                        <MudStack Spacing="0">
+                            <MudText Class="text-gray-500">Produkt link</MudText>
+                            <MudText>@Product.Link</MudText>
+                        </MudStack>
+                    </MudItem>
+                    <MudItem Class="" xs="4">
+                        <MudStack Spacing="0">
+                            <MudText Class="text-gray-500">Pains</MudText>
+                            <MudText>@Product.Pains</MudText>
+                        </MudStack>
+                    </MudItem>
+                    <MudItem Class="" xs="4">
+                        <MudStack Spacing="0">
+                            <MudText Class="text-gray-500">Features</MudText>
+                            <MudText>@Product.Features</MudText>
+                        </MudStack>
+                    </MudItem>
+                    <MudItem Class="" xs="4">
+                        <MudStack Spacing="0">
+                            <MudText Class="text-gray-500">Fokuspunkter</MudText>
+                            <MudText>@Product.FocusPoints</MudText>
+                        </MudStack>
+                    </MudItem>
+                    <MudItem Class="" xs="4">
+                        <MudStack Spacing="0">
+                            <MudText Class="text-gray-500">Værdi</MudText>
+                            <MudText>@Product.Value</MudText>
+                        </MudStack>
+                    </MudItem>
+                    <MudItem Class="" xs="4">
+                        <MudStack Spacing="0">
+                            <MudText Class="text-gray-500">Brugsanvisninger</MudText>
+                            <MudText>@Product.HowToUse</MudText>
+                        </MudStack>
+                    </MudItem>
+                </MudGrid>
+            </MudItem>
+        </MudGrid>
         
     </DialogContent>
 
     <DialogActions>
-        <MudButton OnClick="Cancel">Luk</MudButton>
+        <MudStack Class="w-full" AlignItems="AlignItems.End">
+            <MudDivider />
+            <MudButton OnClick="Cancel" Variant="Variant.Outlined" Class="rounded-lg w-fit mx-4 mb-4">Luk</MudButton>
+        </MudStack>
     </DialogActions>
 </MudDialog>
 

@@ -16,12 +16,17 @@
 
 <MudStack Class="mt-3" Spacing="2">
     <MudText>Antal brands: @(Value.NumberOfBrands == -1 ? "Ubegrænset" : Value.NumberOfBrands)</MudText>
-    <MudSlider Class="px-2" Disabled="Value.NumberOfBrands == -1" Variant="Variant.Outlined" T="int" Color="Color.Success" Size="Size.Large" @bind-Value="Value.NumberOfBrands" Step="1" Min="1" Max="10"></MudSlider>
+    <MudSlider Class="px-2" Disabled="Value.NumberOfBrands == -1" Variant="Variant.Outlined" T="int" Color="Color.Success" Size="Size.Large" @bind-Value="Value.NumberOfBrands" Step="1" Min="DefaultSubscription.NumberOfBrands" Max="10"></MudSlider>
     <MudText>Antal brugere: @(Value.NumberOfUsers == -1 ? "Ubegrænset" : Value.NumberOfUsers)</MudText>
-    <MudSlider Class="px-2" Disabled="Value.NumberOfUsers == -1" Variant="Variant.Outlined" T="int" Color="Color.Success" Size="Size.Large" @bind-Value="Value.NumberOfUsers" Step="1" Min="1" Max="10"></MudSlider>
+    <MudSlider Class="px-2" Disabled="Value.NumberOfUsers == -1" Variant="Variant.Outlined" T="int" Color="Color.Success" Size="Size.Large" @bind-Value="Value.NumberOfUsers" Step="1" Min="DefaultSubscription.NumberOfUsers" Max="10"></MudSlider>
 </MudStack>
 
 @code {
+    protected override void OnInitialized()
+    {
+        DefaultSubscription = StripeService.GetSubscriptionInfo(SubscriptionType.Medium);
+    }
+
     [Parameter]
     public Subscription Value
     {
@@ -49,6 +54,7 @@
             if (_type == value) return;
 
             Value = StripeService.GetSubscriptionInfo(value);
+            DefaultSubscription = StripeService.GetSubscriptionInfo(value);
             _type = value;
             TypeChanged.InvokeAsync(value);
         }
@@ -58,4 +64,6 @@
     public EventCallback<SubscriptionType> TypeChanged { get; set; }
 
     private SubscriptionType _type;
+
+    private Subscription DefaultSubscription = new();
 }
