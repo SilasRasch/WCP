@@ -68,7 +68,7 @@ namespace WCPFrontEnd.Services
             {
                 foreach (CreatorParticipation participation in project.Participations)
                 {
-                    if (string.IsNullOrEmpty(participation.Creator.StripeAccountId))
+                    if (participation.Salary > 0 && !string.IsNullOrEmpty(participation.Creator.StripeAccountId))
                     {
                         var res = _stripeService.Transfer(participation.Salary, participation.Creator.StripeAccountId, $"Projektløn ({project.Id})", participation.Creator.User.Language.Currency);
                         
