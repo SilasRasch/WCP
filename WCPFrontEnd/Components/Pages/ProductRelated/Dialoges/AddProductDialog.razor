@@ -1,0 +1,91 @@
+﻿@using System.Security.Claims
+@using Microsoft.EntityFrameworkCore
+@using WCPAdminFrontEnd.Services
+@using WCPFrontEnd.Services
+@using WCPShared.Interfaces
+@using WCPShared.Models.DTOs
+@using WCPShared.Models.Entities
+@using WCPShared.Models.Entities.UserModels
+@using WCPShared.Models.Views
+@using WCPShared.Services.EntityFramework
+@using WCPShared.Services.StaticHelpers
+@inject IWcpDbContext Context
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            Opret nyt produkt
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+
+        @if (_error is not null)
+        {
+            <MudText Color="Color.Error">@_error</MudText>
+        }
+
+        <MudForm @ref="_form" @bind-IsValid="@_success" @bind-Errors="@_errors">
+            <MudSelect @bind-Value="Product.Brand" ToStringFunc="BrandToStringFunc" Label="Brand" Required RequiredError="Dette felt er påkrævet" AnchorOrigin="Origin.BottomCenter" Placeholder="Hvilket brand tilhører produktet?">
+                @foreach (Brand brand in Brands)
+                {
+                    <MudSelectItem Value="@brand">@brand.Name</MudSelectItem>
+                }
+            </MudSelect>
+
+            <AddProductElement @bind-Product="Product" />
+        </MudForm>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton OnClick="Cancel">Annuller</MudButton>
+        <MudButton Color="@Color.Success" Variant="Variant.Filled" Disabled="@(!_success)" OnClick="Submit">Opret</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; }
+
+    [Parameter]
+    public Brand Brand { get; set; }
+
+    private MudForm _form;
+    private bool _success;
+    private string[] _errors = { };
+
+    private Product Product = new Product();
+    private string? _error;
+
+    private int OrganizationId;
+
+    private IEnumerable<Brand> Brands { get; set; } = [];
+   
+
+    protected override async Task OnInitializedAsync()
+    {
+        Product.Brand = Brand;
+
+        var auth = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var email = auth.User.FindFirst(c => c.Type == ClaimTypes.Email)?.Value;
+        var user = await Context.Users.SingleOrDefaultAsync(x => x.Email == email);
+
+        if (user is not null && user.OrganizationId is not null)
+        {
+            OrganizationId = user.OrganizationId.Value;
+            Brands = await Context.Brands.Where(x => x.OrganizationId == OrganizationId).AsNoTracking().ToListAsync();
+        }
+    }
+
+    private async Task Submit()
+    {
+        await Context.AddAsync(Product);
+        await Context.SaveChangesAsync();
+
+        MudDialog.Close(DialogResult.Ok(Product));
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private string BrandToStringFunc(Brand brand) => brand is not null ? $"{brand.Name}" : "";
+}

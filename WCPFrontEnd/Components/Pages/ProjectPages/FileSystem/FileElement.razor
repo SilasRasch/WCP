@@ -1,0 +1,59 @@
+﻿@using WCPFrontEnd.Services
+@using WCPShared.Models.Entities.ProjectModels
+@using WCPShared.Services
+@inject S3Service S3Service
+@inject ProjectService ProjectService
+
+<MudMenu FullWidth="true" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
+    <ActivatorContent>
+        <MudFab StartIcon="@Icons.Material.Filled.Note" EndIcon="@Icons.Material.Filled.MoreVert" IconSize="Size.Medium" Class="mud-background" Label="@(FileUri.Split('/').Last())" />
+    </ActivatorContent>
+    <ChildContent>
+        <MudMenuItem Icon="@Icons.Material.Filled.Link" Href="@FileUri" Target="_blank">Åbn</MudMenuItem>
+        @* <MudMenuItem Icon="@Icons.Material.Filled.Draw" OnClick="@(() => Rename.InvokeAsync((FileUri, "test")))">Omdøb</MudMenuItem> *@
+        <MudMenuItem Icon="@Icons.Material.Filled.Draw" OnClick="@(() => _renameInputOpen = true)">Omdøb</MudMenuItem>
+        <MudMenuItem Icon="@Icons.Material.Filled.Delete" IconColor="Color.Error" OnClick="() => Delete.InvokeAsync(FileUri)">Slet</MudMenuItem>
+    </ChildContent>
+</MudMenu>
+
+<MudPopover Open="@_renameInputOpen" Class="px-4 pt-4" AnchorOrigin="Origin.CenterCenter" TransformOrigin="Origin.CenterCenter">
+    <div class="d-flex flex-column">
+        <MudTextField Variant="Variant.Outlined" @bind-Value="_renameInputString" Label="Nyt navn" Required />
+
+        <div class="flex ml-auto mr-n3 mb-1">
+            <MudButton OnClick="@(() =>_renameInputOpen = false)" Color="Color.Error">Luk</MudButton>
+            <MudButton OnClick="RenameFile" Color="Color.Success" Disabled="Path.GetFileNameWithoutExtension(FileUri.Split('/').Last()) == _renameInputString">Gem</MudButton>
+        </div>
+    </div>
+</MudPopover>
+
+@code {
+    [Parameter]
+    public Project Project { get; set; }
+
+    [Parameter]
+    public string FileUri { get; set; }
+
+    [Parameter]
+    public EventCallback<string> Delete { get; set; }
+
+    [Parameter]
+    public EventCallback<(string, string)> Rename { get; set; }
+
+    private bool _renameInputOpen = false;
+    private string _renameInputString = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        _renameInputString = Path.GetFileNameWithoutExtension(FileUri.Split('/').Last());
+    }
+
+    private async Task RenameFile() 
+    {
+        if (!string.IsNullOrEmpty(_renameInputString)) 
+        {
+            await Rename.InvokeAsync((FileUri,   _renameInputString));
+            _renameInputOpen = false;
+        }
+    }
+}

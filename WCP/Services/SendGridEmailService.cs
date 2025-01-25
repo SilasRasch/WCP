@@ -45,7 +45,7 @@ namespace WCPShared.Services
             return response.StatusCode;
         }
 
-        public async Task<HttpStatusCode> SendForgotPasswordEmail(User user, string token)
+        public async Task<HttpStatusCode> SendForgotPasswordEmail(User user, string token, string host)
         {
             var apiKey = Secrets.GetSendGridAPI(_configuration);
             var client = new SendGridClient(apiKey);
@@ -56,7 +56,7 @@ namespace WCPShared.Services
 
             var dynamicTemplateDate = new
             {
-                link = Secrets.IsProd ? $"https://wcp.dk/reset-kodeord?token={token}" : $"https://test.wcp.dk/reset-kodeord?token={token}",
+                link = $"https://{host}/reset-kodeord?token={token}"
             };
             msg.SetTemplateData(dynamicTemplateDate);
 
@@ -120,6 +120,28 @@ namespace WCPShared.Services
                 brandURL = brand.URL,
                 organizationId = brand.OrganizationId,
             });
+
+            var response = await client.SendEmailAsync(msg);
+
+            if (response.StatusCode != HttpStatusCode.OK && response.StatusCode != HttpStatusCode.Created && response.StatusCode != HttpStatusCode.Accepted)
+                throw new ArgumentException($"Send Grid mail was not sent... {response.StatusCode} : {await response.Body.ReadAsStringAsync()}");
+
+            return response.StatusCode;
+        }
+
+        public async Task<HttpStatusCode> SendShippingEmail(CreatorParticipation participation, string Base64Pdf)
+        {
+            var apiKey = Secrets.GetSendGridAPI(_configuration);
+            var client = new SendGridClient(apiKey);
+            var from = new EmailAddress("info@webcontent.dk", "WebContent Platform");
+            var to = new EmailAddress(participation.Creator.User.Email, participation.Creator.User.Name);
+
+            var plainTextContent = $"Efter content er godkendt, bedes du sende produktet retur med vedhæftede label";
+            var htmlContent = $"<strong>{plainTextContent}</strong>";
+
+            var msg = MailHelper.CreateSingleEmail(from, to, $"Returlabel - Projekt {participation.Project.Name} #{participation.ProjectId}", plainTextContent, htmlContent);
+
+            msg.AddAttachment("returlabel.pdf", Base64Pdf);
 
             var response = await client.SendEmailAsync(msg);
 

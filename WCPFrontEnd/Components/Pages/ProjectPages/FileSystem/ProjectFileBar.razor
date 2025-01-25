@@ -1,0 +1,179 @@
+﻿@using System.Text.RegularExpressions
+@using WCPFrontEnd.Services
+@using WCPShared.Models.Entities.ProjectModels
+@using WCPShared.Models.Entities.ProjectModels.Concepts
+@using WCPShared.Services
+@inject IDialogService DialogService
+@inject S3Service S3Service
+@inject ProjectService ProjectService
+
+@* Breadcrumbs *@
+<MudStack Row Class="mt-2">
+    <MudText Class="cursor-pointer" @onclick="@(() => GoToPath(string.Empty))">Home</MudText>
+
+    @if (!string.IsNullOrEmpty(_path)) 
+    {
+        @for (int i = 0; i < _path.Split('/').Length; i++)
+        {
+            string str = _path.Split('/')[i];
+            string fullPath = string.Join('/', _path.Split('/').Take(i + 1));
+            <MudText>/</MudText>
+            <MudText Class="cursor-pointer" @onclick="@(() => GoToPath(fullPath))">
+                @(str.Trim().First().ToString().ToUpper() + str.Substring(1))
+            </MudText>
+        }
+    }
+</MudStack>
+
+<MudGrid Spacing="0" Justify="Justify.FlexStart" Class="my-2 p-4 bg-neutral-50 rounded-lg gap-2">
+    @* Home *@
+    @if (_path == string.Empty) 
+    {
+        if (Project.Concepts.Any(x => x is CreatorConcept)) 
+        {
+            <AuthorizeView Roles="Admin, Creator">
+                <MudFab StartIcon="@Icons.Material.Filled.Folder" IconColor="Color.Primary" IconSize="Size.Large" Class="mud-background" Label="Scripts" OnClick="@(() => GoToPath("scripts"))" />
+                <MudFab StartIcon="@Icons.Material.Filled.Folder" IconColor="Color.Primary" IconSize="Size.Large" Class="mud-background" Label="Content" OnClick="@(() => GoToPath("content"))" />
+            </AuthorizeView>
+        }
+
+        <MudFab StartIcon="@Icons.Material.Filled.Folder" IconColor="Color.Primary" IconSize="Size.Large" Class="mud-background" Label="Product" OnClick="@(() => GoToPath("product"))" />
+        <MudFab StartIcon="@Icons.Material.Filled.Folder" IconColor="Color.Primary" IconSize="Size.Large" Class="mud-background" Label="Other" OnClick="@(() => GoToPath("other"))" />
+    }
+
+    <AuthorizeView Roles="Admin, Creator">
+        @if (Project.Concepts.Any(x => x is CreatorConcept))
+        {
+            @* Scripts *@
+            @if (_path == "scripts")
+            {
+                <MudFab StartIcon="@Icons.Material.Filled.Upload" IconSize="Size.Large" Class="mud-background" Label="Upload" @onclick="ToggleUploadDialog" />
+                @foreach (string str in Project.Files.Where(x => x.Contains(_path)))
+                {
+                    <FileElement FileUri="@str" Project="Project" Delete="DeleteFile" Rename="RenameFile" />
+                }
+            }
+
+            @* Creator content *@
+            @if (_path == "content")
+            {
+                for (int i = 1; i <= Project.Concepts.Count(); i++)
+                {
+                    <MudFab StartIcon="@Icons.Material.Filled.Folder" IconSize="Size.Large" Class="mud-background" Label="@($"Content {i}")" OnClick="@(() => GoToPath("content/" + i))" />
+                }
+            }
+
+            if (Regex.IsMatch(_path, @"^content\/\d{1,2}$"))
+            {
+                <MudFab StartIcon="@Icons.Material.Filled.Folder" IconSize="Size.Large" Class="mud-background" Label="Audio" OnClick="@(() => GoToPath(_path + "/audio"))" />
+                <MudFab StartIcon="@Icons.Material.Filled.Folder" IconSize="Size.Large" Class="mud-background" Label="Visuals" OnClick="@(() => GoToPath(_path + "/visuals"))" />
+            }
+
+            if (Regex.IsMatch(_path, @"^content\/\d{1,2}\/"))
+            {
+                <MudFab StartIcon="@Icons.Material.Filled.Upload" IconSize="Size.Large" Class="mud-background" Label="Upload" @onclick="ToggleUploadDialog" />
+                @foreach (string str in Project.Files.Where(x => x.Contains(_path)))
+                {
+                    <FileElement FileUri="@str" Project="Project" Delete="DeleteFile" Rename="RenameFile" />
+                }
+            }
+        }
+    </AuthorizeView>
+
+    
+    @* Product TODO: FIX FORMAT FOLDER *@
+    @if (_path == "product")
+    {
+       @*  @foreach (var concept in Project.Concepts)
+        {
+            @foreach (var format in concept.Formats)
+            {
+                <MudFab StartIcon="@Icons.Material.Filled.Folder" IconSize="Size.Large" Class="mud-background" Label="@format" OnClick="@(() => GoToPath($"product/{format}"))" />
+            }
+        } *@
+
+        <MudFab StartIcon="@Icons.Material.Filled.Folder" IconSize="Size.Large" Class="mud-background" Label="16:9" OnClick="@(() => GoToPath($"product/16:9"))" />
+        <MudFab StartIcon="@Icons.Material.Filled.Folder" IconSize="Size.Large" Class="mud-background" Label="4:5" OnClick="@(() => GoToPath($"product/4:5"))" />
+        <MudFab StartIcon="@Icons.Material.Filled.Folder" IconSize="Size.Large" Class="mud-background" Label="1:1" OnClick="@(() => GoToPath($"product/1:1"))" />
+        <MudFab StartIcon="@Icons.Material.Filled.Folder" IconSize="Size.Large" Class="mud-background" Label="Uden captions" OnClick="@(() => GoToPath($"product/uden captions"))" />
+    }
+
+    @if (_path.Contains("product/"))
+    {
+        <MudFab StartIcon="@Icons.Material.Filled.Upload" IconSize="Size.Large" Class="mud-background" Label="Upload" @onclick="ToggleUploadDialog" />
+        @foreach (string str in Project.Files.Where(x => x.Contains(_path)))
+        {
+            <FileElement FileUri="@str" Project="Project" Delete="DeleteFile" Rename="RenameFile" />
+        }
+    }
+    
+    @* Other files *@
+    @if (_path == "other")
+    {
+        <MudFab StartIcon="@Icons.Material.Filled.Upload" IconSize="Size.Large" Class="mud-background" Label="Upload" @onclick="ToggleUploadDialog" />
+        @foreach (string str in Project.Files.Where(x => x.Contains(_path)))
+        {
+            <FileElement FileUri="@str" Project="Project" Delete="DeleteFile" Rename="RenameFile" />
+        }
+    }
+</MudGrid>
+
+@code {
+    [Parameter]
+    public Project Project { get; set; }
+
+    private int _tabIndex;
+    private string _path = string.Empty;
+
+    private void GoToPath(string path) 
+    {
+        _path = path;
+    }
+
+    private string? GetAcceptString()
+    {
+        if (_path.Contains("visuals")) return "video/*,image/*";
+        if (_path.Contains("audio")) return "audio/*";
+        if (_path.Contains("scripts")) return ".doc,.docx,application/msword";
+        return null;
+    }
+
+    private async Task ToggleUploadDialog()
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+        var parameters = new DialogParameters<Dialoges.FileUploadDialog>()
+        {
+            { x => x.Path, _path },
+            { x => x.Project, Project },
+            { x => x.ContentType, GetAcceptString() }
+        };
+
+        var dialog = await DialogService.ShowAsync<Dialoges.FileUploadDialog>("FileUploadDialog", parameters, options);
+        var result = await dialog.Result;
+
+        if (result is not null && !result.Canceled)
+            StateHasChanged();
+    }
+
+    private async Task DeleteFile(string fileUri)
+    {
+        await S3Service.DeleteFile(fileUri);
+        Project.Files.Remove(fileUri);
+        await ProjectService.UpdateObject(Project.Id, Project);
+        StateHasChanged();
+    }
+
+    private async Task RenameFile((string, string) args)
+    {
+        string newUri = await S3Service.RenameFile(args.Item1, args.Item2);
+
+        if (!string.IsNullOrEmpty(newUri)) 
+        {
+            Project.Files.Remove(args.Item1);
+            Project.Files.Add(newUri);
+
+            await ProjectService.UpdateObject(Project.Id, Project);
+            StateHasChanged();
+        }
+    }
+}

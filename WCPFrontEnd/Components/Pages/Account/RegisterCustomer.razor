@@ -1,0 +1,205 @@
+﻿@page "/register"
+@using Microsoft.AspNetCore.WebUtilities
+@using Stripe.Checkout
+@using WCPFrontEnd.Components.Shared
+@using WCPFrontEnd.Services
+@using WCPShared.Interfaces
+@using WCPShared.Interfaces.Auth
+@using WCPShared.Models.Entities.UserModels
+@using WCPShared.Models.Entities
+@using Stripe
+@using WCPShared.Models.Enums
+@using WCPShared.Services
+@inject IWcpDbContext Context
+@inject IJSRuntime jsRuntime
+@inject IAuthService AuthService
+@inject IWcpDbContext Context
+@inject StripeService StripeService
+@inject NavigationManager NavManager
+
+<PageTitle>Kunderegistrering</PageTitle>
+
+<MudGrid Class="absolute top-0 left-0 min-h-[100vh] overflow-hidden" Spacing="0">
+    <MudItem xs="6">
+        <MudStack Class="pa-4 h-full">
+            <img src="https://wc-files.se-sto-1.linodeobjects.com/media/wc-logo.png" class="max-h-[36px] object-contain my-4" alt="WebContent logo" />
+            <MudStack Spacing="0">
+                <MudText Class="text-center" Typo="Typo.h6">Bliv registreret som kunde</MudText>
+                <span class="text-center text-neutral-400 text-[16px]">Vi glæder os alle sammen til at arbejde med dig!</span>
+            </MudStack>
+            <MudStepper @bind-ActiveIndex="_index" StepClass="my-2">
+                <ChildContent>
+                    <MudStep Title="Abonnement">
+                        <MudText>Abonnement</MudText>
+                        <SubscriptionPicker @bind-Value="Subscription" @bind-Type="Subscription.Type" />
+                    </MudStep>
+
+                    <MudStep Title="Bruger" Completed="UserCompleted">
+                        <MudStack>
+                            <MudTextField Variant="Variant.Outlined" @bind-Value="User.Name" Label="Fulde navn" Placeholder="Dit fulde navn" Validation="@(new Func<string, string>(ValidationHelpers.NameValidation))" Required RequiredError="Dette felt er påkrævet" />
+                            <MudTextField Variant="Variant.Outlined" @bind-Value="User.Email" Label="E-mail" Placeholder="Din e-mail" Validation="@(new Func<string, string>(ValidationHelpers.EmailValidation))" Required RequiredError="Dette felt er påkrævet" />
+                            <MudTextField Variant="Variant.Outlined" @bind-Value="User.Phone" Label="Telefon" Placeholder="Dit telefonnummer" Validation="@(new Func<string, string>(ValidationHelpers.PhoneValidation))" Required RequiredError="Dette felt er påkrævet" />
+
+                            @* TODO: Password validation *@
+                            <MudStack Row>
+                                <MudTextField Variant="Variant.Outlined" @bind-Value="Password" InputType="InputType.Password" Label="Kodeord" Placeholder="Vi kigger væk..." Required RequiredError="Dette felt er påkrævet" />
+                                <MudTextField Variant="Variant.Outlined" @bind-Value="ConfirmPassword" InputType="InputType.Password" Label="Gentag kodeord" Placeholder="Har du skrevet det ned?" Required RequiredError="Dette felt er påkrævet" />
+                            </MudStack>
+                        </MudStack>
+                    </MudStep>
+
+                    <MudStep Title="Organisation" Completed="OrganizationCompleted">
+                        <MudStack>
+                            <MudTextField Variant="Variant.Outlined" @bind-Value="Organization.Name" Placeholder="Virksomhedens navn" Label="Navn" Required Validation="@(new Func<string, string>(ValidationHelpers.NameValidation))" RequiredError="Dette felt er påkrævet" />
+                            <MudTextField Variant="Variant.Outlined" @bind-Value="Organization.CVR" Placeholder="Virksomhedens CVR" Label="CVR" Required Validation="@(new Func<string, string>(ValidationHelpers.CvrValidation))" RequiredError="Dette felt er påkrævet" />
+                            <LanguageSelector @bind-Value="Organization.Language" Languages="Languages" Variant="Variant.Outlined" Label="Land" Placeholder="Hvor opererer din virksomhed fra?" />
+                        </MudStack>
+                    </MudStep>
+
+                    <MudStep Title="Brand" @bind-Completed="_completed">
+                        <MudStack>
+                            <MudTextField Variant="Variant.Outlined" @bind-Value="Brand.Name" Label="Brandnavn" Placeholder="Brandets navn" Validation="@(new Func<string, string>(ValidationHelpers.NameValidation))" Required RequiredError="Dette felt er påkrævet" />
+                            <MudTextField Variant="Variant.Outlined" @bind-Value="Brand.URL" Label="Brand URL" Placeholder="Brandets URL" Validation="@(new Func<string, string>(ValidationHelpers.URLValidation))" Required RequiredError="Dette felt er påkrævet" />
+
+                            @if (!ValidateModels)
+                            {
+                                <MudText Class="mt-2" Color="Color.Error">* Tjek venligst at du har udfyldt alle felter</MudText>
+                            }
+                        </MudStack>
+                    </MudStep>
+                </ChildContent>
+                <CompletedContent>
+                    <MudStack>
+                        <MudText>Du vil nu blive viderstillet til vores Stripe onboarding...</MudText>
+                        <MudText>Hvis ikke kan du trykke <a href="@CheckoutUrl" target="_blank"><u>her</u></a> for at gå til siden manuelt</MudText>
+
+                        @if (User.Id != default)
+                        {
+                            <MudText> Din bruger er oprettet, men dit abonnement vil først blive aktiveret når du har betalt 🌞</MudText>
+                        }
+
+                        @if (!string.IsNullOrEmpty(Error))
+                        {
+                            <MudText Color="Color.Error">@Error</MudText>
+                        }
+
+                    </MudStack>
+
+
+                </CompletedContent>
+                <ActionContent Context="stepper">
+                    @if (!_completed)
+                    {
+                        <MudStack Row Class="px-4 w-full">
+                            <MudButton OnClick="@(() => stepper.PreviousStepAsync())" Variant="Variant.Outlined" Color="Color.Primary" Disabled="@(_index <= 0)" DropShadow="false" Class="rounded-lg">Tilbage</MudButton>
+                            <MudSpacer />
+
+                            @if (stepper.Steps[_index] == stepper.Steps.Last())
+                            {
+                                <MudButton OnClick="() => CompleteRegistration(stepper)" StartIcon="@Icons.Material.Filled.Done" Color="Color.Primary" Disabled="@(!ValidateModels)">Registrér</MudButton>
+                            }
+                            else
+                            {
+                                <MudButton OnClick="@(() => stepper.NextStepAsync())" Variant="Variant.Filled" Color="Color.Primary" DropShadow="false" Class="rounded-lg">Næste</MudButton>
+                            }
+                        </MudStack>
+                    }
+                </ActionContent>
+            </MudStepper>
+        </MudStack>
+    </MudItem>
+    <MudItem xs="6" Class="bg-primary-600 overflow-hidden">
+        <DashboardAdvert />
+    </MudItem>
+</MudGrid>
+
+@code {
+    private User User { get; set; } = new User();
+    private Organization Organization { get; set; } = new Organization();
+    private Brand Brand { get; set; } = new Brand();
+
+    private WCPShared.Models.Entities.Subscription Subscription { get; set; } = new WCPShared.Models.Entities.Subscription() 
+    {
+        NumberOfBrands = 1,
+        NumberOfUsers = 1,
+        Type = SubscriptionType.Medium
+    };
+
+    private string Password;
+    private string ConfirmPassword;
+
+    private IEnumerable<Language> Languages = [];
+
+    private bool ValidateModels => UserCompleted && Organization.Validate() && Brand.Validate();
+    private bool UserCompleted => ValidationHelpers.NameValidation(User.Name) is null && 
+        ValidationHelpers.EmailValidation(User.Email) is null && 
+        ValidationHelpers.PhoneValidation(User.Phone) is null;
+
+    private bool OrganizationCompleted => ValidationHelpers.NameValidation(Organization.Name) is null &&
+        ValidationHelpers.CvrValidation(Organization.CVR) is null &&
+        Organization.Language is not null;
+
+    private int _index;
+    private bool _completed;
+    private string Error = string.Empty;
+    private string CheckoutUrl = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        var uri = NavManager.ToAbsoluteUri(NavManager.Uri);
+
+        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("brands", out var brandCount))
+            Subscription.NumberOfBrands = Convert.ToInt32(brandCount);
+
+        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("users", out var userCount))
+            Subscription.NumberOfUsers = Convert.ToInt32(userCount);
+
+        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("type", out var type))
+            Subscription.Type = (SubscriptionType) Enum.Parse(typeof(SubscriptionType), type);
+
+        if (Subscription.Type == SubscriptionType.None)
+            Subscription.Type = SubscriptionType.Medium;
+
+        Languages = Context.Languages.ToList();
+    }
+
+    private async Task CompleteRegistration(MudStepper stepper) 
+    {
+        await stepper.NextStepAsync();
+
+        Customer customer = StripeService.CreateCustomer(User);
+
+        var lineItems = StripeService.GenerateLineItems(Subscription);
+        var checkout = StripeService.StartCheckoutSession(lineItems, "subscription", customerId: customer.Id);
+        CheckoutUrl = checkout.Url;
+        await jsRuntime.InvokeVoidAsync("open", CheckoutUrl);
+
+        // Save user to database while user checks out
+        Subscription.Created = DateTime.Now;
+        Organization.Subscription = Subscription;
+        Organization.StripeAccountId = customer.Id;
+        Organization.IsActive = false; // Will activate when checkout is complete
+        await Context.Organizations.AddAsync(Organization);
+        await Context.SaveChangesAsync();
+
+        if (Organization.Id != default) 
+        {
+            Brand.Organization = Organization;
+            await Context.Brands.AddAsync(Brand);
+            await Context.SaveChangesAsync();
+        }
+
+        try
+        {
+            if (Organization.Id != default && Brand.Id != default) 
+            {
+                User.Organization = Organization;
+                await AuthService.RegisterCustomer(User, Password);
+            }
+        }
+        catch (Exception ex)
+        {
+            Error = ex.Message;
+        }
+    }
+}

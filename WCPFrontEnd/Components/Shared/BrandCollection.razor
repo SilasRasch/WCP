@@ -1,0 +1,221 @@
+﻿@using System.Net.Http.Json
+@using Microsoft.EntityFrameworkCore
+@using System.Security.Claims
+@using WCPAdminFrontEnd.Services
+@using WCPFrontEnd.Components.Pages.Brand.Dialoges
+@using WCPFrontEnd.Components.Shared
+@using WCPShared.Interfaces
+@using WCPShared.Models.Entities.UserModels
+@using WCPShared.Models.Enums
+@using WCPShared.Models.Views
+@using WCPShared.Models.Entities
+@using WCPShared.Services.EntityFramework
+@inject BrandService BrandService
+@inject IWcpDbContext Context
+@inject IDialogService DialogService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@attribute [Authorize(Roles = "Admin, Bruger")]
+
+@if (!ListView)
+{
+
+    <MudGrid Spacing="3">
+        @foreach (Brand brand in BrandList)
+        {
+            <MudItem>
+                <BrandCard Brand="brand" />
+            </MudItem>
+        }
+    </MudGrid>
+}
+else
+{
+    <MudDataGrid T="Brand" SelectOnRowClick="@_selectable" MultiSelection="@_selectable" Items="@BrandList" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter"
+    Hideable="@_hidable" Striped="@_striped" Elevation="0" ColumnResizeMode="@(_resizable ? ResizeMode.Column : ResizeMode.None)" DragDropColumnReordering="_movable" FilterCaseSensitivity="DataGridFilterCaseSensitivity.Ignore"
+    Class="border border-border">
+        <ToolBarContent>
+            <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
+            AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+            <MudSpacer />
+
+            <MudIconButton onclick="FetchBrands" Icon="@Icons.Material.Filled.Refresh" Class="hover:animate-spin-once"></MudIconButton>
+            <MudIconButton Icon="@Icons.Material.Filled.Settings" OnClick="ToggleOpenTableSettings" Class="hover:animate-spin-once"></MudIconButton>
+            <MudPopover Open="@_open" Fixed="true" Class="px-4 pt-4" AnchorOrigin="Origin.BottomRight">
+                <div class="d-flex flex-column">
+                    <MudText>Tabel-indstillinger</MudText>
+                    <MudDivider></MudDivider>
+                    <MudSwitch @bind-Value="_selectable" Color="Color.Primary">Selectable</MudSwitch>
+                    <MudDivider></MudDivider>
+                    <MudSwitch @bind-Value="_resizable" Color="Color.Primary">Resizable</MudSwitch>
+                    <MudDivider></MudDivider>
+                    <MudSwitch @bind-Value="_movable" Color="Color.Primary">Movable</MudSwitch>
+                    <MudDivider></MudDivider>
+                    <MudSwitch @bind-Value="_hidable" Color="Color.Primary">Hidable</MudSwitch>
+                    <MudDivider></MudDivider>
+                    <MudSwitch @bind-Value="_groupOrganization" Color="Color.Primary">Gruppér Organisation</MudSwitch>
+                    <MudDivider></MudDivider>
+                    <MudSwitch @bind-Value="_striped" Color="Color.Primary">Zebra</MudSwitch>
+                    <MudDivider></MudDivider>
+                    <MudSwitch @bind-Value="_stickyActions" Color="Color.Primary">Sticky actions</MudSwitch>
+                    <MudDivider></MudDivider>
+
+                    <MudButton OnClick="@ToggleOpenTableSettings" Class="ml-auto mr-n3 mb-1" Color="Color.Error">Luk</MudButton>
+                </div>
+            </MudPopover>
+        </ToolBarContent>
+        <Columns>
+            @if (_selectable)
+            {
+                <SelectColumn T="BrandView" />
+            }
+
+            @* <AuthorizeView Context="authcontext" Roles="Admin">
+                    <PropertyColumn Property="x => x.Id" Title="Id">
+                        <CellTemplate>
+                            <div @onclick="() => ToggleEditDialog(context.Item)" class="flex justify-center rounded-full w-10 p-2 cursor-pointer bg-red-500 text-white">
+                                <MudText>@context.Item.Id</MudText>
+                            </div>
+                        </CellTemplate>
+                    </PropertyColumn>
+                </AuthorizeView> *@
+
+            <AuthorizeView Context="authcontext">
+                <PropertyColumn Property="x => x.Name" Title="Navn" />
+                <PropertyColumn Property="x => x.URL" Title="URL" />
+
+                <PropertyColumn Property="x => x.Organization.Name" Title="Organisation" Grouping="_groupOrganization">
+                    <CellTemplate>
+                        <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
+                            <MudText Typo="Typo.h6">@ProjectHelper.CountryStringToFlag(context.Item.Organization.Language.IsoLanguageCode) </MudText>
+                            @context.Item.Organization.Name
+                        </MudStack>
+                    </CellTemplate>
+                </PropertyColumn>
+            </AuthorizeView>
+
+            <AuthorizeView Context="authcontext" Roles="Admin">
+                <TemplateColumn Title="Actions" StickyRight="@_stickyActions">
+                    <CellTemplate>
+                        <MudMenu Icon="@Icons.Material.Filled.MoreHoriz" AriaLabel="Åben aktionsmenu" AnchorOrigin="Origin.BottomCenter">
+                            <MudMenuItem OnClick="() => ToggleEditDialog(context.Item)">
+                                <MudStack Row="true">
+                                    <MudIcon Icon="@Icons.Material.Filled.Edit"></MudIcon>
+                                    <MudText>Rediger</MudText>
+                                </MudStack>
+                            </MudMenuItem>
+                            <MudMenuItem OnClick="() => ToggleDeleteModal(context.Item.Id)">
+                                <MudStack Row="true">
+                                    <MudIcon Icon="@Icons.Material.Filled.Delete" Color="Color.Error"></MudIcon>
+                                    <MudText>Slet</MudText>
+                                </MudStack>
+                            </MudMenuItem>
+                        </MudMenu>
+                    </CellTemplate>
+                </TemplateColumn>
+            </AuthorizeView>
+        </Columns>
+        <PagerContent>
+            <MudDataGridPager T="Brand" PageSizeOptions="[100, 200, 300, 400, 500]" RowsPerPageString="Rækker per side:" />
+        </PagerContent>
+    </MudDataGrid>
+}
+
+@code {
+    [Parameter]
+    public bool ListView { get; set; } = false;
+
+    // Open table settings
+    private bool _open = false;
+    private bool _selectable = false;
+    private bool _resizable = false;
+    private bool _movable = false;
+    private bool _hidable = false;
+    private bool _striped = true;
+    private bool _stickyActions = true;
+    private bool _groupOrganization = false;
+
+    private User? User;
+
+    private IEnumerable<Brand> BrandList = [];
+
+    private string? _searchString;
+    private List<string> _events = new();
+
+    private Func<Brand, bool> _quickFilter => x =>
+    {
+        if (string.IsNullOrWhiteSpace(_searchString))
+            return true;
+
+        if ($"{x.Name}{x.URL}".Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        return false;
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var email = authState.User.FindFirst(c => c.Type == ClaimTypes.Email)?.Value;
+        User = await Context.Users.Include(x => x.Organization).ThenInclude(x => x.Subscription).SingleOrDefaultAsync(x => x.Email == email);
+        await FetchBrands();
+    }
+
+    private async Task FetchBrands()
+    {
+        if (User is not null && User.Role == UserRole.Admin)
+        {
+            BrandList = await Context.Brands
+            .Include(x => x.Organization)
+            .ThenInclude(x => x.Language)
+            .Include(x => x.Projects)
+            .Include(x => x.Products)
+            .ToListAsync();
+        }
+
+        if (User is not null && User.Role == UserRole.Bruger)
+        {
+            BrandList = await Context.Brands
+            .Include(x => x.Organization)
+            .ThenInclude(x => x.Language)
+            .Include(x => x.Projects)
+            .Include(x => x.Products)
+            .Where(x => x.OrganizationId == User.OrganizationId)
+            .ToListAsync();
+        }
+    }
+
+    private async Task ToggleDeleteModal(int id)
+    {
+        var parameters = new DialogParameters<DeleteModal>
+        {
+            { x => x.Type, "brand" }
+        };
+
+        var options = new DialogOptions { CloseOnEscapeKey = true, CloseButton = true };
+        var dialog = await DialogService.ShowAsync<DeleteModal>("Delete dialog", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await BrandService.DeleteObject(id);
+            await FetchBrands();
+        }
+    }
+
+    private async Task ToggleEditDialog(Brand brand)
+    {
+        var parameters = new DialogParameters<EditBrandDialog>
+        {
+            { x => x.Brand, brand }
+        };
+
+        var options = new DialogOptions { CloseOnEscapeKey = true, CloseButton = true };
+        var dialog = await DialogService.ShowAsync<EditBrandDialog>("Delete dialog", parameters, options);
+        var result = await dialog.Result;
+
+        if (result is not null && !result.Canceled)
+            await FetchBrands();
+    }
+
+    private void ToggleOpenTableSettings() => _open = !_open;
+}

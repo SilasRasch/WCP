@@ -1,0 +1,41 @@
+﻿@using WCPShared.Models.Entities
+
+<MudTextField Label="Navn" @bind-Value="Product.Name" Required RequiredError="Dette felt er påkrævet" />
+<MudTextField Label="Produktlink" @bind-Value="Product.Link" />
+<MudTextField Label="Billedelink" @bind-Value="Product.ImgUrl" />
+
+<MudStack Spacing="8" Row>
+    <MudTextField Label="Pains" AutoGrow @bind-Value="Product.Pains" Required RequiredError="Dette felt er påkrævet" />
+    <MudTextField Label="Features" AutoGrow @bind-Value="Product.Features" Required RequiredError="Dette felt er påkrævet" />
+</MudStack>
+
+<MudStack Spacing="8" Row>
+    <MudTextField Label="Fokuspunkter" AutoGrow @bind-Value="Product.FocusPoints" Required RequiredError="Dette felt er påkrævet" />
+    <MudTextField Label="Beskrivelse" AutoGrow @bind-Value="Product.Description" Required RequiredError="Dette felt er påkrævet" />
+</MudStack>
+
+
+
+<MudStack Spacing="8" Row>
+    <MudTextField Label="Brugsanvisinger" AutoGrow @bind-Value="Product.HowToUse" />
+    <MudTextField Label="Anslået værdi" @bind-Value="Product.Value" Required RequiredError="Dette felt er påkrævet" />
+</MudStack>
+
+@code {
+    [Parameter]
+    public Product Product
+    {
+        get { return _product; }
+        set
+        {
+            if (_product == value) return;
+
+            _product = value;
+            ProductChanged.InvokeAsync(value);
+        }
+    }
+
+    [Parameter]
+    public EventCallback<Product> ProductChanged { get; set; }
+    private Product _product;
+}

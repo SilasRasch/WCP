@@ -1,0 +1,79 @@
+﻿@using Microsoft.EntityFrameworkCore
+@using WCPAdminFrontEnd.Services
+@using WCPFrontEnd.Components.Shared
+@using WCPShared.Interfaces
+@using WCPShared.Models.Entities
+@using WCPShared.Models.Entities.ProjectModels
+@using WCPShared.Models.Entities.ProjectModels.Concepts
+@using WCPShared.Models.Entities.UserModels
+@inject IDialogService DialogService
+
+@foreach (var concept in Project.Concepts) 
+{
+    var tempConcept = concept;
+    <ConceptCollapsible @bind-Concept="tempConcept" Project="Project" />
+}
+
+@code {
+    [Parameter]
+    public IWcpDbContext Context { get; set; }
+
+    [Parameter]
+    public Project Project
+    {
+        get { return _project; }
+        set
+        {
+            if (_project == value) return;
+
+            _project = value;
+            ProjectChanged.InvokeAsync(value);
+        }
+    }
+
+    [Parameter]
+    public EventCallback<Project> ProjectChanged { get; set; }
+    private Project _project;
+
+    private MudSelect<Product> productSelect;
+    private IEnumerable<Product> Products = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Project.Brand is not null)
+        {
+            Products = await Context.Products.Where(x => x.BrandId == Project.Brand.Id).ToListAsync();
+            Languages = await Context.Languages.ToListAsync();
+        }
+    }
+
+    private async Task OpenAddProductDialog(Concept concept)
+    {
+        // await productSelect.CloseMenu();
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+
+        var parameters = new DialogParameters<WCPFrontEnd.Components.Pages.ProductRelated.Dialoges.AddProductDialog>
+        {
+            { x => x.Brand, Project.Brand }
+        };
+
+        var dialog = await DialogService.ShowAsync<WCPFrontEnd.Components.Pages.ProductRelated.Dialoges.AddProductDialog>("Add product dialog", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled && result.Data is Product addedProduct)
+        {
+            concept.Product = addedProduct;
+            Products = await Context.Products.Where(x => x.BrandId == Project.Brand.Id).AsNoTracking().ToListAsync();
+        }
+    }
+
+    private string ProductToString(Product product) => product is not null ? product.Name : string.Empty;
+
+    private void ToggleFormat(string format, Concept concept)
+    {
+        if (!concept.Formats.Contains(format)) concept.Formats.Add(format);
+        else concept.Formats.Remove(format);
+    }
+
+    private IEnumerable<Language> Languages = [];
+}

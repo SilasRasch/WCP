@@ -56,7 +56,6 @@ namespace WCPShared.Services.Converters
                 Organization = Convert(obj.Organization!),
                 Phone = obj.Phone,
                 Role = obj.Role.ToString(),
-                Language = obj.Language.Name
             };
         }
 

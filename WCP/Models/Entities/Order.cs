@@ -113,5 +113,15 @@ namespace WCPShared.Models.Entities
         {
             return HashCode.Combine(Id);
         }
+
+        public double CalculatePrice()
+        {
+            double price = ContentCount * 500.0;
+            
+            if (ExtraHook is not null)
+                price += ExtraHook.Value * 200;
+
+            return price;
+        }
     }
 }

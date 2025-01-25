@@ -1,0 +1,69 @@
+@using Microsoft.EntityFrameworkCore
+@using WCPAdminFrontEnd.Services
+@using WCPShared.Interfaces
+@using WCPShared.Models.Entities
+@using WCPShared.Models.Entities.UserModels
+@using WCPShared.Models.Enums
+@using WCPShared.Services
+@inject IWcpDbContext Context
+@inject StripeService StripeService
+
+<MudSelect Variant="Variant.Outlined" @bind-Value="Type" Required Placeholder="Vælg et abonnement" RequiredError="Dette felt er påkrævet" AnchorOrigin="Origin.BottomCenter">
+    <MudSelectItem Value="SubscriptionType.Small">Lille</MudSelectItem>
+    <MudSelectItem Value="SubscriptionType.Medium">Standard</MudSelectItem>
+    <MudSelectItem Value="SubscriptionType.Large">Stor</MudSelectItem>
+</MudSelect>
+
+<MudStack Class="mt-3" Spacing="2">
+    <MudText>Antal brands: @(Value.NumberOfBrands == -1 ? "Ubegrænset" : Value.NumberOfBrands)</MudText>
+    <MudSlider Class="px-2" Disabled="Value.NumberOfBrands == -1" Variant="Variant.Outlined" T="int" Color="Color.Success" Size="Size.Large" @bind-Value="Value.NumberOfBrands" Step="1" Min="DefaultSubscription.NumberOfBrands" Max="10"></MudSlider>
+    <MudText>Antal brugere: @(Value.NumberOfUsers == -1 ? "Ubegrænset" : Value.NumberOfUsers)</MudText>
+    <MudSlider Class="px-2" Disabled="Value.NumberOfUsers == -1" Variant="Variant.Outlined" T="int" Color="Color.Success" Size="Size.Large" @bind-Value="Value.NumberOfUsers" Step="1" Min="DefaultSubscription.NumberOfUsers" Max="10"></MudSlider>
+</MudStack>
+
+@code {
+    protected override void OnInitialized()
+    {
+        DefaultSubscription = StripeService.GetSubscriptionInfo(SubscriptionType.Medium);
+    }
+
+    [Parameter]
+    public Subscription Value
+    {
+        get => _value;
+        set
+        {
+            if (_value == value) return;
+
+            _value = value;
+            ValueChanged.InvokeAsync(value);
+        }
+    }
+
+    [Parameter]
+    public EventCallback<Subscription> ValueChanged { get; set; }
+
+    private Subscription _value;
+
+    [Parameter]
+    public SubscriptionType Type
+    {
+        get => _type;
+        set
+        {
+            if (_type == value) return;
+
+            Value = StripeService.GetSubscriptionInfo(value);
+            DefaultSubscription = StripeService.GetSubscriptionInfo(value);
+            _type = value;
+            TypeChanged.InvokeAsync(value);
+        }
+    }
+
+    [Parameter]
+    public EventCallback<SubscriptionType> TypeChanged { get; set; }
+
+    private SubscriptionType _type;
+
+    private Subscription DefaultSubscription = new();
+}

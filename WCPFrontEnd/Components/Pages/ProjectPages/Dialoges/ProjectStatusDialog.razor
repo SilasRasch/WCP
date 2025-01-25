@@ -1,0 +1,184 @@
+﻿@using Microsoft.EntityFrameworkCore
+@using Stripe
+@using System.Security.Claims
+@using WCPAdminFrontEnd.Services
+@using WCPFrontEnd.Services
+@using WCPShared.Interfaces
+@using WCPShared.Models.Entities
+@using WCPShared.Models.Entities.ProjectModels
+@using WCPShared.Models.Entities.UserModels
+@using WCPShared.Models.Enums
+@using WCPShared.Models.Views
+@using WCPShared.Services
+@using WCPShared.Services.EntityFramework
+@using WCPShared.Services.StaticHelpers
+@inject ProjectService ProjectService
+@inject StripeService StripeService
+@inject IJSRuntime JSRuntime
+@inject IWcpDbContext Context
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            @Project.Name ny status (@ProjectHelper.GetStatusString(NewStatus))
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudStack Row="true">
+            <MudTextField Value="@Project.Id.ToString()" Label="Projekt ID" ReadOnly="true" />
+            <MudTextField Value="@Project.Name" Label="Projektnavn" ReadOnly="true" />
+        </MudStack>
+
+        @* From unconfirmed to confirmed *@
+        @if (Project.Status == ProjectStatus.Unconfirmed && NewStatus == ProjectStatus.Queued)
+        {
+            <MudStack Row="true">
+                <MudTextField @bind-Value="Project.Price" Label="Pris" Placeholder="Pris eksl. moms" Immediate="true"></MudTextField>
+            </MudStack>
+
+            @if (Project is not CreatorProject) 
+            {
+                <MudStack Row="true">
+                    <MudDatePicker @bind-Date="_deliveryDate" Label="Leveringsdato" Placeholder="Estimeret leveringsdato" DateFormat="dd.MM.yyyy"></MudDatePicker>
+                </MudStack>
+            }
+        }
+
+        @if (Project is CreatorProject && Project.Status == ProjectStatus.CreatorFilming && Project.Deadline == DateTime.MinValue)
+        {
+            <MudStack Row="true">
+                <MudDatePicker @bind-Date="_deliveryDate" Label="Leveringsdato" Placeholder="Estimeret leveringsdato" DateFormat="dd.MM.yyyy"></MudDatePicker>
+            </MudStack>
+        }
+
+        @if (Project.Status == ProjectStatus.Feedback && NewStatus == ProjectStatus.Finished) 
+        {
+            <MudPaper Class="pa-4" Elevation="0">
+                <MudText>Hvordan har din oplevelse været? Vi vil meget gerne høre din mening...</MudText>
+                <MudStack Class="mt-4" AlignItems="AlignItems.Center">
+                    <MudRating @bind-SelectedValue="Feedback.Score" Size="Size.Large" MaxValue="5" />
+                </MudStack>
+                <MudTextField AutoGrow @bind-Value="Feedback.Text" Label="Tekst" />
+            </MudPaper>
+        }
+
+        @if (CustomerHasToPay)
+        {
+            <AuthorizeView Roles="Bruger">
+                <MudPaper Class="pa-4 my-4" Elevation="3">
+                    <MudText Typo="Typo.h6">Betaling</MudText>
+
+                    <MudText>@Project.Price DKK</MudText>
+
+                    <MudSelect @bind-Value="PaymentMethod" ToStringFunc="(e) => PaymentMethodToString(e)" Placeholder="Vælg betalingsmiddel" Clearable Variant="Variant.Outlined"
+                    AnchorOrigin="Origin.BottomCenter">
+                        @if (PaymentMethods is not null)
+                        {
+                            @foreach (var paymentMethod in PaymentMethods)
+                            {
+                                <MudSelectItem Value="paymentMethod">@PaymentMethodToString(paymentMethod)</MudSelectItem>
+                            }
+                        }
+                    </MudSelect>
+
+                    <MudText Typo="Typo.caption">@paymentStatus</MudText>
+                    <MudText Typo="Typo.caption">* Ved at trykke <i>bekræft</i> anerkender du en betaling fra det valgte betalingsmiddel på <strong>@Project.Price</strong> DKK</MudText>
+                </MudPaper>
+            </AuthorizeView>
+        }
+
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel" Color="Color.Error"><MudIcon Icon="@Icons.Material.Filled.Cancel" Class="mr-2" /> Annuller</MudButton>
+        <MudButton OnClick="Submit" Color="Color.Success" Disabled="CustomerHasToPay && PaymentMethod is null"><MudIcon Icon="@Icons.Material.Filled.Save" Class="mr-2" /> Bekræft</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; }
+
+    [Parameter]
+    public Project Project { get; set; }
+
+    [Parameter]
+    public ProjectStatus NewStatus { get; set; }
+
+    private Feedback Feedback { get; set; } = new();
+    private User User { get; set; }
+
+    private PaymentMethod? PaymentMethod;
+    private IEnumerable<PaymentMethod> PaymentMethods;
+    private string paymentStatus;
+    private DateTime? _deliveryDate;
+    private Project ProjectCopy;
+    private AuthenticationState AuthenticationState;
+    private string? StripeAccountId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        AuthenticationState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var email = AuthenticationState.User.FindFirst(c => c.Type == ClaimTypes.Email)?.Value;
+        User = await Context.Users.SingleOrDefaultAsync(x => x.Email == email);
+
+        ProjectCopy = DtoHelper.CopyEntity(Project);
+
+        if (Project.Deadline != DateTime.MinValue)
+            _deliveryDate = Project.Deadline;
+
+        if (CustomerHasToPay)
+        {
+            StripeAccountId = AuthenticationState.User.FindFirst(c => c.Type == "StripeAccountId")?.Value;
+
+            if (!string.IsNullOrEmpty(StripeAccountId)) 
+            {
+                PaymentMethods = await StripeService.GetPaymentMethods(StripeAccountId);
+                PaymentMethod = PaymentMethods.FirstOrDefault();
+            }
+        }
+    }
+
+    private async void Submit()
+    {
+        if (CustomerHasToPay)
+            ConfirmPayment();
+
+        if (_deliveryDate is not null)
+        {
+            Project.Deadline = _deliveryDate!.Value.AddHours(23).AddMinutes(59).AddSeconds(59);
+        }
+
+        if (Project.Status == ProjectStatus.Feedback && NewStatus == ProjectStatus.Finished) 
+        {
+            Feedback.Project = Project;
+            Feedback.User = User;
+            Feedback.Created = DateTime.Now;
+            await Context.AddAsync(Feedback);
+            await Context.SaveChangesAsync();
+        }
+
+        Project.Status = NewStatus;
+
+        await ProjectService.UpdateObject(Project, ProjectCopy);
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+
+    private void ConfirmPayment()
+    {
+        if (!string.IsNullOrEmpty(StripeAccountId)) 
+        {
+            var paymentIntent = StripeService.CreateCharge((float)Project.Price, Project.Brand.Organization.Language.Currency, orderId: Project.Id, customerId: StripeAccountId);
+            paymentIntent = StripeService.ConfirmPayment(paymentIntent.Id, PaymentMethod.Id);
+        }
+
+    }
+
+    private string PaymentMethodToString(PaymentMethod paymentMethod) 
+        => paymentMethod is not null ? $"{paymentMethod.Card.Brand.ToUpper()} ●●●● ●●●● ●●●● {paymentMethod.Card.Last4} ({paymentMethod.Card.ExpMonth}/{paymentMethod.Card.ExpYear.ToString().Substring(2)})" : "";
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private bool CustomerHasToPay => Project.Status == ProjectStatus.Planned && NewStatus == ProjectStatus.CreatorFilming;
+}
+

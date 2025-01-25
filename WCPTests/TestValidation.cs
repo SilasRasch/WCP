@@ -182,7 +182,8 @@ namespace WCPTests
                 Email = "info@webcontent.dk",
                 Role = UserRole.Bruger,
                 Phone = "12341234",
-                Name = "Mathias Hansen"
+                Name = "Mathias Hansen",
+                Organization = new Organization { Name = "Org", CVR = "12341234" }
             };
 
             Assert.IsTrue(legal.Validate());
@@ -191,9 +192,14 @@ namespace WCPTests
             {
                 Email = "info@webcontent", // Not an email
                 Phone = "12341234",
-                Name = "Mathias Hansen"
+                Name = "Mathias Hansen",
+                Organization = new Organization { Name = "Org", CVR = "12341234" }
             };
 
+            Assert.IsFalse(illegal.Validate());
+
+            illegal.Email = "info@webcontent.dk";
+            illegal.Organization = null;
             Assert.IsFalse(illegal.Validate());
         }
 

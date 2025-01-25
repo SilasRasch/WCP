@@ -1,0 +1,49 @@
+﻿@using WCPAdminFrontEnd.Services
+@using WCPFrontEnd.Services
+@using WCPShared.Models.Entities
+@using WCPShared.Models.Entities.UserModels
+@inject CustomDialogService DialogService
+
+<MudPaper Elevation="0" Class="border-[1px] border-border pa-4 w-[270px]">
+    <MudStack Spacing="3">
+        <MudStack Spacing="0">
+            <span class="font-medium text-[18px]">@Brand.Name</span>
+            <span class="text-neutral-400 text-[15px]">@Brand.Organization.Name</span>
+        </MudStack>
+
+        <MudGrid>
+            <MudItem xs="6">
+                <MudStack Spacing="0">
+                    <span class="text-neutral-400 text-[14px]">Projekter</span>
+                    <span class="text-nowrap text-ellipsis overflow-hidden bg-success-50 w-fit rounded-xl border border-success-500 px-2 text-success-400">@Brand.Projects.Count()</span>
+                </MudStack>
+            </MudItem>
+            <MudItem xs="6">
+                <MudStack Spacing="0">
+                    <span class="text-neutral-400 text-[14px]">Produkter</span>
+                    <span class="text-nowrap text-ellipsis overflow-hidden bg-violet-50 w-fit rounded-xl border border-violet-500 px-2 text-violet-400">@Brand.Products.Count()</span>
+                </MudStack>
+            </MudItem>
+        </MudGrid>
+
+        <MudDivider />
+
+        <MudStack Row>
+            <MudMenu Size="Size.Small" Icon="@Icons.Material.Filled.MoreVert" AnchorOrigin="Origin.BottomRight">
+                <MudMenuItem OnClick="() => DialogService.OpenBrandDetailDialog(Brand)">
+                    <MudStack Row="true">
+                        <MudIcon Icon="@Icons.Material.Filled.Search"></MudIcon>
+                        <MudText>Åbn</MudText>
+                    </MudStack>
+                </MudMenuItem>
+            </MudMenu>
+
+            <a @onclick="() => DialogService.OpenBrandDetailDialog(Brand)" class="bg-primary-50 text-[14px] text-primary-500 w-full flex-grow font-semibold border border-primary-500 rounded-lg py-2 text-center hover:bg-primary-100 cursor-pointer duration-200">Se detaljer</a>
+        </MudStack>
+    </MudStack>
+</MudPaper>
+
+@code {
+    [Parameter]
+    public Brand Brand { get; set; }
+}

@@ -1,0 +1,536 @@
+﻿@page "/settings"
+@using Microsoft.EntityFrameworkCore
+@using System.Security.Claims
+@using Stripe
+@using WCPAdminFrontEnd.Services
+@using WCPFrontEnd.Components.Shared
+@using WCPFrontEnd.Services
+@using WCPShared.Interfaces
+@using WCPShared.Models.Entities.UserModels
+@using WCPShared.Models.Enums
+@using WCPShared.Services
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IWcpDbContext Context
+@inject StripeService StripeService
+@inject CustomDialogService DialogService
+@inject NavigationManager Navigation
+@inject IJSRuntime jsRuntime
+
+<PageTitle>Indstillinger</PageTitle>
+
+<MudStack Spacing="3">
+    <MudStack Spacing="0">
+        <span class="text-[20px] font-semibold">Indstillinger</span>
+        <span class="text-[16px] text-neutral-400">Justér dine præferencer og informationer herfra</span>
+    </MudStack>
+
+    <MudTabs Border ApplyEffectsToContainer="true" PanelClass="mt-3" TabHeaderClass="capitalize mud-background">
+        <MudTabPanel Text="Bruger">
+            <MudStack Class="w-full" Spacing="0">
+                @if (User is not null)
+                {
+                    <MudStack>
+                        <MudGrid>
+                            <MudItem xs="3">
+                                <span>Navn</span>
+                            </MudItem>
+                            <MudItem xs="6">
+                                <MudTextField T="string" Variant="Variant.Outlined" @bind-Value="User.Name" Validation="@(new Func<string, string>(ValidationHelpers.NameValidation))" RequiredError="Dette felt er påkrævet" />
+                            </MudItem>
+                        </MudGrid>
+
+                        <MudDivider />
+
+                        <MudGrid>
+                            <MudItem xs="3">
+                                <span>Email</span>
+                            </MudItem>
+                            <MudItem xs="6">
+                                <MudTextField T="string" Variant="Variant.Outlined" @bind-Value="User.Email" Required="true" Validation="@(new Func<string, string>(ValidationHelpers.EmailValidation))" RequiredError="Dette felt er påkrævet" />
+                            </MudItem>
+                        </MudGrid>
+
+                        <MudDivider />
+
+                        <MudGrid>
+                            <MudItem xs="3">
+                                <span>Telefon</span>
+                            </MudItem>
+                            <MudItem xs="6">
+                                <MudTextField T="string" Variant="Variant.Outlined" @bind-Value="User.Phone" Validation="@(new Func<string, string>(ValidationHelpers.PhoneValidation))" RequiredError="Dette felt er påkrævet" />
+                            </MudItem>
+                        </MudGrid>
+
+                        <MudDivider />
+
+                        <MudGrid>
+                            <MudItem xs="3">
+                                <span>Nationalitet</span>
+                            </MudItem>
+                            <MudItem xs="6">
+                                <MudSelect @bind-Value="User.Language" Variant="Variant.Outlined" ToStringFunc="(e) => ProjectHelper.LanguageToStringFlag(e)" Delimiter=" " Required RequiredError="Dette felt er påkrævet" AnchorOrigin="Origin.BottomCenter">
+                                    @foreach (var lang in _languages)
+                                    {
+                                        <MudSelectItem Value="@lang">@ProjectHelper.CountryStringToFlag(lang.IsoLanguageCode) @lang.Name</MudSelectItem>
+                                    }
+                                </MudSelect>
+                            </MudItem>
+                        </MudGrid>
+                    </MudStack>
+                }
+                else
+                {
+                    <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+                }
+
+                <MudStack Row Justify="Justify.FlexEnd" AlignItems="AlignItems.Center" Class="w-full">
+                    <MudButton Href="/" Variant="Variant.Outlined" Class="mt-2 rounded-lg w-fit">Annuller</MudButton>
+                    <MudButton OnClick="SaveChanges" Color="Color.Success" Variant="Variant.Filled" Class="mt-2 rounded-lg w-fit">Gem ændringer</MudButton>
+                </MudStack>
+
+                @if (HasBeenSaved)
+                {
+                    <MudPaper Class="pa-4 mt-2 mud-success">
+                        <MudText Class="text-white">Dine ændringer er blevet gemt</MudText>
+                    </MudPaper>
+                }
+            </MudStack>
+
+        </MudTabPanel>
+
+        <AuthorizeView Roles="Bruger">
+            <MudTabPanel Text="Abonnement">
+                <MudStack Class="w-full" Spacing="0">
+                    <SubscriptionPage Customer="User" />
+                </MudStack>
+            </MudTabPanel>
+
+            <MudTabPanel Text="Betaling">
+                <MudStack Class="w-full mt-2" Spacing="0">
+                    <MudGrid>
+                        <MudItem xs="9">
+                            <MudGrid>
+                                <MudItem xs="6">
+                                    @foreach (PaymentMethod method in PaymentMethods) 
+                                    {
+                                        <MudPaper Elevation="0" Class="border-border border w-fit">
+                                            <MudStack Row Class="pa-4" Justify="Justify.FlexStart" AlignItems="AlignItems.Start">
+                                                <img class="h-[48px] p-2 rounded-lg border border-border" src="https://1000logos.net/wp-content/uploads/2021/11/VISA-logo.png" height="32" />
+                                                <MudStack Spacing="4">
+                                                    <MudStack Spacing="0">
+                                                        <MudStack Row>
+                                                            <span class="text-[16px] font-medium capitalize">@method.Card.Brand</span>
+
+                                                            @* @if (method.Card == method.Card.Is) *@
+                                                            <span class="text-[16px] font-medium capitalize">(Standard)</span>
+                                                        </MudStack>
+
+                                                        <span class="text-neutral-400">**** **** **** @method.Card.Last4</span>
+                                                    </MudStack>
+                                                    <span class="text-[16px]">Udløber: @method.Card.ExpMonth/@method.Card.ExpYear.ToString().Substring(2)</span>
+                                                </MudStack>
+                                                <MudStack Class="h-full ml-16">
+                                                    <MudMenu Size="Size.Small" Icon="@Icons.Material.Filled.MoreHoriz" AnchorOrigin="Origin.BottomCenter">
+                                                        <MudMenuItem>Sæt som standard</MudMenuItem>
+                                                        <MudMenuItem>Slet</MudMenuItem>
+                                                    </MudMenu>
+                                                </MudStack>
+                                            </MudStack>
+                                        </MudPaper>
+                                    }
+                                </MudItem>
+                            </MudGrid>
+                        </MudItem>
+                        <MudItem xs="3">
+                            <div class="flex justify-end">
+                                <MudButton OnClick="() => DialogService.OpenAddPaymentMethodDialog(User)" StartIcon="@Icons.Material.Filled.Add" DropShadow="false" Color="Color.Primary" Variant="Variant.Filled" Class="w-fit !normal-case">Tilføj betalingsmiddel</MudButton>
+                            </div>
+                        </MudItem>
+                    </MudGrid>
+                </MudStack>
+            </MudTabPanel>
+
+            <MudTabPanel Text="Brands">
+                <MudStack Class="w-full" Spacing="0">
+                    <BrandCollection ListView="false" />
+                </MudStack>
+            </MudTabPanel>
+        </AuthorizeView>
+
+        <AuthorizeView Context="authcontext" Roles="Creator">
+            @if (Creator is not null)
+            {
+                <MudTabPanel Text="Creator profil">
+                    <MudStack Class="w-full" Spacing="0">
+                        <MudStack>
+                            <MudGrid>
+                                <MudItem xs="3">
+                                    <span>Adresse</span>
+                                </MudItem>
+                                <MudItem xs="6">
+                                    <MudTextField Variant="Variant.Outlined" @bind-Value="Creator.Address" Placeholder="Adressen forsendelser bliver sendt til" Required RequiredError="Dette felt er påkrævet" />
+                                </MudItem>
+                            </MudGrid>
+
+                            <MudDivider />
+
+                            <MudGrid>
+                                <MudItem xs="3">
+                                    <span>Fødselsdag</span>
+                                </MudItem>
+                                <MudItem xs="6">
+                                    <MudDatePicker Variant="Variant.Outlined" @bind-Date="Creator.DateOfBirth" Required="Creator.SubType == CreatorSubType.UGC" DateFormat="dd.MM.yyyy"></MudDatePicker>
+                                </MudItem>
+                            </MudGrid>
+
+                            <MudDivider />
+
+                            <MudGrid>
+                                <MudItem xs="3">
+                                    <span>Køn</span>
+                                </MudItem>
+                                <MudItem xs="6">
+                                    <MudSelect @bind-Value="Creator.Gender" Variant="Variant.Outlined" Required RequiredError="Dette felt er påkrævet" AnchorOrigin="Origin.BottomCenter" Placeholder="Vælg et køn">
+                                        <MudSelectItem Value="@("Mand")">Mand</MudSelectItem>
+                                        <MudSelectItem Value="@("Kvinde")">Kvinde</MudSelectItem>
+                                    </MudSelect>
+                                </MudItem>
+                            </MudGrid>
+
+                            <MudDivider />
+
+                            <MudGrid>
+                                <MudItem xs="3">
+                                    <span>Sprog</span>
+                                </MudItem>
+                                <MudItem xs="6">
+                                    <MultiLanguageSelector Variant="Variant.Outlined" Label="" @bind-Value="_selectedLanguages" />
+                                </MudItem>
+                            </MudGrid>
+
+                            <MudDivider />
+
+                            <MudGrid>
+                                <MudItem xs="3">
+                                    <span>Kategorier</span>
+                                </MudItem>
+                                <MudItem xs="6">
+                                    <MudSelect T="string" Variant="Variant.Outlined" MultiSelection @bind-SelectedValues="Creator.Tags" AnchorOrigin="Origin.BottomCenter">
+                                        <MudSelectItem Value="@("Beauty")">Beauty</MudSelectItem>
+                                        <MudSelectItem Value="@("Fashion")">Fashion</MudSelectItem>
+                                        <MudSelectItem Value="@("Home")">Home</MudSelectItem>
+                                        <MudSelectItem Value="@("Lifestyle")">Lifestyle</MudSelectItem>
+                                        <MudSelectItem Value="@("Technology")">Technology</MudSelectItem>
+                                    </MudSelect>
+                                </MudItem>
+                            </MudGrid>
+
+                            <MudDivider />
+
+                            <MudGrid>
+                                <MudItem xs="3">
+                                    <span>Budget</span>
+                                </MudItem>
+                                <MudItem xs="6">
+                                    <MudSelect Variant="Variant.Outlined" @bind-Value="Creator.PriceEstimate" ToStringFunc="ProjectHelper.LongArrayToStringFunc" AnchorOrigin="Origin.BottomCenter">
+                                        <MudSelectItem Value="@(new long[] { 150, 250 })">150-250</MudSelectItem>
+                                        <MudSelectItem Value="@(new long[] { 250, 350 })">250-350</MudSelectItem>
+                                        <MudSelectItem Value="@(new long[] { 350, 500 })">350-500</MudSelectItem>
+                                        <MudSelectItem Value="@(new long[] { 500, 700 })">500-700</MudSelectItem>
+                                        <MudSelectItem Value="@(new long[] { 700 })">700+</MudSelectItem>
+                                    </MudSelect>
+                                </MudItem>
+                            </MudGrid>
+
+                            <MudGrid>
+                                <MudItem xs="3"></MudItem>
+                                <MudItem xs="6">
+                                    <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.Center" Spacing="4">
+                                        <p class="text-nowrap">God pris</p>
+                                        <MudProgressLinear Color="@GetEstimateBarColor(CalculateBudgetEstimate(Creator.PriceEstimate))" Value="@CalculateBudgetEstimate(Creator.PriceEstimate)" Rounded Size="Size.Large" />
+                                        <p class="text-nowrap">Høj pris</p>
+                                    </MudStack>
+                                </MudItem>
+                                <MudItem xs="3"></MudItem>
+                            </MudGrid>
+
+                            <MudDivider />
+
+                            <MudGrid>
+                                <MudItem xs="3">
+                                    <MudTooltip Text="Ønsker du at modtage betaling via din CVR-registrerede virksomhed?">
+                                        <span>Er du CVR registreret?</span>
+                                    </MudTooltip>
+                                </MudItem>
+                                <MudItem xs="6">
+                                    <MudToggleGroup context="context2" @bind-Value="Creator.StripeAccountType" Color="Color.Primary">
+                                        <MudToggleItem Value="@("business")">Ja</MudToggleItem>
+                                        <MudToggleItem Value="@("individual")">Nej</MudToggleItem>
+                                    </MudToggleGroup>
+                                </MudItem>
+                            </MudGrid>
+
+                            <MudDivider />
+
+                            <MudStack Row Justify="Justify.FlexEnd" AlignItems="AlignItems.Center" Class="w-full">
+                                <MudButton Href="/" Variant="Variant.Outlined" Class="mt-2 rounded-lg w-fit">Annuller</MudButton>
+                                <MudButton OnClick="SaveChanges" Color="Color.Success" Variant="Variant.Filled" Class="mt-2 rounded-lg w-fit">Gem ændringer</MudButton>
+                            </MudStack>
+
+                            @if (HasBeenSaved)
+                            {
+                                <MudPaper Class="pa-4 mud-success">
+                                    <MudText Class="text-white">Dine ændringer er blevet gemt</MudText>
+                                </MudPaper>
+                            }
+                        </MudStack>
+                    </MudStack>
+                </MudTabPanel>
+
+                <MudTabPanel Text="Udbetaling">
+                    <MudStack Class="w-full" Spacing="0">
+                        <MudStack>
+                            <MudGrid>
+                                <MudItem xs="3">
+                                    <span>Connect onboarding</span>
+                                </MudItem>
+                                <MudItem xs="6" Class="my-2">
+                                    @if (CreatorOnboardingStatusConnect) 
+                                    {
+                                        <span class="p-2 bg-success-50 text-success-700 border-success-700 border rounded">Onboarded</span>
+                                    }
+                                    else 
+                                    {
+                                        <MudStack Row AlignItems="AlignItems.Center">
+                                            <span class="p-2 bg-error-50 text-error-700 border-error-700 border rounded">Ikke onboarded</span>
+                                            <a href="@CreatorOnboardingURL" class="hover:underline text-blue-500 cursor-pointer">Tryk her for at blive onboardet</a>
+                                        </MudStack>
+                                    }
+                                </MudItem>
+                            </MudGrid>
+
+                            <MudDivider />
+
+                            <MudGrid>
+                                <MudItem xs="3">
+                                    <span>ID validering</span>
+                                </MudItem>
+                                <MudItem xs="6" Class="my-2">
+                                    @if (CreatorOnboardingStatusConnect)
+                                    {
+                                        <span class="p-2 bg-success-50 text-success-700 border-success-700 border rounded">Verificeret</span>
+                                    }
+                                    else
+                                    {
+                                        <MudStack Row AlignItems="AlignItems.Center">
+                                            <span class="p-2 bg-error-50 text-error-700 border-error-700 border rounded">Ikke verificeret</span>
+                                            <a href="@CreatorOnboardingURL" class="hover:underline text-blue-500 cursor-pointer">Tryk her for at blive verificeret</a>
+                                        </MudStack>
+                                    }
+                                </MudItem>
+                            </MudGrid>
+
+                            <MudDivider />
+
+                            <MudGrid>
+                                <MudItem xs="3">
+                                    <span>Konto til udbetaling</span>
+                                </MudItem>
+                                <MudItem xs="6">
+                                    @foreach (var account in PayoutAccounts)
+                                    {
+                                        if (account is BankAccount bankAccount)
+                                        {
+                                            <MudStack Row AlignItems="AlignItems.Center">
+                                                <span>@bankAccount.Country************@bankAccount.Last4 (@bankAccount.BankName)</span>
+                                                <MudMenu Size="Size.Small" Icon="@Icons.Material.Filled.MoreHoriz" AnchorOrigin="Origin.BottomCenter">
+                                                    <MudMenuItem>Ændre</MudMenuItem>
+                                                </MudMenu>
+                                            </MudStack>
+                                        }
+                                    }
+                                </MudItem>
+                            </MudGrid>
+                        </MudStack>
+                    </MudStack>
+                </MudTabPanel>
+            }
+            else
+            {
+                <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+            }
+        </AuthorizeView>
+
+        <MudTabPanel Text="Kodeord">
+            <MudStack Class="w-full" Spacing="0">
+                <MudStack>
+                    <MudGrid>
+                        <MudItem xs="3">
+                            <span>Nuværende kodeord</span>
+                        </MudItem>
+                        <MudItem xs="6">
+                            <MudTextField Variant="Variant.Outlined" InputType="InputType.Password" @bind-Value="OldPassword" Required />
+                        </MudItem>
+                    </MudGrid>
+
+                    <MudDivider />
+
+                    <MudGrid>
+                        <MudItem xs="3">
+                            <span>Nye kodeord</span>
+                        </MudItem>
+                        <MudItem xs="6">
+                            <MudTextField Variant="Variant.Outlined" InputType="InputType.Password" @bind-Value="NewPassword" Required />
+                        </MudItem>
+                    </MudGrid>
+
+                    <MudDivider />
+
+                    <MudGrid>
+                        <MudItem xs="3">
+                            <span>Nye kodeord</span>
+                        </MudItem>
+                        <MudItem xs="6">
+                            <MudTextField Variant="Variant.Outlined" InputType="InputType.Password" @bind-Value="ConfirmNewPassword" Required />
+                        </MudItem>
+                    </MudGrid>
+
+                    <MudStack Row Justify="Justify.FlexEnd" AlignItems="AlignItems.Center" Class="w-full">
+                        <MudButton Href="/" Variant="Variant.Outlined" Class="mt-2 rounded-lg w-fit">Annuller</MudButton>
+                        <MudButton OnClick="ChangePassword" Color="Color.Success" Variant="Variant.Filled" Class="mt-2 rounded-lg w-fit">Skift kodeord</MudButton>
+                    </MudStack>
+
+                    @if (PasswordChanged)
+                    {
+                        <MudPaper Class="pa-4 mud-success">
+                            <MudText Class="text-white">Dit password er nu skiftet</MudText>
+                        </MudPaper>
+                    }
+                </MudStack>
+            </MudStack>
+        </MudTabPanel>
+    </MudTabs>
+</MudStack>
+
+
+
+@code {
+    private IEnumerable<Language> _languages = new List<Language>();
+    private User User;
+    private bool HasBeenSaved = false;
+    private bool PasswordChanged = false;
+
+    private Creator Creator;
+    private IEnumerable<PaymentMethod> PaymentMethods = [];
+    private IEnumerable<IExternalAccount> PayoutAccounts = [];
+    private IEnumerable<Language> _selectedLanguages { get; set; } = new HashSet<Language>();
+
+    private string OldPassword = string.Empty;
+    private string NewPassword = string.Empty;
+    private string ConfirmNewPassword = string.Empty;
+
+    private bool CreatorOnboardingStatusConnect = false;
+    private string CreatorOnboardingURL = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var auth = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        string email = auth.User.FindFirst(c => c.Type == ClaimTypes.Email)?.Value!;
+        User = await Context.Users
+            .Include(x => x.Organization)
+            .ThenInclude(x => x.Subscription)
+            .SingleOrDefaultAsync(x => x.Email == email);
+        _languages = Context.Languages.ToList();
+
+        if (User.Role == UserRole.Creator)
+        {
+            Creator = await Context.Creators.Include(x => x.Languages).SingleOrDefaultAsync(x => x.UserId == User.Id);
+
+            if (Creator is not null && Creator.Languages is not null) 
+            {
+                _selectedLanguages = Creator.Languages;
+                PayoutAccounts = await StripeService.GetPayoutAccount(Creator.StripeAccountId);
+
+                CreatorOnboardingStatusConnect = await StripeService.CheckOnboardingStatus(Creator.StripeAccountId);
+
+                if (!CreatorOnboardingStatusConnect)
+                    await CheckOnboarding(Creator);
+            }
+        }
+
+        PaymentMethods = await GetPaymentInfo(User);
+    }
+
+    private async Task<IEnumerable<PaymentMethod>> GetPaymentInfo(User user)
+    {
+        if (User.Role == UserRole.Bruger)
+        {
+            var stripeAccountId = User.Organization.StripeAccountId;
+
+            if (!string.IsNullOrEmpty(stripeAccountId))
+            {
+                return await StripeService.GetPaymentMethods(stripeAccountId);
+            }
+        }
+
+        return [];
+    }
+
+    private void SaveChanges()
+    {
+        if (User.Validate())
+        {
+            if (User.Role == UserRole.Creator)
+                Creator.Languages = _selectedLanguages.ToList();
+
+            Context.SaveChangesAsync();
+            HasBeenSaved = true;
+        }
+    }
+
+    private double CalculateBudgetEstimate(long[] array) => array.Count() > 0 ? 100.0 / 700.0 * array[0] : 0;
+
+    private Color GetEstimateBarColor(double value)
+    {
+        if (value == 0)
+            return Color.Default;
+
+        if (value > 0 && value < 40)
+            return Color.Success;
+
+        if (value > 40 && value < 66)
+            return Color.Warning;
+
+        if (value > 66 && value < 100)
+            return Color.Primary;
+
+        return Color.Error;
+    }
+
+    private async Task ChangePassword()
+    {
+        if (BCrypt.Net.BCrypt.Verify(OldPassword, User.PasswordHash) && NewPassword == ConfirmNewPassword)
+        {
+            string passwordHash = BCrypt.Net.BCrypt.HashPassword(NewPassword);
+            User.PasswordHash = passwordHash;
+            await Context.SaveChangesAsync();
+
+            PasswordChanged = true;
+            OldPassword = string.Empty;
+            NewPassword = string.Empty;
+            ConfirmNewPassword = string.Empty;
+        }
+    }
+
+    private async Task CheckOnboarding(Creator creator)
+    {
+        if (string.IsNullOrEmpty(creator.StripeAccountId))
+        {
+            creator.StripeAccountId = StripeService.CreateAccount(creator.User.Email, creator.StripeAccountType, creator.User.Language.IsoCountryCode).Id;
+            await Context.SaveChangesAsync();
+        }
+
+        var accountLink = StripeService.CreateAccountLink(creator.StripeAccountId);
+        CreatorOnboardingURL = accountLink.Url;
+    }
+}

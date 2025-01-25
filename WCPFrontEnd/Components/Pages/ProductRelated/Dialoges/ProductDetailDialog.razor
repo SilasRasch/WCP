@@ -1,0 +1,106 @@
+﻿@using System.Security.Claims
+@using Microsoft.EntityFrameworkCore
+@using WCPAdminFrontEnd.Services
+@using WCPFrontEnd.Services
+@using WCPShared.Interfaces
+@using WCPShared.Models.DTOs
+@using WCPShared.Models.Entities
+@using WCPShared.Models.Entities.UserModels
+@using WCPShared.Models.Views
+@using WCPShared.Services.EntityFramework
+@using WCPShared.Services.StaticHelpers
+
+<MudDialog Gutters="false" TitleClass="!p-0 pt-4" ActionsClass="!p-0" ContentClass="py-2">
+    <TitleContent>
+        <MudText Typo="Typo.h6" Class="px-4 mb-2">
+            @Product.Name - Detaljer
+        </MudText>
+        <MudDivider />
+    </TitleContent>
+    <DialogContent>
+        <MudGrid Class="px-4">
+            <MudItem xs="4" Class="flex align-items-center">
+                @if (!string.IsNullOrEmpty(Product.ImgUrl))
+                {
+                    <MudImage Src="@Product.ImgUrl" ObjectFit="ObjectFit.Contain" Class="border-border border rounded"></MudImage>
+                }
+            </MudItem>
+            <MudItem xs="8">
+                <MudGrid>
+                    <MudItem Class="" xs="4">
+                        <MudStack Spacing="0">
+                            <MudText Class="text-gray-500">Brand</MudText>
+
+                            @if (Product.Brand is not null)
+                            {
+                                <MudText>@Product.Brand.Name</MudText>
+                            }
+                        </MudStack>
+                    </MudItem>
+                    <MudItem Class="" xs="4">
+                        <MudStack Spacing="0">
+                            <MudText Class="text-gray-500">Billede link</MudText>
+                            <MudText>@Product.ImgUrl</MudText>
+                        </MudStack>
+                    </MudItem>
+                    <MudItem Class="" xs="4">
+                        <MudStack Spacing="0">
+                            <MudText Class="text-gray-500">Produkt link</MudText>
+                            <MudText>@Product.Link</MudText>
+                        </MudStack>
+                    </MudItem>
+                    <MudItem Class="" xs="4">
+                        <MudStack Spacing="0">
+                            <MudText Class="text-gray-500">Pains</MudText>
+                            <MudText>@Product.Pains</MudText>
+                        </MudStack>
+                    </MudItem>
+                    <MudItem Class="" xs="4">
+                        <MudStack Spacing="0">
+                            <MudText Class="text-gray-500">Features</MudText>
+                            <MudText>@Product.Features</MudText>
+                        </MudStack>
+                    </MudItem>
+                    <MudItem Class="" xs="4">
+                        <MudStack Spacing="0">
+                            <MudText Class="text-gray-500">Fokuspunkter</MudText>
+                            <MudText>@Product.FocusPoints</MudText>
+                        </MudStack>
+                    </MudItem>
+                    <MudItem Class="" xs="4">
+                        <MudStack Spacing="0">
+                            <MudText Class="text-gray-500">Værdi</MudText>
+                            <MudText>@Product.Value</MudText>
+                        </MudStack>
+                    </MudItem>
+                    <MudItem Class="" xs="4">
+                        <MudStack Spacing="0">
+                            <MudText Class="text-gray-500">Brugsanvisninger</MudText>
+                            <MudText>@Product.HowToUse</MudText>
+                        </MudStack>
+                    </MudItem>
+                </MudGrid>
+            </MudItem>
+        </MudGrid>
+        
+    </DialogContent>
+
+    <DialogActions>
+        <MudStack Class="w-full" AlignItems="AlignItems.End">
+            <MudDivider />
+            <MudButton OnClick="Cancel" Variant="Variant.Outlined" Class="rounded-lg w-fit mx-4 mb-4">Luk</MudButton>
+        </MudStack>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; }
+
+    [Parameter]
+    public Product Product { get; set; }
+
+    private async Task Submit() => MudDialog.Close(DialogResult.Ok(Product));
+
+    private void Cancel() => MudDialog.Cancel();
+}

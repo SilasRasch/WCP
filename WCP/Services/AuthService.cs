@@ -68,13 +68,6 @@ namespace WCPShared.Services
                 NotificationSetting = "slack"
             };
 
-            if (language is not null)
-            {
-                user.Language = language;
-                user.LanguageId = language.Id;
-            }
-                
-
             user = await _userService.AddObject(user);
 
             if (request.Creator is not null && user is not null && user.Id != 0 && request.User.Role == "Creator")
@@ -108,6 +101,12 @@ namespace WCPShared.Services
             string passwordHash = BCrypt.Net.BCrypt.HashPassword(generatedPassword);
             string verificationToken = GenerateRandomString(64);
 
+            user.PasswordHash = passwordHash;
+            user.VerificationToken = verificationToken;
+            user.NotificationSetting = "slack";
+            user.NotificationsOn = true;
+            user.IsActive = false;
+
             user = await _userService.AddObject(user);
 
             if (creator is not null && user is not null && user.Id != 0 && user.Role == UserRole.Creator)
@@ -128,6 +127,72 @@ namespace WCPShared.Services
             if (user is not null)
                 try { await _emailService.SendRegistrationEmail(user, verificationToken, selfRegister); }
                 catch { /* ignore */ }
+
+            return user;
+        }
+
+        public async Task<User?> RegisterCreator(User user, Creator creator, string password)
+        {
+            if (!user.Validate())
+                throw new ArgumentException("User validation error");
+
+            if (await _userService.GetObjectBy(x => x.Email == user.Email) is not null)
+                throw new ArgumentException("A user with that email already exists...");
+
+            string passwordHash = BCrypt.Net.BCrypt.HashPassword(password);
+            string verificationToken = GenerateRandomString(64);
+
+            user.PasswordHash = passwordHash;
+            user.VerificationToken = verificationToken;
+            user.NotificationSetting = "slack";
+            user.NotificationsOn = true;
+            user.IsActive = true;
+            user.Role = UserRole.Creator;
+
+            user = await _userService.AddObject(user);
+
+            if (user is not null && user.Id != default)
+            {
+                if (!creator.Validate())
+                    throw new ArgumentException("Creator validation error");
+
+                creator.User = user;
+                creator = await _creatorService.AddObject(creator);
+
+                if (creator is null || creator.Id == 0)
+                {
+                    await _userService.DeleteObject(user.Id);
+                    throw new ArgumentException("Adding creator failed...");
+                }
+            }
+
+            // Send registration email
+
+            //if (user is not null)
+            //    try { await _emailService.SendRegistrationEmail(user, verificationToken, selfRegister); }
+            //    catch { /* ignore */ }
+
+            return user;
+        }
+
+        public async Task<User> RegisterCustomer(User user, string password)
+        {
+            if (!user.Validate())
+                throw new ArgumentException("Validation error");
+
+            if (await _userService.GetObjectBy(x => x.Email == user.Email) is not null)
+                throw new ArgumentException("A user with that email already exists...");
+
+            string passwordHash = BCrypt.Net.BCrypt.HashPassword(password);
+            string verificationToken = GenerateRandomString(64);
+
+            user.PasswordHash = passwordHash;
+            user.VerificationToken = verificationToken;
+            user.NotificationSetting = "slack";
+            user.NotificationsOn = true;
+            user.IsActive = true;
+
+            user = await _userService.AddObject(user);
 
             return user;
         }

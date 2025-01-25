@@ -27,6 +27,7 @@ namespace WCPTests
         private LanguageService _languageService;
         private SlackNotificationService _slackNotificationService;
         private ViewConverter _viewConverter;
+        private StripeService _stripeService;
 
         private Organization _organization;
         private Brand _brand;
@@ -73,6 +74,7 @@ namespace WCPTests
 
             IWcpDbContext context = new TestDbContext(options);
             _viewConverter = new ViewConverter();
+            _stripeService = new StripeService(context);
             _languageService = new LanguageService(context);
             _organizationService = new OrganizationService(context, _viewConverter, _languageService);
             _brandService = new BrandService(context, _organizationService, _viewConverter);
@@ -80,7 +82,7 @@ namespace WCPTests
             _userService = new UserService(context, _organizationService, _languageService, _viewConverter);
             _creatorService = new CreatorService(context, _languageService, _userService, _viewConverter);
             _slackNotificationService = new SlackNotificationService(new SlackNet.SlackApiClient("mock"), _creatorService, _userService);
-            _orderService = new OrderService(context, _brandService, _creatorService, _viewConverter, _slackNotificationService, _staticTemplateService);
+            _orderService = new OrderService(context, _brandService, _creatorService, _viewConverter, _slackNotificationService, _staticTemplateService, _stripeService);
 
             await _languageService.AddObject(new Language { Name = "DAN" });
             _organization = await _organizationService.AddObject(new OrganizationDto() { Name = "Org", CVR = "12345678", LanguageId = 1 });
@@ -88,9 +90,9 @@ namespace WCPTests
             _user = await _userService.AddObject(new RegisterDto() { Name = "Creator", Email = "ugc@email.wcp", OrganizationId = _organization!.Id, Phone = "12341234", Role = "Creator", LanguageId = 1 });
             await _userService.AddObject(new RegisterDto() { Name = "Scripter", Email = "scripter@email.wcp", OrganizationId = _organization!.Id, Phone = "12341234", Role = "Creator", LanguageId = 1 });
             await _userService.AddObject(new RegisterDto() { Name = "UGC", Email = "ugc2@email.wcp", Phone = "12341234", Role = "Creator", LanguageId = 1 });
-            _creator = await _creatorService.AddObject(new CreatorDto() { Address = "Adressevej 12, 4000 By", Gender = "Mand", SubType = "UGC", UserId = 1 });
-            _creator2 = await _creatorService.AddObject(new CreatorDto() { Address = "Adressevej 12, 4000 By", Gender = "Mand", SubType = "UGC", UserId = 3 });
-            _scripter = await _creatorService.AddObject(new CreatorDto() { Address = "Adressevej 12, 4000 By", Gender = "Mand", SubType = "Scripter", UserId = 2 });
+            _creator = await _creatorService.AddObject(new CreatorDto() { Address = "Adressevej 12, 4000 By", Gender = "Mand", SubType = "UGC", UserId = 1, ImgURL = "" });
+            _creator2 = await _creatorService.AddObject(new CreatorDto() { Address = "Adressevej 12, 4000 By", Gender = "Mand", SubType = "UGC", UserId = 3, ImgURL = "" });
+            _scripter = await _creatorService.AddObject(new CreatorDto() { Address = "Adressevej 12, 4000 By", Gender = "Mand", SubType = "Scripter", UserId = 2, ImgURL = "" });
         }
 
         #endregion
@@ -265,8 +267,8 @@ namespace WCPTests
                 Creator = _scripter,
                 CreatorId = 2,
                 HasDelivered = false,
-                Order = result,
-                OrderId = result.Id,
+                Project = null,
+                ProjectId = result.Id,
                 Salary = 0,
             });
             await _orderService.UpdateObject(result.Id, result);
@@ -297,8 +299,8 @@ namespace WCPTests
                 Creator = _scripter,
                 CreatorId = 2,
                 HasDelivered = false,
-                Order = result,
-                OrderId = result.Id,
+                Project = null,
+                ProjectId = result.Id,
                 Salary = 0,
             });
             await _orderService.UpdateObject(result.Id, result);
@@ -321,8 +323,8 @@ namespace WCPTests
                 Creator = _creator2,
                 CreatorId = 3,
                 HasDelivered = false,
-                Order = result,
-                OrderId = result.Id,
+                Project = null,
+                ProjectId = result.Id,
                 Salary = 0,
             });
             result.Status = ProjectStatus.CreatorFilming;

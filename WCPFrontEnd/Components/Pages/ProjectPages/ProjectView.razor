@@ -1,0 +1,395 @@
+﻿@page "/projects/{ProjectId:int}"
+
+@using Microsoft.EntityFrameworkCore
+@using WCPAdminFrontEnd.Services
+@using WCPFrontEnd.Components.Pages.ProductRelated.Dialoges
+@using WCPFrontEnd.Components.Pages.ProjectPages.FileSystem
+@using WCPFrontEnd.Services
+@using WCPShared.Interfaces
+@using WCPShared.Models.Entities.ProjectModels
+@using WCPShared.Models.Entities
+@using WCPShared.Models.Entities.ProjectModels.Concepts
+@using WCPShared.Models.Enums
+@inject ProjectService ProjectService
+@inject IWcpDbContext Context
+@inject CustomDialogService CustomDialogService
+@attribute [Authorize]
+
+@if (Project is not null) 
+{
+    <MudStack Row>
+        <MudStack Spacing="0">
+            <span class="text-[20px] font-semibold">Projekt #@Project.Id</span>
+            <span class="text-[16px] text-neutral-400">Administrér dit projekt herfra</span>
+        </MudStack>
+        <MudSpacer />
+
+        <AuthorizeView Roles="Admin">
+            <MudMenu Icon="@Icons.Material.Filled.MoreHoriz" AnchorOrigin="Origin.BottomRight">
+                <MudMenuItem Disabled Icon="@Icons.Material.Filled.Edit">Redigér projekt</MudMenuItem>
+                <MudMenuItem OnClick="() => CustomDialogService.OpenStatusDialogAdmin(Project)" Icon="@Icons.Material.Filled.ChangeCircle">Skift status</MudMenuItem>
+                <MudMenuItem Disabled IconColor="Color.Error" Icon="@Icons.Material.Filled.Delete">Annuller projekt</MudMenuItem>
+            </MudMenu>
+        </AuthorizeView>
+
+        <AuthorizeView Roles="Bruger">
+            <MudMenu Icon="@Icons.Material.Filled.MoreHoriz" AnchorOrigin="Origin.BottomRight">
+                <MudMenuItem Disabled="Project.Status != ProjectStatus.Unconfirmed" IconColor="Color.Error" Icon="@Icons.Material.Filled.Delete">Annuller projekt</MudMenuItem>
+            </MudMenu>
+        </AuthorizeView>
+    </MudStack>
+
+    <MudStack Row Class="mt-3">
+        <MudPaper Class="pa-4 border-[1px] border-border" Width="25%" Elevation="0">
+            <MudStack Row AlignItems="AlignItems.Center" Class="w-full">
+                <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Class=" h-[48px] aspect-square rounded-lg bg-primary-200 flex">
+                    <MudIcon Size="Size.Large" Icon="@Icons.Material.Filled.PlayArrow" Class="text-primary-700"></MudIcon>
+                </MudStack>
+                <MudStack Spacing="0" Class="w-full">
+                    <MudText Class="text-neutral-400">Antal videoer</MudText>
+
+                    <MudStack Row Class="w-full" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                        <MudText Typo="Typo.h5">@Project.Concepts.Sum(x => x.Amount)</MudText>
+                    </MudStack>
+                </MudStack>
+            </MudStack>
+        </MudPaper>
+
+        <MudPaper Class="pa-4 border-[1px] border-border" Width="25%" Elevation="0">
+            <MudStack Row AlignItems="AlignItems.Center" Class="w-full">
+                <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Class=" h-[48px] aspect-square rounded-lg bg-warning-200 flex">
+                    <MudIcon Size="Size.Large" Icon="@Icons.Material.Filled.LocalShipping" Class="text-warning-700"></MudIcon>
+                </MudStack>
+                <MudStack Spacing="0" Class="w-full">
+                    <MudText Class="text-neutral-400">Antal produkter</MudText>
+
+                    <MudStack Row Class="w-full" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                        <MudText Typo="Typo.h5">@Project.Concepts.Count()</MudText>
+                    </MudStack>
+                </MudStack>
+            </MudStack>
+        </MudPaper>
+
+        <MudPaper Class="pa-4 border-[1px] border-border" Width="25%" Elevation="0">
+            <MudStack Row AlignItems="AlignItems.Center" Class="w-full">
+                <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Class=" h-[48px] aspect-square rounded-lg bg-success-200 flex">
+                    <MudIcon Size="Size.Large" Icon="@Icons.Material.Filled.Assignment" Class="text-success-700"></MudIcon>
+                </MudStack>
+                <MudStack Spacing="0" Class="w-full">
+                    <MudText Class="text-neutral-400">Status</MudText>
+
+                    <MudStack Row Class="w-full" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                        <MudText Typo="Typo.h5">@Project.Status</MudText>
+                    </MudStack>
+                </MudStack>
+            </MudStack>
+        </MudPaper>
+
+        @if (Project.Status >= ProjectStatus.CreatorFilming) 
+        {
+            <MudPaper Class="pa-4 border-[1px] border-border" Width="25%" Elevation="0">
+                <MudStack Row AlignItems="AlignItems.Center" Class="w-full">
+                    <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Class=" h-[48px] aspect-square rounded-lg bg-blue-200 flex">
+                        <MudIcon Size="Size.Large" Icon="@Icons.Material.Filled.LocalMovies" Class="text-blue-700"></MudIcon>
+                    </MudStack>
+                    <MudStack Spacing="0" Class="w-full">
+                        <MudText Class="text-neutral-400">Afleveringer</MudText>
+
+                        <MudStack Row Class="w-full" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                            <MudText Typo="Typo.h5">@(Project.Participations.Where(x => x.HasDelivered).Count())/@Project.Participations.Count()</MudText>
+                        </MudStack>
+                    </MudStack>
+                </MudStack>
+            </MudPaper>
+        }
+        else 
+        {
+            <MudPaper Class="pa-4 border-[1px] border-border" Width="25%" Elevation="0">
+                <MudStack Row AlignItems="AlignItems.Center" Class="w-full">
+                    <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Class=" h-[48px] aspect-square rounded-lg bg-blue-200 flex">
+                        <MudIcon Size="Size.Large" Icon="@Icons.Material.Filled.LocalMovies" Class="text-blue-700"></MudIcon>
+                    </MudStack>
+                    <MudStack Spacing="0" Class="w-full">
+                        <MudText Class="text-neutral-400">Antal creators</MudText>
+
+                        <MudStack Row Class="w-full" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                            <MudText Typo="Typo.h5">@Project.Participations.Count()</MudText>
+                        </MudStack>
+                    </MudStack>
+                </MudStack>
+            </MudPaper>
+        }
+        
+    </MudStack>
+
+    <MudStack Row Class="mt-3" Spacing="3">
+        <MudStack Class="grow" Spacing="3">
+            <MudPaper Class="border-[1px] border-border" Elevation="0">
+                <div class="bg-neutral-50 rounded-t">
+                    <MudText Class="pa-4">Grund detajler</MudText>
+                    <MudDivider Class="border-border" />
+                </div>
+
+                <MudGrid Class="pa-4">
+                    <MudItem Class="" xs="4">
+                        <MudStack Spacing="0">
+                            <MudText Class="text-gray-500">Brand</MudText>
+                            <MudText>@Project.Brand.Name</MudText>
+                        </MudStack>
+                    </MudItem>
+                    <MudItem Class="" xs="4">
+                        <MudStack Spacing="0">
+                            <MudText Class="text-gray-500">Projektnavn</MudText>
+                            <MudText>@Project.Name</MudText>
+                        </MudStack>
+                    </MudItem>
+                    <MudItem Class="" xs="4">
+                        <MudStack Spacing="0">
+                            <MudText Class="text-gray-500">Type</MudText>
+                            <MudText>@Project.Type</MudText>
+                        </MudStack>
+                    </MudItem>
+                    <MudItem Class="" xs="4">
+                        <MudStack Spacing="0">
+                            <MudText Class="text-gray-500">Oprettet</MudText>
+                            <MudText>@Project.Created.ToString("d")</MudText>
+                        </MudStack>
+                    </MudItem>
+                    <MudItem Class="" xs="4">
+                        <MudStack Spacing="0">
+                            <MudText Class="text-gray-500">Status</MudText>
+                            <MudText>@Project.Status</MudText>
+                        </MudStack>
+                    </MudItem>
+                </MudGrid>
+            </MudPaper>
+
+            <MudPaper Class="border-[1px] border-border" Elevation="0">
+                <div class="bg-neutral-50 rounded-t">
+                    <MudText Class="pa-4">Projekt detajler</MudText>
+                    <MudDivider Class="border-border" />
+                </div>
+
+                <MudGrid Class="pa-4">
+                    <MudItem Class="" xs="6">
+                        <MudStack Spacing="0">
+                            <MudText Class="text-gray-500">Pris</MudText>
+                            <MudText>@(Project.Price != 0 ? $"{Project.Price} kr" : "Ingen pris endnu")</MudText>
+                        </MudStack>
+                    </MudItem>
+                    <MudItem Class="" xs="6">
+                        <MudStack Spacing="0">
+                            <MudText Class="text-gray-500">Deadline</MudText>
+                            <MudText>@Project.Deadline.ToString("d")</MudText>
+                        </MudStack>
+                    </MudItem>
+
+                    <MudItem Class="" xs="6">
+                        <MudStack Spacing="0">
+                            <MudText Class="text-gray-500">Koncepter</MudText>
+                            <MudText>@Project.Concepts.Count() stk (@Project.Concepts.Sum(x => x.Amount) videoer)</MudText>
+                        </MudStack>
+                    </MudItem>
+
+                    @if (Project.Type == ProjectType.UGC || Project.Type == ProjectType.Photos)
+                    {
+                        <MudItem Class="" xs="6">
+                            <MudStack Spacing="0">
+                                <MudStack Row Justify="Justify.Center" AlignItems="AlignItems.Center">
+                                    <MudText Class="text-gray-500">Creators</MudText>
+                                    <MudSpacer />
+                                    <a class="text-blue-500 hover:underline cursor-pointer">Se alle</a>
+                                </MudStack>
+                                
+                                <MudAvatarGroup Max="5" Spacing="3">
+                                    @foreach (var participation in Project.Participations)
+                                    {
+                                        <div class="flex flex-col justify-center items-center">
+                                            <MudAvatar Color="Color.Primary">
+                                                @if (!string.IsNullOrEmpty(participation.Creator.ImgURL))
+                                                {
+                                                    <MudImage Src="@participation.Creator.ImgURL" />
+                                                }
+                                                else
+                                                {
+                                                    @participation.Creator.User.Name.First()
+                                                }
+                                            </MudAvatar>
+                                        </div>
+                                    }
+
+                                    @if (Project.Participations.Count == 0)
+                                    {
+                                        <MudText Class="p-2 cursor-pointer">-</MudText>
+                                    }
+                                </MudAvatarGroup>
+                            </MudStack>
+                        </MudItem>
+                    }
+
+                </MudGrid>
+            </MudPaper>
+
+            <MudPaper Class="border-[1px] border-border" Elevation="0">
+                <div class="bg-neutral-50 rounded-t">
+                    <MudText Class="pa-4">Koncepter</MudText>
+                    <MudDivider Class="border-gray-300" />
+                </div>
+
+                <MudGrid Class="pa-4">
+                    @foreach (var concept in Project.Concepts)
+                    {
+                        <MudItem Class="" xs="6">
+                            <MudPaper Class="border-[1px] border-border" Elevation="0">
+                                <div class="rounded-t">
+                                    <MudStack Row Justify="Justify.Center">
+                                        <MudText Class="pa-4">@concept.Product.Name</MudText>
+                                        <MudSpacer />
+                                        <span @onclick="() => CustomDialogService.OpenProductDialog(concept.Product)" class="cursor-pointer text-[16px] pa-4 text-blue-500 hover:underline">Detaljer</span>
+                                    </MudStack>
+
+                                    <MudDivider Class="border-border" />
+                                </div>
+
+                                <MudGrid Class="pa-4">
+                                    <MudItem xs="6">
+                                        <MudStack Spacing="0">
+                                            <MudText Class="text-gray-500">Antal</MudText>
+                                            <MudText>@concept.Amount videoer</MudText>
+                                        </MudStack>
+                                    </MudItem>
+                                    <MudItem xs="6">
+                                        <MudStack Spacing="0">
+                                            <MudText Class="text-gray-500">Platforme</MudText>
+                                            <MudText>@concept.Platforms</MudText>
+                                        </MudStack>
+                                    </MudItem>
+                                    <MudItem xs="12">
+                                        <MudStack Spacing="0">
+                                            <MudText Class="text-gray-500">Formater</MudText>
+                                            <MudText>@String.Join(", ", concept.Formats)</MudText>
+                                        </MudStack>
+                                    </MudItem>
+                                </MudGrid>
+                            </MudPaper>
+                        </MudItem>
+                    }
+                </MudGrid>
+            </MudPaper>
+        </MudStack>
+
+        <AuthorizeView Roles="Creator">
+            <MudStack Spacing="3">
+                <MudPaper Class="border-[1px] border-border pa-4" Elevation="0">
+                    <MudStack>
+                        <MudText Typo="Typo.h6">Tid til aflevering</MudText>
+                        <MudStack Row AlignItems="AlignItems.Center">
+                            <MudStack Spacing="0" AlignItems="AlignItems.Center">
+                                <MudText><span class="font-semibold">16</span></MudText>
+                                <MudText Class="text-gray-500">Dage</MudText>
+                            </MudStack>
+
+                            <div class="h-[20px] mx-2 border-l-[2px] border-border"></div>
+
+                            <MudStack Spacing="0" AlignItems="AlignItems.Center">
+                                <MudText><span class="font-semibold">13</span></MudText>
+                                <MudText Class="text-gray-500">Timer</MudText>
+                            </MudStack>
+
+                            <div class="h-[20px] mx-2 border-l-[2px] border-border"></div>
+
+                            <MudStack Spacing="0" AlignItems="AlignItems.Center">
+                                <MudText><span class="font-semibold">22</span></MudText>
+                                <MudText Class="text-gray-500">Minutter</MudText>
+                            </MudStack>
+
+                            <div class="h-[20px] mx-2 border-l-[2px] border-gray-300"></div>
+
+                            <MudStack Spacing="0" AlignItems="AlignItems.Center">
+                                <MudText><span class="font-semibold">20</span></MudText>
+                                <MudText Class="text-gray-500">Sekunder</MudText>
+                            </MudStack>
+
+                        </MudStack>
+                        <MudButton DropShadow="false" Color="Color.Primary" Variant="Variant.Filled" Class="rounded-lg" EndIcon="@Icons.Material.Filled.ArrowOutward">Aflever nu</MudButton>
+                    </MudStack>
+                </MudPaper>
+
+                @if (Project.Type == ProjectType.UGC || Project.Type == ProjectType.Photos)
+                {
+                    <MudPaper Class="border-[1px] border-border pa-4" Elevation="0">
+                        <MudStack>
+                            <MudText Typo="Typo.h6">Afleveringer</MudText>
+
+                            <MudStack Spacing="0">
+                                <MudText Class="text-gray-500">Dine afleveringer</MudText>
+                                <MudText>@Project.Concepts.Sum(x => (x as CreatorConcept).CreativesPerCreator) videoer</MudText>
+                            </MudStack>
+
+
+                        </MudStack>
+                    </MudPaper>
+                }
+
+
+            </MudStack>
+        </AuthorizeView>
+    </MudStack>
+    
+    <MudText Class="mt-3">Projekt filer</MudText>
+    <MudPaper Class="pa-4 mt-2">
+        <ProjectFileBar Project="Project" />
+    </MudPaper>
+}
+else 
+{
+    <MudProgressCircular Indeterminate Color="Color.Primary" />
+}
+
+@code {
+    [Parameter]
+    public int ProjectId { get; set; }
+
+    public Project? Project { get; set; }
+    private List<Brand> Brands = [];
+
+    private bool _editable = false;
+    private DateTime? _deliveryDate = DateTime.Now;
+    private DateTime? _createdDate = DateTime.Now;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Project = await Context.Projects
+            .Include(x => x.Concepts)
+            .ThenInclude(x => x.Product)
+            .Include(x => x.Brand)
+            .ThenInclude(x => x.Organization)
+            .ThenInclude(x => x.Language)
+            .Include(x => x.Participations)
+            .ThenInclude(x => x.Creator)
+            .ThenInclude(x => x.User)
+            .SingleOrDefaultAsync(x => x.Id == ProjectId);
+        _deliveryDate = Project.Deadline;
+        _createdDate = Project.Created;
+        Brands = await Context.Brands
+            .Include(x => x.Organization)
+            .ThenInclude(x => x.Language)
+            .ToListAsync();
+    }
+
+    private async Task Submit()
+    {
+        if (_deliveryDate != DateTime.MinValue)
+            Project.Deadline = _deliveryDate!.Value.AddHours(23).AddMinutes(59).AddSeconds(59);
+
+        if (_createdDate != DateTime.MinValue)
+            Project.Created = _createdDate!.Value;
+
+        await ProjectService.UpdateObject(Project.Id, Project);
+    }
+
+    private void ToggleEditable()
+    {
+        _editable = !_editable;
+    }
+}

@@ -1,12 +1,43 @@
-﻿<MudNavMenu>
-    <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Hjem</MudNavLink>
-    <MudNavLink Href="projects" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Assignment">Projekter</MudNavLink>
-    <MudNavGroup Icon="@Icons.Material.Filled.People" Title="Brugerelateret" Expanded="true" HideExpandIcon="true">
-        <MudNavLink Href="users" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Person">Brugere</MudNavLink>
-        <MudNavLink Href="creators" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.VideoCameraFront">Creators</MudNavLink>
-    </MudNavGroup>
+﻿@using WCPFrontEnd.Services
+@inject CustomDialogService DialogService
+
+<MudNavMenu Class="h-full" Color="Color.Primary" Rounded>
+    <AuthorizeView Roles="Bruger">
+        <MudStack @onclick="DialogService.OpenProjectCreation" AlignItems="AlignItems.Center" Row Class="my-4 p-2 px-4 bg-primary-50 hover:bg-primary-500 hover:text-white duration-200 text-primary-500 cursor-pointer rounded">
+            <MudIcon Icon="@Icons.Material.Filled.Add" />
+            <p class="font-medium">Opret nyt projekt</p>
+        </MudStack>
+    </AuthorizeView>
     
-    <MudNavLink Href="organizations" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Business">Organisationer</MudNavLink>
-    <MudNavLink Href="brands" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.BusinessCenter">Brands</MudNavLink>
-    <MudNavLink Href="statics" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Draw">Statics</MudNavLink>
+    <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Dashboard</MudNavLink>
+    
+    <AuthorizeView Policy="IsNotSubscribed">
+        <MudNavLink Href="settings" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AttachMoney">Køb adgang</MudNavLink>
+    </AuthorizeView>
+    
+    <AuthorizeView>
+        <MudNavLink Href="projects" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Assignment">Projekter</MudNavLink>
+    </AuthorizeView>
+
+    <AuthorizeView Roles="Bruger">
+        <MudNavLink Href="creators" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Person">Creators</MudNavLink>
+    </AuthorizeView>
+
+    <AuthorizeView Roles="Admin">
+        <MudNavLink Href="brands" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.BusinessCenter">Brands</MudNavLink>
+        <MudNavGroup Icon="@Icons.Material.Filled.People" Title="Brugerelateret" Expanded="true" HideExpandIcon="true">
+            <MudNavLink Href="users" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Person">Brugere</MudNavLink>
+            <MudNavLink Href="creators" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.VideoCameraFront">Creators</MudNavLink>
+        </MudNavGroup>
+
+        <MudNavLink Href="organizations" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Business">Organisationer</MudNavLink>
+        <MudNavLink Href="statics" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Draw">Statics</MudNavLink>
+        <MudNavLink Href="feedback" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Star">Feedback</MudNavLink>
+    </AuthorizeView>
+
+    <AuthorizeView Roles="Creator">
+        <MudNavLink Href="payout" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.CreditCard">Udbetaling</MudNavLink>
+    </AuthorizeView>
+
+    <MudNavLink Class="absolute left-0 bottom-0" Href="settings" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Settings">Indstillinger</MudNavLink>
 </MudNavMenu>

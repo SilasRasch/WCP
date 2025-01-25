@@ -2,6 +2,7 @@
 using SlackNet.WebApi;
 using WCPShared.Interfaces.DataServices;
 using WCPShared.Models.Entities;
+using WCPShared.Models.Entities.ProjectModels;
 using WCPShared.Models.Enums;
 using WCPShared.Models.Views;
 using WCPShared.Services.EntityFramework;
@@ -67,67 +68,70 @@ namespace WCPShared.Services
             return (await _slackApiClient.Users.List()).Members.SingleOrDefault(x => x.RealName == userName);
         }
 
-        public async Task SendStatusNotifications(Order newOrder, Order oldOrder)
+        public async Task SendStatusNotifications(Project newProject, Project oldProject)
         {
             if (!EnableNotifications) return;
 
             // Organizational notifications
 
-            // Notify organization when the order is accepted
-            if (newOrder.Status == ProjectStatus.Queued && oldOrder.Status == ProjectStatus.Unconfirmed)
+            // Notify organization when the project is accepted
+            if (newProject.Status == ProjectStatus.Queued && oldProject.Status == ProjectStatus.Unconfirmed)
                 await SendMessageToChannel(
-                    newOrder.Brand.Organization.Name,
-                    $"[{newOrder.ProjectName}] Tak for din bestilling - den er nu bekræftet! {InsertProjectLink(newOrder.Id)}");
+                    newProject.Brand.Organization.Name,
+                    $"[{newProject.Name}] Tak for din bestilling - den er nu bekræftet! {InsertProjectLink(newProject.Id)}");
 
             // Notify the organization when the scripts and creators have been choosen
-            if (newOrder.Status == ProjectStatus.Planned && oldOrder.Status == ProjectStatus.Scripting)
+            if (newProject.Status == ProjectStatus.Planned && oldProject.Status == ProjectStatus.Scripting)
                 await SendMessageToChannel(
-                    newOrder.Brand.Organization.Name,
-                    $"[{newOrder.ProjectName}] Scripts og creators er nu klar - hop ind og accepter! {InsertProjectLink(newOrder.Id)}");
+                    newProject.Brand.Organization.Name,
+                    $"[{newProject.Name}] Scripts og creators er nu klar - hop ind og accepter! {InsertProjectLink(newProject.Id)}");
 
             // Notify the organization when the project has wrapped up production
-            if (newOrder.Status == ProjectStatus.Feedback && oldOrder.Status == ProjectStatus.Editing)
+            if (newProject.Status == ProjectStatus.Feedback && oldProject.Status == ProjectStatus.Editing)
                 await SendMessageToChannel(
-                    newOrder.Brand.Organization.Name,
-                    $"[{newOrder.ProjectName}] Dit projekt er nu færdigt - hop ind og giv feedback! {InsertProjectLink(newOrder.Id)}");
+                    newProject.Brand.Organization.Name,
+                    $"[{newProject.Name}] Dit projekt er nu færdigt - hop ind og giv feedback! {InsertProjectLink(newProject.Id)}");
 
             // Notify the organization when the project has been cancelled
-            if (newOrder.Status == ProjectStatus.Cancelled && oldOrder.Status != ProjectStatus.Cancelled)
+            if (newProject.Status == ProjectStatus.Cancelled && oldProject.Status != ProjectStatus.Cancelled)
                 await SendMessageToChannel(
-                    newOrder.Brand.Organization.Name,
-                    $"[{newOrder.ProjectName}] Dit projekt er blevet annulleret {InsertProjectLink(newOrder.Id)}");
+                    newProject.Brand.Organization.Name,
+                    $"[{newProject.Name}] Dit projekt er blevet annulleret {InsertProjectLink(newProject.Id)}");
 
             // Creator notifications
 
-            var allCreators = await _creatorService.GetAllObjectsView();
-            IEnumerable<CreatorView> creatorsWithUsers = from CreatorParticipation in newOrder.Participations
-                                                  join CreatorView in allCreators
-                                                  on CreatorParticipation.Creator.Id equals CreatorView.Id
-                                                  select CreatorView;
-
-            // Notify creators when the project is moved from planned to production
-            if (newOrder.Status == ProjectStatus.CreatorFilming && oldOrder.Status == ProjectStatus.Planned)
-                foreach (CreatorView creator in creatorsWithUsers)
-                    await SendMessageToUser(
-                        creator.User.Name,
-                        $"[{newOrder.ProjectName}] Projektet er nu godkendt og produkterne er på vej til dig! {InsertProjectLink(newOrder.Id)}");
-
-            // Notify creators when the project is moved from scripting to planned
-            if (newOrder.Status == ProjectStatus.Planned && oldOrder.Status == ProjectStatus.Scripting)
-                foreach (CreatorView creator in creatorsWithUsers)
-                    await SendMessageToUser(
-                        creator.User.Name,
-                        $"[{newOrder.ProjectName}] Du er blevet inviteret til et projekt! {InsertProjectLink(newOrder.Id)}");
-
-            // Notify newly invited creators (only in planned ???)
-            if (newOrder.Status == ProjectStatus.Planned)
+            if (newProject is CreatorProject newCreatorProject && oldProject is CreatorProject oldCreatorProject)
             {
-                var newCreators = creatorsWithUsers.ExceptBy(oldOrder.Participations.Select(x => x.CreatorId), x => x.Id);
-                if (newCreators.Any())
-                    foreach (CreatorView creator in newCreators)
+                var allCreators = await _creatorService.GetAllObjectsView();
+                IEnumerable<CreatorView> creatorsWithUsers = from CreatorParticipation in newCreatorProject.Participations
+                                                             join CreatorView in allCreators
+                                                             on CreatorParticipation.Creator.Id equals CreatorView.Id
+                                                             select CreatorView;
+
+                // Notify creators when the project is moved from planned to production
+                if (newCreatorProject.Status == ProjectStatus.CreatorFilming && oldCreatorProject.Status == ProjectStatus.Planned)
+                    foreach (CreatorView creator in creatorsWithUsers)
                         await SendMessageToUser(
                             creator.User.Name,
-                            $"[{newOrder.ProjectName}] Du er blevet inviteret til et projekt! {InsertProjectLink(newOrder.Id)}");
+                            $"[{newCreatorProject.Name}] Projektet er nu godkendt og produkterne er på vej til dig! {InsertProjectLink(newCreatorProject.Id)}");
+
+                // Notify creators when the project is moved from scripting to planned
+                if (newCreatorProject.Status == ProjectStatus.Planned && oldCreatorProject.Status == ProjectStatus.Scripting)
+                    foreach (CreatorView creator in creatorsWithUsers)
+                        await SendMessageToUser(
+                            creator.User.Name,
+                            $"[{newCreatorProject.Name}] Du er blevet inviteret til et projekt! {InsertProjectLink(newCreatorProject.Id)}");
+
+                // Notify newly invited creators (only in planned ???)
+                if (newCreatorProject.Status == ProjectStatus.Planned)
+                {
+                    var newCreators = creatorsWithUsers.ExceptBy(oldCreatorProject.Participations.Select(x => x.CreatorId), x => x.Id);
+                    if (newCreators.Any())
+                        foreach (CreatorView creator in newCreators)
+                            await SendMessageToUser(
+                                creator.User.Name,
+                                $"[{newCreatorProject.Name}] Du er blevet inviteret til et projekt! {InsertProjectLink(newCreatorProject.Id)}");
+                }
             }
         }
 

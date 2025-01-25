@@ -14,8 +14,8 @@
 
 <PageTitle>Brugere</PageTitle>
 
-<MudDataGrid T="User" SelectOnRowClick="@_selectable" MultiSelection="@_selectable" Items="@UserList.Reverse()" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter" Hideable="@_hidable" Striped="@_striped" Elevation="3"
-    ColumnResizeMode="@(_resizable ? ResizeMode.Column : ResizeMode.None)" DragDropColumnReordering="_movable" FilterCaseSensitivity="DataGridFilterCaseSensitivity.Ignore">
+<MudDataGrid T="User" SelectOnRowClick="@_selectable" MultiSelection="@_selectable" Items="@UserList.Reverse()" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter" Hideable="@_hidable" Striped="@_striped" Elevation="0"
+    Class="border border-border" ColumnResizeMode="@(_resizable ? ResizeMode.Column : ResizeMode.None)" DragDropColumnReordering="_movable" FilterCaseSensitivity="DataGridFilterCaseSensitivity.Ignore">
     <ToolBarContent>
         <MudStack Row="true" AlignItems="AlignItems.Center">
             <MudText Typo="Typo.h6">Brugere</MudText>
@@ -55,13 +55,13 @@
         {
             <SelectColumn T="User" />
         }
-        <PropertyColumn Property="x => x.Id" Title="Id" Editable="false">
+        @* <PropertyColumn Property="x => x.Id" Title="Id" Editable="false">
             <CellTemplate>
                 <div @onclick="() => ToggleEditDialog(context.Item)" class="flex justify-center rounded-full w-10 p-2 cursor-pointer bg-red-500 text-white">
                     <MudText>@context.Item.Id</MudText>
                 </div>
             </CellTemplate>
-        </PropertyColumn>
+        </PropertyColumn> *@
         <PropertyColumn Property="x => x.Name" Title="Navn" />
         <PropertyColumn Property="x => x.Email" Title="Email" />
         <PropertyColumn Property="x => x.IsActive" Title="Aktivitet">
@@ -85,19 +85,8 @@
                 @if (context.Item.Organization is not null)
                 {
                     <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
-                        <MudText Typo="Typo.h6">@ProjectHelper.CountryStringToFlag(context.Item.Organization.Language.Name) </MudText>
+                        <MudText Typo="Typo.h6">@ProjectHelper.CountryStringToFlag(context.Item.Organization.Language.IsoLanguageCode) </MudText>
                         <MudText>@context.Item.Organization.Name</MudText>
-                    </MudStack>
-                }
-            </CellTemplate>
-        </PropertyColumn>
-
-        <PropertyColumn Property="x => x.Language" Title="Sprog/Land">
-            <CellTemplate>
-                @if (context.Item.Language is not null)
-                {
-                    <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
-                        <MudText Typo="Typo.h6">@ProjectHelper.CountryStringToFlag(context.Item.Language.Name) </MudText>
                     </MudStack>
                 }
             </CellTemplate>
@@ -173,7 +162,6 @@
     private async Task FetchUsers()
     {
         UserList = await Context.Users
-            .Include(x => x.Language)
             .Include(x => x.Organization)
             .ThenInclude(x => x.Language)
             .ToListAsync();

@@ -1,4 +1,5 @@
-﻿using WCPShared.Models.Entities.AuthModels;
+﻿using WCPShared.Models.Entities;
+using WCPShared.Models.Entities.AuthModels;
 using WCPShared.Models.Entities.UserModels;
 
 namespace WCPShared.Interfaces.Auth
@@ -14,5 +15,7 @@ namespace WCPShared.Interfaces.Auth
         Task<User?> Verify(VerifyUserDto request);
         Task<dynamic> Authenticate();
         Task<bool> AddAdmin(int id);
+        Task<User> RegisterCustomer(User user, string password);
+        Task<User?> RegisterCreator(User user, Creator creator, string password);
     }
 }

@@ -1,45 +1,154 @@
-﻿@inherits LayoutComponentBase
+﻿@using System.Security.Claims
+@using Microsoft.EntityFrameworkCore
+@using Stripe
+@using WCPAdminFrontEnd.Services
+@using WCPFrontEnd.Services
+@using WCPShared.Interfaces
+@using WCPShared.Models.Entities.UserModels
+@using WCPShared.Models.Enums
+@using WCPShared.Services
+@inherits LayoutComponentBase
 @inject NavigationManager Navigation
+@inject IJSRuntime jsRuntime
+@inject StripeService StripeService
+@inject IWcpDbContext Context
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject ApplicationState ApplicationState
 
 <MudThemeProvider @ref="_mudThemeProvider" Theme="@_theme" IsDarkMode="_isDarkMode" />
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
 
-<MudLayout>
-    <MudAppBar Elevation="1">
-        <a href="/" class="mt-2">
-            <MudImage Src="https://wcp.dk/assets/webcontent-B3eGu9V2.png" Class="max-h-[64px]" Alt="WebContent logo" />
-        </a>
-        <MudSpacer />
+<MudStack Row Spacing="0" Class="mud-height-full">
+    <AuthorizeView>
+        <Authorized>
+            <MudStack Class="rounded-0 border-r-[1px] border-border p-4 h-[100vh]">
+                <a href="/" class="py-2">
+                    <MudImage Src="https://wc-files.se-sto-1.linodeobjects.com/media/wc-logo.png" Height="28" Class="max-h-[28px]" Alt="WebContent logo" />
+                </a>
+                <NavMenu />
+            </MudStack>
+        </Authorized>
+    </AuthorizeView>
+
+    <MudStack Spacing="0" Class="grow mud-height-full">
         <AuthorizeView>
             <Authorized>
-                <MudIconButton Icon="@(DarkLightModeButtonIcon)" Color="Color.Warning" OnClick="@DarkModeToggle" />
-                <MudNavLink Style="max-width: fit-content" Href="/logout" Match="NavLinkMatch.Prefix" IconColor="Color.Error" Icon="@Icons.Material.Filled.Logout">Log ud</MudNavLink>
+                <MudPaper Elevation="0" Class="border-b-[1px] border-border py-2 rounded-0 px-6">
+                    <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart" Spacing="1">
+                
+                                <MudPaper Elevation="0" Class="rounded-lg p-2 border-border border">
+                                    <MudStack Row>
+                                        <MudIcon Icon="@Icons.Material.Filled.Search" />
+                                        <input type="text" placeholder="Søg" class="max-w-96 w-[25vw]" />
+                                    </MudStack>
+                                </MudPaper>
+
+                                <MudSpacer />
+
+                                <WCPFrontEnd.Components.Pages.ChatTest />
+
+                                <AuthorizeView Context="context2" Roles="Creator">
+                                    @if (Balance is not null)
+                                    {
+                                        <CreatorBalance Balance="Balance" />
+                                    }
+                                </AuthorizeView>
+
+                                <div class="h-[32px] mx-2 border-l-[1px] border-border"></div>
+
+                                <MudMenu AriaLabel="Åben profil menu" AnchorOrigin="Origin.BottomRight" Variant="Variant.Outlined">
+                                    <ActivatorContent>
+                                        @if (ApplicationState.IsDataLoaded)
+                                        {
+                                            <MudStack Spacing="4" Row Justify="Justify.Center" AlignItems="AlignItems.Center">
+                                                <MudStack Row Spacing="2">
+                                                    <MudAvatar Color="Color.Primary">
+                                                        @ApplicationState.CurrentUser.Name.First()
+                                                    </MudAvatar>
+
+                                                    <MudStack Spacing="0">
+                                                        <MudText>@ApplicationState.CurrentUser.Name</MudText>
+                                                        <MudText Typo="Typo.caption">@ApplicationState.CurrentUser.Role</MudText>
+                                                    </MudStack>
+                                                </MudStack>
+
+                                                <MudIcon Icon="@Icons.Material.Filled.KeyboardArrowDown"></MudIcon>
+                                            </MudStack>
+                                        }
+                                        else
+                                        {
+                                            <MudStack Spacing="4" Row Justify="Justify.Center" AlignItems="AlignItems.Center">
+                                                <MudStack Row Spacing="2">
+                                                    <MudAvatar Color="Color.Primary">
+                                                        WC
+                                                    </MudAvatar>
+
+                                                    <MudStack Spacing="0">
+                                                        <MudText>Indlæser...</MudText>
+                                                    </MudStack>
+                                                </MudStack>
+
+                                                <MudIcon Icon="@Icons.Material.Filled.KeyboardArrowDown"></MudIcon>
+                                            </MudStack>
+                                        }
+                                    </ActivatorContent>
+                                    <ChildContent>
+                                        <MudMenuItem Href="settings" Icon="@Icons.Material.Filled.Settings">Indstillinger</MudMenuItem>
+                                        <MudMenuItem Href="profile" Icon="@Icons.Material.Filled.Support">Support</MudMenuItem>
+                                        <MudMenuItem Href="profile" Icon="@Icons.Material.Filled.HelpOutline">FAQ</MudMenuItem>
+                                        @* <MudMenuItem Icon="@(DarkLightModeButtonIcon)" IconColor="Color.Warning" OnClick="@DarkModeToggle">Skift tema</MudMenuItem> *@
+                                        <MudDivider />
+                                        <MudMenuItem Href="logout" Icon="@Icons.Material.Filled.Logout">Log ud</MudMenuItem>
+                                    </ChildContent>
+
+                                </MudMenu>
+                    
+                    </MudStack>
+                </MudPaper>
             </Authorized>
-            <NotAuthorized>
-                <MudNavLink Style="max-width: fit-content" Href="/login" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Login">Log ind</MudNavLink>
-            </NotAuthorized>
         </AuthorizeView>
 
+        <MudMainContent Class="mud-height-full px-6 py-3">
+            <AuthorizeView Roles="Bruger">
+                <Authorized>
+                    <AuthorizeView Context="subscribed" Policy="IsNotSubscribed">
+                        <Authorized>
+                            <MudPaper Class="pa-2 mb-2 mud-error">
+                                <MudText Class="text-white" Typo="Typo.body1">🛑 Det ser ikke ud til at du har et abonnement hos os... Klik <a class="text-white" href="/settings"><u class="cursor-pointer">her</u></a> for at købe adgang! 🔓</MudText>
+                            </MudPaper>
+                        </Authorized>
+                    </AuthorizeView>
+                </Authorized>
+            </AuthorizeView>
 
+            <AuthorizeView Roles="Creator">
+                <Authorized>
+                    <AuthorizeView Context="connected" Policy="IsNotStripeConnected">
+                        <Authorized>
+                            <MudPaper Class="pa-2 mb-2 mud-error">
+                                <MudText Class="text-white" Typo="Typo.body1">🛑 Det ser ikke ud til at du er onboardet på vores <em>nye</em> betalingsplatform... Klik <a class="cursor-pointer text-white underline" href="/settings">her</a> for kunne blive betalt! 💲</MudText>
+                            </MudPaper>
+                        </Authorized>
+                    </AuthorizeView>
+                    <AuthorizeView Context="connected" Policy="OnboardingIncomplete">
+                        <Authorized>
+                            <MudPaper Class="pa-2 mb-2 mud-error">
+                                <MudText Class="text-white" Typo="Typo.body1">🛑 Det ser ud til at vi mangler nogle informationer om dig for at kunne lave udbetalinger... Klik <a class="cursor-pointer text-white underline" href="/settings">her</a> for kunne blive betalt! 💲</MudText>
+                            </MudPaper>
+                        </Authorized>
+                    </AuthorizeView>
+                </Authorized>
+            </AuthorizeView>
 
-    </MudAppBar>
-    <MudDrawerContainer Class="mud-height-full">
-        <AuthorizeView>
-            <Authorized>
-                <MudDrawer @bind-Open="_drawerOpen" Fixed="true" Style="position: fixed" Elevation="1" Variant="@DrawerVariant.Mini" OpenMiniOnHover="true">
-                    <NavMenu />
-                </MudDrawer>
-            </Authorized>
-        </AuthorizeView>
-
-        <MudMainContent Class="mud-height-full mt-16 pa-4">
-            @Body
+            @if (ApplicationState.IsDataLoaded)
+            {
+                @Body
+            }
         </MudMainContent>
-    </MudDrawerContainer>
-</MudLayout>
-
+    </MudStack>
+</MudStack>
 
 <div id="blazor-error-ui">
     An unhandled error has occurred.
@@ -47,33 +156,50 @@
     <a class="dismiss">🗙</a>
 </div>
 
+<style>
+    textarea:focus, input:focus {
+        outline: none;
+    }
+</style>
+
 @code {
     private bool _drawerOpen = false;
     private bool _isDarkMode = false;
     private MudTheme? _theme = null;
     private MudThemeProvider? _mudThemeProvider;
+    private BalanceAmount Balance;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        base.OnInitialized();
+        await base.OnInitializedAsync();
 
         _theme = new()
         {
             PaletteLight = _lightPalette,
             PaletteDark = _darkPalette,
-            LayoutProperties = new LayoutProperties()
+            LayoutProperties = new LayoutProperties() 
+            {
+                DefaultBorderRadius = "12px",
+            },
+            ZIndex = new ZIndex() 
+            {
+                AppBar = 1201,       // Default is 1100
+                Drawer = 1200,       // Default is 1200
+                Popover = 1300,      // Default is 1300
+                Dialog = 1400,       // Default is 1400
+                Snackbar = 1500,     // Default is 1500
+                Tooltip = 9999       // Default is 1600
+            }
         };
+
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var id = authState.User.FindFirst(c => c.Type == "Id");
+
+        await ApplicationState.LoadDataAsync(id);
+
+        if (id is not null) await GetBalance();
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            _isDarkMode = await _mudThemeProvider!.GetSystemPreference();
-            StateHasChanged();
-        }
-    }
-    
     private void DrawerToggle()
     {
         _drawerOpen = !_drawerOpen;
@@ -86,14 +212,16 @@
 
     private readonly PaletteLight _lightPalette = new()
     {
-        Primary = "#ED4C4D",
+        Primary = "#f3584a",
+        Background = "#f9f9f9",
         Secondary = "#ffeddc",
         Black = "#110e2d",
         AppbarText = "#424242",
-        AppbarBackground = "#ffeddc",
-        DrawerBackground = "rgb(255, 247, 230)",
+        AppbarBackground = "#FFFFFF",
+        DrawerBackground = "#FFFFFF",
         GrayLight = "#e8e8e8",
         GrayLighter = "#f9f9f9",
+        Error = "#dc3545",
     };
 
     private readonly PaletteDark _darkPalette = new()
@@ -101,7 +229,7 @@
         Primary = "#ED4C4D",
         Secondary = "#1e1e1e",
         Surface = "#2e2e2e",
-        Background = "#2E2E2E",
+        Background = "#3c3c3c",
         BackgroundGray = "#151521",
         AppbarText = "#92929f",
         AppbarBackground = "#1e1e1e",
@@ -109,7 +237,7 @@
         ActionDefault = "#74718e",
         ActionDisabled = "#9999994d",
         ActionDisabledBackground = "#605f6d4d",
-        TextPrimary = "#b2b0bf",
+        TextPrimary = "#e6e6e6",
         TextSecondary = "#92929f",
         TextDisabled = "#ffffff33",
         DrawerIcon = "#92929f",
@@ -131,6 +259,54 @@
         true => Icons.Material.Rounded.LightMode,
         false => Icons.Material.Outlined.DarkMode,
     };
-}
 
+    private async Task GetBalance()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var stripeAccountId = authState.User.FindFirst(c => c.Type == "StripeAccountId")?.Value;
+
+        if (ApplicationState.CurrentUser.Role == UserRole.Creator)
+        {
+            if (stripeAccountId is not null)
+            {
+                var balances = await StripeService.GetBalance(stripeAccountId);
+
+                // Try and get preferred currency
+                Balance = balances.Available.SingleOrDefault(x => x.Currency == ApplicationState.Language.Currency)!;
+
+                // Then get any
+                if (Balance is null) Balance = balances.Available.FirstOrDefault();
+
+                // Display zero
+                if (Balance is null) Balance = new BalanceAmount { Amount = 0, Currency = ApplicationState.Language.Currency };
+            }
+        }
+    }
+
+    private async Task GoToOnboarding() 
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var creatorId = authState.User.FindFirst(c => c.Type == "CreatorId")?.Value;
+
+        if (!string.IsNullOrEmpty(creatorId)) 
+        {
+            Creator? creator = await Context.Creators
+                    .Include(x => x.User)
+                    .ThenInclude(x => x.Language)
+                    .SingleOrDefaultAsync(x => x.Id == Convert.ToInt32(creatorId));
+
+            if (creator is not null)
+            {
+                if (string.IsNullOrEmpty(creator.StripeAccountId))
+                {
+                    creator.StripeAccountId = StripeService.CreateAccount(creator.User.Email, creator.StripeAccountType, creator.User.Language.IsoCountryCode).Id;
+                    await Context.SaveChangesAsync();
+                }
+
+                var accountLink = StripeService.CreateAccountLink(creator.StripeAccountId);
+                await jsRuntime.InvokeVoidAsync("open", accountLink.Url);
+            }
+        }
+    }
+}
 

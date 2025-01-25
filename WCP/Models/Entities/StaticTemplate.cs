@@ -1,6 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using WCPShared.Interfaces;
+using WCPShared.Models.Entities.ProjectModels;
+using WCPShared.Models.Entities.ProjectModels.Concepts;
 
 namespace WCPShared.Models.Entities
 {
@@ -13,6 +15,7 @@ namespace WCPShared.Models.Entities
         public string TemplateImgOne { get; set; } = string.Empty;
         public string TemplateImgTwo { get; set; } = string.Empty;
         public string ExampleImg { get; set; } = string.Empty;
-        public List<Order> Orders { get; set; } = [];
+        public List<StaticConcept> Concepts { get; set; } = [];
+        //public List<StaticProject> Projects { get; set; } = [];
     }
 }

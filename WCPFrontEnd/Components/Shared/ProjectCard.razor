@@ -1,0 +1,160 @@
+﻿@using WCPAdminFrontEnd.Services
+@using WCPShared.Models.Entities.ProjectModels
+@using WCPShared.Models.Entities.UserModels
+@using WCPShared.Models.Enums
+
+<MudPaper Elevation="0" Class="border-[1px] border-border pa-4 w-fit max-w-[18em] min-w-[16em]">
+    <MudStack Spacing="3">
+        <MudStack Spacing="0">
+            <MudStack Row Justify="Justify.Center">
+                <span class="text-[18px] font-semibold">@Project.Name</span>
+                <MudSpacer />
+                <MudMenu Size="Size.Small" Icon="@Icons.Material.Filled.MoreVert" AnchorOrigin="Origin.BottomRight">
+                    <AuthorizeView Roles="Creator">
+                        @if (Project.Status == ProjectStatus.CreatorFilming && Project.Deadline == DateTime.MinValue)
+                        {
+                            <MudMenuItem OnClick="@((e) => ChangeStatus.InvokeAsync(new ChangeStatusArgs(Project, ProjectStatus.CreatorFilming)))">
+                                <MudStack Row="true">
+                                    <MudIcon Icon="@Icons.Material.Filled.EditCalendar"></MudIcon>
+                                    <MudText>Ændr deadline</MudText>
+                                </MudStack>
+                            </MudMenuItem>
+                        }
+                        else if (Project.Status == ProjectStatus.CreatorFilming)
+                        {
+                            <MudMenuItem OnClick="@((e) => ChangeStatus.InvokeAsync(new ChangeStatusArgs(Project, ProjectStatus.Editing)))">
+                                <MudStack Row="true">
+                                    <MudIcon Icon="@Icons.Material.Filled.Check"></MudIcon>
+                                    <MudText>Aflever projekt</MudText>
+                                </MudStack>
+                            </MudMenuItem>
+                        }
+                    </AuthorizeView>
+                    <AuthorizeView Roles="Bruger">
+                        @if (Project.Status == ProjectStatus.Planned)
+                        {
+                            <MudMenuItem OnClick="@((e) => ChangeStatus.InvokeAsync(new ChangeStatusArgs(Project, ProjectStatus.CreatorFilming)))">
+                                <MudStack Row="true">
+                                    <MudIcon Icon="@Icons.Material.Filled.Check"></MudIcon>
+                                    <MudText>Bekræft scripts</MudText>
+                                </MudStack>
+                            </MudMenuItem>
+                        }
+                        @if (Project.Status == ProjectStatus.Feedback)
+                        {
+                            <MudMenuItem OnClick="@((e) => ChangeStatus.InvokeAsync(new ChangeStatusArgs(Project, ProjectStatus.Finished)))">
+                                <MudStack Row="true">
+                                    <MudIcon Icon="@Icons.Material.Filled.Check"></MudIcon>
+                                    <MudText>Bekræft videoer</MudText>
+                                </MudStack>
+                            </MudMenuItem>
+                        }
+                        <MudMenuItem OnClick="@((e) => ChangeStatus.InvokeAsync(new ChangeStatusArgs(Project, ProjectStatus.Cancelled)))">
+                            <MudStack Row="true">
+                                <MudIcon Icon="@Icons.Material.Filled.Delete" Color="Color.Error"></MudIcon>
+                                <MudText>Annullér</MudText>
+                            </MudStack>
+                        </MudMenuItem>
+                    </AuthorizeView>
+                    <AuthorizeView Roles="Admin">
+                        <MudMenuItem>
+                            <MudStack Row="true">
+                                <MudIcon Icon="@Icons.Material.Filled.Edit"></MudIcon>
+                                <MudText>Rediger</MudText>
+                            </MudStack>
+                        </MudMenuItem>
+                        @if (Project.Status == ProjectStatus.Unconfirmed)
+                        {
+                            <MudMenuItem OnClick="@((e) => ChangeStatus.InvokeAsync(new ChangeStatusArgs(Project, ProjectStatus.Queued)))">
+                                <MudStack Row="true">
+                                    <MudIcon Icon="@Icons.Material.Filled.Check"></MudIcon>
+                                    <MudText>Bekræft</MudText>
+                                </MudStack>
+                            </MudMenuItem>
+                        }
+                        @if (Project.Status <= ProjectStatus.Feedback && Project.Status > ProjectStatus.Unconfirmed)
+                        {
+                            <MudMenuItem OnClick="@((e) => ChangeStatus.InvokeAsync(new ChangeStatusArgs(Project, Project.Status + 1)))">
+                                <MudStack Row="true">
+                                    <MudIcon Icon="@Icons.Material.Filled.KeyboardDoubleArrowRight"></MudIcon>
+                                    <MudText>Ryk frem</MudText>
+                                </MudStack>
+                            </MudMenuItem>
+                        }
+                        @if (Project.Status > 0)
+                        {
+                            <MudMenuItem OnClick="@((e) => ChangeStatus.InvokeAsync(new ChangeStatusArgs(Project, Project.Status - 1)))">
+                                <MudStack Row="true">
+                                    <MudIcon Icon="@Icons.Material.Filled.KeyboardDoubleArrowLeft"></MudIcon>
+                                    <MudText>Ryk tilbage</MudText>
+                                </MudStack>
+                            </MudMenuItem>
+                        }
+                        <MudMenuItem OnClick="@((e) => ChangeStatus.InvokeAsync(new ChangeStatusArgs(Project, ProjectStatus.Cancelled)))">
+                            <MudStack Row="true">
+                                <MudIcon Icon="@Icons.Material.Filled.Delete" Color="Color.Error"></MudIcon>
+                                <MudText>Annullér</MudText>
+                            </MudStack>
+                        </MudMenuItem>
+                    </AuthorizeView>
+                </MudMenu>
+            </MudStack>
+            <span class="text-neutral-400 text-[14px]">@Project.Brand.Name</span>
+        </MudStack>
+
+        <MudStack Row AlignItems="AlignItems.Center">
+            <MudProgressLinear Value="@(CalculateProgress(Project.Status))" Size="Size.Large" Color="Color.Success" Rounded />
+            <span>@(CalculateProgress(Project.Status))%</span>
+        </MudStack>
+
+        <MudStack Spacing="0">
+            <span class="text-neutral-400 text-[14px]">Type</span>
+            <span class="">@Project.Type</span>
+        </MudStack>
+
+        <MudStack Row Spacing="1">
+            <MudStack Class="text-[14px] text-violet-700 bg-violet-300 px-2 rounded-xl w-fit border-2 border-violet-400" Row Spacing="0" AlignItems="AlignItems.Center">
+                @* <MudIcon Icon="@Icons.Material.Filled.Timer" Class="text-[8px] text-violet-700"></MudIcon> *@
+                <span class="">@Project.Deadline.ToString("d")</span>
+            </MudStack>
+            <span class="@ProjectHelper.GetStatusColor(Project.Status) + text-[14px]">@ProjectHelper.GetStatusString(Project.Status)</span>
+        </MudStack>       
+
+        <MudDivider />
+
+
+        <a href="@("/projects/" + Project.Id)" class="bg-primary-50 text-[14px] text-primary-500 font-semibold border border-primary-500 rounded-lg py-2 text-center hover:bg-primary-100 cursor-pointer duration-200">Se detaljer</a>
+    </MudStack>
+</MudPaper>
+
+@code {
+    [Parameter]
+    public Project Project { get; set; }
+
+    [Parameter]
+    public EventCallback<ChangeStatusArgs> ChangeStatus { get; set; }
+
+    public class ChangeStatusArgs 
+    {
+        public ChangeStatusArgs(Project project, ProjectStatus newStatus)
+        {
+            Project = project;
+            NewStatus = newStatus;
+        }
+
+        public Project Project { get; set; }
+        public ProjectStatus NewStatus { get; set; }
+    }
+
+    public int CalculateProgress(ProjectStatus status) 
+    {
+        int statusInt = (int)Project.Status;
+
+        if (statusInt <= 0)
+            return 0;
+
+        int count = Enum.GetNames(typeof(ProjectStatus)).Count();
+        
+        return (statusInt * 100 / count);
+    }
+}

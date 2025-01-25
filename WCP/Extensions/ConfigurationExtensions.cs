@@ -42,13 +42,61 @@ namespace WCPShared.Extensions
         {
             if (Secrets.IsProd)
             {
-                services.AddDbContext<IWcpDbContext, WcpDbContext>(
-                    options => options.UseSqlServer(Secrets.GetConnectionString(config)));
+                services.AddDbContextFactory<WcpDbContext>(options =>
+                    options.UseSqlServer(Secrets.GetConnectionString(config)));
+
+                services.AddDbContext<IWcpDbContext, WcpDbContext>(options =>
+                    options.UseSqlServer(Secrets.GetConnectionString(config)));
+
+                services.AddSingleton<IWcpDbContextFactory, WcpDbContextFactory>();
             }
             else
             {
-                services.AddDbContext<IWcpDbContext, TestDbContext>(
-                    options => options.UseSqlServer(Secrets.GetConnectionString(config)));
+                //services.AddDbContextFactory<TestDbContext>(options =>
+                //{
+                //    options.EnableSensitiveDataLogging();
+                //    options.UseSqlServer(Secrets.GetConnectionString(config));
+                //});
+
+                services.AddDbContext<IWcpDbContext, TestDbContext>(options =>
+                {
+                    options.EnableSensitiveDataLogging();
+                    options.UseSqlServer(Secrets.GetConnectionString(config));
+                });
+
+                //services.AddSingleton<IWcpDbContextFactory, TestDbContextFactory>();
+            }
+
+            return services;
+        }
+
+        public static IServiceCollection ConfigureDbContextPostgres(this IServiceCollection services, IConfiguration config)
+        {
+            if (Secrets.IsProd)
+            {
+                services.AddDbContextFactory<WcpDbContext>(options =>
+                    options.UseNpgsql(Secrets.GetConnectionString(config)));
+
+                services.AddDbContext<IWcpDbContext, WcpDbContext>(options =>
+                    options.UseNpgsql(Secrets.GetConnectionString(config)));
+
+                services.AddSingleton<IWcpDbContextFactory, WcpDbContextFactory>();
+            }
+            else
+            {
+                services.AddDbContextFactory<TestDbContext>(options =>
+                {
+                    options.EnableSensitiveDataLogging();
+                    options.UseNpgsql(Secrets.GetConnectionString(config));
+                });
+
+                services.AddDbContext<IWcpDbContext, TestDbContext>(options =>
+                {
+                    options.EnableSensitiveDataLogging();
+                    options.UseNpgsql(Secrets.GetConnectionString(config));
+                });
+
+                services.AddSingleton<IWcpDbContextFactory, TestDbContextFactory>();
             }
 
             return services;

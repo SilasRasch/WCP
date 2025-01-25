@@ -26,7 +26,7 @@ namespace WCPFrontEnd.Services
 
         public static string EmailValidation(string arg)
         {
-            return !Validation.ValidateEmail(arg) ? "Ugyldigt email" : null!;
+            return !Validation.ValidateEmail(arg) ? "Ugyldig email" : null!;
         }
     }
 }

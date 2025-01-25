@@ -5,7 +5,6 @@ namespace WCPShared.Models.Enums
     {
         UGC,
         Statics,
-        Stills,
-        Edit
+        Photos
     }
 }

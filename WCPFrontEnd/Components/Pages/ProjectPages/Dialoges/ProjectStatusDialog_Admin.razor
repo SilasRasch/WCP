@@ -1,0 +1,49 @@
+﻿@using WCPAdminFrontEnd.Services
+@using WCPFrontEnd.Services
+@using WCPShared.Models.Entities
+@using WCPShared.Models.Entities.ProjectModels
+@using WCPShared.Models.Enums
+@using WCPShared.Models.Views
+@using WCPShared.Services.EntityFramework
+@inject ProjectService ProjectService
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            Skift status
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudStack Row="true">
+            <MudTextField Value="@Project.Id.ToString()" Label="Projekt ID" ReadOnly="true" />
+            <MudTextField Value="@Project.Name" Label="Projektnavn" ReadOnly="true" />
+        </MudStack>
+        <MudSelect @bind-Value="Project.Status" Label="Status" Placeholder="Vælg ny status" AnchorOrigin="Origin.BottomCenter">
+            @foreach (ProjectStatus item in Enum.GetValues(typeof(ProjectStatus)))
+            {
+                <MudSelectItem Value="@item">@ProjectHelper.GetStatusString(item)</MudSelectItem>
+            }
+        </MudSelect>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel" Color="Color.Error"><MudIcon Icon="@Icons.Material.Filled.Cancel" Class="mr-2" /> Luk</MudButton>
+        <MudButton OnClick="Submit" Color="Color.Success"><MudIcon Icon="@Icons.Material.Filled.Save" Class="mr-2" /> Gem</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; }
+
+    [Parameter]
+    public Project Project { get; set; }
+
+    private async void Submit()
+    {
+        await ProjectService.UpdateObject(Project.Id, Project);
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}
+

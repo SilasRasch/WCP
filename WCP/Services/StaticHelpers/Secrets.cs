@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using SlackNet;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,6 +25,28 @@ namespace WCPShared.Services.StaticHelpers
             }
         }
 
+        public static string GetStripeApiKey(IConfiguration config)
+        {
+            var env = Environment.GetEnvironmentVariable("STRIPE_API_KEY")!;
+            var appsetting = config.GetSection("StripeApiKey").Value!;
+
+            if (env != null)
+                return env;
+
+            return appsetting;
+        }
+
+        public static string GetStripeWebhookKey(IConfiguration config)
+        {
+            var env = Environment.GetEnvironmentVariable("STRIPE_WH_KEY")!;
+            var appsetting = config.GetSection("StripeWhKey").Value!;
+
+            if (env != null)
+                return env;
+
+            return appsetting;
+        }
+
         public static string GetConnectionString(IConfiguration config)
         {
             string env;
@@ -36,8 +59,8 @@ namespace WCPShared.Services.StaticHelpers
             }
             else
             {
-                env = Environment.GetEnvironmentVariable("TEST_CONNECTION_STRING")!;
-                appsetting = config.GetSection("TestConnectionString").Value!;
+                env = Environment.GetEnvironmentVariable("CONNECTION_STRING")!;
+                appsetting = config.GetSection("ConnectionString").Value!;
             }
 
 
@@ -62,6 +85,17 @@ namespace WCPShared.Services.StaticHelpers
         {
             var env = Environment.GetEnvironmentVariable("JWT_KEY")!;
             var appsetting = config.GetSection("Jwt:GeneratedToken").Value!;
+
+            if (env != null)
+                return env;
+
+            return appsetting;
+        }
+
+        public static string GetShipmondoPassword(IConfiguration config)
+        {
+            var env = Environment.GetEnvironmentVariable("SHIPMONDO_PSWD")!;
+            var appsetting = config.GetSection("ShipmondoPassword").Value!;
 
             if (env != null)
                 return env;
@@ -120,7 +154,8 @@ namespace WCPShared.Services.StaticHelpers
             "https://www.wcp.dk",
             "https://test.wcp.dk",
             "http://172.232.142.14:8181",
-            "http://172.232.142.14"
+            "http://172.232.142.14",
+            "https://app.nobitches.win"
         ];
 
         public static Uri OtlpEndpoint => new Uri("http://localhost:4317"); 

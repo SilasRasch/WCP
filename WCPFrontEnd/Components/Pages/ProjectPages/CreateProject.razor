@@ -1,0 +1,183 @@
+﻿@using Microsoft.EntityFrameworkCore
+@using WCPAdminFrontEnd.Services
+@using WCPFrontEnd.Components.Pages.ProjectPages.ProjectSteps
+@using WCPFrontEnd.Components.Shared
+@using WCPFrontEnd.Services
+@using WCPShared.Interfaces
+@using WCPShared.Models.Entities.ProjectModels
+@using WCPShared.Models.Entities
+@using WCPShared.Models.Entities.ProjectModels.Concepts
+@using WCPShared.Models.Enums
+@inject IWcpDbContext Context
+@inject ProjectService ProjectService
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+
+<MudDialog Gutters="false" TitleClass="!p-0" ContentClass="!my-0">
+    <TitleContent>
+        <MudStack Spacing="0" Class="pa-4">
+            <span class="font-medium text-xl">Projektbestilling</span>
+            <span class="text-neutral-400 text-lg">Lad os starte et nyt samarbejde!</span>
+        </MudStack>
+        <MudDivider />
+    </TitleContent>
+    <DialogContent>
+        <MudForm @ref="form" @bind-IsValid="_success" @bind-Errors="_errors" Class="px-8">
+            <MudStepper @bind-ActiveIndex="_index" StepClass="!p-0" Class="!p-0" NavClass="!p-0 ">
+                <ChildContent>
+                    <MudStep Title="Grundinformation">
+                        <MudStack Spacing="2">
+                            <MudStack Row>
+                                <MudSelect @bind-Value="Project.Brand" Variant="Variant.Outlined" ToStringFunc="BrandToStringFunc" Clearable Label="Brand" Required="true" RequiredError="Dette felt er påkrævet" AnchorOrigin="Origin.BottomCenter" Placeholder="Vælg et brand">
+                                    @foreach (Brand brand in Brands)
+                                    {
+                                        <MudSelectItem Value="@brand">
+                                            <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
+                                                <MudText Typo="Typo.h6">@ProjectHelper.CountryStringToFlag(brand.Organization.Language.IsoLanguageCode) </MudText>
+                                                @brand.Name (@brand.Organization.Name.Trim())
+                                            </MudStack>
+                                        </MudSelectItem>
+                                    }
+                                </MudSelect>
+
+                                <MudTextField @bind-Value="@Project.Name" Variant="Variant.Outlined" Label="Projektnavn" Placeholder="Noget deskriptivt" Required RequiredError="Dette felt er påkrævet" />
+                            </MudStack>
+
+                            <MudStack Spacing="1">
+                                <MudText>Type</MudText>
+                                <MudStack Row>
+                                    <span @onclick="() => ChangeProjectType(ProjectType.UGC)" class="@(Project.Type == ProjectType.UGC ? "w-[200px] h-[200px] bg-primary-50 border-2 border-primary-500 rounded cursor-pointer" : "w-[200px] h-[200px] border-2 border-border rounded cursor-pointer")">
+                                        <MudStack Class="w-full h-full" Spacing="2" Justify="Justify.Center" AlignItems="AlignItems.Center">
+                                            <MudIcon Size="Size.Large" Class="@(Project.Type == ProjectType.UGC ? "text-primary-500" : "")" Icon="@Icons.Material.Filled.OndemandVideo" />
+                                            <MudText Typo="Typo.h6" Class="@(Project.Type == ProjectType.UGC ? "text-primary-500" : "")">UGC</MudText>
+                                        </MudStack>
+                                    </span>
+                                    <span @onclick="() => ChangeProjectType(ProjectType.Statics)" class="@(Project.Type == ProjectType.Statics ? "w-[200px] h-[200px] bg-primary-50 border-2 border-primary-500 rounded cursor-pointer" : "w-[200px] h-[200px] border-2 border-border rounded cursor-pointer")">
+                                        <MudStack Class="w-full h-full mud-text-primary" Spacing="2" Justify="Justify.Center" AlignItems="AlignItems.Center">
+                                            <MudIcon Size="Size.Large" Class="@(Project.Type == ProjectType.Statics ? "text-primary-500" : "")" Icon="@Icons.Material.Filled.PhotoAlbum" />
+                                            <MudText Typo="Typo.h6" Class="@(Project.Type == ProjectType.Statics ? "text-primary-500" : "")">Statics</MudText>
+                                        </MudStack>
+                                    </span>
+                                    <span @onclick="() => ChangeProjectType(ProjectType.Photos)" class="@(Project.Type == ProjectType.Photos ? "w-[200px] h-[200px] bg-primary-50 border-2 border-primary-500 rounded cursor-pointer" : "w-[200px] h-[200px] border-2 border-border rounded cursor-pointer")">
+                                        <MudStack Class="w-full h-full mud-text-primary" Spacing="2" Justify="Justify.Center" AlignItems="AlignItems.Center">
+                                            <MudIcon Size="Size.Large" Class="@(Project.Type == ProjectType.Photos ? "text-primary-500" : "")" Icon="@Icons.Material.Filled.Photo" />
+                                            <MudText Typo="Typo.h6" Class="@(Project.Type == ProjectType.Photos ? "text-primary-500" : "")">Fotos</MudText>
+                                        </MudStack>
+                                    </span>
+                                </MudStack>
+                            </MudStack>
+                        </MudStack>
+                    </MudStep>
+
+                    <MudStep Title="Koncepter">
+                        <MudStack>
+                            @foreach (var concept in Project.Concepts)
+                            {
+                                var tempConcept = concept;
+                                <ConceptCollapsible @bind-Concept="tempConcept" @bind-Project="Project" RemoveConcept="RemoveConcept" />
+                            }
+
+                            <MudButton Color="Color.Primary" Variant="Variant.Outlined" OnClick="AddConcept" Class="w-fit rounded-lg py-3" DropShadow="false">Tilføj koncept</MudButton>
+                        </MudStack>
+                    </MudStep>
+
+                    <MudStep Title="Overblik">
+                        <ProjectDetails Project="Project" ShowCreated="false" ShowPrice="false" ShowDeadline="false" ShowStatus="false" ShowCreators="false" />
+                    </MudStep>
+                </ChildContent>
+
+                <ActionContent Context="stepper">
+                    @if (!_completed)
+                    {
+                        <MudStack Class="w-full my-2">
+                            <MudDivider />
+
+                            <MudStack Row Class="w-full">
+                                <MudButton OnClick="@(() => stepper.PreviousStepAsync())" Variant="Variant.Outlined" Color="Color.Primary" Disabled="@(_index <= 0)" DropShadow="false" Class="rounded-lg">Tilbage</MudButton>
+                                <MudSpacer />
+
+                                @if (stepper.Steps[_index] == stepper.Steps.Last())
+                                {
+                                    <MudButton OnClick="SendProject" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Done" Color="Color.Primary" DropShadow="false" Class="rounded-lg">Send</MudButton>
+                                }
+                                else
+                                {
+                                    <MudButton OnClick="@(() => stepper.NextStepAsync())" Variant="Variant.Filled" Color="Color.Primary" DropShadow="false" Class="rounded-lg">Næste</MudButton>
+                                }
+                            </MudStack>
+                        </MudStack>
+                    }
+                </ActionContent>
+            </MudStepper>
+        </MudForm>
+    </DialogContent>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; }
+
+    private int _index;
+    private bool _completed;
+    private Project Project = new Project();
+    private IEnumerable<Brand> Brands = [];
+
+    private List<string> Formats = [];
+
+    private MudForm form;
+    private bool _success;
+    private string[] _errors = {};
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        Project.Type = ProjectType.UGC;
+        AddConcept(); // Add base concept
+
+        var orgId = 1;
+        Brands = await Context.Brands
+            .Include(x => x.Organization)
+            .ThenInclude(x => x.Language)
+            .Where(x => x.OrganizationId == orgId)
+            .ToListAsync();
+    }
+
+    private void ChangeProjectType(ProjectType type)
+    {
+        Project.Type = type;
+        ResetConcepts();
+    }
+
+    private string BrandToStringFunc(Brand brand) => brand is not null && 
+        brand.Organization is not null && !string.IsNullOrEmpty(brand.Organization.Name) ? $"{brand.Name} ({brand.Organization.Name})" : "";
+
+    private async Task SendProject() 
+    {
+        await ProjectService.AddObject(Project);
+        Snackbar.Configuration.PositionClass = Defaults.Classes.Position.BottomLeft;
+        Snackbar.Add("Nyt projekt tilføjet: " + Project.Name);
+        Navigation.NavigateTo("/projects");
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+
+    private void ResetConcepts() 
+    {
+        Project.Concepts = new List<Concept>();
+        AddConcept();
+    }
+
+    private void AddConcept() 
+    {
+        if (Project.Type == ProjectType.UGC) Project.Concepts.Add(new UgcConcept());
+        if (Project.Type == ProjectType.Statics) Project.Concepts.Add(new StaticConcept());
+        if (Project.Type == ProjectType.Photos) Project.Concepts.Add(new PhotoConcept());
+    }
+
+    private void RemoveConcept(Concept concept) 
+    {
+        Project.Concepts.Remove(concept);
+        StateHasChanged();
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}

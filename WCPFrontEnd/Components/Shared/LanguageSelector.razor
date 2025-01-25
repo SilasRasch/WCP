@@ -1,0 +1,53 @@
+﻿@using Microsoft.EntityFrameworkCore
+@using WCPAdminFrontEnd.Services
+@using WCPShared.Interfaces
+@using WCPShared.Models.Entities.UserModels
+
+<MudSelect @bind-Value="Value" Variant="Variant" Text="@ProjectHelper.LanguageToStringFlag(Value)" Label="@Label"
+Required="@Required" Placeholder="@Placeholder" RequiredError="Dette felt er påkrævet" AnchorOrigin="Origin.BottomCenter">
+    @if (Languages is not null) 
+    {
+        foreach (var lang in Languages)
+        {
+            <MudSelectItem Value="@lang">@ProjectHelper.CountryStringToFlag(lang.IsoLanguageCode) @(Country ? lang.IsoCountryCode : lang.Name) </MudSelectItem>
+        }
+    }
+</MudSelect>
+
+@code {
+    [Parameter]
+    public IEnumerable<Language> Languages { get; set; }
+
+    [Parameter]
+    public Language Value
+    {
+        get => _value;
+        set
+        {
+            if (_value == value) return;
+
+            _value = value;
+            ValueChanged.InvokeAsync(value);
+        }
+    }
+
+    [Parameter]
+    public string Placeholder { get; set; } = string.Empty;
+
+    [Parameter]
+    public bool Required { get; set; } = false;
+
+    [Parameter]
+    public string Label { get; set; } = "Sprog";
+
+    [Parameter]
+    public Variant Variant { get; set; } = Variant.Text;
+
+    [Parameter]
+    public EventCallback<Language> ValueChanged { get; set; }
+
+    [Parameter]
+    public bool Country { get; set; } = false;
+
+    private Language _value;
+}

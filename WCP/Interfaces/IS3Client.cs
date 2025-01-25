@@ -2,6 +2,8 @@
 {
     public interface IS3Client
     {
-        Task<string> UploadImage(string fileName, Stream fileStream, string? fileType = "image/jpg");
+        Task<string> UploadFile(string fileName, Stream fileStream, string mimeType);
+        Task DeleteFile(string fileName);
+        Task<string> CopyFileAsync(string sourceKey, string destinationKey);
     }
 }

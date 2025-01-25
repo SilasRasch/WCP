@@ -1,0 +1,88 @@
+﻿@using WCPAdminFrontEnd.Services
+@using WCPFrontEnd.Services
+@using WCPShared.Models.Entities.UserModels
+@inject CustomDialogService DialogService
+
+<MudPaper Elevation="0" Class="border-[1px] border-border pa-4 w-[270px]">
+    <MudStack Spacing="3">
+
+        <MudStack Spacing="0" Justify="Justify.Center" AlignItems="AlignItems.Center" Class="w-full">
+            <MudAvatar Color="Color.Primary" Size="Size.Large" Class="mb-2">
+                @if (!string.IsNullOrEmpty(Creator.ImgURL))
+                {
+                    <MudImage Src="@Creator.ImgURL" />
+                }
+                else
+                {
+                    @Creator.User.Name.First()
+                }
+            </MudAvatar>
+
+            <span class="font-medium text-[18px]">@Creator.User.Name</span>
+            <span class="text-neutral-400 text-[15px]">@Creator.Gender, @ProjectHelper.CalculateAge(Creator.DateOfBirth.Value)</span>
+        </MudStack>
+
+        <MudDivider />
+
+        <MudGrid Spacing="3">
+            <MudItem xs="6">
+                <MudStack Spacing="0">
+                    <span class="text-neutral-400 text-[14px]">Sprog</span>
+
+                    @if (Creator.Languages is not null && Creator.Languages.Any())
+                    {
+                        <span class="text-nowrap text-ellipsis overflow-hidden">@String.Join(", ", Creator.Languages.Select(x => x.Name))</span>
+                    }
+                    else
+                    {
+                        <span class="text-nowrap text-ellipsis overflow-hidden">Ingen information</span>
+                    }
+                </MudStack>
+            </MudItem>
+            <MudItem xs="6">
+                <MudStack Spacing="0">
+                    <span class="text-neutral-400 text-[14px]">Tags</span>
+                    <span class="text-nowrap text-ellipsis overflow-hidden">@String.Join(", ", Creator.Tags)</span>
+                </MudStack>
+            </MudItem>
+            <MudItem xs="6">
+                <MudStack Spacing="0">
+                    <span class="text-neutral-400 text-[14px]">Pris</span>
+                    <span class="text-nowrap text-ellipsis overflow-hidden bg-success-50 w-fit rounded-xl border border-success-500 px-2 text-success-400">@String.Join("-", Creator.PriceEstimate) kr</span>
+                </MudStack>
+            </MudItem>
+            <MudItem xs="6">
+                <MudStack Spacing="0">
+                    <span class="text-neutral-400 text-[14px]">Projekter</span>
+                    <span class="text-nowrap text-ellipsis overflow-hidden bg-violet-50 w-fit rounded-xl border border-violet-500 px-2 text-violet-400">@Creator.Participations.Count()</span>
+                </MudStack>
+            </MudItem>
+        </MudGrid>
+
+        <MudDivider />
+
+        <MudStack Row>
+            <MudMenu Size="Size.Small" Icon="@Icons.Material.Filled.MoreVert" AnchorOrigin="Origin.BottomRight">
+                <MudMenuItem OnClick="() => DialogService.OpenCreatorDetailDialog(Creator)">
+                    <MudStack Row="true">
+                        <MudIcon Icon="@Icons.Material.Filled.Search"></MudIcon>
+                        <MudText>Detaljer</MudText>
+                    </MudStack>
+                </MudMenuItem>
+                <MudMenuItem>
+                    <MudStack Row="true">
+                        <MudIcon Icon="@Icons.Material.Filled.ContactMail"></MudIcon>
+                        <MudText>Kontakt</MudText>
+                    </MudStack>
+                </MudMenuItem>
+            </MudMenu>
+
+            <a @onclick="() => DialogService.OpenCreatorDetailDialog(Creator)" class="bg-primary-50 text-[14px] text-primary-500 w-full flex-grow font-semibold border border-primary-500 rounded-lg py-2 text-center hover:bg-primary-100 cursor-pointer duration-200">Se detaljer</a>
+        </MudStack>
+    </MudStack>
+</MudPaper>
+
+@code {
+    [Parameter]
+    public Creator Creator { get; set; }
+}

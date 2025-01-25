@@ -1,0 +1,111 @@
+﻿@using WCPAdminFrontEnd.Services
+@using WCPFrontEnd.Services
+@using WCPShared.Models.Entities
+@using WCPShared.Models.Entities.ProjectModels
+@using WCPShared.Models.Enums
+@using WCPShared.Models.Views
+@using WCPShared.Services
+@using WCPShared.Services.EntityFramework
+@inject ProjectService ProjectService
+@inject S3Service S3Service
+
+<MudDialog ContentClass="p-2">
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            Upload filer @* (@Path) *@
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudPaper Elevation="0" MinWidth="256px">
+            <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Class="w-full">
+                <MudFileUpload T="IReadOnlyList<IBrowserFile>" FilesChanged="SyncFiles" Accept="@ContentType">
+                    <ActivatorContent>
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.CloudUpload">
+                            Vælg filer
+                        </MudButton>
+                    </ActivatorContent>
+                </MudFileUpload>
+
+                @if (Files.Count > 0) 
+                {
+                    <MudDataGrid Items="@Files" Elevation="0">
+                        <Columns>
+                            <PropertyColumn Property="x => x.ContentType" Title="Filtype" Sortable="false" />
+                            <PropertyColumn Property="x => x.Name" Title="Navn" Sortable="false" />
+                            <PropertyColumn Property="x => x.Size" Title="Størrelse" Sortable="false">
+                                <CellTemplate>@GenerateFileSize(context.Item.Size)</CellTemplate>
+                            </PropertyColumn>
+                            <TemplateColumn>
+                                <CellTemplate>
+                                    <MudIconButton OnClick="() => RemoveFile(context.Item)" Class="-py-2" Icon="@Icons.Material.Filled.Delete" Color="Color.Error"></MudIconButton>
+                                </CellTemplate>
+                            </TemplateColumn>
+                        </Columns>
+                    </MudDataGrid>
+                }
+            </MudStack>
+        </MudPaper>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel" Color="Color.Error"><MudIcon Icon="@Icons.Material.Filled.Cancel" Class="mr-2" /> Annuller</MudButton>
+        <MudButton OnClick="Submit" Color="Color.Success"><MudIcon Icon="@Icons.Material.Filled.Upload" Class="mr-2" /> Upload</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; }
+
+    [Parameter]
+    public Project Project { get; set; }
+
+    [Parameter]
+    public string ContentType { get; set; }
+
+    [Parameter] 
+    public string Path { get; set; }
+
+    private List<IBrowserFile> Files { get; set; } = [];
+
+    private async void Submit()
+    {
+        foreach (IBrowserFile file in Files)
+        {
+            string url = await S3Service.UploadCloudFile(file, $"brands/{Project.Brand.Name}/{Project.Id}/{Path}");
+            Project.Files.Add(url);
+        }
+
+        await ProjectService.UpdateObject(Project.Id, Project);
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private void SyncFiles(IReadOnlyList<IBrowserFile> files)
+    {
+        foreach (var file in files)
+        {
+            this.Files.Add(file);
+        }
+    }
+
+    private void RemoveFile(IBrowserFile file) 
+    {
+        Files.Remove(file);
+    }
+
+    private string GenerateFileSize(double fileSize) 
+    {
+        if (fileSize < 1024)
+            return fileSize + " B";
+        
+        if (fileSize < 1024 * 1024)
+            return Math.Round((double)fileSize / (double)1024, 2) + " KB";
+
+        if (fileSize < Math.Pow(1024, 3))
+            return Math.Round((double)fileSize / (double)(1024 * 1024), 2) + " MB";
+
+        return Math.Round((double)fileSize / (double)(Math.Pow(1024, 2))) + " GB";
+    }
+}
+

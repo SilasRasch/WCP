@@ -13,8 +13,8 @@
 
 <PageTitle>Organisationer</PageTitle>
 
-<MudDataGrid T="Organization" SelectOnRowClick="@_selectable" MultiSelection="@_selectable" Items="@OrganizationList" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter" Hideable="@_hidable" Striped="@_striped" Elevation="3"
-             ColumnResizeMode="@(_resizable ? ResizeMode.Column : ResizeMode.None)" FilterCaseSensitivity="DataGridFilterCaseSensitivity.Ignore" DragDropColumnReordering="_movable">
+<MudDataGrid T="Organization" SelectOnRowClick="@_selectable" MultiSelection="@_selectable" Items="@OrganizationList" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter" Hideable="@_hidable" Striped="@_striped" Elevation="0"
+    Class="border border-border" ColumnResizeMode="@(_resizable ? ResizeMode.Column : ResizeMode.None)" FilterCaseSensitivity="DataGridFilterCaseSensitivity.Ignore" DragDropColumnReordering="_movable">
     <ToolBarContent>
         <MudStack Row="true" AlignItems="AlignItems.Center">
             <MudText Typo="Typo.h6">Organisationer</MudText>
@@ -63,8 +63,23 @@
         <PropertyColumn Property="x => x.Language" Title="Sprog">
             <CellTemplate>
                 <MudText Typo="Typo.h5">
-                    @ProjectHelper.CountryStringToFlag(context.Item.Language.Name)
+                    @ProjectHelper.CountryStringToFlag(context.Item.Language.IsoLanguageCode)
                 </MudText>
+            </CellTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.IsActive" Title="Aktivitet">
+            <CellTemplate>
+                <MudText Color="@(context.Item.IsActive ? Color.Success : Color.Error)">
+                    @(context.Item.IsActive ? "Aktiv" : "Inaktiv")
+                </MudText>
+            </CellTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.Subscription" Title="Abonnement">
+            <CellTemplate>
+                @if (context.Item.Subscription is not null) 
+                {
+                    <MudText>@context.Item.Subscription.Type.ToString()</MudText>
+                }
             </CellTemplate>
         </PropertyColumn>
 
@@ -77,6 +92,14 @@
                             <MudText>Rediger</MudText>
                         </MudStack>
                     </MudMenuItem>
+                    <AuthorizeView Context="authcontext" Roles="Admin">
+                        <MudMenuItem OnClick="@((e) => ToggleUserActivation(context.Item))">
+                            <MudStack Row="true">
+                                <MudIcon Icon="@(context.Item.IsActive ? Icons.Material.Filled.Close : Icons.Material.Filled.Check)" Color="@(context.Item.IsActive ? Color.Error : Color.Success)"></MudIcon>
+                                <MudText>@(context.Item.IsActive ? "Deaktivér" : "Aktivér")</MudText>
+                            </MudStack>
+                        </MudMenuItem>
+                    </AuthorizeView>
                     <MudMenuItem OnClick="() => ToggleDeleteModal(context.Item.Id)">
                         <MudStack Row="true">
                             <MudIcon Icon="@Icons.Material.Filled.Delete" Color="Color.Error"></MudIcon>
@@ -125,7 +148,12 @@
 
     private async Task FetchOrganizations()
     {
-        OrganizationList = Context.Organizations.Include(x => x.Language);
+        
+        
+        OrganizationList = await Context.Organizations
+            .Include(x => x.Language)
+            .Include(x => x.Subscription)
+            .ToListAsync();
     }
 
     private async Task ToggleDeleteModal(int id)
@@ -169,6 +197,13 @@
 
         if (result is not null && !result.Canceled)
             await FetchOrganizations();
+    }
+
+    private async Task ToggleUserActivation(Organization org)
+    {
+        org.IsActive = !org.IsActive;
+        await Context.SaveChangesAsync();
+        await FetchOrganizations();
     }
 
     private void ToggleOpenTableSettings() => _open = !_open;
