@@ -7,6 +7,7 @@
 @using WCPShared.Models.Entities.ProjectModels.Concepts
 @using WCPShared.Models.Entities.UserModels
 @inject IDialogService DialogService
+@inject IWcpDbContext Context
 
 <MudPaper Elevation="0" Class="border-border border">
     <MudStack Row Class="px-4 py-2" AlignItems="AlignItems.Center" @onclick="() => ConceptExpanded = !ConceptExpanded">
@@ -28,12 +29,21 @@
         <MudDivider />
 
         <MudStack Spacing="0" Class="pa-4">
-            <MudStack Spacing="4" Class="mt-4">
+            @* <MudStack Spacing="4" Class="mt-4">
 
                 <MudStack Spacing="0">
                     <span>Produkt</span>
                     <span class="text-[16px] cursor-pointer p-4 bg-primary-50 border-primary-500 border rounded text-primary-500 duration-200 hover:bg-primary-100">Vælg produkt</span>
                 </MudStack>
+            </MudStack> *@
+
+            <MudStack Row Spacing="8" AlignItems="AlignItems.Center" Justify="Justify.Center" Class="mt-4">
+                <MudSelect Variant="Variant.Outlined" @bind-Value="Concept.Product" ToStringFunc="ProductToString" Label="Produkt" Placeholder="Vælg produkt" AnchorOrigin="Origin.BottomCenter">
+                    @foreach (var product in Products) 
+                    {
+                        <MudSelectItem Value="@(product)">@product.Name</MudSelectItem>
+                    }
+                </MudSelect>
             </MudStack>
 
             <MudStack Row Spacing="8" AlignItems="AlignItems.Center" Justify="Justify.Center" Class="mt-4">
@@ -202,9 +212,6 @@
 
 @code {
     [Parameter]
-    public IWcpDbContext Context { get; set; }
-
-    [Parameter]
     public Concept Concept
     {
         get { return _concept; }
@@ -285,4 +292,12 @@
     }
 
     private IEnumerable<Language> Languages = [];
+
+    // private string ProductToString(Product product) 
+    // {
+    //     if (product is null) return string.Empty;
+    //     if (string.IsNullOrEmpty(product.Name)) return string.Empty;
+
+    //     return product.Name;
+    // }
 }
