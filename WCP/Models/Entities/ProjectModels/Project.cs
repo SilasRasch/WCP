@@ -84,10 +84,26 @@ namespace WCPShared.Models.Entities.ProjectModels
         /// <summary>
         /// Calculates an estimated price
         /// </summary>
-        /// <returns>100 dkk per content amount</returns>
         public virtual long CalculatePrice()
         {
-            throw new NotImplementedException();
+            var calculatedPrice = 0;
+            
+            foreach (var concept in Concepts)
+            {
+                if (concept is UgcConcept ugcConcept)
+                {
+                    var videoPrice = concept.Amount * 850;
+                    calculatedPrice += videoPrice;
+                    var hooksPrice = ugcConcept.ExtraHooks * 200;
+                    calculatedPrice += hooksPrice;
+                }
+                else
+                {
+                    return concept.Amount * 100;
+                }
+            }
+
+            return calculatedPrice;
         }
 
         public override bool Equals(object? obj)
