@@ -140,9 +140,9 @@ namespace WCPShared.Services.StaticHelpers
                 {
                     AccessKey = config.GetSection("S3Settings:AccessKey").Value!,
                     SecretKey = config.GetSection("S3Settings:SecretKey").Value!,
-                    ServiceUrl = config.GetSection("S3Settings:ServiceUrl").Value!,
-                    Bucket = config.GetSection("S3Settings:Bucket").Value!,
-                    Root = config.GetSection("S3Settings:Root").Value!
+                    ServiceUrl = "se-sto-1.linodeobjects.com",
+                    Bucket = "wc_files",
+                    Root = "media",
                 };
             }
         }
