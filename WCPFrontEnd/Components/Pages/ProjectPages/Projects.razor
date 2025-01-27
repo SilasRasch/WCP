@@ -47,7 +47,7 @@
                 <MudGrid Spacing="3">
                     @foreach (Project project in ProjectList.Where(x => x.Status != ProjectStatus.Cancelled && x.Status != ProjectStatus.Finished))
                     {
-                        <MudItem xs="3">
+                        <MudItem>
                             <WCPFrontEnd.Components.Shared.ProjectCard Project="project" ChangeStatus="(e) => OpenStatusDialog(e.Project, e.NewStatus)" />
                         </MudItem>
                     }
@@ -57,7 +57,7 @@
                 <MudGrid Spacing="3">
                     @foreach (Project project in ProjectList.Where(x => x.Status == ProjectStatus.Cancelled || x.Status == ProjectStatus.Finished))
                     {
-                        <MudItem xs="3">
+                        <MudItem>
                             <WCPFrontEnd.Components.Shared.ProjectCard Project="project" ChangeStatus="(e) => OpenStatusDialog(e.Project, e.NewStatus)" />
                         </MudItem>
                     }
