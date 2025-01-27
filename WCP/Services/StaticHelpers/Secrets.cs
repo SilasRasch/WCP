@@ -130,7 +130,7 @@ namespace WCPShared.Services.StaticHelpers
                     AccessKey = Environment.GetEnvironmentVariable("S3_ACCESS_KEY")!,
                     SecretKey = Environment.GetEnvironmentVariable("S3_SECRET_KEY")!,
                     ServiceUrl = "se-sto-1.linodeobjects.com",
-                    Bucket = "wc_files",
+                    Bucket = "wc-files",
                     Root = "media",
                 };
             }
@@ -141,7 +141,7 @@ namespace WCPShared.Services.StaticHelpers
                     AccessKey = config.GetSection("S3Settings:AccessKey").Value!,
                     SecretKey = config.GetSection("S3Settings:SecretKey").Value!,
                     ServiceUrl = "se-sto-1.linodeobjects.com",
-                    Bucket = "wc_files",
+                    Bucket = "wc-files",
                     Root = "media",
                 };
             }
