@@ -2,8 +2,6 @@
 using Stripe.Checkout;
 using Stripe.Identity;
 using WCPShared.Interfaces;
-using WCPShared.Models.Entities;
-using WCPShared.Models.Entities.ProjectModels;
 using WCPShared.Models.Entities.UserModels;
 using WCPShared.Models.Enums;
 
@@ -434,7 +432,7 @@ namespace WCPShared.Services
         public async Task SetDefaultPaymentMethod(string customerId, string paymentMethodId)
         {
             var customerService = new CustomerService();
-            await customerService.UpdateAsync(customerId, new CustomerUpdateOptions
+            var response = await customerService.UpdateAsync(customerId, new CustomerUpdateOptions
             {
                 InvoiceSettings = new CustomerInvoiceSettingsOptions
                 {
@@ -454,6 +452,37 @@ namespace WCPShared.Services
             catch
             {
                 return [];
+            }
+        }
+
+        public void RemovePaymentMethod(string paymentMethodId)
+        {
+            if (string.IsNullOrEmpty(paymentMethodId)) 
+                return;
+            
+            try
+            {
+                var paymentMethodService = new PaymentMethodService();
+                var response = paymentMethodService.Detach(paymentMethodId);
+            }
+            catch
+            {
+
+            }
+        }
+
+        public string GetDefaultPaymentMethod(string customerId)
+        {
+            var customerService = new CustomerService();
+
+            try
+            {
+                var customer = customerService.Get(customerId);
+                return customer.InvoiceSettings.DefaultPaymentMethodId;
+            }
+            catch (StripeException ex)
+            {
+                return $"Error: {ex.Message}";
             }
         }
     }

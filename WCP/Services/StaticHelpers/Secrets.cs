@@ -35,6 +35,17 @@ namespace WCPShared.Services.StaticHelpers
 
             return appsetting;
         }
+        
+        public static string GetStripePublishableKey(IConfiguration config)
+        {
+            var env = Environment.GetEnvironmentVariable("STRIPE_PUBLISHABLE_KEY")!;
+            var appsetting = config.GetSection("StripePublishableKey").Value!;
+
+            if (env != null)
+                return env;
+
+            return appsetting;
+        }
 
         public static string GetStripeWebhookKey(IConfiguration config)
         {

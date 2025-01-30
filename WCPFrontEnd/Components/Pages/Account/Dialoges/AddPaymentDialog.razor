@@ -12,8 +12,11 @@
 @using WCPShared.Models.Entities
 @using WCPShared.Services
 @using WCPShared.Services.EntityFramework
+@using WCPShared.Services.StaticHelpers
 @inject IWcpDbContext Context
 @inject StripeService StripeService
+@inject IConfiguration Configuration
+@inject IJSRuntime JS
 
 <MudDialog TitleClass="!p-0 mb-2">
     <TitleContent>
@@ -27,43 +30,15 @@
 
         <MudGrid>
             <MudItem xs="12">
-                <MudForm @ref="_form" @bind-IsValid="@_success" @bind-Errors="@_errors">
-                    <MudGrid>
-                        <MudItem xs="6">
-                            <MudStack Spacing="0" Class="w-full">
-                                <span class="text-neutral-400 text-[14px]">Kortholders navn</span>
-                                <MudTextField Placeholder="Lars Larsen" T="string" @bind-Value="NewMethod.BillingDetails.Name" Variant="Variant.Outlined" Required />
-                            </MudStack>
-                        </MudItem>
-                        <MudItem xs="6">
-                            <MudStack Spacing="0" Class="w-full">
-                                <span class="text-neutral-400 text-[14px]">Kort nummer</span>
-                                <MudTextField T="string" Placeholder="1234 1234 1234 1234" Variant="Variant.Outlined" @bind-Value="NewMethod.Card.Number" Required />
-                            </MudStack>
-                        </MudItem>
-                        <MudItem xs="3">
-                            <MudStack Spacing="0" Class="w-full">
-                                <span class="text-neutral-400 text-[14px]">Udløber</span>
-                                <MudTextField Placeholder="03/2024" Variant="Variant.Outlined" @bind-Value="ExpiryString" Required />
-                            </MudStack>
-                        </MudItem>
-                        <MudItem xs="3">
-                            <MudStack Spacing="0" Class="w-full">
-                                <span class="text-neutral-400 text-[14px]">CVC</span>
-                                <MudTextField T="string" Placeholder="123" Variant="Variant.Outlined" @bind-Value="NewMethod.Card.Cvc" Required />
-                            </MudStack>
-                        </MudItem>
-                    </MudGrid>
-                </MudForm>
-            </MudItem>
-            <MudItem xs="12" Class="text-center">
-                @StripeError
+                <div id="card-element"></div>
+                <p>@Message</p>
             </MudItem>
         </MudGrid>
+
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="Cancel">Luk</MudButton>
-        <MudButton Color="@Color.Primary" Class="rounded-lg" Variant="Variant.Filled" Disabled="@(!_success)" OnClick="Submit">Tilføj</MudButton>
+        <MudButton Color="@Color.Primary" Class="rounded-lg" Variant="Variant.Filled" OnClick="SubmitPayment">Tilføj</MudButton>
     </DialogActions>
 </MudDialog>
 
@@ -74,42 +49,45 @@
     [Parameter]
     public User User { get; set; }
 
-    private PaymentMethodCreateOptions NewMethod = new PaymentMethodCreateOptions() 
+    private void Cancel() => MudDialog.Cancel();
+
+    private string? Message;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        Type = "card",
-        Card = new PaymentMethodCardOptions(),
-        BillingDetails = new PaymentMethodBillingDetailsOptions()
-    };
-
-    private string ExpiryString = string.Empty;
-
-    private MudForm _form;
-    private bool _success;
-    private string[] _errors = { };
-
-    private string StripeError = string.Empty;
-
-    private async Task Submit()
-    {
-        if (ExpiryString.Contains("/"))
+        if (firstRender)
         {
-            var expiryArr = ExpiryString.Split('/');
-            NewMethod.Card.ExpMonth = Convert.ToInt32(expiryArr.First());
-            NewMethod.Card.ExpYear = Convert.ToInt32(expiryArr.Last());
+            var publishableKey = Secrets.GetStripePublishableKey(Configuration);
+            await JS.InvokeVoidAsync("initializeStripe", publishableKey);
+        }
+    }
 
+    private async Task SubmitPayment()
+    {
+        string paymentMethodId = await JS.InvokeAsync<string>("processStripePayment");
+
+        if (!string.IsNullOrEmpty(paymentMethodId))
+        {
             try
             {
-                await StripeService.AddPaymentMethod(User.Organization!.StripeAccountId, NewMethod);
-                MudDialog.Close(DialogResult.Ok(true));
+                var paymentMethodService = new PaymentMethodService();
+
+                // Attach the payment method to the customer
+                paymentMethodService.Attach(paymentMethodId, new PaymentMethodAttachOptions
+                {
+                    Customer = User.Organization!.StripeAccountId
+                });
+
+                MudDialog.Close();
             }
             catch (Exception ex)
             {
-                StripeError = ex.Message;
+                Message = $"Error: {ex.Message}";
             }
         }
-        
-        
+        else
+        {
+            Message = "Failed to retrieve payment method.";
+        }
     }
-
-    private void Cancel() => MudDialog.Cancel();
 }

@@ -106,23 +106,34 @@
             </MudTabPanel>
 
             <MudTabPanel Text="Betaling">
-                <MudStack Class="w-full mt-2" Spacing="0">
+                <MudStack Class="w-full" Spacing="0">
+                    @if (!PaymentMethods.Any())
+                    {
+                        <span class="text-[16px] rounded-lg bg-warning-50 border border-warning-500 text-warning-500 p-2 mb-2">Det ser ikke ud til at du har et betalingskort tilknyttet, hvilket betyder dit abonnement vil blive sat på pause, næste gang vi forsøger at trække for dit abonnement...</span>
+                    }
+                    else if (!PaymentMethods.Any(x => x.Id == DefaultPaymentMethodId)) 
+                    {
+                        <span class="text-[16px] rounded-lg bg-warning-50 border border-warning-500 text-warning-500 p-2 mb-2">Det ser ikke ud til at du har et standard betalingskort, hvilket betyder dit abonnement vil blive sat på pause, næste gang vi forsøger at trække for dit abonnement...</span>
+                    }
                     <MudGrid>
                         <MudItem xs="9">
                             <MudGrid>
                                 <MudItem xs="6">
                                     @foreach (PaymentMethod method in PaymentMethods) 
                                     {
-                                        <MudPaper Elevation="0" Class="border-border border w-fit">
+                                        <MudPaper Elevation="0" Class="border-border border w-fit mb-2">
                                             <MudStack Row Class="pa-4" Justify="Justify.FlexStart" AlignItems="AlignItems.Start">
                                                 <img class="h-[48px] p-2 rounded-lg border border-border" src="https://1000logos.net/wp-content/uploads/2021/11/VISA-logo.png" height="32" />
                                                 <MudStack Spacing="4">
                                                     <MudStack Spacing="0">
-                                                        <MudStack Row>
+                                                        <MudStack Row Spacing="2">
                                                             <span class="text-[16px] font-medium capitalize">@method.Card.Brand</span>
 
-                                                            @* @if (method.Card == method.Card.Is) *@
-                                                            <span class="text-[16px] font-medium capitalize">(Standard)</span>
+                                                            @if (method.Id == DefaultPaymentMethodId) 
+                                                            {
+                                                                <span class="text-[16px] font-medium capitalize">(Standard)</span>
+                                                            }
+                                                            
                                                         </MudStack>
 
                                                         <span class="text-neutral-400">**** **** **** @method.Card.Last4</span>
@@ -131,8 +142,11 @@
                                                 </MudStack>
                                                 <MudStack Class="h-full ml-16">
                                                     <MudMenu Size="Size.Small" Icon="@Icons.Material.Filled.MoreHoriz" AnchorOrigin="Origin.BottomCenter">
-                                                        <MudMenuItem>Sæt som standard</MudMenuItem>
-                                                        <MudMenuItem>Slet</MudMenuItem>
+                                                        @if (method.Id != DefaultPaymentMethodId)
+                                                        {
+                                                            <MudMenuItem OnClick="() => SetDefaultPaymentMethod(method)">Sæt som standard</MudMenuItem>
+                                                        }
+                                                        <MudMenuItem OnClick="() => DeletePaymentMethod(method)">Slet</MudMenuItem>
                                                     </MudMenu>
                                                 </MudStack>
                                             </MudStack>
@@ -143,7 +157,7 @@
                         </MudItem>
                         <MudItem xs="3">
                             <div class="flex justify-end">
-                                <MudButton OnClick="() => DialogService.OpenAddPaymentMethodDialog(User)" StartIcon="@Icons.Material.Filled.Add" DropShadow="false" Color="Color.Primary" Variant="Variant.Filled" Class="w-fit !normal-case">Tilføj betalingsmiddel</MudButton>
+                                <MudButton OnClick="OpenAddPaymentDialog" StartIcon="@Icons.Material.Filled.Add" DropShadow="false" Color="Color.Primary" Variant="Variant.Filled" Class="w-fit !normal-case">Tilføj betalingsmiddel</MudButton>
                             </div>
                         </MudItem>
                     </MudGrid>
@@ -432,6 +446,7 @@
     private bool PasswordChanged = false;
 
     private Creator Creator;
+    string DefaultPaymentMethodId = string.Empty;
     private IEnumerable<PaymentMethod> PaymentMethods = [];
     private IEnumerable<IExternalAccount> PayoutAccounts = [];
     private IEnumerable<Language> _selectedLanguages { get; set; } = new HashSet<Language>();
@@ -474,10 +489,10 @@
             }
         }
 
-        PaymentMethods = await GetPaymentInfo(User);
+        await GetPaymentInfo(User);
     }
 
-    private async Task<IEnumerable<PaymentMethod>> GetPaymentInfo(User user)
+    private async Task GetPaymentInfo(User user)
     {
         if (User.Role == UserRole.Bruger)
         {
@@ -485,11 +500,10 @@
 
             if (!string.IsNullOrEmpty(stripeAccountId))
             {
-                return await StripeService.GetPaymentMethods(stripeAccountId);
+                PaymentMethods = await StripeService.GetPaymentMethods(stripeAccountId);
+                DefaultPaymentMethodId = StripeService.GetDefaultPaymentMethod(stripeAccountId);
             }
         }
-
-        return [];
     }
 
     private void SaveChanges()
@@ -554,5 +568,31 @@
     {
         var session = await StripeService.CreateVerificationSession(creator);
         CreatorKycVerificationURL = session.Url;
+    }
+
+    private async Task SetDefaultPaymentMethod(PaymentMethod method) 
+    {
+        await StripeService.SetDefaultPaymentMethod(User.Organization.StripeAccountId, method.Id);
+        await FetchStripeCards();
+    }
+
+    private async Task DeletePaymentMethod(PaymentMethod method) 
+    {
+        StripeService.RemovePaymentMethod(method.Id);
+        await FetchStripeCards();
+    }
+
+    private async Task FetchStripeCards() 
+    {
+        await GetPaymentInfo(User);
+        StateHasChanged();
+    }
+
+    private async Task OpenAddPaymentDialog() 
+    {
+        var result = await DialogService.OpenAddPaymentMethodDialog(User);
+
+        if (result is not null && !result.Canceled)
+            await FetchStripeCards();
     }
 }

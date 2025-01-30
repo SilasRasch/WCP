@@ -21,3 +21,44 @@
         alert("Payment successful!");
     }
 };
+
+let stripe;
+let card;
+
+window.initializeStripe = async function (publishableKey) {
+    stripe = Stripe(publishableKey);
+    const elements = stripe.elements();
+    card = elements.create('card', {
+        hidePostalCode: true,
+        style: {
+            base: {
+                fontSize: '18px',
+                color: '#32325d',
+                fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
+                '::placeholder': {
+                    color: '#aab7c4'
+                },
+                padding: '10px',
+            },
+            invalid: {
+                color: '#fa755a'
+            }
+        }
+    });
+
+    card.mount('#card-element');
+};
+
+window.processStripePayment = async function () {
+    const { paymentMethod, error } = await stripe.createPaymentMethod({
+        type: 'card',
+        card: card,
+    });
+
+    if (error) {
+        console.error(error.message);
+        return "";
+    }
+
+    return paymentMethod.id;
+};

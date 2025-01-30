@@ -1098,6 +1098,11 @@ video {
   border-color: rgb(234 179 8 / var(--tw-border-opacity));
 }
 
+.border-warning-500 {
+  --tw-border-opacity: 1;
+  border-color: rgb(255 173 79 / var(--tw-border-opacity));
+}
+
 .\!bg-white {
   --tw-bg-opacity: 1 !important;
   background-color: rgb(255 255 255 / var(--tw-bg-opacity)) !important;
@@ -1513,6 +1518,11 @@ video {
 .text-yellow-700 {
   --tw-text-opacity: 1;
   color: rgb(161 98 7 / var(--tw-text-opacity));
+}
+
+.text-warning-500 {
+  --tw-text-opacity: 1;
+  color: rgb(255 173 79 / var(--tw-text-opacity));
 }
 
 .underline {

@@ -85,7 +85,7 @@ namespace WCPFrontEnd.Services
             var result = await dialog.Result;
         }
 
-        public async Task OpenAddPaymentMethodDialog(User user)
+        public async Task<DialogResult?> OpenAddPaymentMethodDialog(User user)
         {
             var parameters = new DialogParameters<AddPaymentDialog>
             {
@@ -94,7 +94,7 @@ namespace WCPFrontEnd.Services
 
             var options = new DialogOptions { CloseOnEscapeKey = true };
             var dialog = await DialogService.ShowAsync<AddPaymentDialog>("Creator detail dialog", parameters, options);
-            var result = await dialog.Result;
+            return await dialog.Result;
         }
 
         public async Task OpenProjectCreation()
