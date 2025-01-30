@@ -1,5 +1,6 @@
 ﻿using Stripe;
 using Stripe.Checkout;
+using Stripe.Identity;
 using WCPShared.Interfaces;
 using WCPShared.Models.Entities;
 using WCPShared.Models.Entities.ProjectModels;
@@ -59,32 +60,6 @@ namespace WCPShared.Services
 
             var customerService = new CustomerService();
             return customerService.Create(customerOptions);
-        }
-
-        public List<SessionLineItemOptions> GenerateLineItemsOld(WCPShared.Models.Entities.Subscription subscription)
-        {
-            var lineItems = new List<SessionLineItemOptions>();
-
-            //if (subscription.Type == SubscriptionType.Small)
-            //    lineItems.Add(new SessionLineItemOptions { Price = "price_1QIcSMHvTm5ojAP1fHGmabbx", Quantity = 1 });
-
-            //if (subscription.Type == SubscriptionType.Medium)
-            //    lineItems.Add(new SessionLineItemOptions { Price = "price_1QI82YHvTm5ojAP1RfnEQ6aY", Quantity = 1 });
-
-            //if (subscription.Type == SubscriptionType.Large)
-            //    lineItems.Add(new SessionLineItemOptions { Price = "price_1QIcSfHvTm5ojAP1bIm4bRat", Quantity = 1 });
-
-            //var subscriptionIncluded = GetSubscriptionInfo(subscription.Type);
-
-            //if (subscription.NumberOfVideos > subscriptionIncluded.NumberOfVideos)
-            //    lineItems.Add(new SessionLineItemOptions { Price = "price_1QIcUKHvTm5ojAP1Jvpzjhlv", Quantity = subscription.NumberOfVideos - subscriptionIncluded.NumberOfVideos });
-
-            //if (subscription.NumberOfBrands > subscriptionIncluded.NumberOfBrands)
-            //    lineItems.Add(new SessionLineItemOptions { Price = "price_1QIcUZHvTm5ojAP1Nd5KbYkj", Quantity = subscription.NumberOfBrands - subscriptionIncluded.NumberOfBrands });
-
-            //if (subscription.NumberOfUsers > subscriptionIncluded.NumberOfUsers)
-            //    lineItems.Add(new SessionLineItemOptions { Price = "price_1QIcUoHvTm5ojAP1qdp3Fuks", Quantity = subscription.NumberOfUsers - subscriptionIncluded.NumberOfUsers });
-            return lineItems;
         }
         
         public List<SessionLineItemOptions> GenerateLineItems(WCPShared.Models.Entities.Subscription subscription)
@@ -151,11 +126,30 @@ namespace WCPShared.Services
             {
                 Account = accountId,
                 RefreshUrl = "https://wcp.dk/refresh",
-                ReturnUrl = "https://wcp.dk.com/onboarding-complete",
+                ReturnUrl = "https://wcp.dk/onboarding-complete",
                 Type = "account_onboarding",
             };
             var accountLinkService = new AccountLinkService();
             return accountLinkService.Create(accountLinkOptions);
+        }
+
+        public async Task<VerificationSession> CreateVerificationSession(Creator creator)
+        {
+            var service = new VerificationSessionService();
+            var session = service.Create(new VerificationSessionCreateOptions
+            {
+                Type = "document",
+                Metadata = new Dictionary<string, string>
+                {
+                    { "account_id", creator.StripeAccountId } // Associate session with your user
+                },
+                ReturnUrl = "https://app.webcontent.dk/kyc_complete"
+            });
+
+            creator.KycVerificationId = session.Id;
+            await _context.SaveChangesAsync();
+
+            return session;
         }
 
         public WCPShared.Models.Entities.Subscription GetSubscriptionInfo(SubscriptionType type)
@@ -363,6 +357,23 @@ namespace WCPShared.Services
             catch
             {
                 return false;
+            }
+        }
+
+        public string CheckKycStatus(string verificationId)
+        {
+            if (string.IsNullOrEmpty(verificationId)) return string.Empty;
+            
+            try
+            {
+                var verificationService = new VerificationSessionService();
+                var session = verificationService.Get(verificationId);
+
+                return session.Status;
+            }
+            catch
+            {
+                return string.Empty;
             }
         }
 

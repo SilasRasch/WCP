@@ -37,74 +37,74 @@
             <Authorized>
                 <MudPaper Elevation="0" Class="border-b-[1px] border-border py-2 rounded-0 px-6">
                     <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart" Spacing="1">
-                
-                                <MudPaper Elevation="0" Class="rounded-lg p-2 border-border border">
-                                    <MudStack Row>
-                                        <MudIcon Icon="@Icons.Material.Filled.Search" />
-                                        <input type="text" placeholder="Søg" class="max-w-96 w-[25vw]" />
+
+                        <MudPaper Elevation="0" Class="rounded-lg p-2 border-border border">
+                            <MudStack Row>
+                                <MudIcon Icon="@Icons.Material.Filled.Search" />
+                                <input type="text" placeholder="Søg" class="max-w-96 w-[25vw]" />
+                            </MudStack>
+                        </MudPaper>
+
+                        <MudSpacer />
+
+                        <WCPFrontEnd.Components.Pages.ChatTest />
+
+                        <AuthorizeView Context="context2" Roles="Creator">
+                            @if (Balance is not null)
+                            {
+                                <CreatorBalance Balance="Balance" />
+                            }
+                        </AuthorizeView>
+
+                        <div class="h-[32px] mx-2 border-l-[1px] border-border"></div>
+
+                        <MudMenu AriaLabel="Åben profil menu" AnchorOrigin="Origin.BottomRight" Variant="Variant.Outlined">
+                            <ActivatorContent>
+                                @if (ApplicationState.IsDataLoaded)
+                                {
+                                    <MudStack Spacing="4" Row Justify="Justify.Center" AlignItems="AlignItems.Center">
+                                        <MudStack Row Spacing="2">
+                                            <MudAvatar Color="Color.Primary">
+                                                @ApplicationState.CurrentUser.Name.First()
+                                            </MudAvatar>
+
+                                            <MudStack Spacing="0">
+                                                <MudText>@ApplicationState.CurrentUser.Name</MudText>
+                                                <MudText Typo="Typo.caption">@ApplicationState.CurrentUser.Role</MudText>
+                                            </MudStack>
+                                        </MudStack>
+
+                                        <MudIcon Icon="@Icons.Material.Filled.KeyboardArrowDown"></MudIcon>
                                     </MudStack>
-                                </MudPaper>
+                                }
+                                else
+                                {
+                                    <MudStack Spacing="4" Row Justify="Justify.Center" AlignItems="AlignItems.Center">
+                                        <MudStack Row Spacing="2">
+                                            <MudAvatar Color="Color.Primary">
+                                                WC
+                                            </MudAvatar>
 
-                                <MudSpacer />
-
-                                <WCPFrontEnd.Components.Pages.ChatTest />
-
-                                <AuthorizeView Context="context2" Roles="Creator">
-                                    @if (Balance is not null)
-                                    {
-                                        <CreatorBalance Balance="Balance" />
-                                    }
-                                </AuthorizeView>
-
-                                <div class="h-[32px] mx-2 border-l-[1px] border-border"></div>
-
-                                <MudMenu AriaLabel="Åben profil menu" AnchorOrigin="Origin.BottomRight" Variant="Variant.Outlined">
-                                    <ActivatorContent>
-                                        @if (ApplicationState.IsDataLoaded)
-                                        {
-                                            <MudStack Spacing="4" Row Justify="Justify.Center" AlignItems="AlignItems.Center">
-                                                <MudStack Row Spacing="2">
-                                                    <MudAvatar Color="Color.Primary">
-                                                        @ApplicationState.CurrentUser.Name.First()
-                                                    </MudAvatar>
-
-                                                    <MudStack Spacing="0">
-                                                        <MudText>@ApplicationState.CurrentUser.Name</MudText>
-                                                        <MudText Typo="Typo.caption">@ApplicationState.CurrentUser.Role</MudText>
-                                                    </MudStack>
-                                                </MudStack>
-
-                                                <MudIcon Icon="@Icons.Material.Filled.KeyboardArrowDown"></MudIcon>
+                                            <MudStack Spacing="0">
+                                                <MudText>Indlæser...</MudText>
                                             </MudStack>
-                                        }
-                                        else
-                                        {
-                                            <MudStack Spacing="4" Row Justify="Justify.Center" AlignItems="AlignItems.Center">
-                                                <MudStack Row Spacing="2">
-                                                    <MudAvatar Color="Color.Primary">
-                                                        WC
-                                                    </MudAvatar>
+                                        </MudStack>
 
-                                                    <MudStack Spacing="0">
-                                                        <MudText>Indlæser...</MudText>
-                                                    </MudStack>
-                                                </MudStack>
+                                        <MudIcon Icon="@Icons.Material.Filled.KeyboardArrowDown"></MudIcon>
+                                    </MudStack>
+                                }
+                            </ActivatorContent>
+                            <ChildContent>
+                                <MudMenuItem Href="settings" Icon="@Icons.Material.Filled.Settings">Indstillinger</MudMenuItem>
+                                <MudMenuItem Href="profile" Icon="@Icons.Material.Filled.Support">Support</MudMenuItem>
+                                <MudMenuItem Href="profile" Icon="@Icons.Material.Filled.HelpOutline">FAQ</MudMenuItem>
+                                @* <MudMenuItem Icon="@(DarkLightModeButtonIcon)" IconColor="Color.Warning" OnClick="@DarkModeToggle">Skift tema</MudMenuItem> *@
+                                <MudDivider />
+                                <MudMenuItem Href="logout" Icon="@Icons.Material.Filled.Logout">Log ud</MudMenuItem>
+                            </ChildContent>
 
-                                                <MudIcon Icon="@Icons.Material.Filled.KeyboardArrowDown"></MudIcon>
-                                            </MudStack>
-                                        }
-                                    </ActivatorContent>
-                                    <ChildContent>
-                                        <MudMenuItem Href="settings" Icon="@Icons.Material.Filled.Settings">Indstillinger</MudMenuItem>
-                                        <MudMenuItem Href="profile" Icon="@Icons.Material.Filled.Support">Support</MudMenuItem>
-                                        <MudMenuItem Href="profile" Icon="@Icons.Material.Filled.HelpOutline">FAQ</MudMenuItem>
-                                        @* <MudMenuItem Icon="@(DarkLightModeButtonIcon)" IconColor="Color.Warning" OnClick="@DarkModeToggle">Skift tema</MudMenuItem> *@
-                                        <MudDivider />
-                                        <MudMenuItem Href="logout" Icon="@Icons.Material.Filled.Logout">Log ud</MudMenuItem>
-                                    </ChildContent>
+                        </MudMenu>
 
-                                </MudMenu>
-                    
                     </MudStack>
                 </MudPaper>
             </Authorized>
@@ -125,20 +125,19 @@
 
             <AuthorizeView Roles="Creator">
                 <Authorized>
-                    <AuthorizeView Context="connected" Policy="IsNotStripeConnected">
-                        <Authorized>
-                            <MudPaper Class="pa-2 mb-2 mud-error">
-                                <MudText Class="text-white" Typo="Typo.body1">🛑 Det ser ikke ud til at du er onboardet på vores <em>nye</em> betalingsplatform... Klik <a class="cursor-pointer text-white underline" href="/settings">her</a> for kunne blive betalt! 💲</MudText>
-                            </MudPaper>
-                        </Authorized>
-                    </AuthorizeView>
-                    <AuthorizeView Context="connected" Policy="OnboardingIncomplete">
-                        <Authorized>
-                            <MudPaper Class="pa-2 mb-2 mud-error">
-                                <MudText Class="text-white" Typo="Typo.body1">🛑 Det ser ud til at vi mangler nogle informationer om dig for at kunne lave udbetalinger... Klik <a class="cursor-pointer text-white underline" href="/settings">her</a> for kunne blive betalt! 💲</MudText>
-                            </MudPaper>
-                        </Authorized>
-                    </AuthorizeView>
+                    @if (IsNotStripeConnected) 
+                    {
+                        <MudPaper Class="pa-2 mb-2 mud-error">
+                            <MudText Class="text-white" Typo="Typo.body1">🛑 Det ser ikke ud til at du er onboardet på vores <em>nye</em> betalingsplatform... Klik <a class="cursor-pointer text-white underline" href="/settings">her</a> for kunne blive betalt! 💲</MudText>
+                        </MudPaper>
+                    }
+
+                    @if (OnboardingIncomplete) 
+                    {
+                        <MudPaper Class="pa-2 mb-2 mud-error">
+                            <MudText Class="text-white" Typo="Typo.body1">🛑 Det ser ud til at vi mangler nogle informationer om dig for at kunne lave udbetalinger... Klik <a class="cursor-pointer text-white underline" href="/settings">her</a> for kunne blive betalt! 💲</MudText>
+                        </MudPaper>
+                    }
                 </Authorized>
             </AuthorizeView>
 
@@ -158,7 +157,7 @@
 
 <style>
     textarea:focus, input:focus {
-        outline: none;
+    outline: none;
     }
 </style>
 
@@ -271,14 +270,17 @@
             {
                 var balances = await StripeService.GetBalance(stripeAccountId);
 
-                // Try and get preferred currency
-                Balance = balances.Available.SingleOrDefault(x => x.Currency == ApplicationState.Language.Currency)!;
+                if (balances is not null) 
+                {
+                    // Try and get preferred currency
+                    Balance = balances.Available.SingleOrDefault(x => x.Currency == ApplicationState.Language.Currency)!;
 
-                // Then get any
-                if (Balance is null) Balance = balances.Available.FirstOrDefault();
+                    // Then get any
+                    if (Balance is null) Balance = balances.Available.FirstOrDefault();
 
-                // Display zero
-                if (Balance is null) Balance = new BalanceAmount { Amount = 0, Currency = ApplicationState.Language.Currency };
+                    // Display zero
+                    if (Balance is null) Balance = new BalanceAmount { Amount = 0, Currency = ApplicationState.Language.Currency };
+                }
             }
         }
     }
@@ -305,6 +307,29 @@
 
                 var accountLink = StripeService.CreateAccountLink(creator.StripeAccountId);
                 await jsRuntime.InvokeVoidAsync("open", accountLink.Url);
+            }
+        }
+    }
+
+    private bool IsNotStripeConnected = false;
+    private bool OnboardingIncomplete = false;
+
+    private async Task CheckOnboardingStatus() 
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var StripeAccountId = authState.User.FindFirst(c => c.Type == "StripeAccountId")?.Value;
+
+        if (!string.IsNullOrEmpty(StripeAccountId))
+        {
+            Creator? creator = await Context.Creators
+                    .Include(x => x.User)
+                    .ThenInclude(x => x.Language)
+                    .SingleOrDefaultAsync(x => x.StripeAccountId == StripeAccountId);
+
+            if (creator is null) IsNotStripeConnected = true;
+            else 
+            {
+                OnboardingIncomplete = !await StripeService.CheckOnboardingStatus(creator.StripeAccountId) || !StripeService.CheckKycStatus(creator.KycVerificationId);
             }
         }
     }

@@ -173,10 +173,6 @@
 
         // Opret konto med det samme og forbind til creator. Afvent med onboarding til første log-in.
         Account account = StripeService.CreateAccount(User.Email, Creator.StripeAccountType, User.Language.IsoCountryCode);
-        
-        // AccountLink accountLink = StripeService.CreateAccountLink(account.Id);
-        // await jsRuntime.InvokeVoidAsync("open", accountLink.Url);
-
         Creator.StripeAccountId = account.Id;
         Creator.Languages = selectedLanguages.ToList();
         User.Role = UserRole.Creator;

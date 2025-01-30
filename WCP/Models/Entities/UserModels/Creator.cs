@@ -19,10 +19,14 @@ namespace WCPShared.Models.Entities.UserModels
         public List<Language>? Languages { get; set; } = new List<Language>();
         public List<CreatorParticipation> Participations { get; set; } = new List<CreatorParticipation>();
         public string Gender { get; set; } = string.Empty;
-        public string StripeAccountId { get; set; } = string.Empty;
         public long[] PriceEstimate { get; set; } = [];
-        public string StripeAccountType { get; set; } = string.Empty;
         public IEnumerable<string> Tags { get; set; } = [];
+
+        // Stripe
+        public string StripeAccountId { get; set; } = string.Empty;
+        public string KycVerificationId { get; set; } = string.Empty;
+        public string StripeAccountType { get; set; } = string.Empty;
+        
 
         public bool Validate()
         {

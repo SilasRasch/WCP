@@ -107,16 +107,9 @@
             Creator? creator = await Context.Creators.SingleOrDefaultAsync(x => x.UserId == user.Id);
             if (creator is not null) 
             {
-                if (string.IsNullOrEmpty(creator.StripeAccountId))
-                    claims.Add(new Claim("IsNotStripeConnected", string.Empty));
-                else {
+                if (!string.IsNullOrEmpty(creator.StripeAccountId)) 
+                {
                     claims.Add(new Claim("StripeAccountId", creator.StripeAccountId));
-
-                    // Display onboarding incomplete
-                    if (!await StripeService.CheckOnboardingStatus(creator.StripeAccountId)) 
-                    {
-                        claims.Add(new Claim("OnboardingIncomplete", string.Empty));
-                    }
                 }
 
                 claims.Add(new Claim("SubType", creator.SubType.ToString()));

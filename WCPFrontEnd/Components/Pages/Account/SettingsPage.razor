@@ -316,15 +316,26 @@
                                     <span>ID validering</span>
                                 </MudItem>
                                 <MudItem xs="6" Class="my-2">
-                                    @if (CreatorOnboardingStatusConnect)
+                                    @if (CreatorKycVerifiedStatus == "verified")
                                     {
                                         <span class="p-2 bg-success-50 text-success-700 border-success-700 border rounded">Verificeret</span>
+                                    }
+                                    else if (CreatorKycVerifiedStatus == "processing") 
+                                    {
+                                        <span class="p-2 bg-error-50 text-error-700 border-error-700 border rounded">Processerer dokumenter</span>
+                                    }
+                                    else if (!CreatorOnboardingStatusConnect)
+                                    {
+                                        <MudStack Row AlignItems="AlignItems.Center">
+                                            <span class="p-2 bg-error-50 text-error-700 border-error-700 border rounded">Ikke verificeret</span>
+                                            <a class="hover:underline text-blue-500 cursor-pointer">gennemgå onboarding først</a>
+                                        </MudStack>
                                     }
                                     else
                                     {
                                         <MudStack Row AlignItems="AlignItems.Center">
                                             <span class="p-2 bg-error-50 text-error-700 border-error-700 border rounded">Ikke verificeret</span>
-                                            <a href="@CreatorOnboardingURL" class="hover:underline text-blue-500 cursor-pointer">Tryk her for at blive verificeret</a>
+                                            <a href="@CreatorKycVerificationURL" class="hover:underline text-blue-500 cursor-pointer">Tryk her for at blive verificeret</a>
                                         </MudStack>
                                     }
                                 </MudItem>
@@ -430,7 +441,9 @@
     private string ConfirmNewPassword = string.Empty;
 
     private bool CreatorOnboardingStatusConnect = false;
+    private string CreatorKycVerifiedStatus = string.Empty;
     private string CreatorOnboardingURL = string.Empty;
+    private string CreatorKycVerificationURL = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
@@ -452,9 +465,12 @@
                 PayoutAccounts = await StripeService.GetPayoutAccount(Creator.StripeAccountId);
 
                 CreatorOnboardingStatusConnect = await StripeService.CheckOnboardingStatus(Creator.StripeAccountId);
+                CreatorKycVerifiedStatus = StripeService.CheckKycStatus(Creator.KycVerificationId);
 
-                if (!CreatorOnboardingStatusConnect)
-                    await CheckOnboarding(Creator);
+                if (!CreatorOnboardingStatusConnect) await CreatorAccountLink(Creator);
+
+                // Only if onboarding is complete
+                if ((CreatorKycVerifiedStatus != "verified" && CreatorKycVerifiedStatus != "processing") && CreatorOnboardingStatusConnect) await CreateKycSession(Creator);
             }
         }
 
@@ -522,7 +538,7 @@
         }
     }
 
-    private async Task CheckOnboarding(Creator creator)
+    private async Task CreatorAccountLink(Creator creator)
     {
         if (string.IsNullOrEmpty(creator.StripeAccountId))
         {
@@ -532,5 +548,11 @@
 
         var accountLink = StripeService.CreateAccountLink(creator.StripeAccountId);
         CreatorOnboardingURL = accountLink.Url;
+    }
+
+    private async Task CreateKycSession(Creator creator) 
+    {
+        var session = await StripeService.CreateVerificationSession(creator);
+        CreatorKycVerificationURL = session.Url;
     }
 }

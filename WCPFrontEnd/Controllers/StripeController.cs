@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Stripe;
 using Stripe.Checkout;
+using Stripe.Identity;
 using WCPShared.Interfaces;
 using WCPShared.Services.StaticHelpers;
 
@@ -101,6 +102,17 @@ namespace WCPFrontEnd.Controllers
                         await _context.SaveChangesAsync();
                         Console.WriteLine("A payment failed for {0}.", org.Name);
                     }
+                }
+                else if (stripeEvent.Type == EventTypes.IdentityVerificationSessionVerified)
+                {
+                    var session = stripeEvent.Data.Object as VerificationSession;
+                    var stripeAccountId = session.Metadata["account_id"]; // Stripe Account ID
+
+                    var user = await _context.Creators.SingleOrDefaultAsync(x => x.StripeAccountId == stripeAccountId);
+                    if (user is null) return BadRequest("Creator not found with specified account id: " + stripeAccountId);
+                    
+                    user.KycVerificationId = session.Id;
+                    await _context.SaveChangesAsync();
                 }
                 else
                 {
