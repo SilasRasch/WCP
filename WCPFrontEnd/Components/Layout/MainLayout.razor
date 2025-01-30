@@ -329,7 +329,7 @@
             if (creator is null) IsNotStripeConnected = true;
             else 
             {
-                OnboardingIncomplete = !await StripeService.CheckOnboardingStatus(creator.StripeAccountId) || !StripeService.CheckKycStatus(creator.KycVerificationId);
+                OnboardingIncomplete = !await StripeService.CheckOnboardingStatus(creator.StripeAccountId) || StripeService.CheckKycStatus(creator.KycVerificationId) != "verified";
             }
         }
     }
