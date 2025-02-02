@@ -46,10 +46,10 @@ namespace WCPFrontEnd.Services
             if (obj is CreatorProject creatorProject && oldObj is CreatorProject oldCreatorProject)
             {
                 PayCreators(creatorProject, oldCreatorProject);
-                await CreateShippingLabels(creatorProject, oldCreatorProject);
+                //await CreateShippingLabels(creatorProject, oldCreatorProject);
             }
 
-            await _slackNotificationService.SendStatusNotifications(obj, oldObj);;
+            //await _slackNotificationService.SendStatusNotifications(obj, oldObj);;
             return obj;
         }
 
