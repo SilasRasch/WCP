@@ -29,7 +29,7 @@ namespace WCPShared.Services
             if (!EnableNotifications) return;
 
             var user = await _userService.GetObjectBy(x => x.Name == username);
-            if (user is null || !user.NotificationsOn || user.NotificationSetting.ToLower() !=  "slack") return;
+            //if (user is null || !user.NotificationsOn || user.NotificationSetting.ToLower() !=  "slack") return;
 
             User? slackUser = await FetchUser(username);
             if (slackUser is not null)

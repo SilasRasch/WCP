@@ -362,18 +362,26 @@
                                     <span>Konto til udbetaling</span>
                                 </MudItem>
                                 <MudItem xs="6">
-                                    @foreach (var account in PayoutAccounts)
+                                    @if (PayoutAccounts.Any()) 
                                     {
-                                        if (account is BankAccount bankAccount)
+                                        @foreach (var account in PayoutAccounts)
                                         {
-                                            <MudStack Row AlignItems="AlignItems.Center">
-                                                <span>@bankAccount.Country************@bankAccount.Last4 (@bankAccount.BankName)</span>
-                                                <MudMenu Size="Size.Small" Icon="@Icons.Material.Filled.MoreHoriz" AnchorOrigin="Origin.BottomCenter">
-                                                    <MudMenuItem>Ændre</MudMenuItem>
-                                                </MudMenu>
-                                            </MudStack>
+                                            if (account is BankAccount bankAccount)
+                                            {
+                                                <MudStack Row AlignItems="AlignItems.Center">
+                                                    <span>@bankAccount.Country************@bankAccount.Last4 (@bankAccount.BankName)</span>
+                                                    <MudMenu Size="Size.Small" Icon="@Icons.Material.Filled.MoreHoriz" AnchorOrigin="Origin.BottomCenter">
+                                                        <MudMenuItem>Ændre</MudMenuItem>
+                                                    </MudMenu>
+                                                </MudStack>
+                                            }
                                         }
                                     }
+                                    else 
+                                    {
+                                        <p>Ingen konti fundet</p>
+                                    }
+                                    
                                 </MudItem>
                             </MudGrid>
                         </MudStack>

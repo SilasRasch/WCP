@@ -65,7 +65,7 @@ namespace WCPShared.Services
                 OrganizationId = request.User.OrganizationId,
                 Organization = org,
                 NotificationsOn = true,
-                NotificationSetting = "slack"
+                //NotificationSetting = "slack"
             };
 
             user = await _userService.AddObject(user);
@@ -103,7 +103,7 @@ namespace WCPShared.Services
 
             user.PasswordHash = passwordHash;
             user.VerificationToken = verificationToken;
-            user.NotificationSetting = "slack";
+            //user.NotificationSetting = "slack";
             user.NotificationsOn = true;
             user.IsActive = false;
 
@@ -144,7 +144,7 @@ namespace WCPShared.Services
 
             user.PasswordHash = passwordHash;
             user.VerificationToken = verificationToken;
-            user.NotificationSetting = "slack";
+            //user.NotificationSetting = "slack";
             user.NotificationsOn = true;
             user.IsActive = true;
             user.Role = UserRole.Creator;
@@ -167,7 +167,6 @@ namespace WCPShared.Services
             }
 
             // Send registration email
-
             //if (user is not null)
             //    try { await _emailService.SendRegistrationEmail(user, verificationToken, selfRegister); }
             //    catch { /* ignore */ }
@@ -188,7 +187,7 @@ namespace WCPShared.Services
 
             user.PasswordHash = passwordHash;
             user.VerificationToken = verificationToken;
-            user.NotificationSetting = "slack";
+            //user.NotificationSetting = "slack";
             user.NotificationsOn = true;
             user.IsActive = true;
 
@@ -225,20 +224,6 @@ namespace WCPShared.Services
             };
         }
 
-        public async Task<bool> AddAdmin(int id)
-        {
-            User? user = await _userService.GetObject(id);
-            if (user is null)
-                return false;
-
-            if (user.Role != UserRole.Admin)
-                return false;
-
-            user.Role = UserRole.Admin;
-            await _userService.UpdateObject(id, user);
-            return true;
-        }
-
         public string GenerateRandomString(int byteCount)
         {
             return Convert.ToHexString(RandomNumberGenerator.GetBytes(byteCount));
@@ -271,76 +256,31 @@ namespace WCPShared.Services
             return true;
         }
 
-        public async Task<User?> SelfRegister(SelfRegisterDto request)
-        {
-            var user = await _userService.GetObjectBy(x => x.VerificationToken == request.VerificationToken);
-            if (user == null) throw new NotFoundException("User not found");
-
-            var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
-            user.PasswordHash = passwordHash;
-            user.Phone = request.User.Phone;
-            user.Name = request.User.Name;
-            user.IsActive = true;
-
-            if (!user.Validate()) throw new ArgumentException("Validation failed...");
-
-            var updateResult = await _userService.UpdateObject(user.Id, user);
-            if (updateResult is null) throw new ArgumentException("Updating user failed...");
-
-            if (user.Role == UserRole.Creator && request.Creator is not null)
-            {
-                if (!request.Creator.Validate()) throw new ArgumentException("Creator validation failed");
-                var creator = await _creatorService.GetObjectBy(x => x.UserId == user.Id);
-                if (creator == null) throw new NotFoundException("Creator not found");
-
-                request.Creator.SubType = creator.SubType.ToString();
-                var result = await _creatorService.UpdateObject(creator.Id, request.Creator);
-                if (result is null) throw new ArgumentException("Something went wrong...");
-            }
-
-            user.VerificationToken = null;
-            updateResult = await _userService.UpdateObject(user.Id, user);
-
-            return updateResult is not null ? updateResult : throw new ArgumentException("Verification token removal failed");
-        }
-
-        public async Task<User?> Verify(VerifyUserDto request)
-        {
-            var user = await _userService.GetObjectBy(x => x.VerificationToken == request.VerificationToken);
-            if (user == null) throw new NotFoundException();
-
-            var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
-            user.PasswordHash = passwordHash;
-            user.IsActive = true;
-
-            var result = await _userService.UpdateObject(user.Id, user);
-            return result;
-        }
-
         public async Task<dynamic> Authenticate()
         {
-            string email = _userContextService.GetEmail();
-            User? user = await _context.Users.Include(x => x.Organization).SingleOrDefaultAsync(x => x.Email == email);
+            //string email = _userContextService.GetEmail();
+            //User? user = await _context.Users.Include(x => x.Organization).SingleOrDefaultAsync(x => x.Email == email);
 
-            if (user is null) throw new NotFoundException("No user with the given email");
+            //if (user is null) throw new NotFoundException("No user with the given email");
 
-            var id = user.Id;
-            var roles = _userContextService.GetRoles();
-            var name = user.Name;
-            var phone = user.Phone;
-            var notificationSetting = user.NotificationSetting;
+            //var id = user.Id;
+            //var roles = _userContextService.GetRoles();
+            //var name = user.Name;
+            //var phone = user.Phone;
+            ////var notificationSetting = user.NotificationSetting;
 
-            if (user.Role == UserRole.Bruger && user.Organization is not null)
-                return new { id, orgId = user.Organization.Id, email, roles, name, notificationSetting, phone };
+            //if (user.Role == UserRole.Bruger && user.Organization is not null)
+            //    return new { id, orgId = user.Organization.Id, email, roles, name, notificationSetting, phone };
 
-            if (user.Role == UserRole.Creator)
-            {
-                CreatorView? creator = await _creatorService.GetObjectViewBy(x => x.UserId == _userContextService.GetId());
-                if (creator is not null)
-                    return new { id, creatorId = creator.Id, subType = creator.SubType, email, roles, name, notificationSetting, phone };
-            }
+            //if (user.Role == UserRole.Creator)
+            //{
+            //    CreatorView? creator = await _creatorService.GetObjectViewBy(x => x.UserId == _userContextService.GetId());
+            //    if (creator is not null)
+            //        return new { id, creatorId = creator.Id, subType = creator.SubType, email, roles, name, notificationSetting, phone };
+            //}
 
-            return new { id, email, roles, name, notificationSetting, phone };
+            //return new { id, email, roles, name, notificationSetting, phone };
+            throw new NotImplementedException();
         }
     }
 }

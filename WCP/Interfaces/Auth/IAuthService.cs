@@ -11,10 +11,7 @@ namespace WCPShared.Interfaces.Auth
         Task<AuthResponse?> Login(UserDto request);
         Task LoginAttempt(bool success, User user);
         Task<bool> CheckLoginAttempts(UserDto request);
-        Task<User?> SelfRegister(SelfRegisterDto request);
-        Task<User?> Verify(VerifyUserDto request);
         Task<dynamic> Authenticate();
-        Task<bool> AddAdmin(int id);
         Task<User> RegisterCustomer(User user, string password);
         Task<User?> RegisterCreator(User user, Creator creator, string password);
     }

@@ -70,22 +70,24 @@ namespace WCPShared.Services
 
         public async Task<string?> RefreshToken(int userId, string refreshToken)
         {
-            User? user = await _context.Users.Include(x => x.Organization).SingleOrDefaultAsync(x => x.Id == userId);
+            //User? user = await _context.Users.Include(x => x.Organization).SingleOrDefaultAsync(x => x.Id == userId);
 
-            if (user is null || user.RefreshToken != refreshToken || user.RefreshTokenExpiry < DateTime.Now)
-                return null;
+            //if (user is null || user.RefreshToken != refreshToken || user.RefreshTokenExpiry < DateTime.Now)
+            //    return null;
 
-            return CreateToken(user);
+            //return CreateToken(user);
+            throw new NotImplementedException();
         }
 
         public async Task<string?> RefreshToken(string email, string refreshToken)
         {
-            User? user = await _context.Users.Include(x => x.Organization).SingleOrDefaultAsync(x => x.Email == email);
+            //User? user = await _context.Users.Include(x => x.Organization).SingleOrDefaultAsync(x => x.Email == email);
 
-            if (user is null || user.RefreshToken != refreshToken || user.RefreshTokenExpiry < DateTime.Now)
-                return null;
+            //if (user is null || user.RefreshToken != refreshToken || user.RefreshTokenExpiry < DateTime.Now)
+            //    return null;
 
-            return CreateToken(user);
+            //return CreateToken(user);
+            throw new NotImplementedException();
         }
 
         public async Task SetRefreshToken(int userId, string token)
@@ -94,8 +96,8 @@ namespace WCPShared.Services
 
             if (user != null)
             {
-                user.RefreshToken = token;
-                user.RefreshTokenExpiry = DateTime.Now.AddDays(1);
+                //user.RefreshToken = token;
+                //user.RefreshTokenExpiry = DateTime.Now.AddDays(1);
                 await _userService.UpdateObject(userId, user);
             }
         }

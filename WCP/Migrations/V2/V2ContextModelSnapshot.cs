@@ -8,10 +8,10 @@ using WCPShared.Models;
 
 #nullable disable
 
-namespace WCPShared.Migrations.TestDb
+namespace WCPShared.Migrations.V2
 {
-    [DbContext(typeof(TestDbContext))]
-    partial class TestDbContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(V2Context))]
+    partial class V2ContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
@@ -34,7 +34,7 @@ namespace WCPShared.Migrations.TestDb
 
                     b.HasIndex("SpeakersId");
 
-                    b.ToTable("CreatorLanguage");
+                    b.ToTable("CreatorLanguage", (string)null);
                 });
 
             modelBuilder.Entity("StaticConceptStaticTemplate", b =>
@@ -49,7 +49,7 @@ namespace WCPShared.Migrations.TestDb
 
                     b.HasIndex("StaticTemplatesId");
 
-                    b.ToTable("StaticConceptStaticTemplate");
+                    b.ToTable("StaticConceptStaticTemplate", (string)null);
                 });
 
             modelBuilder.Entity("WCPShared.Models.Entities.Brand", b =>
@@ -75,7 +75,7 @@ namespace WCPShared.Migrations.TestDb
 
                     b.HasIndex("OrganizationId");
 
-                    b.ToTable("Brands");
+                    b.ToTable("Brands", (string)null);
                 });
 
             modelBuilder.Entity("WCPShared.Models.Entities.ChatMessage", b =>
@@ -108,7 +108,7 @@ namespace WCPShared.Migrations.TestDb
 
                     b.HasIndex("ToId");
 
-                    b.ToTable("Chats");
+                    b.ToTable("Chats", (string)null);
                 });
 
             modelBuilder.Entity("WCPShared.Models.Entities.CreatorParticipation", b =>
@@ -139,7 +139,7 @@ namespace WCPShared.Migrations.TestDb
 
                     b.HasIndex("CreatorId");
 
-                    b.ToTable("CreatorParticipations");
+                    b.ToTable("CreatorParticipations", (string)null);
                 });
 
             modelBuilder.Entity("WCPShared.Models.Entities.Feedback", b =>
@@ -172,7 +172,7 @@ namespace WCPShared.Migrations.TestDb
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Feedbacks");
+                    b.ToTable("Feedbacks", (string)null);
                 });
 
             modelBuilder.Entity("WCPShared.Models.Entities.Organization", b =>
@@ -205,7 +205,7 @@ namespace WCPShared.Migrations.TestDb
 
                     b.HasIndex("LanguageId");
 
-                    b.ToTable("Organizations");
+                    b.ToTable("Organizations", (string)null);
                 });
 
             modelBuilder.Entity("WCPShared.Models.Entities.Product", b =>
@@ -258,7 +258,7 @@ namespace WCPShared.Migrations.TestDb
 
                     b.HasIndex("BrandId");
 
-                    b.ToTable("Products");
+                    b.ToTable("Products", (string)null);
                 });
 
             modelBuilder.Entity("WCPShared.Models.Entities.ProjectModels.Concepts.Concept", b =>
@@ -295,7 +295,7 @@ namespace WCPShared.Migrations.TestDb
 
                     b.HasIndex("ProjectId");
 
-                    b.ToTable("Concepts");
+                    b.ToTable("Concepts", (string)null);
 
                     b.HasDiscriminator<int>("Type");
 
@@ -349,7 +349,7 @@ namespace WCPShared.Migrations.TestDb
 
                     b.HasIndex("BrandId");
 
-                    b.ToTable("Projects");
+                    b.ToTable("Projects", (string)null);
                 });
 
             modelBuilder.Entity("WCPShared.Models.Entities.StaticTemplate", b =>
@@ -382,7 +382,7 @@ namespace WCPShared.Migrations.TestDb
 
                     b.HasKey("Id");
 
-                    b.ToTable("StaticTemplates");
+                    b.ToTable("StaticTemplates", (string)null);
                 });
 
             modelBuilder.Entity("WCPShared.Models.Entities.Subscription", b =>
@@ -421,7 +421,7 @@ namespace WCPShared.Migrations.TestDb
                     b.HasIndex("OrganizationId")
                         .IsUnique();
 
-                    b.ToTable("Subscriptions");
+                    b.ToTable("Subscriptions", (string)null);
                 });
 
             modelBuilder.Entity("WCPShared.Models.Entities.UserModels.Creator", b =>
@@ -478,7 +478,7 @@ namespace WCPShared.Migrations.TestDb
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Creators");
+                    b.ToTable("Creators", (string)null);
                 });
 
             modelBuilder.Entity("WCPShared.Models.Entities.UserModels.Language", b =>
@@ -507,7 +507,7 @@ namespace WCPShared.Migrations.TestDb
 
                     b.HasKey("Id");
 
-                    b.ToTable("Languages");
+                    b.ToTable("Languages", (string)null);
                 });
 
             modelBuilder.Entity("WCPShared.Models.Entities.UserModels.User", b =>
@@ -570,7 +570,7 @@ namespace WCPShared.Migrations.TestDb
 
                     b.HasIndex("OrganizationId");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("WCPShared.Models.Entities.ProjectModels.Concepts.CreatorConcept", b =>

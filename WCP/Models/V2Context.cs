@@ -10,7 +10,7 @@ using WCPShared.Models.Enums;
 
 namespace WCPShared.Models
 {
-    public class TestDbContext : DbContext, IWcpDbContext
+    public class V2Context : DbContext, IWcpDbContext
     {
         public DbSet<User> Users { get; set; }
         public DbSet<Organization> Organizations { get; set; }
@@ -26,7 +26,7 @@ namespace WCPShared.Models
         public DbSet<ChatMessage> Chats { get; set; }
         public DbSet<Feedback> Feedbacks { get; set; }
 
-        public TestDbContext(DbContextOptions<TestDbContext> options) : base(options)
+        public V2Context(DbContextOptions<V2Context> options) : base(options)
         {
         }
 

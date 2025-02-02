@@ -64,6 +64,12 @@ namespace WCPShared.Extensions
                     options.UseSqlServer(Secrets.GetConnectionString(config));
                 });
 
+                //services.AddDbContext<V2Context>(options =>
+                //{
+                //    options.EnableSensitiveDataLogging();
+                //    options.UseSqlServer("");
+                //});
+
                 //services.AddSingleton<IWcpDbContextFactory, TestDbContextFactory>();
             }
 
