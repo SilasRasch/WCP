@@ -21,7 +21,7 @@
     <div class="absolute right-0 top-0 h-[100vh] bg-white z-40 shadow-lg shadow-black/30 xl:min-w-[384px]">
         @if (Recipient is null) 
         {
-            <MudStack Spacing="0" Class="">
+            <MudStack Spacing="0" Class="max-h-[100vh] overflow-y-scroll">
                 <MudStack Row AlignItems="AlignItems.Center" Class="p-2 py-4" Spacing="2">
                     <MudIcon @onclick="() => isOpen = false" Class="cursor-pointer" Icon="@Icons.Material.Filled.KeyboardArrowLeft" />
                     <MudStack Spacing="0">
@@ -68,7 +68,7 @@
         }
         else
         {
-            <MudStack AlignItems="AlignItems.Start" Spacing="0" Class="relative h-full min-w-72">
+            <MudStack AlignItems="AlignItems.Start" Spacing="0" Class="relative h-full overflow-y-scroll overflow-x-hidden min-w-72">
                 <MudStack Row AlignItems="AlignItems.Center" Class="p-2 py-4 w-full" Spacing="2">
                     <MudIcon @onclick="() => Recipient = null" Class="cursor-pointer" Icon="@Icons.Material.Filled.KeyboardArrowLeft" />
                     <MudAvatar Color="Color.Primary" Square Rounded>
